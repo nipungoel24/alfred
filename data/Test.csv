@@ -1,0 +1,63 @@
+"email_id,sender_email,sender_name,subject,body,timestamp,has_attachment,thread_id"
+"1,john.smith@techcorp.com,John Smith,Project Alpha - Budget Approval Needed,""Hi Team,"
+
+I need urgent approval for the Project Alpha budget increase. We're looking at an additional $50K for Q1 due to unexpected infrastructure costs.
+
+Can we schedule a meeting this week to discuss? The deadline for approval is Friday.
+
+"Best regards,"
+"John"",2024-01-15T09:23:00Z,TRUE,thread_001"
+"2,newsletter@techweekly.com,Tech Weekly,Your Weekly Tech Digest - Jan 15,""Hello Subscriber,"
+
+Here's your weekly roundup of the latest in technology:
+#NAME?
+#NAME?
+- Cybersecurity trends for 2024
+
+Click here to read more...
+
+"Unsubscribe | Manage Preferences"",2024-01-15T08:00:00Z,FALSE,thread_002"
+"3,sarah.johnson@clientco.com,Sarah Johnson,Re: Q4 Deliverables Status,""Thanks for the update. The deliverables look great!"
+
+I have a few minor comments on the design document. Can you incorporate them by Wednesday?
+
+"Also, let's set up a call next week to discuss Q1 planning."
+
+"Sarah"",2024-01-15T10:45:00Z,TRUE,thread_003"
+"4,hr@company.com,HR Department,Reminder: Performance Review Due Jan 20,""Dear Employee,"
+
+"This is a reminder that your self-assessment for the annual performance review is due by January 20, 2024."
+
+Please complete the form in the HR portal at your earliest convenience.
+
+"If you have questions, contact your manager or HR representative."
+
+"HR Team"",2024-01-15T07:30:00Z,FALSE,thread_004"
+"5,spam.bot@suspicious.net,Limited Time Offer,You've Won $1,000,000!!!,""CONGRATULATIONS!!!"
+
+"You have been selected to receive $1,000,000 in our exclusive lottery!"
+
+Click here immediately to claim your prize. This offer expires in 24 hours!
+
+"Act now!"",2024-01-15T11:20:00Z,FALSE,thread_005"
+"6,mike.chen@vendor.com,Mike Chen,Invoice #INV-2024-001 - Payment Due,""Hi,"
+
+Attached is invoice #INV-2024-001 for the consulting services provided in December 2023.
+
+"Amount due: $12,500"
+Payment terms: Net 30
+"Due date: February 10, 2024"
+
+Please confirm receipt and let me know if you need any additional information.
+
+"Thanks,"
+"Mike"",2024-01-15T13:15:00Z,TRUE,thread_006"
+"7,alerts@github.com,GitHub,Security Alert: Vulnerability Detected in Repository,""A security vulnerability has been detected in your repository 'ai-platform'."
+
+Severity: High
+Package: lodash@4.17.15
+Vulnerability: Prototype Pollution
+
+We recommend updating to version 4.17.21 or higher immediately.
+
+"View details: [Link]"",2024-01-15T14:30:00Z,FALSE,thread_007"
