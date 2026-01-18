@@ -9,8 +9,12 @@ from typing import Optional, Dict, Any
 # This ensures Python can find your 'src' and 'Data_clean' folders
 current_dir = os.path.dirname(os.path.abspath(__file__))
 parent_dir = os.path.dirname(current_dir)
+data_clean_dir = os.path.join(parent_dir, 'Data_clean') # Point to Data_clean folder
+
+# Add all necessary paths
 if current_dir not in sys.path: sys.path.append(current_dir)
 if parent_dir not in sys.path: sys.path.append(parent_dir)
+if data_clean_dir not in sys.path: sys.path.append(data_clean_dir)
 
 # --- IMPORTS ---
 try:
@@ -22,6 +26,7 @@ try:
         from src.utils import load_emails_from_csv as clean_and_load_emails
         from src.agents import EmailProcessingOrchestrator
 except ImportError as e:
+    # Fallback to catch-all
     st.error(f"⚠️ Critical Error: Missing backend files. {e}")
     st.stop()
 
@@ -279,8 +284,7 @@ with col_list:
 # === COLUMN 3: READING PANE ===
 with col_read:
     st.markdown("### 📄 Reading Pane")
-    
-    # FIX 1: Removed fixed height so the container grows to fit content (including draft)
+    # FIX: Remove fixed height to allow expansion
     with st.container(border=True):
         selected = st.session_state.selected_email
         
@@ -326,12 +330,11 @@ with col_read:
                     st.success(action)
                 with c2:
                     st.markdown('<span class="analysis-label">🔑 Key Entities</span>', unsafe_allow_html=True)
-                    # YELLOW BOX FIX
                     st.warning(formatted_entities)
 
                 st.divider()
 
-                # --- 4. DRAFT REPLY SECTION (ROBUST FIX) ---
+                # --- 4. DRAFT REPLY SECTION (SMART LOGIC) ---
                 st.markdown("**✍️ Draft Reply:**")
                 
                 # 1. Search for AI draft (Case-insensitive & Safe)
@@ -341,8 +344,6 @@ with col_read:
                 ]
                 
                 raw_draft = None
-                
-                # Create lowercase lookup to find keys like 'Draft_Response' or 'draft_response'
                 email_data_lower = {k.lower(): v for k, v in selected.items()}
                 
                 for k in possible_keys:
@@ -356,25 +357,33 @@ with col_read:
                             raw_draft = clean_val
                             break
                 
-                # 2. Force a Draft (Template) if None Found
+                # 2. Logic: Show Draft vs Template vs Empty
                 if raw_draft:
                     final_draft = raw_draft
-                    st.caption("✅ Alfred generated a draft for you:")
+                    caption_text = "✅ Alfred generated a draft for you:"
                 else:
-                    # Fallback template so the box ALWAYS appears
-                    sender = selected.get('sender_name') or "there"
-                    subject = selected.get('subject') or "your email"
-                    final_draft = f"""Hi {sender},
+                    # Only show template if action implies a reply is needed
+                    action_str = str(action).lower()
+                    if "reply" in action_str or "respond" in action_str:
+                        sender = selected.get('sender_name') or "there"
+                        subject = selected.get('subject') or "your email"
+                        final_draft = f"""Hi {sender},
 
 Thank you for your email regarding "{subject}".
 
-[Alfred suggests no specific reply is required, but you can add your response here.]
+[Alfred suggests a reply, but couldn't generate a draft. Please add your response here.]
 
 Best regards,
 [Your Name]"""
-                    st.caption("ℹ️ No auto-draft found. Using template:")
+                        caption_text = "ℹ️ Reply recommended. Using template:"
+                    else:
+                        # Action is Archive, Read, etc. -> No template needed
+                        final_draft = ""
+                        caption_text = "ℹ️ No reply recommended."
 
-                # 3. Render Draft Box (Populated)
+                st.caption(caption_text)
+
+                # 3. Render Draft Box (Populated or Empty)
                 edited_draft = st.text_area(
                     "Compose Reply", 
                     value=final_draft, 
