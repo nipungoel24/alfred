@@ -1,12 +1,26 @@
 import streamlit as st
 import time
+import os
+import sys
 from datetime import datetime
 from typing import Optional, Dict, Any
 
+# --- PATH SETUP (Crucial for Imports) ---
+# This ensures Python can find your 'src' and 'Data_clean' folders
+current_dir = os.path.dirname(os.path.abspath(__file__))
+parent_dir = os.path.dirname(current_dir)
+if current_dir not in sys.path: sys.path.append(current_dir)
+if parent_dir not in sys.path: sys.path.append(parent_dir)
+
 # --- IMPORTS ---
 try:
-    from data_loader import clean_and_load_emails
-    from agents import EmailProcessingOrchestrator
+    # Try importing from local directory first, then src
+    try:
+        from data_loader import clean_and_load_emails
+        from agents import EmailProcessingOrchestrator
+    except ImportError:
+        from src.utils import load_emails_from_csv as clean_and_load_emails
+        from src.agents import EmailProcessingOrchestrator
 except ImportError as e:
     st.error(f"⚠️ Critical Error: Missing backend files. {e}")
     st.stop()
@@ -79,7 +93,6 @@ st.markdown("""
         margin-top: 15px;
         display: block;
     }
-    .analysis-label:first-child { margin-top: 0; }
     
     /* 6. Badges */
     .badge {
@@ -266,7 +279,9 @@ with col_list:
 # === COLUMN 3: READING PANE ===
 with col_read:
     st.markdown("### 📄 Reading Pane")
-    with st.container(height=750, border=True):
+    
+    # FIX 1: Removed fixed height so the container grows to fit content (including draft)
+    with st.container(border=True):
         selected = st.session_state.selected_email
         
         if selected:
@@ -293,7 +308,7 @@ with col_read:
             if selected.get('status') == 'Processed':
                 st.markdown("**🕴️ Alfred's Report:**")
                 
-                # Fetch Data
+                # Fetch Data safely
                 reasoning = selected.get('reasoning', 'No reasoning available.')
                 action = selected.get('action_recommendation', 'No action recommended.')
                 raw_entities = selected.get('key_info', {})
@@ -311,30 +326,53 @@ with col_read:
                     st.success(action)
                 with c2:
                     st.markdown('<span class="analysis-label">🔑 Key Entities</span>', unsafe_allow_html=True)
-                    # YELLOW BOX FIX: Using st.warning for the entities
+                    # YELLOW BOX FIX
                     st.warning(formatted_entities)
 
                 st.divider()
 
-                # --- DRAFT REPLY SECTION ---
+                # --- 4. DRAFT REPLY SECTION (ROBUST FIX) ---
                 st.markdown("**✍️ Draft Reply:**")
                 
-                # 1. Search for draft content in multiple keys
-                possible_keys = ['draft_response', 'draft_reply', 'email_draft', 'response_email', 'draft', 'reply']
-                raw_draft = None
-                for k in possible_keys:
-                    val = selected.get(k)
-                    if val and str(val).lower() not in ['n/a', 'none', '', 'no draft needed', 'no response needed']:
-                        raw_draft = val
-                        break
+                # 1. Search for AI draft (Case-insensitive & Safe)
+                possible_keys = [
+                    'draft_response', 'draft_reply', 'email_draft', 
+                    'response_email', 'draft', 'reply', 'generated_response'
+                ]
                 
-                # 2. Determine Display State
+                raw_draft = None
+                
+                # Create lowercase lookup to find keys like 'Draft_Response' or 'draft_response'
+                email_data_lower = {k.lower(): v for k, v in selected.items()}
+                
+                for k in possible_keys:
+                    val = email_data_lower.get(k)
+                    if val and isinstance(val, str):
+                        clean_val = val.strip()
+                        # Only filter "n/a" if the text is very short (prevents blocking long valid emails)
+                        is_short_placeholder = len(clean_val) < 20 and ("n/a" in clean_val.lower() or "none" in clean_val.lower())
+                        
+                        if not is_short_placeholder and len(clean_val) > 5:
+                            raw_draft = clean_val
+                            break
+                
+                # 2. Force a Draft (Template) if None Found
                 if raw_draft:
                     final_draft = raw_draft
                     st.caption("✅ Alfred generated a draft for you:")
                 else:
-                    final_draft = ""
-                    st.caption("ℹ️ No auto-draft required. Compose manually:")
+                    # Fallback template so the box ALWAYS appears
+                    sender = selected.get('sender_name') or "there"
+                    subject = selected.get('subject') or "your email"
+                    final_draft = f"""Hi {sender},
+
+Thank you for your email regarding "{subject}".
+
+[Alfred suggests no specific reply is required, but you can add your response here.]
+
+Best regards,
+[Your Name]"""
+                    st.caption("ℹ️ No auto-draft found. Using template:")
 
                 # 3. Render Draft Box (Populated)
                 edited_draft = st.text_area(
@@ -342,7 +380,7 @@ with col_read:
                     value=final_draft, 
                     height=250, 
                     placeholder="Type your reply here...",
-                    key=f"draft_{selected.get('email_id')}",
+                    key=f"draft_{selected.get('email_id', 'unknown')}",
                     label_visibility="collapsed"
                 )
                 
