@@ -120,14 +120,33 @@ streamlit run app.py
 ## 📂 Project Structure
 
 ```text
-alfred-inbox/
-├── app.py                 # Main Streamlit Frontend (UI Layer)
-├── agents.py              # LangGraph Agent Definitions (Logic Layer)
-├── data_loader.py         # CSV Parsing & Cleaning Utility
-├── requirements.txt       # Project Dependencies
-├── .env                   # API Keys (Not committed)
-└── data/
-    └── dataset_emails.csv # Provided assignment dataset
+alfred/
+├── config/
+│   ├── __init__.py
+│   └── settings.py           # Configuration (Prompts, Model settings)
+├── data/
+│   └── dataset_emails.csv    # Raw dataset for testing
+├── Data_clean/
+│   ├── data_loader.py        # Data ingestion and cleaning logic
+│   └── test_parser.py        # Parser testing utilities
+├── logs/
+│   └── email_organizer.log   # Application runtime logs
+├── src/
+│   ├── __init__.py
+│   ├── agents.py             # LangGraph Agent definitions (Router, Analyzer, Writer)
+│   ├── app.py                # Main Streamlit UI application
+│   ├── email_processor.py    # Core processing orchestration
+│   ├── logger.py             # Logging configuration
+│   └── utils.py              # Helper functions
+├── tests/
+│   └── test_utils.py         # Unit tests
+├── .env                      # Environment variables (API Keys)
+├── .gitignore                # Git ignore rules
+├── CHANGELOG.md              # Version history
+├── PIPELINE.md               # Architecture documentation
+├── README.md                 # Project documentation
+├── requirements.txt          # Python dependencies
+└── run_app.py                # Execution entry point
 
 ```
 
