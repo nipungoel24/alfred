@@ -28,6 +28,11 @@ class Repository:
         r = self.con.execute('SELECT payload FROM emails WHERE id=?', (email_id,)).fetchone()
         return Email.model_validate_json(r['payload']) if r else None
 
+    def delete_email(self, email_id):
+        self.con.execute('DELETE FROM emails WHERE id=?', (email_id,))
+        self.con.execute('DELETE FROM tasks WHERE source_email_id=?', (email_id,))
+        self.con.commit()
+
     def cached_analysis(self, email_id, fingerprint, model, schema='1'):
         r = self.con.execute(
             'SELECT payload FROM email_analysis WHERE email_id=? AND content_hash=? AND model_name=? AND schema_version=?',

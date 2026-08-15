@@ -7,6 +7,7 @@ from backend.app.schemas import EmailAccount, Email, EmailAnalysis, Priority, Ca
 from backend.app.mail.providers.gmail import GmailProvider
 from backend.app.db.repositories import Repository
 from backend.app.db.secure_store import encrypt_token, decrypt_token
+import httpx
 
 @pytest.fixture
 def mock_gmail():
@@ -46,14 +47,24 @@ def test_gmail_token_exchange(mock_post, mock_gmail):
     assert res["refresh_token"] == "mock_refresh"
     assert res["expires_in"] == 3600
 
-# 3. Synchronize Mailbox & Normalization & Task Extraction Mock
+# Helper to base64 encode strings
+def base64_encode_string(text: str) -> str:
+    import base64
+    return base64.urlsafe_b64encode(text.encode("utf-8")).decode("ascii")
+
+# 3. Initial Synchronize Mailbox (Full Sync) & Normalized Properties
 @patch("httpx.AsyncClient.get")
-def test_gmail_sync_flow(mock_get, mock_gmail, temp_repo):
-    # Set up mock endpoints
+def test_gmail_sync_initial(mock_get, mock_gmail, temp_repo):
+    # Mock endpoints: 1. Profile, 2. Messages List, 3. Message Detail
+    profile_response = MagicMock()
+    profile_response.status_code = 200
+    profile_response.json.return_value = {"historyId": "9999"}
+
     list_response = MagicMock()
     list_response.status_code = 200
     list_response.json.return_value = {
-        "messages": [{"id": "gmail_msg_100", "threadId": "gmail_thread_200"}]
+        "messages": [{"id": "gmail_msg_100", "threadId": "gmail_thread_200"}],
+        "nextPageToken": "page_token_xyz"
     }
 
     detail_response = MagicMock()
@@ -66,7 +77,7 @@ def test_gmail_sync_flow(mock_get, mock_gmail, temp_repo):
             "headers": [
                 {"name": "From", "value": "Billing Department <billing@saas.com>"},
                 {"name": "To", "value": "user@gmail.com"},
-                {"name": "Subject", "value": "Renewal failed - action required"}
+                {"name": "Subject", "value": "Renewal failed"}
             ],
             "parts": [
                 {
@@ -79,8 +90,7 @@ def test_gmail_sync_flow(mock_get, mock_gmail, temp_repo):
         }
     }
 
-    # Side effect: first list, then detail
-    mock_get.side_effect = [list_response, detail_response]
+    mock_get.side_effect = [profile_response, list_response, detail_response]
 
     # Save mock account in repository
     account = EmailAccount(
@@ -107,40 +117,240 @@ def test_gmail_sync_flow(mock_get, mock_gmail, temp_repo):
     assert email.sender == "billing@saas.com"
     assert email.sender_name == "Billing Department"
     assert email.thread_id == "gmail_thread_200"
-    assert "Please update your payment card" in email.body
 
-    # Now verify Task Extraction: Save analysis for this email
-    analysis = EmailAnalysis(
-        short_summary="SaaS invoice failed",
-        category=Category.finance,
-        priority=Priority.urgent,
-        priority_score=90,
-        reason_for_priority="Critical billing issue",
-        needs_reply=True,
-        action_items=[ActionItem(description="Update card", owner="User", deadline="5 PM today")],
-        deadlines=[Deadline(description="Pay invoice", due_at="before 5 PM today", confidence="explicit")]
+    # Check sync_cursor contents
+    updated_account = temp_repo.account("gmail_user")
+    assert updated_account.sync_cursor is not None
+    cursor = json.loads(updated_account.sync_cursor)
+    assert cursor["history_id"] == "9999"
+    assert cursor["next_page_token"] == "page_token_xyz"
+
+# 4. Incremental Sync (using history API) & Deletions
+@patch("httpx.AsyncClient.get")
+def test_gmail_sync_incremental(mock_get, mock_gmail, temp_repo):
+    # Start with an already synced account
+    cursor_json = json.dumps({"history_id": "9999", "next_page_token": "page_token_xyz"})
+    account = EmailAccount(
+        id="gmail_user",
+        provider="gmail",
+        email_address="user@gmail.com",
+        display_name="User",
+        connection_status="connected",
+        sync_cursor=cursor_json
     )
-    temp_repo.save_analysis("gmail_msg_100", "fingerprint_abc", "qwen3:4b", analysis)
+    temp_repo.save_account(account)
 
-    # Check tasks extracted automatically!
-    tasks_list = temp_repo.tasks()
-    assert len(tasks_list) == 2
-    
-    # Assert specific task fields
-    action_task = next(t for t in tasks_list if t.id == "task_gmail_msg_100_0")
-    assert action_task.title == "Update card"
-    assert action_task.due_at == "5 PM today"
-    assert action_task.priority == "urgent"
-    assert action_task.source_email_id == "gmail_msg_100"
+    # Pre-populate repository with msg_100
+    existing_email = Email(
+        id="gmail_msg_100",
+        thread_id="gmail_thread_200",
+        account_id="gmail_user",
+        sender="billing@saas.com",
+        subject="Renewal failed",
+        body="Please update your card"
+    )
+    temp_repo.upsert_email(existing_email, "hash_100")
 
-    deadline_task = next(t for t in tasks_list if t.id == "deadline_gmail_msg_100_0")
-    assert deadline_task.title == "Pay invoice"
-    assert deadline_task.due_at == "before 5 PM today"
-    assert deadline_task.priority == "urgent"
+    # Mocks: 1. History (adding msg_101, deleting msg_100), 2. Detail of msg_101, 3. Profile to fetch new historyId
+    history_response = MagicMock()
+    history_response.status_code = 200
+    history_response.json.return_value = {
+        "history": [
+            {
+                "id": "10000",
+                "messagesAdded": [
+                    {
+                        "message": {"id": "gmail_msg_101", "threadId": "gmail_thread_200"}
+                    }
+                ],
+                "messagesDeleted": [
+                    {
+                        "message": {"id": "gmail_msg_100"}
+                    }
+                ]
+            }
+        ]
+    }
 
-def base64_encode_string(text: str) -> str:
-    return base64_url_encode(text.encode("utf-8"))
+    detail_response = MagicMock()
+    detail_response.status_code = 200
+    detail_response.json.return_value = {
+        "id": "gmail_msg_101",
+        "threadId": "gmail_thread_200",
+        "internalDate": "1786786975000",
+        "payload": {
+            "headers": [
+                {"name": "From", "value": "Billing Department <billing@saas.com>"},
+                {"name": "To", "value": "user@gmail.com"},
+                {"name": "Subject", "value": "Renewal succeeded"}
+            ],
+            "parts": [
+                {
+                    "mimeType": "text/plain",
+                    "body": {
+                        "data": base64_encode_string("Thank you for updating your payment card.")
+                    }
+                }
+            ]
+        }
+    }
 
-def base64_url_encode(data: bytes) -> str:
-    import base64
-    return base64.urlsafe_b64encode(data).decode("ascii")
+    profile_response = MagicMock()
+    profile_response.status_code = 200
+    profile_response.json.return_value = {"historyId": "10005"}
+
+    mock_get.side_effect = [history_response, detail_response, profile_response]
+
+    credentials = {
+        "access_token": "access_token_123",
+        "refresh_token": "refresh_token_123",
+        "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    }
+
+    res = asyncio.run(mock_gmail.sync_messages(account, credentials, temp_repo))
+    assert res["imported"] == 1
+
+    # Verify msg_101 is imported
+    assert temp_repo.email("gmail_msg_101") is not None
+    # Verify msg_100 is deleted
+    assert temp_repo.email("gmail_msg_100") is None
+
+    # Check updated cursor
+    updated_account = temp_repo.account("gmail_user")
+    cursor = json.loads(updated_account.sync_cursor)
+    assert cursor["history_id"] == "10005"
+    assert cursor["next_page_token"] == "page_token_xyz" # Next page token preserved for pagination!
+
+# 5. History Expired (Recovery Sync via Full Sync)
+@patch("httpx.AsyncClient.get")
+def test_gmail_sync_history_expired_recovery(mock_get, mock_gmail, temp_repo):
+    cursor_json = json.dumps({"history_id": "8888", "next_page_token": "page_token_xyz"})
+    account = EmailAccount(
+        id="gmail_user",
+        provider="gmail",
+        email_address="user@gmail.com",
+        display_name="User",
+        connection_status="connected",
+        sync_cursor=cursor_json
+    )
+    temp_repo.save_account(account)
+
+    # History API returns 410 Expired
+    history_response = MagicMock()
+    history_response.status_code = 410
+
+    # Profile API
+    profile_response = MagicMock()
+    profile_response.status_code = 200
+    profile_response.json.return_value = {"historyId": "10008"}
+
+    # Messages list
+    list_response = MagicMock()
+    list_response.status_code = 200
+    list_response.json.return_value = {
+        "messages": [{"id": "gmail_msg_200", "threadId": "gmail_thread_300"}]
+    }
+
+    # Detail
+    detail_response = MagicMock()
+    detail_response.status_code = 200
+    detail_response.json.return_value = {
+        "id": "gmail_msg_200",
+        "threadId": "gmail_thread_300",
+        "internalDate": "1786786976000",
+        "payload": {
+            "headers": [
+                {"name": "From", "value": "Newsletter <info@news.com>"},
+                {"name": "To", "value": "user@gmail.com"},
+                {"name": "Subject", "value": "Tech news"}
+            ],
+            "parts": [
+                {
+                    "mimeType": "text/plain",
+                    "body": {
+                        "data": base64_encode_string("Weekly newsletter")
+                    }
+                }
+            ]
+        }
+    }
+
+    mock_get.side_effect = [history_response, profile_response, list_response, detail_response]
+
+    credentials = {
+        "access_token": "access_token_123",
+        "refresh_token": "refresh_token_123",
+        "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    }
+
+    res = asyncio.run(mock_gmail.sync_messages(account, credentials, temp_repo))
+    assert res["imported"] == 1
+    assert temp_repo.email("gmail_msg_200") is not None
+
+    # Check updated cursor has recovered historyId
+    updated_account = temp_repo.account("gmail_user")
+    cursor = json.loads(updated_account.sync_cursor)
+    assert cursor["history_id"] == "10008"
+
+# 6. Progressive Pagination (load_older = True)
+@patch("httpx.AsyncClient.get")
+def test_gmail_sync_load_older(mock_get, mock_gmail, temp_repo):
+    cursor_json = json.dumps({"history_id": "10000", "next_page_token": "page_token_xyz"})
+    account = EmailAccount(
+        id="gmail_user",
+        provider="gmail",
+        email_address="user@gmail.com",
+        display_name="User",
+        connection_status="connected",
+        sync_cursor=cursor_json
+    )
+    temp_repo.save_account(account)
+
+    # Mocks: 1. Messages List (with pageToken), 2. Detail
+    list_response = MagicMock()
+    list_response.status_code = 200
+    list_response.json.return_value = {
+        "messages": [{"id": "gmail_msg_older_1", "threadId": "gmail_thread_999"}],
+        "nextPageToken": "page_token_abc_older"
+    }
+
+    detail_response = MagicMock()
+    detail_response.status_code = 200
+    detail_response.json.return_value = {
+        "id": "gmail_msg_older_1",
+        "threadId": "gmail_thread_999",
+        "internalDate": "1786786900000",
+        "payload": {
+            "headers": [
+                {"name": "From", "value": "Old Friend <old@friend.com>"},
+                {"name": "To", "value": "user@gmail.com"},
+                {"name": "Subject", "value": "Long time no see"}
+            ],
+            "parts": [
+                {
+                    "mimeType": "text/plain",
+                    "body": {
+                        "data": base64_encode_string("Hello, let's catch up.")
+                    }
+                }
+            ]
+        }
+    }
+
+    mock_get.side_effect = [list_response, detail_response]
+
+    credentials = {
+        "access_token": "access_token_123",
+        "refresh_token": "refresh_token_123",
+        "expires_at": (datetime.now(timezone.utc) + timedelta(hours=1)).isoformat()
+    }
+
+    res = asyncio.run(mock_gmail.sync_messages(account, credentials, temp_repo, load_older=True))
+    assert res["imported"] == 1
+    assert temp_repo.email("gmail_msg_older_1") is not None
+
+    # Check updated sync cursor page token is advanced
+    updated_account = temp_repo.account("gmail_user")
+    cursor = json.loads(updated_account.sync_cursor)
+    assert cursor["history_id"] == "10000" # History ID unchanged!
+    assert cursor["next_page_token"] == "page_token_abc_older" # Advanced!

@@ -154,7 +154,7 @@ async def gmail_callback(code: str = Query(...), state: str = Query(...), redire
         )
 
 @app.post('/api/accounts/{account_id}/sync')
-async def sync_account(account_id: str):
+async def sync_account(account_id: str, load_older: bool = Query(False)):
     account = repo.account(account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Email account not found")
@@ -175,7 +175,7 @@ async def sync_account(account_id: str):
     
     try:
         if account.provider == "gmail":
-            res = await gmail_provider.sync_messages(account, cred_payload, repo)
+            res = await gmail_provider.sync_messages(account, cred_payload, repo, load_older=load_older)
             return res
         else:
             raise HTTPException(status_code=400, detail="Unsupported account provider")

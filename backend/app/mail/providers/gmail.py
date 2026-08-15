@@ -68,7 +68,8 @@ class GmailProvider(MailProvider):
             r.raise_for_status()
             return r.json()
 
-    async def sync_messages(self, account: EmailAccount, credentials: Dict[str, Any], repo) -> Dict[str, Any]:
+    async def sync_messages(self, account: EmailAccount, credentials: Dict[str, Any], repo, load_older: bool = False) -> Dict[str, Any]:
+        import json
         access_token = credentials.get("access_token")
         refresh_token = credentials.get("refresh_token")
         expires_at_str = credentials.get("expires_at")
@@ -103,58 +104,159 @@ class GmailProvider(MailProvider):
                 repo.save_account(account)
                 raise e
 
-        # Perform sync using Gmail API
         headers = {"Authorization": f"Bearer {access_token}"}
         
-        # Build query for sync: last 7 days if initial, or after last sync
-        if account.last_sync_at:
+        # Parse sync_cursor
+        history_id = None
+        next_page_token = None
+        if account.sync_cursor:
             try:
-                last_dt = datetime.fromisoformat(account.last_sync_at)
-                epoch = int(last_dt.timestamp())
-                q = f"after:{epoch}"
+                cursor_data = json.loads(account.sync_cursor)
+                history_id = cursor_data.get("history_id")
+                next_page_token = cursor_data.get("next_page_token")
             except Exception:
-                # Fallback to 7 days
-                days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y/%m/%d")
-                q = f"after:{days_ago}"
-        else:
-            days_ago = (datetime.now(timezone.utc) - timedelta(days=7)).strftime("%Y/%m/%d")
-            q = f"after:{days_ago}"
+                # For backwards compatibility if sync_cursor is just history_id
+                history_id = account.sync_cursor
 
-        params = {"q": q, "maxResults": 50}
-        messages_list = []
-        
+        imported = 0
+        skipped = 0
+
         async with httpx.AsyncClient() as client:
-            r = await client.get(f"{self.gmail_base_url}/messages", headers=headers, params=params)
-            r.raise_for_status()
-            res_json = r.json()
-            messages_list = res_json.get("messages", [])
-
-            imported = 0
-            skipped = 0
-
-            for msg_summary in messages_list:
-                msg_id = msg_summary.get("id")
-                
-                # Deduplication check
+            # Helper to fetch and upsert full details for a message ID
+            async def import_message_id(msg_id):
+                nonlocal imported, skipped
                 if repo.email(msg_id) is not None:
                     skipped += 1
-                    continue
-                
-                # Fetch full message
+                    return
+                # Fetch full message payload
                 r_detail = await client.get(f"{self.gmail_base_url}/messages/{msg_id}", headers=headers)
                 r_detail.raise_for_status()
                 msg_detail = r_detail.json()
-                
                 normalized = self._normalize_message(msg_detail, account.id)
                 repo.upsert_email(normalized, content_fingerprint(normalized))
                 imported += 1
 
-            # Update sync status
-            account.last_sync_at = datetime.now(timezone.utc).isoformat()
-            account.connection_status = "connected"
-            repo.save_account(account)
+            if load_older:
+                if not next_page_token:
+                    return {"imported": 0, "skipped_duplicates": 0, "message": "No older messages to load"}
+                
+                params = {"q": "label:INBOX", "maxResults": 50, "pageToken": next_page_token}
+                r = await client.get(f"{self.gmail_base_url}/messages", headers=headers, params=params)
+                r.raise_for_status()
+                res_json = r.json()
+                
+                messages_list = res_json.get("messages", [])
+                for msg in messages_list:
+                    await import_message_id(msg["id"])
 
-            return {"imported": imported, "skipped_duplicates": skipped}
+                # Update next page token, keeping history_id unchanged
+                new_next_page = res_json.get("nextPageToken")
+                new_cursor = {
+                    "history_id": history_id,
+                    "next_page_token": new_next_page
+                }
+                account.sync_cursor = json.dumps(new_cursor)
+                repo.save_account(account)
+                return {"imported": imported, "skipped_duplicates": skipped, "has_more": bool(new_next_page)}
+
+            # Regular Sync Flow
+            run_full_sync = False
+            history_records = []
+            
+            if history_id:
+                try:
+                    history_params = {"startHistoryId": history_id, "maxResults": 100}
+                    next_hist_page = None
+                    while True:
+                        if next_hist_page:
+                            history_params["pageToken"] = next_hist_page
+                        r = await client.get(f"{self.gmail_base_url}/history", headers=headers, params=history_params)
+                        # Let's check status directly so we can handle 404/410 specifically
+                        if r.status_code in (400, 404, 410):
+                            run_full_sync = True
+                            break
+                        r.raise_for_status()
+                        res_json = r.json()
+                        history_records.extend(res_json.get("history", []))
+                        next_hist_page = res_json.get("nextPageToken")
+                        if not next_hist_page:
+                            break
+                except Exception:
+                    # Generic network or api failure, recover with full sync if appropriate
+                    run_full_sync = True
+
+            if not history_id or run_full_sync:
+                # Perform Full Sync / Safe Recovery Sync
+                # 1. Fetch current profile to get latest historyId
+                r_profile = await client.get(f"https://gmail.googleapis.com/gmail/v1/users/me/profile", headers=headers)
+                r_profile.raise_for_status()
+                latest_history_id = r_profile.json().get("historyId")
+
+                # 2. Fetch the first page of inbox messages
+                params = {"q": "label:INBOX", "maxResults": 50}
+                r = await client.get(f"{self.gmail_base_url}/messages", headers=headers, params=params)
+                r.raise_for_status()
+                res_json = r.json()
+                
+                messages_list = res_json.get("messages", [])
+                for msg in messages_list:
+                    await import_message_id(msg["id"])
+
+                # 3. Store new cursor
+                new_next_page = res_json.get("nextPageToken")
+                new_cursor = {
+                    "history_id": latest_history_id,
+                    "next_page_token": new_next_page
+                }
+                account.sync_cursor = json.dumps(new_cursor)
+                account.last_sync_at = datetime.now(timezone.utc).isoformat()
+                account.connection_status = "connected"
+                repo.save_account(account)
+                return {"imported": imported, "skipped_duplicates": skipped}
+
+            else:
+                # Process incremental history changes
+                new_messages = []
+                deleted_messages = []
+                for record in history_records:
+                    # Collect added messages
+                    for added in record.get("messagesAdded", []):
+                        msg = added.get("message", {})
+                        if msg.get("id"):
+                            new_messages.append(msg["id"])
+                    # Collect deleted messages
+                    for deleted in record.get("messagesDeleted", []):
+                        msg = deleted.get("message", {})
+                        if msg.get("id"):
+                            deleted_messages.append(msg["id"])
+
+                # Remove duplicates from our local list
+                new_messages = list(dict.fromkeys(new_messages))
+                deleted_messages = list(dict.fromkeys(deleted_messages))
+
+                for msg_id in new_messages:
+                    try:
+                        await import_message_id(msg_id)
+                    except Exception:
+                        pass # Ignore individual message load errors
+
+                for msg_id in deleted_messages:
+                    repo.delete_email(msg_id)
+
+                # Get latest historyId from profile
+                r_profile = await client.get(f"https://gmail.googleapis.com/gmail/v1/users/me/profile", headers=headers)
+                r_profile.raise_for_status()
+                latest_history_id = r_profile.json().get("historyId")
+
+                new_cursor = {
+                    "history_id": latest_history_id,
+                    "next_page_token": next_page_token # Keep next_page_token for loading older messages intact
+                }
+                account.sync_cursor = json.dumps(new_cursor)
+                account.last_sync_at = datetime.now(timezone.utc).isoformat()
+                account.connection_status = "connected"
+                repo.save_account(account)
+                return {"imported": imported, "skipped_duplicates": skipped}
 
     def _normalize_message(self, detail: Dict[str, Any], account_id: str) -> Email:
         headers = detail.get("payload", {}).get("headers", [])
