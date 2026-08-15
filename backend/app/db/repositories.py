@@ -43,6 +43,41 @@ class Repository:
             'payload=excluded.payload, analyzed_at=excluded.analyzed_at',
             (email_id, fingerprint, model, schema, analysis.model_dump_json(), datetime.now(timezone.utc).isoformat())
         )
+        # Extract and save tasks derived from this email analysis
+        email = self.email(email_id)
+        if email:
+            # Action items -> tasks
+            for idx, item in enumerate(analysis.action_items):
+                t_id = f"task_{email_id}_{idx}"
+                if not self.task(t_id):
+                    t = Task(
+                        id=t_id,
+                        source_email_id=email_id,
+                        source_thread_id=email.thread_id,
+                        title=item.description,
+                        description=f"Owner: {item.owner}" if item.owner else None,
+                        due_at=item.deadline,
+                        priority=analysis.priority.value,
+                        status='pending',
+                        created_at=datetime.now(timezone.utc).isoformat()
+                    )
+                    self.save_task(t)
+            # Deadlines -> tasks
+            for idx, dl in enumerate(analysis.deadlines):
+                d_id = f"deadline_{email_id}_{idx}"
+                if not self.task(d_id):
+                    t = Task(
+                        id=d_id,
+                        source_email_id=email_id,
+                        source_thread_id=email.thread_id,
+                        title=dl.description,
+                        description=f"Confidence: {dl.confidence}",
+                        due_at=dl.due_at,
+                        priority=analysis.priority.value,
+                        status='pending',
+                        created_at=datetime.now(timezone.utc).isoformat()
+                    )
+                    self.save_task(t)
         self.con.commit()
 
     def cached_briefing(self, fingerprint, model, schema='1'):

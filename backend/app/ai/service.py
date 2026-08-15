@@ -21,8 +21,17 @@ class AIService:
  async def health(self): return await self.client.health()
  async def analyze_email(self,email: Email):
   raw=await self.client.generate(self.model, ANALYSIS_PROMPT+json.dumps(email.model_dump(mode='json')), EmailAnalysis.model_json_schema()); return EmailAnalysis.model_validate_json(raw)
- async def draft_reply(self,email: Email):
-  return await self.client.generate(self.model, 'Write a concise, professional reply to this email. Return only the reply text, no explanations, no wrapping quotes.\nEMAIL:\n'+json.dumps(email.model_dump(mode='json')), None, 0.7)
+ async def draft_reply(self, email: Email, thread_emails: list[Email] | None = None):
+  thread_context = ""
+  if thread_emails:
+      sorted_thread = sorted([e for e in thread_emails if e.id != email.id], key=lambda x: x.received_at.isoformat() if x.received_at else '')
+      for past_email in sorted_thread[-3:]:
+          thread_context += f"From: {past_email.sender_name or past_email.sender}\nSubject: {past_email.subject}\nBody: {past_email.body[:300]}...\n---\n"
+  prompt = 'Write a concise, professional reply to the last email. Return only the reply text, no explanations, no wrapping quotes.\n'
+  if thread_context:
+      prompt += f"CONVERSATION HISTORY:\n{thread_context}\n"
+  prompt += 'LAST EMAIL:\n'+json.dumps(email.model_dump(mode='json'))
+  return await self.client.generate(self.model, prompt, None, 0.7)
  async def generate_inbox_briefing(self, emails):
   items=[]
   for email in emails:
