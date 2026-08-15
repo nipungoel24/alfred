@@ -297,6 +297,24 @@ class GmailProvider(MailProvider):
             source_metadata={"gmail_raw": detail}
         )
 
+    def _clean_html(self, html: str) -> str:
+        import re
+        from html import unescape
+        # Strip script and style blocks
+        text = re.sub(r"<script[^>]*>.*?</script>", "", html, flags=re.I | re.S)
+        text = re.sub(r"<style[^>]*>.*?</style>", "", text, flags=re.I | re.S)
+        # Convert line breaks and block ends to newlines
+        text = re.sub(r"<br\s*/?>", "\n", text, flags=re.I)
+        text = re.sub(r"</p>", "\n\n", text, flags=re.I)
+        text = re.sub(r"</div>", "\n", text, flags=re.I)
+        text = re.sub(r"</h1>|</h2>|</h3>", "\n\n", text, flags=re.I)
+        # Remove remaining tags and unescape HTML symbols
+        text = re.sub(r"<[^>]+>", " ", text)
+        text = unescape(text)
+        # Strip whitespace from each line while maintaining structure
+        lines = [re.sub(r"[ \t]+", " ", line).strip() for line in text.split("\n")]
+        return "\n".join(lines).strip()
+
     def _extract_body(self, payload: Dict[str, Any]) -> str:
         if "parts" in payload:
             text_body = ""
@@ -312,9 +330,17 @@ class GmailProvider(MailProvider):
                     sub_body = self._extract_body(part)
                     if sub_body:
                         text_body += sub_body
-            return text_body if text_body else html_body
+            if text_body:
+                return text_body
+            if html_body:
+                return self._clean_html(html_body)
+            return ""
         else:
             body_data = payload.get("body", {}).get("data", "")
+            mime_type = payload.get("mimeType", "")
             if body_data:
-                return base64.urlsafe_b64decode(body_data.encode("ascii")).decode("utf-8", errors="replace")
+                decoded = base64.urlsafe_b64decode(body_data.encode("ascii")).decode("utf-8", errors="replace")
+                if mime_type == "text/html":
+                    return self._clean_html(decoded)
+                return decoded
         return ""

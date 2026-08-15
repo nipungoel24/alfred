@@ -16,38 +16,38 @@ LOG_DIR = BASE_DIR / "logs"
 SRC_DIR = BASE_DIR / "src"
 
 # API Configuration - Groq LLaMA Primary Provider
-# Llama 3 8B Configuration (ONLY LLM USED)
-# Using llama-3.1-8b-instant: Fast and efficient model via Groq
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
-GROQ_MODEL = "llama-3.1-8b-instant"  # Llama 3 8B model
+GROQ_MODEL = "llama-3.1-8b-instant"
 
-# Set active model name to Llama 3 8B
+# Set active model name
 MODEL_NAME = "llama-3.1-8b-instant"
-TEMPERATURE = 0.7
+TEMPERATURE = 0.6  # Slightly lowered to reduce hallucination/randomness
 MAX_TOKENS = 2000
 
 # LangGraph Configuration
-AGENT_TIMEOUT = 30  # seconds
+AGENT_TIMEOUT = 30
 MAX_ITERATIONS = 10
 
 # Email Categories
+# REMOVED: "Urgent" (Handled by Priority now)
+# ADDED: "General" (Fallback for uncategorized emails)
 EMAIL_CATEGORIES = [
     "Work",
     "Personal",
-    "Urgent",
     "Newsletter",
     "Spam",
     "Financial",
     "Meeting",
-    "Social"
+    "Social",
+    "General" 
 ]
 
 # Priority Levels
+# REMOVED: "Critical" to align with Agent outputs
 PRIORITY_LEVELS = {
-    "Critical": 1,
-    "High": 2,
-    "Medium": 3,
-    "Low": 4
+    "High": 1,
+    "Medium": 2,
+    "Low": 3
 }
 
 # Recommended Actions
@@ -59,7 +59,8 @@ RECOMMENDED_ACTIONS = [
     "Forward",
     "Flag for Review",
     "Delete",
-    "Add to Calendar"
+    "Add to Calendar",
+    "Read & Archive"
 ]
 
 # Logging Configuration
@@ -80,9 +81,9 @@ REQUIRED_CSV_COLUMNS = [
     "thread_id"
 ]
 
-# Streamlit Configuration
-STREAMLIT_PAGE_TITLE = "Email Inbox Organizer"
-STREAMLIT_PAGE_ICON = "📧"
+# Streamlit Configuration (Updated to match app.py branding)
+STREAMLIT_PAGE_TITLE = "Alfred | Intelligent Inbox"
+STREAMLIT_PAGE_ICON = "🕴️"
 STREAMLIT_LAYOUT = "wide"
 STREAMLIT_INITIAL_SIDEBAR_STATE = "expanded"
 
@@ -108,21 +109,52 @@ AGENTS = {
     }
 }
 
-# Keyword mappings for category detection
+# Expanded Keyword mappings for better categorization accuracy
 CATEGORY_KEYWORDS = {
-    "Work": ["meeting", "project", "deadline", "deliverable", "review", "approve", "budget", "report"],
-    "Urgent": ["urgent", "asap", "immediate", "emergency", "critical", "down", "broken"],
-    "Newsletter": ["newsletter", "digest", "weekly", "monthly", "subscription", "unsubscribe"],
-    "Spam": ["congratulations", "winner", "claim", "limited time", "act now", "click here"],
-    "Personal": ["friend", "family", "personal", "hi", "hey", "catch up", "weekend"],
-    "Financial": ["invoice", "payment", "billing", "expense", "purchase", "order", "refund"],
-    "Meeting": ["meeting", "call", "sync", "standup", "conference", "availability"],
-    "Social": ["like", "follow", "comment", "share", "post", "notification"]
+    "Work": [
+        "meeting", "project", "deadline", "deliverable", "review", "approve", 
+        "budget", "report", "presentation", "deck", "sync", "status", "update",
+        "quarterly", "roadmap", "client", "contract", "proposal"
+    ],
+    "Newsletter": [
+        "newsletter", "digest", "weekly", "monthly", "subscription", "unsubscribe", 
+        "edition", "trends", "insights", "top stories", "curated", "webinar", "reader"
+    ],
+    "Spam": [
+        "congratulations", "winner", "claim", "limited time", "act now", "click here",
+        "lottery", "inheritance", "viagra", "casino", "verify your account", "urgent assistance"
+    ],
+    "Personal": [
+        "friend", "family", "personal", "hi", "hey", "catch up", "weekend", 
+        "dinner", "lunch", "party", "love", "mom", "dad", "vacation", "trip"
+    ],
+    "Financial": [
+        "invoice", "payment", "billing", "expense", "purchase", "order", "refund",
+        "receipt", "transaction", "bank", "statement", "credit card", "salary"
+    ],
+    "Meeting": [
+        "meeting", "call", "sync", "standup", "conference", "availability", 
+        "schedule", "calendar", "invite", "zoom", "teams", "google meet"
+    ],
+    "Social": [
+        "like", "follow", "comment", "share", "post", "notification", 
+        "linkedin", "facebook", "twitter", "instagram", "friend request"
+    ],
+    "General": [
+        "info", "enquiry", "question", "feedback", "contact"
+    ]
 }
 
-# Priority scoring rules
+# Enhanced Priority Rules
 PRIORITY_RULES = {
-    "urgent_keywords": ["urgent", "asap", "immediate", "emergency", "critical"],
-    "high_importance_senders": ["boss", "ceo", "cto", "manager", "director"],
-    "low_importance_patterns": ["newsletter", "marketing", "promo", "discount"]
+    "high_indicators": [
+        "urgent", "asap", "immediate", "emergency", "critical", "deadline", 
+        "overdue", "important", "action required", "server down", "breach"
+    ],
+    "high_importance_roles": [
+        "boss", "ceo", "cto", "manager", "director", "vp", "head of", "founder"
+    ],
+    "low_importance_patterns": [
+        "newsletter", "marketing", "promo", "discount", "digest", "unsubscribe", "no-reply"
+    ]
 }
