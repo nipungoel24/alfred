@@ -1,0 +1,10 @@
+import { api } from './client';
+export type Priority = 'urgent' | 'high' | 'medium' | 'low';
+export type Analysis = { short_summary:string; category:string; priority:Priority; priority_score:number; reason_for_priority:string; needs_reply:boolean; action_items:{description:string;owner?:string|null;deadline?:string|null}[]; deadlines:{description:string;due_at?:string|null}[]; important_details:string[] };
+export type Email = { id:string; sender:string; sender_name?:string|null; subject:string; body:string; received_at?:string|null; analysis?:Analysis|null };
+export type BriefingItem = { email_id:string;sender:string;subject:string;short_summary:string;priority:Priority;why_it_matters:string;deadline?:string|null;needs_reply:boolean };
+export type Briefing = { executive_summary:string;total_emails:number;urgent_count:number;high_priority_count:number;needs_reply_count:number;deadline_count:number;top_attention_items:BriefingItem[];important_updates:string[];can_wait_or_review_later:string[] };
+export const emails = (query='') => api<Email[]>(`/api/emails${query ? `?q=${encodeURIComponent(query)}` : ''}`);
+export const analyze = (id:string) => api<{analysis:Analysis;cached:boolean}>(`/api/emails/${id}/analyze`, {method:'POST'});
+export const draft = (id:string) => api<{draft:string}>(`/api/emails/${id}/draft`, {method:'POST'});
+export const briefing = () => api<Briefing>('/api/briefing');

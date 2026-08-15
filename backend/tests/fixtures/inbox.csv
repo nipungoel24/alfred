@@ -1,0 +1,3 @@
+email_id,sender_email,sender_name,subject,body,timestamp
+urgent-1,billing@example.com,Billing,Payment failed,"Your payment failed. Please update payment method by 2026-08-16.",2026-08-15T09:00:00Z
+newsletter-1,news@example.com,News,Weekly newsletter,"<script>alert(1)</script><p>Stories this week</p>",2026-08-14T09:00:00Z
