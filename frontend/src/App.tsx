@@ -13,13 +13,14 @@ import {
   deleteTask,
   Email,
   Briefing,
+  BriefingItem,
   EmailAccount,
   Task
 } from './api/emails';
 import { PriorityBadge } from './components/PriorityBadge';
 import './styles.css';
 
-const nav = ['Overview', 'Inbox', 'Tasks', 'Accounts', 'Settings'];
+const nav = ['Overview', 'Inbox', 'Important', 'Needs Reply', 'Tasks', 'Deadlines', 'Later', 'Accounts', 'Settings'];
 
 export default function App() {
   const [data, setData] = useState<Email[]>([]);
@@ -38,8 +39,10 @@ export default function App() {
   const [needsReplyFilter, setNeedsReplyFilter] = useState<boolean | null>(null);
   const [activeAccount, setActiveAccount] = useState('all');
   
-  // Sync state tracker
+  // Sync state trackers
   const [syncingId, setSyncingId] = useState<string | null>(null);
+  const [syncStatus, setSyncStatus] = useState<string>(''); // '', 'syncing', 'analyzing', 'done', 'error'
+  const [syncProgress, setSyncProgress] = useState<string>('');
 
   const load = async () => {
     try {
@@ -79,16 +82,78 @@ export default function App() {
 
   const handleSync = async (accountId: string) => {
     setSyncingId(accountId);
+    setSyncStatus('syncing');
+    setSyncProgress('Syncing Gmail inbox...');
     setError('');
     try {
-      const res = await syncAccount(accountId);
-      // Run bulk analyze on new emails in background
+      const res = await syncAccount(accountId, false);
+      
+      // If new messages were imported, run local AI analysis
+      if (res.imported > 0) {
+        setSyncStatus('analyzing');
+        setSyncProgress(`Sync imported ${res.imported} messages. Running local AI analysis...`);
+        
+        // Fetch fresh email list to identify un-analyzed emails
+        const freshList = await emails('', '', null, accountId);
+        const unanalyzed = freshList.filter(e => !e.analysis);
+        
+        for (let i = 0; i < unanalyzed.length; i++) {
+          setSyncProgress(`Analyzing message ${i + 1} of ${unanalyzed.length} locally...`);
+          try {
+            await analyze(unanalyzed[i].id);
+          } catch (err) {
+            console.error("Local analysis failed for message", unanalyzed[i].id, err);
+          }
+        }
+      }
+      
       await load();
-      alert(`Sync completed! Imported ${res.imported} new messages.`);
+      setSyncStatus('done');
+      setSyncProgress('');
+      setTimeout(() => setSyncStatus(''), 3000);
     } catch (e) {
       setError((e as Error).message);
+      setSyncStatus('error');
+      setSyncProgress('Sync failed.');
     } finally {
       setSyncingId(null);
+    }
+  };
+
+  const handleLoadOlder = async () => {
+    if (accountsList.length === 0) return;
+    const accountId = accountsList[0].id;
+    setSyncStatus('syncing');
+    setSyncProgress('Loading older messages from Gmail...');
+    setError('');
+    try {
+      const res = await syncAccount(accountId, true);
+      
+      // Run local AI analysis on newly loaded older messages
+      if (res.imported > 0) {
+        setSyncStatus('analyzing');
+        setSyncProgress(`Loaded ${res.imported} older messages. Running local AI analysis...`);
+        const freshList = await emails('', '', null, accountId);
+        const unanalyzed = freshList.filter(e => !e.analysis);
+        
+        for (let i = 0; i < unanalyzed.length; i++) {
+          setSyncProgress(`Analyzing older message ${i + 1} of ${unanalyzed.length} locally...`);
+          try {
+            await analyze(unanalyzed[i].id);
+          } catch (err) {
+            console.error("Local analysis failed", err);
+          }
+        }
+      }
+      
+      await load();
+      setSyncStatus('done');
+      setSyncProgress('');
+      setTimeout(() => setSyncStatus(''), 3000);
+    } catch (e) {
+      setError((e as Error).message);
+      setSyncStatus('error');
+      setSyncProgress('Loading older messages failed.');
     }
   };
 
@@ -183,6 +248,23 @@ export default function App() {
     }
   };
 
+  // Pre-filter visible list based on sub-inbox page view
+  const getVisibleEmails = () => {
+    let list = data;
+    if (page === 'Important') {
+      list = data.filter(e => e.analysis?.priority === 'urgent' || e.analysis?.priority === 'high');
+    } else if (page === 'Needs Reply') {
+      list = data.filter(e => e.analysis?.needs_reply === true);
+    } else if (page === 'Deadlines') {
+      list = data.filter(e => e.analysis && e.analysis.deadlines && e.analysis.deadlines.length > 0);
+    } else if (page === 'Later') {
+      list = data.filter(e => e.analysis?.priority === 'low' || e.analysis?.category === 'newsletter' || e.analysis?.category === 'promotion');
+    }
+    return list;
+  };
+
+  const showEmailList = ['Inbox', 'Important', 'Needs Reply', 'Deadlines', 'Later'].includes(page);
+
   return (
     <main>
       <aside>
@@ -203,6 +285,13 @@ export default function App() {
 
       <section className="content">
         {error && <div className="error">{error}</div>}
+
+        {syncStatus && (
+          <div className="glass" style={{ padding: '16px', marginBottom: '20px', background: '#6a4bf715', border: '1px solid #6a4bf744', display: 'flex', alignItems: 'center', gap: '10px' }}>
+            <span className="sync-loader" style={{ fontSize: '18px' }}>⏳</span>
+            <span style={{ fontWeight: 600, color: '#e1e1e6' }}>{syncProgress}</span>
+          </div>
+        )}
 
         {/* 1. OVERVIEW PAGE */}
         {page === 'Overview' && (
@@ -255,6 +344,20 @@ export default function App() {
               )}
             </div>
 
+            {brief && brief.deadlines && brief.deadlines.length > 0 && (
+              <>
+                <h2>Upcoming deadlines</h2>
+                <div className="glass" style={{ padding: '20px' }}>
+                  {brief.deadlines.map((i: BriefingItem) => (
+                    <p key={i.email_id} style={{ margin: '8px 0', borderBottom: '1px solid #ffffff08', paddingBottom: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <span>⏰ <b>{i.sender}</b> — {i.subject}</span>
+                      <b style={{ color: '#ff9cac' }}>{i.deadline}</b>
+                    </p>
+                  ))}
+                </div>
+              </>
+            )}
+
             {brief && brief.important_updates.length > 0 && (
               <>
                 <h2>Important updates</h2>
@@ -267,15 +370,26 @@ export default function App() {
                 </div>
               </>
             )}
+
+            {brief && brief.can_wait_or_review_later && brief.can_wait_or_review_later.length > 0 && (
+              <>
+                <h2>Can wait</h2>
+                <div className="glass" style={{ padding: '20px', color: '#8990b6' }}>
+                  <p style={{ margin: 0 }}>
+                    ℹ️ You have {brief.can_wait_or_review_later.length} updates, newsletters, or promotions that can wait.
+                  </p>
+                </div>
+              </>
+            )}
           </>
         )}
 
-        {/* 2. INBOX PAGE */}
-        {page === 'Inbox' && (
+        {/* 2. SUB-INBOX TABS */}
+        {showEmailList && (
           <>
             <header>
               <p className="eyebrow">SYNCED MAILBOX</p>
-              <h1>Inbox</h1>
+              <h1>{page}</h1>
             </header>
 
             <div className="inbox-header">
@@ -298,34 +412,38 @@ export default function App() {
                 ))}
               </select>
 
-              <select
-                className="filter-select"
-                value={priorityFilter}
-                onChange={e => setPriorityFilter(e.target.value)}
-              >
-                <option value="">All Priorities</option>
-                <option value="urgent">Urgent</option>
-                <option value="high">High</option>
-                <option value="medium">Medium</option>
-                <option value="low">Low</option>
-              </select>
+              {page === 'Inbox' && (
+                <>
+                  <select
+                    className="filter-select"
+                    value={priorityFilter}
+                    onChange={e => setPriorityFilter(e.target.value)}
+                  >
+                    <option value="">All Priorities</option>
+                    <option value="urgent">Urgent</option>
+                    <option value="high">High</option>
+                    <option value="medium">Medium</option>
+                    <option value="low">Low</option>
+                  </select>
 
-              <select
-                className="filter-select"
-                value={needsReplyFilter === null ? '' : String(needsReplyFilter)}
-                onChange={e => {
-                  const val = e.target.value;
-                  setNeedsReplyFilter(val === '' ? null : val === 'true');
-                }}
-              >
-                <option value="">Reply Status</option>
-                <option value="true">Needs Reply</option>
-                <option value="false">Read-only</option>
-              </select>
+                  <select
+                    className="filter-select"
+                    value={needsReplyFilter === null ? '' : String(needsReplyFilter)}
+                    onChange={e => {
+                      const val = e.target.value;
+                      setNeedsReplyFilter(val === '' ? null : val === 'true');
+                    }}
+                  >
+                    <option value="">Reply Status</option>
+                    <option value="true">Needs Reply</option>
+                    <option value="false">Read-only</option>
+                  </select>
+                </>
+              )}
             </div>
 
             <div className="inbox glass">
-              {data.map(e => (
+              {getVisibleEmails().map(e => (
                 <button className="email-row" onClick={() => handleOpenEmail(e.id)} key={e.id}>
                   <PriorityBadge priority={e.analysis?.priority || 'low'} />
                   <span>
@@ -340,12 +458,20 @@ export default function App() {
                   )}
                 </button>
               ))}
-              {data.length === 0 && (
+              {getVisibleEmails().length === 0 && (
                 <div style={{ padding: '40px', textAlign: 'center', color: '#8990b6' }}>
-                  No emails match your filter or search settings. Connect a Gmail account or import a CSV file to sync emails.
+                  No emails found in this category.
                 </div>
               )}
             </div>
+
+            {getVisibleEmails().length > 0 && accountsList.length > 0 && (
+              <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <button className="btn-primary" onClick={handleLoadOlder} disabled={syncStatus !== ''}>
+                  {syncStatus === 'syncing' ? 'Loading...' : 'Load Older Messages'}
+                </button>
+              </div>
+            )}
           </>
         )}
 
@@ -427,22 +553,22 @@ export default function App() {
                   </div>
                   <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
                     <span className={`status-badge status-${acc.connection_status}`}>
-                      {acc.connection_status}
+                      {acc.connection_status === 'error' ? 'Reconnect Required' : acc.connection_status}
                     </span>
-                    <button
-                      className="btn-primary"
-                      style={{ margin: 0 }}
-                      disabled={syncingId === acc.id}
-                      onClick={() => handleSync(acc.id)}
-                    >
-                      {syncingId === acc.id ? (
-                        <>
-                          <span className="sync-loader">⏳</span> Syncing...
-                        </>
-                      ) : (
-                        'Sync Now'
-                      )}
-                    </button>
+                    {acc.connection_status === 'error' ? (
+                      <button className="btn-primary" style={{ margin: 0 }} onClick={handleConnectGmail}>
+                        Reconnect
+                      </button>
+                    ) : (
+                      <button
+                        className="btn-primary"
+                        style={{ margin: 0 }}
+                        disabled={syncingId === acc.id || syncStatus !== ''}
+                        onClick={() => handleSync(acc.id)}
+                      >
+                        {syncingId === acc.id ? 'Syncing...' : 'Sync Now'}
+                      </button>
+                    )}
                     <button className="btn-danger" onClick={() => handleDisconnect(acc.id)}>
                       Disconnect
                     </button>
@@ -499,7 +625,7 @@ export default function App() {
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <PriorityBadge priority={selected.analysis?.priority || 'low'} />
                 {selected.received_at && (
-                  <span style={{ fontSize: '12px', color: '#8990b6' }}>
+                  <span style={{ fontSize: '12px', color: '#8990b6', marginLeft: 'auto' }}>
                     {new Date(selected.received_at).toLocaleString()}
                   </span>
                 )}
@@ -513,7 +639,7 @@ export default function App() {
                 </p>
               )}
 
-              <div className="body">{selected.body}</div>
+              <div className="body" style={{ whiteSpace: 'pre-wrap' }}>{selected.body}</div>
 
               {selected.analysis ? (
                 <>

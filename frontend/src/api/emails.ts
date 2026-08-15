@@ -46,6 +46,7 @@ export type Briefing = {
   needs_reply_count: number;
   deadline_count: number;
   top_attention_items: BriefingItem[];
+  deadlines: BriefingItem[];
   important_updates: string[];
   can_wait_or_review_later: string[]
 };
@@ -75,7 +76,7 @@ export type Task = {
 };
 
 export const emails = (query = '', priority = '', needsReply: boolean | null = null, accountId = '') => {
-  let params = [];
+  const params = [];
   if (query) params.push(`q=${encodeURIComponent(query)}`);
   if (priority) params.push(`priority=${encodeURIComponent(priority)}`);
   if (needsReply !== null) params.push(`needs_reply=${needsReply}`);
