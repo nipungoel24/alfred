@@ -21,11 +21,13 @@ def temp_repo(tmp_path):
 
 # 1. OAuth URL Generation
 def test_gmail_oauth_url_generation(mock_gmail):
-    url = asyncio.run(mock_gmail.get_auth_url("http://localhost/callback"))
+    url = asyncio.run(mock_gmail.get_auth_url("http://localhost/callback", "test_state", "test_challenge"))
     assert "test_client_id" in url
     assert "http://localhost/callback" in url
     assert "gmail.readonly" in url
     assert "userinfo.email" in url
+    assert "test_state" in url
+    assert "test_challenge" in url
 
 # 2. Token Exchange Mock
 @patch("httpx.AsyncClient.post")
@@ -39,7 +41,7 @@ def test_gmail_token_exchange(mock_post, mock_gmail):
     }
     mock_post.return_value = mock_response
 
-    res = asyncio.run(mock_gmail.exchange_code("auth_code_123", "http://localhost/callback"))
+    res = asyncio.run(mock_gmail.exchange_code("auth_code_123", "http://localhost/callback", "mock_verifier"))
     assert res["access_token"] == "mock_access"
     assert res["refresh_token"] == "mock_refresh"
     assert res["expires_in"] == 3600

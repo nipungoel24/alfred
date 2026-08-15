@@ -15,7 +15,7 @@ class GmailProvider(MailProvider):
         self.userinfo_url = "https://www.googleapis.com/oauth2/v2/userinfo"
         self.gmail_base_url = "https://gmail.googleapis.com/gmail/v1/users/me"
 
-    async def get_auth_url(self, redirect_uri: str) -> str:
+    async def get_auth_url(self, redirect_uri: str, state: str, code_challenge: str) -> str:
         scopes = [
             "https://www.googleapis.com/auth/userinfo.email",
             "https://www.googleapis.com/auth/gmail.readonly"
@@ -26,18 +26,23 @@ class GmailProvider(MailProvider):
             "response_type": "code",
             "scope": " ".join(scopes),
             "access_type": "offline",
-            "prompt": "consent"
+            "prompt": "consent",
+            "state": state,
+            "code_challenge": code_challenge,
+            "code_challenge_method": "S256"
         }
+        # Use httpx.URL to properly escape values
         query = "&".join(f"{k}={httpx.URL(v)}" for k, v in params.items())
         return f"{self.auth_url_base}?{query}"
 
-    async def exchange_code(self, code: str, redirect_uri: str) -> Dict[str, Any]:
+    async def exchange_code(self, code: str, redirect_uri: str, code_verifier: str) -> Dict[str, Any]:
         data = {
             "code": code,
             "client_id": self.client_id,
             "client_secret": self.client_secret,
             "redirect_uri": redirect_uri,
-            "grant_type": "authorization_code"
+            "grant_type": "authorization_code",
+            "code_verifier": code_verifier
         }
         async with httpx.AsyncClient() as client:
             r = await client.post(self.token_url, data=data)

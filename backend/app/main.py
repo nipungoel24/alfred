@@ -1,4 +1,4 @@
-import csv, io, uuid
+import csv, io, uuid, secrets, hashlib, base64
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, UploadFile, File, HTTPException, Query
 from fastapi.responses import JSONResponse, HTMLResponse
@@ -20,6 +20,14 @@ ai = AIService(OllamaClient(settings.ollama_base_url), settings.ollama_model)
 
 # Instantiate Gmail provider
 gmail_provider = GmailProvider(settings.gmail_client_id, settings.gmail_client_secret)
+
+OAUTH_STATES = {}  # state -> {"verifier": verifier, "redirect_uri": redirect_uri}
+
+def generate_pkce_pair():
+    verifier = secrets.token_urlsafe(64)
+    sha256_hash = hashlib.sha256(verifier.encode('ascii')).digest()
+    challenge = base64.urlsafe_b64encode(sha256_hash).decode('ascii').replace('=', '')
+    return verifier, challenge
 
 app = FastAPI(title='Alfred local API')
 app.add_middleware(
@@ -64,14 +72,29 @@ async def connect_gmail(redirect_uri: str = Query(...)):
             status_code=400,
             detail="Gmail OAuth credentials are not configured in your .env file."
         )
-    auth_url = await gmail_provider.get_auth_url(redirect_uri)
+    state = uuid.uuid4().hex
+    verifier, challenge = generate_pkce_pair()
+    OAUTH_STATES[state] = {
+        "verifier": verifier,
+        "redirect_uri": redirect_uri
+    }
+    auth_url = await gmail_provider.get_auth_url(redirect_uri, state, challenge)
     return {"url": auth_url}
 
 @app.get('/api/accounts/gmail/callback')
-async def gmail_callback(code: str = Query(...), state: str | None = None, redirect_uri: str = Query(...)):
+async def gmail_callback(code: str = Query(...), state: str = Query(...), redirect_uri: str | None = Query(None)):
+    state_data = OAUTH_STATES.pop(state, None)
+    if not state_data:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid or expired OAuth state parameter."
+        )
+    actual_redirect = redirect_uri or state_data["redirect_uri"]
+    verifier = state_data["verifier"]
+    
     try:
         # Exchange code for tokens
-        tokens = await gmail_provider.exchange_code(code, redirect_uri)
+        tokens = await gmail_provider.exchange_code(code, actual_redirect, verifier)
         access_token = tokens["access_token"]
         refresh_token = tokens.get("refresh_token", "")
         expires_in = tokens.get("expires_in", 3600)
