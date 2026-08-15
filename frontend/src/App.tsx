@@ -160,7 +160,7 @@ export default function App() {
   const handleConnectGmail = async () => {
     setError('');
     try {
-      const redirectUri = "http://localhost:8765/api/accounts/gmail/callback";
+      const redirectUri = "http://127.0.0.1:8765/api/accounts/gmail/callback";
       const res = await connectGmail(redirectUri);
       window.open(res.url, '_blank');
     } catch (e) {

@@ -34,11 +34,10 @@ To connect Gmail to Alfred, you must create a Developer Project on Google Cloud.
 ### Step 4: Create OAuth 2.0 Client Credentials
 1. Navigate to **APIs & Services > Credentials**.
 2. Click **Create Credentials** at the top, then select **OAuth client ID**.
-3. Set the **Application type** to **Web application**.
-4. Set the **Name** to `Alfred Local client`.
-5. Under **Authorized redirect URIs**, click **Add URI** and enter:
-   * `http://localhost:8765/api/accounts/gmail/callback`
-6. Click **Create**.
+3. Set the **Application type** to **Desktop app** (Installed application).
+4. Set the **Name** to `Alfred Desktop Client`.
+5. Click **Create**.
+6. Google will generate your **Client ID** and a **Client Secret**. (Note: For Desktop app credentials, Google dynamically permits loopback redirects on any port to `http://127.0.0.1` automatically, so you do not need to register authorized redirect URIs in the console!).
 7. Copy your **Client ID** and **Client Secret**.
 
 ---
