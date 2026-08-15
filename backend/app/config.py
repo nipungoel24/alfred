@@ -10,6 +10,8 @@ class Settings(BaseModel):
     host: str = Field(default_factory=lambda: os.getenv("ALFRED_HOST", "127.0.0.1"))
     port: int = Field(default_factory=lambda: int(os.getenv("ALFRED_PORT", "8765")))
     database_path: Path = Field(default_factory=lambda: Path(os.getenv("ALFRED_DATABASE_PATH", Path(os.getenv("LOCALAPPDATA", ".")) / "Alfred" / "alfred.sqlite3")))
+    gmail_client_id: str = Field(default_factory=lambda: os.getenv("GMAIL_CLIENT_ID", "PLACEHOLDER_CLIENT_ID"))
+    gmail_client_secret: str = Field(default_factory=lambda: os.getenv("GMAIL_CLIENT_SECRET", "PLACEHOLDER_CLIENT_SECRET"))
 
 
 @lru_cache
