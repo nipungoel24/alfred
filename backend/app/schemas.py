@@ -23,7 +23,7 @@ class EmailAnalysis(BaseModel):
     deadlines: list[Deadline] = Field(default_factory=list, description="List of deadlines explicitly mentioned in the email (e.g. 'by Friday', 'before 5 PM today'). Keep empty if timing is ambiguous (like 'soon', 'asap') or missing.")
     important_entities: list[ImportantEntity] = Field(default_factory=list); important_details: list[str] = Field(default_factory=list)
 class Email(BaseModel):
-    id: str; thread_id: str | None = None; sender: str; sender_name: str | None = None; recipients: list[str] = Field(default_factory=list)
+    id: str; thread_id: str | None = None; account_id: str | None = None; sender: str; sender_name: str | None = None; recipients: list[str] = Field(default_factory=list)
     subject: str; body: str; received_at: datetime | None = None; source_metadata: dict[str, Any] = Field(default_factory=dict)
     analysis: EmailAnalysis | None = None
 class BriefingItem(BaseModel): email_id: str; sender: str; subject: str; short_summary: str; priority: Priority; why_it_matters: str; deadline: str | None = None; needs_reply: bool
@@ -31,3 +31,26 @@ class InboxBriefing(BaseModel):
     executive_summary: str; total_emails: int; urgent_count: int; high_priority_count: int; needs_reply_count: int; deadline_count: int
     top_attention_items: list[BriefingItem] = Field(default_factory=list); deadlines: list[BriefingItem] = Field(default_factory=list); important_updates: list[str] = Field(default_factory=list); can_wait_or_review_later: list[str] = Field(default_factory=list)
 class ErrorDetail(BaseModel): code: str; message: str; details: dict[str, Any] = {}
+
+class EmailAccount(BaseModel):
+    id: str
+    provider: str
+    email_address: str
+    display_name: str | None = None
+    connection_status: str # 'connected', 'disconnected', 'error'
+    last_sync_at: str | None = None
+    sync_cursor: str | None = None
+    created_at: str | None = None
+    updated_at: str | None = None
+
+class Task(BaseModel):
+    id: str
+    source_email_id: str | None = None
+    source_thread_id: str | None = None
+    title: str
+    description: str | None = None
+    due_at: str | None = None
+    priority: str | None = None
+    status: str # 'pending', 'completed'
+    created_at: str | None = None
+
