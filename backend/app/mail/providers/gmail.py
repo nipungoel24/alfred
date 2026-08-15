@@ -3,7 +3,7 @@ import httpx
 from datetime import datetime, timezone, timedelta
 from typing import Dict, Any, List
 from .base import MailProvider
-from ....schemas import Email, EmailAccount
+from ...schemas import Email, EmailAccount
 from ...mail.fingerprint import content_fingerprint
 
 class GmailProvider(MailProvider):

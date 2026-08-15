@@ -1,5 +1,5 @@
 from typing import List, Dict, Any
-from ....schemas import Email, EmailAccount
+from ...schemas import Email, EmailAccount
 
 class MailProvider:
     async def get_auth_url(self, redirect_uri: str) -> str:
