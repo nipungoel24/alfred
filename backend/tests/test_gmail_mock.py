@@ -354,3 +354,27 @@ def test_gmail_sync_load_older(mock_get, mock_gmail, temp_repo):
     cursor = json.loads(updated_account.sync_cursor)
     assert cursor["history_id"] == "10000" # History ID unchanged!
     assert cursor["next_page_token"] == "page_token_abc_older" # Advanced!
+
+def test_gmail_html_sanitisation(mock_gmail):
+    html_content = """
+    <html>
+        <head><style>body {color: red;}</style></head>
+        <body>
+            <h1>Hello World</h1>
+            <p>This is a paragraph.</p>
+            <script>alert('XSS');</script>
+            <a href="javascript:alert('XSS')">Click here</a>
+        </body>
+    </html>
+    """
+    clean_body = mock_gmail._clean_html(html_content)
+    # Assert scripts are stripped
+    assert "alert('XSS')" not in clean_body
+    # Assert styles are stripped
+    assert "color: red" not in clean_body
+    # Assert HTML tags are stripped
+    assert "<html>" not in clean_body
+    assert "<body>" not in clean_body
+    # Assert text contents are preserved with layout newlines
+    assert "Hello World" in clean_body
+    assert "This is a paragraph." in clean_body
