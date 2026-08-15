@@ -92,7 +92,7 @@ export const briefing = () => api<Briefing>('/api/briefing');
 // Account management
 export const accounts = () => api<EmailAccount[]>('/api/accounts');
 export const connectGmail = (redirectUri: string) => api<{ url: string }>(`/api/accounts/gmail/connect?redirect_uri=${encodeURIComponent(redirectUri)}`, { method: 'POST' });
-export const syncAccount = (id: string) => api<{ imported: number; skipped_duplicates: number }>(`/api/accounts/${id}/sync`, { method: 'POST' });
+export const syncAccount = (id: string, loadOlder = false) => api<{ imported: number; skipped_duplicates: number; has_more?: boolean }>(`/api/accounts/${id}/sync?load_older=${loadOlder}`, { method: 'POST' });
 export const deleteAccount = (id: string) => api<{ status: string }>(`/api/accounts/${id}`, { method: 'DELETE' });
 
 // Task management
