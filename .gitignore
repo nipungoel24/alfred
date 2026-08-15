@@ -12,4 +12,11 @@ venv/
 .DS_Store
 *.db
 *.sqlite
+*.sqlite3
+.pytest-tmp/
 node_modules/
+frontend/dist/
+desktop/src-tauri/target/
+build/
+dist/
+scratch_test.sqlite3
