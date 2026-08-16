@@ -1,0 +1,50 @@
+[
+  {
+    "id": "email_legit_task",
+    "subject": "Q3 Report Needed",
+    "sender": "boss@company.com",
+    "body": "Hi, please send me the Q3 report by Friday. Thanks.",
+    "expected_tasks": 1,
+    "expected_false_positives": 0
+  },
+  {
+    "id": "email_third_party",
+    "subject": "Ticket updated",
+    "sender": "jira@company.com",
+    "body": "John will take care of updating the server configurations tomorrow.",
+    "expected_tasks": 0,
+    "expected_false_positives": 0
+  },
+  {
+    "id": "email_marketing",
+    "subject": "Huge Sale on Shoes!",
+    "sender": "marketing@shoes.com",
+    "body": "Don't miss out! Click here to buy now and save 50%. Complete your purchase today.",
+    "expected_tasks": 0,
+    "expected_false_positives": 0
+  },
+  {
+    "id": "email_base64",
+    "subject": "System Alert",
+    "sender": "alert@system.local",
+    "body": "Error log: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... Decode the base64 string to see full details.",
+    "expected_tasks": 0,
+    "expected_false_positives": 0
+  },
+  {
+    "id": "email_password_reset",
+    "subject": "Reset your password",
+    "sender": "no-reply@service.com",
+    "body": "Someone requested a password reset. Check if the user has a pending password reset request. Click below to verify your account credentials.",
+    "expected_tasks": 0,
+    "expected_false_positives": 0
+  },
+  {
+    "id": "email_tiktok",
+    "subject": "Verify login",
+    "sender": "security@tiktok.com",
+    "body": "Verify the user's TikTok account credentials to continue.",
+    "expected_tasks": 0,
+    "expected_false_positives": 0
+  }
+]

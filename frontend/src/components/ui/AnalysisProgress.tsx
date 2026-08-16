@@ -6,7 +6,8 @@ type ProgressEvent =
   | { type: 'analysis_complete'; email_id: string; cached: boolean; pending: number; total_ms?: number }
   | { type: 'analysis_error'; email_id: string; error: string; pending: number }
   | { type: 'worker_paused'; reason: string; pending: number }
-  | { type: 'heartbeat'; pending: number };
+  | { type: 'heartbeat'; pending: number }
+  | { type: 'jobs_enqueued'; count: number; pending: number };
 
 export function AnalysisProgress() {
   const [pending, setPending] = useState(0);
@@ -20,12 +21,18 @@ export function AnalysisProgress() {
       try {
         const data: ProgressEvent = JSON.parse(event.data);
         setPending(data.pending);
-        if (data.type !== 'heartbeat' && data.type !== 'status') {
+        if (data.type !== 'heartbeat' && data.type !== 'status' && data.type !== 'jobs_enqueued') {
           setLatestEvent(data);
-          // Invalidate relevant queries to fetch new analysis data
-          queryClient.invalidateQueries({ queryKey: ['emails'] });
-          queryClient.invalidateQueries({ queryKey: ['tasks'] });
-          queryClient.invalidateQueries({ queryKey: ['briefing'] });
+          
+          // Debounce invalidations to prevent backend request storms during fast processing
+          if (!(window as any).__invalidationTimer) {
+            (window as any).__invalidationTimer = setTimeout(() => {
+              queryClient.invalidateQueries({ queryKey: ['emails'] });
+              queryClient.invalidateQueries({ queryKey: ['tasks'] });
+              queryClient.invalidateQueries({ queryKey: ['briefing'] });
+              (window as any).__invalidationTimer = null;
+            }, 1000);
+          }
         }
       } catch (err) {
         console.error('Failed to parse SSE event', err);

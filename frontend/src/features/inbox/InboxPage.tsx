@@ -8,7 +8,7 @@ import { EmailDetail } from '../email/EmailDetail';
 
 interface InboxPageProps {
   priorityFilter?: string;
-  needsReplyFilter?: boolean;
+  needsReplyFilter?: boolean | null;
 }
 
 export function InboxPage({ priorityFilter = '', needsReplyFilter = null }: InboxPageProps) {

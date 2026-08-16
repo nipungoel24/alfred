@@ -47,28 +47,32 @@ def _broadcast_progress(event: dict):
 
 
 # ── Background analysis worker ──
-analysis_queue: asyncio.Queue = asyncio.Queue()
 _worker_task: asyncio.Task | None = None
 _worker_running = False
+WORKER_CONCURRENCY = 1
 
 async def _analysis_worker():
-    """Background worker that processes analysis jobs from the queue."""
+    """Background worker that processes analysis jobs from SQLite."""
     global _worker_running
     _worker_running = True
     consecutive_failures = 0
     max_consecutive_failures = 5
 
     while _worker_running:
-        try:
-            email_id = await asyncio.wait_for(analysis_queue.get(), timeout=1.0)
-        except asyncio.TimeoutError:
+        job = repo.next_job('analyze_email')
+        if not job:
+            await asyncio.sleep(1.0)
             continue
-        except asyncio.CancelledError:
-            break
-
+            
+        job_id = job['id']
+        email_id = job['target_id']
+        
+        # Mark as running
+        repo.update_job_status(job_id, 'running')
+        
         e = repo.email(email_id)
         if not e:
-            analysis_queue.task_done()
+            repo.update_job_status(job_id, 'failed', error_message='Email not found')
             continue
 
         fp = content_fingerprint(e)
@@ -76,11 +80,11 @@ async def _analysis_worker():
         if cached:
             # Already analyzed, derive tasks and skip
             _derive_and_save_tasks(e, cached)
+            repo.update_job_status(job_id, 'succeeded')
             _broadcast_progress({
                 "type": "analysis_complete", "email_id": e.id, "cached": True,
-                "pending": analysis_queue.qsize()
+                "pending": repo.pending_job_count('analyze_email')
             })
-            analysis_queue.task_done()
             consecutive_failures = 0
             continue
 
@@ -90,7 +94,7 @@ async def _analysis_worker():
 
             # Record inference metrics
             repo.record_inference_metric(
-                job_id=f"analyze_{e.id}", model=settings.ollama_model,
+                job_id=job_id, model=settings.ollama_model,
                 total_ms=metrics.total_ms, load_ms=metrics.load_ms,
                 prompt_eval_ms=metrics.prompt_eval_ms, eval_ms=metrics.eval_ms,
                 prompt_tokens=metrics.prompt_tokens, output_tokens=metrics.output_tokens,
@@ -99,47 +103,49 @@ async def _analysis_worker():
 
             # Derive tasks from analysis
             _derive_and_save_tasks(e, analysis)
+            
+            repo.update_job_status(job_id, 'succeeded')
 
             _broadcast_progress({
                 "type": "analysis_complete", "email_id": e.id, "cached": False,
-                "pending": analysis_queue.qsize(),
+                "pending": repo.pending_job_count('analyze_email'),
                 "total_ms": round(metrics.total_ms, 1),
             })
             consecutive_failures = 0
 
         except (OllamaUnavailable, OllamaTimeout) as ex:
             consecutive_failures += 1
+            repo.update_job_status(job_id, 'retryable_failed', error_code=type(ex).__name__, error_message=str(ex))
             _broadcast_progress({
                 "type": "analysis_error", "email_id": e.id,
                 "error": type(ex).__name__,
-                "pending": analysis_queue.qsize(),
+                "pending": repo.pending_job_count('analyze_email'),
             })
             if consecutive_failures >= max_consecutive_failures:
                 _broadcast_progress({
                     "type": "worker_paused",
                     "reason": f"Ollama unavailable after {max_consecutive_failures} consecutive failures",
-                    "pending": analysis_queue.qsize(),
+                    "pending": repo.pending_job_count('analyze_email'),
                 })
                 # Wait before retrying
                 await asyncio.sleep(30)
                 consecutive_failures = 0
 
         except (OllamaInvalidResponse, OllamaModelMissing) as ex:
+            repo.update_job_status(job_id, 'failed', error_code=type(ex).__name__, error_message=str(ex))
             _broadcast_progress({
                 "type": "analysis_error", "email_id": e.id,
                 "error": type(ex).__name__,
-                "pending": analysis_queue.qsize(),
+                "pending": repo.pending_job_count('analyze_email'),
             })
 
-        except Exception:
+        except Exception as ex:
+            repo.update_job_status(job_id, 'failed', error_code='UNKNOWN', error_message=str(ex))
             _broadcast_progress({
                 "type": "analysis_error", "email_id": e.id,
                 "error": "UNKNOWN",
-                "pending": analysis_queue.qsize(),
+                "pending": repo.pending_job_count('analyze_email'),
             })
-
-        finally:
-            analysis_queue.task_done()
 
 
 def _derive_and_save_tasks(email: Email, analysis: EmailAnalysis):
@@ -178,6 +184,11 @@ async def lifespan(app: FastAPI):
         rebuilt = rebuild_tasks_from_analyses(repo, settings.ollama_model)
         if rebuilt > 0:
             print(f"[Alfred] Rebuilt {rebuilt} tasks with derivation v{DERIVATION_VERSION}")
+            
+        # Reset any stuck 'running' jobs to 'queued' on startup
+        repo.con.execute('UPDATE jobs SET status="queued" WHERE status="running"')
+        repo.reset_retryable_jobs()
+        repo.con.commit()
     except Exception:
         pass
 
@@ -380,9 +391,12 @@ async def sync_account(account_id: str, load_older: bool = Query(False)):
                 for e in all_emails:
                     fp = content_fingerprint(e)
                     if not repo.cached_analysis(e.id, fp, settings.ollama_model):
-                        await analysis_queue.put(e.id)
+                        repo.enqueue_job(f"analyze_{e.id}", 'analyze_email', e.id, priority=50)
                         enqueued += 1
                 res["analysis_enqueued"] = enqueued
+                
+                # Notify worker to wake up (via progress mechanism or sleep cycle)
+                _broadcast_progress({"type": "jobs_enqueued", "count": enqueued, "pending": repo.pending_job_count('analyze_email')})
 
             return res
         else:
