@@ -13,7 +13,7 @@ export function AnalysisProgress() {
   const [pending, setPending] = useState(0);
   const [latestEvent, setLatestEvent] = useState<ProgressEvent | null>(null);
   const queryClient = useQueryClient();
-  const invalidationTimer = useRef<NodeJS.Timeout | null>(null);
+  const invalidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
     const eventSource = new EventSource('http://127.0.0.1:8765/api/analysis/progress');
