@@ -53,4 +53,7 @@ class Task(BaseModel):
     priority: str | None = None
     status: str # 'pending', 'completed'
     created_at: str | None = None
+    derivation_version: str = "1"
+    confidence: str = "medium"
+    fingerprint: str | None = None
 

@@ -16,7 +16,7 @@ DERIVATION_VERSION = "2"
 # Patterns that indicate noise, not real user tasks
 NOISE_PATTERNS = [
     re.compile(r"decode\s+(the\s+)?base64", re.I),
-    re.compile(r"verify\s+(the\s+)?(user.s?|your)\s+(tiktok|instagram|facebook|twitter|account)\s+credentials?", re.I),
+    re.compile(r"verify\s+(the\s+)?(user.?s?|your)\s+(tiktok|instagram|facebook|twitter|account)\s+(account\s+)?credentials?", re.I),
     re.compile(r"check\s+if\s+(the\s+)?user\s+has\s+a?\s*pending\s+password\s+reset", re.I),
     re.compile(r"(click|tap)\s+(here|below|the\s+link|the\s+button)", re.I),
     re.compile(r"(buy|shop|purchase|order)\s+now", re.I),
