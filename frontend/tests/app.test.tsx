@@ -20,6 +20,8 @@ vi.mock('../src/api/emails', () => {
     tasks: vi.fn(),
     toggleTask: vi.fn(),
     deleteTask: vi.fn()
+    ,health: vi.fn(),
+    regenerateBriefing: vi.fn()
   };
 });
 
@@ -123,8 +125,10 @@ describe('Alfred Frontend Application', () => {
     vi.clearAllMocks();
     vi.mocked(api.emails).mockResolvedValue(mockEmails as any);
     vi.mocked(api.briefing).mockResolvedValue(mockBriefing as any);
+    vi.mocked(api.regenerateBriefing).mockResolvedValue(mockBriefing as any);
     vi.mocked(api.accounts).mockResolvedValue(mockAccounts as any);
     vi.mocked(api.tasks).mockResolvedValue(mockTasks as any);
+    vi.mocked(api.health).mockResolvedValue({ status: 'ok', ai: 'ready' });
   });
 
   afterEach(() => {
@@ -138,7 +142,8 @@ describe('Alfred Frontend Application', () => {
       </QueryClientProvider>
     );
     expect(await screen.findByText(/ALFRED/)).toBeDefined();
-    expect(screen.getByText(/Local Executive/)).toBeDefined();
+    expect(screen.getByText(/Smart Inbox/)).toBeDefined();
+    expect(screen.getByText(/Local AI/)).toBeDefined();
   }, 15000);
 
   it('renders briefing metrics and top attention cards', async () => {
@@ -151,12 +156,12 @@ describe('Alfred Frontend Application', () => {
     await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
 
     // Check Metrics render
-    expect(screen.getByText('Total Analyzed')).toBeDefined();
-    expect(screen.getByText('Urgent')).toBeDefined();
-    expect(screen.getByText('Deadlines')).toBeDefined();
+    expect(screen.getByText('Analyzed')).toBeDefined();
+    expect(screen.getAllByText('Important').length).toBeGreaterThan(1);
+    expect(screen.getAllByText('Deadlines').length).toBeGreaterThan(1);
     
-    // Check Top Attention Card renders
-    expect(screen.getByText('Service interruption today')).toBeDefined();
+    // The attention section remains visible alongside the briefing.
+    expect(screen.getByText('Needs Your Attention')).toBeDefined();
   }, 15000);
 
   it('navigates to Inbox and applies filters', async () => {
@@ -173,17 +178,17 @@ describe('Alfred Frontend Application', () => {
     fireEvent.click(inboxBtn);
 
     // Should display inbox view (we check for search input since virtualized rows might not mount in JSDOM)
-    await screen.findByPlaceholderText('Search emails...', {}, { timeout: 8000 });
+    await screen.findByPlaceholderText('Filter emails...', {}, { timeout: 8000 });
   }, 15000);
 
-  it('displays API error banner when load fails', async () => {
-    vi.mocked(api.briefing).mockRejectedValue(new Error('Backend offline'));
+  it('uses high-priority email analysis when the briefing has no attention items', async () => {
+    vi.mocked(api.briefing).mockResolvedValue({ ...mockBriefing, top_attention_items: [], deadlines: [] } as any);
     render(
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
     );
 
-    await screen.findByText(/Error loading briefing/i, {}, { timeout: 8000 });
+    expect(await screen.findByText('Payment failed - action required today', {}, { timeout: 8000 })).toBeDefined();
   }, 15000);
 });

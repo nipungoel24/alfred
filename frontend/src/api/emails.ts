@@ -89,6 +89,9 @@ export const emailDetails = (id: string) => api<Email>(`/api/emails/${id}`);
 export const analyze = (id: string) => api<{ analysis: Analysis; cached: boolean }>(`/api/emails/${id}/analyze`, { method: 'POST' });
 export const draft = (id: string) => api<{ draft: string }>(`/api/emails/${id}/draft`, { method: 'POST' });
 export const briefing = () => api<Briefing>('/api/briefing');
+export const regenerateBriefing = () => api<Briefing>('/api/briefing/generate', { method: 'POST' });
+export type Health = { status: 'ok' | 'error'; ai?: 'ready' | 'unavailable' };
+export const health = () => api<Health>('/health');
 
 // Account management
 export const accounts = () => api<EmailAccount[]>('/api/accounts');

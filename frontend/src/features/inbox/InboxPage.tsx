@@ -3,22 +3,24 @@ import { useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef } from 'react';
 import { emails as fetchEmails } from '../../api/emails';
-import { PriorityBadge } from '../../components/PriorityBadge';
 import { EmailDetail } from '../email/EmailDetail';
+import { RefreshCw, Inbox as InboxIcon } from 'lucide-react';
 
 interface InboxPageProps {
   priorityFilter?: string;
   needsReplyFilter?: boolean | null;
+  searchQuery?: string;
 }
 
-export function InboxPage({ priorityFilter = '', needsReplyFilter = null }: InboxPageProps) {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [activeAccount] = useState('all');
+export function InboxPage({ priorityFilter = '', needsReplyFilter = null, searchQuery = '' }: InboxPageProps) {
+  const [localSearch, setLocalSearch] = useState('');
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
 
-  const { data: emails = [], isLoading } = useQuery({
-    queryKey: ['emails', { searchQuery, priorityFilter, needsReplyFilter, activeAccount }],
-    queryFn: () => fetchEmails(searchQuery, priorityFilter, needsReplyFilter, activeAccount === 'all' ? '' : activeAccount),
+  const activeSearch = searchQuery || localSearch;
+
+  const { data: emails = [], isLoading, isRefetching } = useQuery({
+    queryKey: ['emails', { searchQuery: activeSearch, priorityFilter, needsReplyFilter }],
+    queryFn: () => fetchEmails(activeSearch, priorityFilter, needsReplyFilter),
   });
 
   const parentRef = useRef<HTMLDivElement>(null);
@@ -26,45 +28,78 @@ export function InboxPage({ priorityFilter = '', needsReplyFilter = null }: Inbo
   const rowVirtualizer = useVirtualizer({
     count: emails.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 100, // Estimated height of a row
-    overscan: 5,
+    estimateSize: () => 56,
+    overscan: 10,
   });
 
+  const formatTime = (dateStr?: string | null) => {
+    if (!dateStr) return '';
+    const d = new Date(dateStr);
+    const now = new Date();
+    const isToday = d.toDateString() === now.toDateString();
+    if (isToday) return d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    const yesterday = new Date(now);
+    yesterday.setDate(yesterday.getDate() - 1);
+    if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+    return d.toLocaleDateString([], { month: 'short', day: 'numeric' });
+  };
+
   return (
-    <div className="flex h-full relative">
-      <div className="flex-1 flex flex-col h-full border-r border-[#2d2d30]">
-        <div className="p-4 border-b border-[#2d2d30] flex gap-4 bg-[#1e1e1e] z-10 sticky top-0">
-          <input
-            type="text"
-            className="input flex-1"
-            placeholder="Search emails..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-          {/* We could add account dropdown here if needed */}
+    <div className="inbox-layout">
+      <div className="inbox-list-pane">
+        {/* Toolbar */}
+        <div className="list-toolbar">
+          {!searchQuery && (
+            <div className="search-box" style={{ flex: 1, maxWidth: 320 }}>
+              <input
+                type="text"
+                placeholder="Filter emails..."
+                value={localSearch}
+                onChange={e => setLocalSearch(e.target.value)}
+              />
+            </div>
+          )}
+          <div style={{ marginLeft: 'auto', display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+            {isRefetching && (
+              <RefreshCw size={14} style={{ animation: 'spin 1s linear infinite', color: 'var(--text-muted)' }} />
+            )}
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+              {emails.length} messages
+            </span>
+          </div>
         </div>
-        
+
+        {/* Email list */}
         {isLoading ? (
-          <div className="p-8 text-center text-muted">Loading emails...</div>
+          <div style={{ padding: 'var(--space-5)' }}>
+            {[...Array(8)].map((_, i) => (
+              <div key={i} style={{ display: 'flex', gap: 'var(--space-3)', padding: '12px var(--space-5)', borderBottom: '1px solid var(--border-subtle)' }}>
+                <div className="skeleton" style={{ width: 120, height: 14 }} />
+                <div className="skeleton" style={{ flex: 1, height: 14 }} />
+                <div className="skeleton" style={{ width: 50, height: 14 }} />
+              </div>
+            ))}
+          </div>
         ) : emails.length === 0 ? (
-          <div className="p-8 text-center text-muted">No emails found.</div>
+          <div className="empty-state">
+            <InboxIcon />
+            <p>No emails found.</p>
+          </div>
         ) : (
-          <div ref={parentRef} className="flex-1 overflow-auto">
-            <div
-              style={{
-                height: `${rowVirtualizer.getTotalSize()}px`,
-                width: '100%',
-                position: 'relative',
-              }}
-            >
-              {rowVirtualizer.getVirtualItems().map((virtualRow) => {
+          <div ref={parentRef} className="email-list">
+            <div style={{ height: rowVirtualizer.getTotalSize(), width: '100%', position: 'relative' }}>
+              {rowVirtualizer.getVirtualItems().map(virtualRow => {
                 const email = emails[virtualRow.index];
                 const isSelected = selectedEmailId === email.id;
+                const isHighPriority = email.analysis?.priority === 'high' || email.analysis?.priority === 'urgent';
                 return (
-                  <div
+                  <button
                     key={virtualRow.index}
                     data-index={virtualRow.index}
                     ref={rowVirtualizer.measureElement}
+                    type="button"
+                    aria-pressed={isSelected}
+                    aria-label={`Open email from ${email.sender_name || email.sender}: ${email.subject}`}
                     style={{
                       position: 'absolute',
                       top: 0,
@@ -72,32 +107,24 @@ export function InboxPage({ priorityFilter = '', needsReplyFilter = null }: Inbo
                       width: '100%',
                       transform: `translateY(${virtualRow.start}px)`,
                     }}
-                    className={`p-4 border-b border-[#2d2d30] cursor-pointer hover:bg-[#2d2d30] transition-colors ${isSelected ? 'bg-[#2d2d30]' : ''}`}
-                    onClick={() => setSelectedEmailId(email.id)}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="font-semibold">{email.sender_name || email.sender}</div>
-                      <div className="text-xs text-muted">
-                        {email.received_at ? new Date(email.received_at).toLocaleDateString() : ''}
+                    <div
+                      className={`email-row ${isSelected ? 'selected' : ''}`}
+                      onClick={() => setSelectedEmailId(email.id)}
+                    >
+                      <div className="email-sender">{email.sender_name || email.sender?.split('@')[0]}</div>
+                      <div className="email-content">
+                        <span className="email-subject">{email.subject}</span>
+                        <span style={{ color: 'var(--text-muted)', fontSize: 'var(--text-sm)' }}> — </span>
+                        <span className="email-snippet">{email.body?.slice(0, 80)}</span>
+                      </div>
+                      <div className="email-meta">
+                        {email.analysis?.needs_reply && <span className="badge badge-reply">Reply</span>}
+                        {isHighPriority && <span className={`badge badge-${email.analysis?.priority}`}>{email.analysis?.priority}</span>}
+                        <span className="email-time">{formatTime(email.received_at)}</span>
                       </div>
                     </div>
-                    <div className="text-sm font-medium mb-1 truncate">{email.subject}</div>
-                    <div className="text-sm text-muted line-clamp-2 mb-2">{email.body}</div>
-                    
-                    {email.analysis ? (
-                      <div className="flex items-center gap-2 mt-2">
-                        <PriorityBadge priority={email.analysis.priority} />
-                        {email.analysis.needs_reply && (
-                          <span className="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-primary/20 text-primary">Needs Reply</span>
-                        )}
-                      </div>
-                    ) : (
-                      <div className="text-xs text-muted flex items-center gap-1 mt-2">
-                        <span className="w-2 h-2 rounded-full border-2 border-muted border-t-transparent animate-spin inline-block"></span>
-                        Analyzing...
-                      </div>
-                    )}
-                  </div>
+                  </button>
                 );
               })}
             </div>
@@ -105,12 +132,10 @@ export function InboxPage({ priorityFilter = '', needsReplyFilter = null }: Inbo
         )}
       </div>
 
+      {/* Detail panel */}
       {selectedEmailId && (
-        <div className="w-1/2 h-full bg-[#1e1e1e] border-l border-[#2d2d30] overflow-auto">
-          <EmailDetail 
-            emailId={selectedEmailId} 
-            onClose={() => setSelectedEmailId(null)} 
-          />
+        <div className="inbox-detail-pane">
+          <EmailDetail emailId={selectedEmailId} onClose={() => setSelectedEmailId(null)} />
         </div>
       )}
     </div>
