@@ -3,6 +3,15 @@ from pathlib import Path
 import os
 from pydantic import BaseModel, Field
 
+# Load .env explicitly to ensure credentials are read reliably
+try:
+    from dotenv import load_dotenv
+    # Look for .env in the current directory or its parents
+    env_path = Path(__file__).parent.parent / ".env"
+    load_dotenv(dotenv_path=env_path)
+except ImportError:
+    pass
+
 
 class Settings(BaseModel):
     ollama_base_url: str = Field(default_factory=lambda: os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434"))

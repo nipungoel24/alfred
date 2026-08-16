@@ -1,46 +1,145 @@
+"""Data access layer for Alfred's local SQLite database.
+
+Responsibilities:
+- CRUD for emails, analyses, briefings, accounts, credentials, tasks, jobs
+- Batch operations with transaction support
+- NO business logic (task derivation, AI invocation, etc.)
+"""
 from datetime import datetime, timezone
 import json
-from .database import connect
+from .database import connect, transaction
 from ..schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task
+
 
 class Repository:
     def __init__(self, path):
         self.con = connect(path)
 
-    def upsert_email(self, email, fingerprint):
+    def close(self):
+        """Close the database connection."""
+        if self.con:
+            self.con.close()
+            self.con = None
+
+    # ──────────────────────────────────────────────
+    # EMAILS
+    # ──────────────────────────────────────────────
+
+    def upsert_email(self, email: Email, fingerprint: str):
+        """Insert or update a single email. Caller manages transaction."""
         self.con.execute(
-            'INSERT INTO emails (id, payload, content_hash, imported_at, account_id, thread_id) '
-            'VALUES(?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+            'INSERT INTO emails (id, payload, content_hash, imported_at, account_id, thread_id, sender_col, subject_col, received_at_col) '
+            'VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
             'payload=excluded.payload, content_hash=excluded.content_hash, imported_at=excluded.imported_at, '
-            'account_id=excluded.account_id, thread_id=excluded.thread_id',
-            (email.id, email.model_dump_json(), fingerprint, datetime.now(timezone.utc).isoformat(), email.account_id, email.thread_id)
+            'account_id=excluded.account_id, thread_id=excluded.thread_id, '
+            'sender_col=excluded.sender_col, subject_col=excluded.subject_col, received_at_col=excluded.received_at_col',
+            (email.id, email.model_dump_json(), fingerprint,
+             datetime.now(timezone.utc).isoformat(), email.account_id, email.thread_id,
+             email.sender.lower(), email.subject, email.received_at.isoformat() if email.received_at else None)
         )
+
+    def upsert_email_commit(self, email: Email, fingerprint: str):
+        """Insert or update a single email with immediate commit."""
+        self.upsert_email(email, fingerprint)
         self.con.commit()
 
-    def emails(self, account_id=None):
+    def upsert_emails_batch(self, email_fingerprint_pairs: list[tuple[Email, str]]):
+        """Batch insert/update emails in a single transaction."""
+        with transaction(self.con) as _:
+            for email, fingerprint in email_fingerprint_pairs:
+                self.upsert_email(email, fingerprint)
+        # Update FTS index
+        self._update_fts_batch([e.id for e, _ in email_fingerprint_pairs])
+
+    def emails(self, account_id=None, limit=500, offset=0):
+        """Fetch emails ordered by received_at descending."""
         if account_id:
-            rows = self.con.execute('SELECT payload FROM emails WHERE account_id=? ORDER BY imported_at DESC', (account_id,)).fetchall()
+            rows = self.con.execute(
+                'SELECT payload FROM emails WHERE account_id=? ORDER BY received_at_col DESC LIMIT ? OFFSET ?',
+                (account_id, limit, offset)
+            ).fetchall()
         else:
-            rows = self.con.execute('SELECT payload FROM emails ORDER BY imported_at DESC').fetchall()
+            rows = self.con.execute(
+                'SELECT payload FROM emails ORDER BY received_at_col DESC LIMIT ? OFFSET ?',
+                (limit, offset)
+            ).fetchall()
         return [Email.model_validate_json(r['payload']) for r in rows]
 
-    def email(self, email_id):
+    def email_count(self, account_id=None) -> int:
+        """Get total email count, optionally filtered by account."""
+        if account_id:
+            return self.con.execute('SELECT COUNT(*) FROM emails WHERE account_id=?', (account_id,)).fetchone()[0]
+        return self.con.execute('SELECT COUNT(*) FROM emails').fetchone()[0]
+
+    def email(self, email_id: str):
         r = self.con.execute('SELECT payload FROM emails WHERE id=?', (email_id,)).fetchone()
         return Email.model_validate_json(r['payload']) if r else None
 
-    def delete_email(self, email_id):
+    def email_exists(self, email_id: str) -> bool:
+        """Check if email exists without deserializing payload."""
+        r = self.con.execute('SELECT 1 FROM emails WHERE id=? LIMIT 1', (email_id,)).fetchone()
+        return r is not None
+
+    def delete_email(self, email_id: str):
         self.con.execute('DELETE FROM emails WHERE id=?', (email_id,))
         self.con.execute('DELETE FROM tasks WHERE source_email_id=?', (email_id,))
         self.con.commit()
 
-    def cached_analysis(self, email_id, fingerprint, model, schema='1'):
+    def search_emails(self, query: str, limit=100) -> list[Email]:
+        """Full-text search using FTS5 if available, falling back to LIKE."""
+        try:
+            rows = self.con.execute(
+                "SELECT e.payload FROM emails_fts f JOIN emails e ON f.rowid = e.rowid "
+                "WHERE emails_fts MATCH ? ORDER BY rank LIMIT ?",
+                (query, limit)
+            ).fetchall()
+            return [Email.model_validate_json(r['payload']) for r in rows]
+        except Exception:
+            # FTS5 not available, fall back to LIKE search
+            like_q = f"%{query}%"
+            rows = self.con.execute(
+                "SELECT payload FROM emails WHERE sender_col LIKE ? OR subject_col LIKE ? LIMIT ?",
+                (like_q, like_q, limit)
+            ).fetchall()
+            return [Email.model_validate_json(r['payload']) for r in rows]
+
+    def emails_by_thread(self, thread_id: str) -> list[Email]:
+        """Fetch emails in a thread, ordered chronologically."""
+        rows = self.con.execute(
+            'SELECT payload FROM emails WHERE thread_id=? ORDER BY received_at_col ASC',
+            (thread_id,)
+        ).fetchall()
+        return [Email.model_validate_json(r['payload']) for r in rows]
+
+    def _update_fts_batch(self, email_ids: list[str]):
+        """Update FTS5 index for a batch of email IDs."""
+        try:
+            for eid in email_ids:
+                email = self.email(eid)
+                if email:
+                    # Delete old FTS entry if exists, then insert
+                    self.con.execute(
+                        "INSERT INTO emails_fts(rowid, subject, sender, body) "
+                        "SELECT rowid, ?, ?, ? FROM emails WHERE id=?",
+                        (email.subject, email.sender, email.body[:5000], eid)
+                    )
+            self.con.commit()
+        except Exception:
+            pass  # FTS5 not available
+
+    # ──────────────────────────────────────────────
+    # ANALYSIS
+    # ──────────────────────────────────────────────
+
+    def cached_analysis(self, email_id: str, fingerprint: str, model: str, schema='1'):
         r = self.con.execute(
             'SELECT payload FROM email_analysis WHERE email_id=? AND content_hash=? AND model_name=? AND schema_version=?',
             (email_id, fingerprint, model, schema)
         ).fetchone()
         return EmailAnalysis.model_validate_json(r['payload']) if r else None
 
-    def save_analysis(self, email_id, fingerprint, model, analysis, schema='1'):
+    def save_analysis(self, email_id: str, fingerprint: str, model: str, analysis: EmailAnalysis, schema='1'):
+        """Save analysis result. Does NOT create tasks — that is TaskDerivationService's job."""
         self.con.execute(
             'INSERT INTO email_analysis (email_id, content_hash, model_name, schema_version, payload, analyzed_at) '
             'VALUES(?,?,?,?,?,?) ON CONFLICT(email_id) DO UPDATE SET '
@@ -48,51 +147,36 @@ class Repository:
             'payload=excluded.payload, analyzed_at=excluded.analyzed_at',
             (email_id, fingerprint, model, schema, analysis.model_dump_json(), datetime.now(timezone.utc).isoformat())
         )
-        # Extract and save tasks derived from this email analysis
-        email = self.email(email_id)
-        if email:
-            # Action items -> tasks
-            for idx, item in enumerate(analysis.action_items):
-                t_id = f"task_{email_id}_{idx}"
-                if not self.task(t_id):
-                    t = Task(
-                        id=t_id,
-                        source_email_id=email_id,
-                        source_thread_id=email.thread_id,
-                        title=item.description,
-                        description=f"Owner: {item.owner}" if item.owner else None,
-                        due_at=item.deadline,
-                        priority=analysis.priority.value,
-                        status='pending',
-                        created_at=datetime.now(timezone.utc).isoformat()
-                    )
-                    self.save_task(t)
-            # Deadlines -> tasks
-            for idx, dl in enumerate(analysis.deadlines):
-                d_id = f"deadline_{email_id}_{idx}"
-                if not self.task(d_id):
-                    t = Task(
-                        id=d_id,
-                        source_email_id=email_id,
-                        source_thread_id=email.thread_id,
-                        title=dl.description,
-                        description=f"Confidence: {dl.confidence}",
-                        due_at=dl.due_at,
-                        priority=analysis.priority.value,
-                        status='pending',
-                        created_at=datetime.now(timezone.utc).isoformat()
-                    )
-                    self.save_task(t)
         self.con.commit()
 
-    def cached_briefing(self, fingerprint, model, schema='1'):
+    def all_analyses_with_emails(self, model: str, schema='1') -> list[tuple[Email, EmailAnalysis]]:
+        """Load all email+analysis pairs efficiently in a single query."""
+        rows = self.con.execute(
+            'SELECT e.payload AS email_payload, a.payload AS analysis_payload '
+            'FROM emails e JOIN email_analysis a ON e.id = a.email_id '
+            'WHERE a.model_name=? AND a.schema_version=?',
+            (model, schema)
+        ).fetchall()
+        results = []
+        for r in rows:
+            email = Email.model_validate_json(r['email_payload'])
+            analysis = EmailAnalysis.model_validate_json(r['analysis_payload'])
+            email.analysis = analysis
+            results.append((email, analysis))
+        return results
+
+    # ──────────────────────────────────────────────
+    # BRIEFINGS
+    # ──────────────────────────────────────────────
+
+    def cached_briefing(self, fingerprint: str, model: str, schema='1'):
         row = self.con.execute(
             'SELECT payload FROM inbox_briefing WHERE fingerprint=? AND model_name=? AND schema_version=?',
             (fingerprint, model, schema)
         ).fetchone()
         return InboxBriefing.model_validate_json(row['payload']) if row else None
 
-    def save_briefing(self, fingerprint, model, briefing, schema='1'):
+    def save_briefing(self, fingerprint: str, model: str, briefing: InboxBriefing, schema='1'):
         self.con.execute(
             'INSERT INTO inbox_briefing (fingerprint, model_name, schema_version, payload, generated_at) '
             'VALUES(?,?,?,?,?) ON CONFLICT(fingerprint) DO UPDATE SET '
@@ -102,7 +186,10 @@ class Repository:
         )
         self.con.commit()
 
-    # --- ACCOUNTS ---
+    # ──────────────────────────────────────────────
+    # ACCOUNTS
+    # ──────────────────────────────────────────────
+
     def save_account(self, account: EmailAccount):
         self.con.execute(
             'INSERT INTO accounts (id, provider, email_address, display_name, connection_status, last_sync_at, sync_cursor, created_at, updated_at) '
@@ -130,7 +217,7 @@ class Repository:
             for r in rows
         ]
 
-    def account(self, account_id):
+    def account(self, account_id: str):
         r = self.con.execute('SELECT * FROM accounts WHERE id=?', (account_id,)).fetchone()
         if not r:
             return None
@@ -141,12 +228,15 @@ class Repository:
             created_at=r['created_at'], updated_at=r['updated_at']
         )
 
-    def delete_account(self, account_id):
+    def delete_account(self, account_id: str):
         self.con.execute('DELETE FROM accounts WHERE id=?', (account_id,))
         self.con.commit()
 
-    # --- CREDENTIALS ---
-    def save_credentials(self, account_id, encrypted_refresh_token, encrypted_access_token, expires_at):
+    # ──────────────────────────────────────────────
+    # CREDENTIALS
+    # ──────────────────────────────────────────────
+
+    def save_credentials(self, account_id: str, encrypted_refresh_token, encrypted_access_token, expires_at: str):
         self.con.execute(
             'INSERT INTO credentials (account_id, encrypted_refresh_token, encrypted_access_token, expires_at) '
             'VALUES (?,?,?,?) ON CONFLICT(account_id) DO UPDATE SET '
@@ -156,48 +246,195 @@ class Repository:
         )
         self.con.commit()
 
-    def credentials(self, account_id):
+    def credentials(self, account_id: str):
         r = self.con.execute(
             'SELECT encrypted_refresh_token, encrypted_access_token, expires_at FROM credentials WHERE account_id=?',
             (account_id,)
         ).fetchone()
         return dict(r) if r else None
 
-    # --- TASKS ---
+    # ──────────────────────────────────────────────
+    # TASKS
+    # ──────────────────────────────────────────────
+
     def save_task(self, task: Task):
         self.con.execute(
-            'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, priority, status, created_at) '
-            'VALUES (?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+            'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, priority, status, created_at, '
+            'derivation_version, confidence, fingerprint) '
+            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
             'title=excluded.title, description=excluded.description, due_at=excluded.due_at, '
-            'priority=excluded.priority, status=excluded.status',
+            'priority=excluded.priority, status=excluded.status, '
+            'derivation_version=excluded.derivation_version, confidence=excluded.confidence, fingerprint=excluded.fingerprint',
             (
                 task.id, task.source_email_id, task.source_thread_id, task.title, task.description,
-                task.due_at, task.priority, task.status, task.created_at or datetime.now(timezone.utc).isoformat()
+                task.due_at, task.priority, task.status,
+                task.created_at or datetime.now(timezone.utc).isoformat(),
+                getattr(task, 'derivation_version', '1'),
+                getattr(task, 'confidence', 'medium'),
+                getattr(task, 'fingerprint', None)
             )
         )
         self.con.commit()
 
-    def tasks(self):
-        rows = self.con.execute('SELECT * FROM tasks ORDER BY created_at DESC').fetchall()
-        return [
-            Task(
-                id=r['id'], source_email_id=r['source_email_id'], source_thread_id=r['source_thread_id'],
-                title=r['title'], description=r['description'], due_at=r['due_at'],
-                priority=r['priority'], status=r['status'], created_at=r['created_at']
-            )
-            for r in rows
-        ]
+    def save_tasks_batch(self, tasks_list: list[Task]):
+        """Save multiple tasks in a single transaction."""
+        with transaction(self.con) as _:
+            for task in tasks_list:
+                self.con.execute(
+                    'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, priority, status, created_at, '
+                    'derivation_version, confidence, fingerprint) '
+                    'VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+                    'title=excluded.title, description=excluded.description, due_at=excluded.due_at, '
+                    'priority=excluded.priority, status=excluded.status, '
+                    'derivation_version=excluded.derivation_version, confidence=excluded.confidence, fingerprint=excluded.fingerprint',
+                    (
+                        task.id, task.source_email_id, task.source_thread_id, task.title, task.description,
+                        task.due_at, task.priority, task.status,
+                        task.created_at or datetime.now(timezone.utc).isoformat(),
+                        getattr(task, 'derivation_version', '2'),
+                        getattr(task, 'confidence', 'medium'),
+                        getattr(task, 'fingerprint', None)
+                    )
+                )
 
-    def task(self, task_id):
+    def tasks(self, status=None):
+        if status:
+            rows = self.con.execute(
+                'SELECT * FROM tasks WHERE status=? ORDER BY created_at DESC', (status,)
+            ).fetchall()
+        else:
+            rows = self.con.execute('SELECT * FROM tasks ORDER BY created_at DESC').fetchall()
+        return [self._task_from_row(r) for r in rows]
+
+    def tasks_by_thread(self, thread_id: str) -> list[Task]:
+        """Get tasks linked to a specific thread."""
+        rows = self.con.execute(
+            'SELECT * FROM tasks WHERE source_thread_id=?', (thread_id,)
+        ).fetchall()
+        return [self._task_from_row(r) for r in rows]
+
+    def tasks_by_email(self, email_id: str) -> list[Task]:
+        """Get tasks linked to a specific email."""
+        rows = self.con.execute(
+            'SELECT * FROM tasks WHERE source_email_id=?', (email_id,)
+        ).fetchall()
+        return [self._task_from_row(r) for r in rows]
+
+    def task(self, task_id: str):
         r = self.con.execute('SELECT * FROM tasks WHERE id=?', (task_id,)).fetchone()
-        if not r:
-            return None
+        return self._task_from_row(r) if r else None
+
+    def task_exists_by_fingerprint(self, fingerprint: str) -> bool:
+        """Check if a task with this fingerprint already exists."""
+        r = self.con.execute('SELECT 1 FROM tasks WHERE fingerprint=? LIMIT 1', (fingerprint,)).fetchone()
+        return r is not None
+
+    def delete_task(self, task_id: str):
+        self.con.execute('DELETE FROM tasks WHERE id=?', (task_id,))
+        self.con.commit()
+
+    def delete_tasks_by_derivation_version(self, version: str):
+        """Delete all tasks created by a specific derivation version."""
+        self.con.execute('DELETE FROM tasks WHERE derivation_version=?', (version,))
+        self.con.commit()
+
+    def _task_from_row(self, r) -> Task:
         return Task(
             id=r['id'], source_email_id=r['source_email_id'], source_thread_id=r['source_thread_id'],
             title=r['title'], description=r['description'], due_at=r['due_at'],
             priority=r['priority'], status=r['status'], created_at=r['created_at']
         )
 
-    def delete_task(self, task_id):
-        self.con.execute('DELETE FROM tasks WHERE id=?', (task_id,))
+    # ──────────────────────────────────────────────
+    # JOBS
+    # ──────────────────────────────────────────────
+
+    def enqueue_job(self, job_id: str, job_type: str, target_id: str, priority: int = 50):
+        """Enqueue a background job. Idempotent — skips if job already exists."""
+        self.con.execute(
+            'INSERT OR IGNORE INTO jobs (id, job_type, target_id, priority, status, created_at) '
+            'VALUES (?,?,?,?,?,?)',
+            (job_id, job_type, target_id, priority, 'queued', datetime.now(timezone.utc).isoformat())
+        )
+        self.con.commit()
+
+    def next_job(self, job_type: str = None):
+        """Get the next queued job by priority."""
+        if job_type:
+            r = self.con.execute(
+                'SELECT * FROM jobs WHERE status="queued" AND job_type=? ORDER BY priority DESC, created_at ASC LIMIT 1',
+                (job_type,)
+            ).fetchone()
+        else:
+            r = self.con.execute(
+                'SELECT * FROM jobs WHERE status="queued" ORDER BY priority DESC, created_at ASC LIMIT 1'
+            ).fetchone()
+        return dict(r) if r else None
+
+    def update_job_status(self, job_id: str, status: str, error_code: str = None, error_message: str = None):
+        now = datetime.now(timezone.utc).isoformat()
+        if status == 'running':
+            self.con.execute(
+                'UPDATE jobs SET status=?, started_at=?, attempts=attempts+1 WHERE id=?',
+                (status, now, job_id)
+            )
+        elif status in ('succeeded', 'failed', 'retryable_failed'):
+            self.con.execute(
+                'UPDATE jobs SET status=?, completed_at=?, error_code=?, error_message=? WHERE id=?',
+                (status, now, error_code, error_message, job_id)
+            )
+        else:
+            self.con.execute('UPDATE jobs SET status=? WHERE id=?', (status, job_id))
+        self.con.commit()
+
+    def pending_job_count(self, job_type: str = None) -> int:
+        if job_type:
+            return self.con.execute(
+                'SELECT COUNT(*) FROM jobs WHERE status IN ("queued","running") AND job_type=?', (job_type,)
+            ).fetchone()[0]
+        return self.con.execute(
+            'SELECT COUNT(*) FROM jobs WHERE status IN ("queued","running")'
+        ).fetchone()[0]
+
+    def completed_job_count(self, job_type: str = None) -> int:
+        if job_type:
+            return self.con.execute(
+                'SELECT COUNT(*) FROM jobs WHERE status="succeeded" AND job_type=?', (job_type,)
+            ).fetchone()[0]
+        return self.con.execute(
+            'SELECT COUNT(*) FROM jobs WHERE status="succeeded"'
+        ).fetchone()[0]
+
+    def failed_job_count(self, job_type: str = None) -> int:
+        if job_type:
+            return self.con.execute(
+                'SELECT COUNT(*) FROM jobs WHERE status IN ("failed","retryable_failed") AND job_type=?', (job_type,)
+            ).fetchone()[0]
+        return self.con.execute(
+            'SELECT COUNT(*) FROM jobs WHERE status IN ("failed","retryable_failed")'
+        ).fetchone()[0]
+
+    def reset_retryable_jobs(self):
+        """Reset retryable_failed jobs back to queued if under max_attempts."""
+        self.con.execute(
+            'UPDATE jobs SET status="queued" WHERE status="retryable_failed" AND attempts < max_attempts'
+        )
+        self.con.commit()
+
+    # ──────────────────────────────────────────────
+    # INFERENCE METRICS
+    # ──────────────────────────────────────────────
+
+    def record_inference_metric(self, job_id: str, model: str, total_ms: float = 0,
+                                 load_ms: float = 0, prompt_eval_ms: float = 0,
+                                 eval_ms: float = 0, prompt_tokens: int = 0,
+                                 output_tokens: int = 0, cache_hit: bool = False,
+                                 success: bool = True):
+        self.con.execute(
+            'INSERT INTO inference_metrics (job_id, model, total_ms, load_ms, prompt_eval_ms, eval_ms, '
+            'prompt_tokens, output_tokens, cache_hit, success, recorded_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)',
+            (job_id, model, total_ms, load_ms, prompt_eval_ms, eval_ms,
+             prompt_tokens, output_tokens, int(cache_hit), int(success),
+             datetime.now(timezone.utc).isoformat())
+        )
         self.con.commit()

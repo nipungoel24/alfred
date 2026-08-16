@@ -82,7 +82,8 @@ def test_briefing_deadline_aggregation():
         "important_updates": [],
         "can_wait_or_review_later": []
     }
-    mock_client.generate.return_value = json.dumps(briefing_data)
+    from backend.app.ai.ollama_client import InferenceMetrics
+    mock_client.generate.return_value = (json.dumps(briefing_data), InferenceMetrics())
     
     ai = AIService(mock_client, "qwen3:4b")
     
@@ -107,7 +108,7 @@ def test_ollama_empty_response():
     mock_client.post.return_value = mock_response
     
     client = OllamaClient("http://fake", client=mock_client)
-    res = asyncio.run(client.generate("qwen3:4b", "Prompt", None))
+    res, metrics = asyncio.run(client.generate("qwen3:4b", "Prompt", None))
     assert res == ""
 
 # 6. Malformed JSON Response from Ollama
@@ -177,7 +178,8 @@ def test_api_endpoint_flows(tmp_path):
     mock_repo = Repository(temp_db)
     
     mock_ai_service = AsyncMock()
-    mock_ai_service.analyze_email.return_value = get_analysis()
+    from backend.app.ai.ollama_client import InferenceMetrics
+    mock_ai_service.analyze_email.return_value = (get_analysis(), InferenceMetrics())
     mock_ai_service.draft_reply.return_value = "Drafted response content."
     
     mock_briefing = InboxBriefing(
@@ -255,7 +257,8 @@ def test_api_endpoint_flows(tmp_path):
 def test_prompt_injection_safety():
     from backend.app.ai.service import AIService
     mock_client = AsyncMock()
-    mock_client.generate.return_value = get_analysis().model_dump_json()
+    from backend.app.ai.ollama_client import InferenceMetrics
+    mock_client.generate.return_value = (get_analysis().model_dump_json(), InferenceMetrics())
     ai_service = AIService(mock_client, "mock_model")
     
     malicious_email = Email(

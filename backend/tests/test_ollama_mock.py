@@ -3,7 +3,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import json
 import httpx
 import asyncio
-from backend.app.ai.ollama_client import OllamaClient, OllamaUnavailable
+from backend.app.ai.ollama_client import OllamaClient, OllamaUnavailable, InferenceMetrics
 from backend.app.ai.service import AIService
 from backend.app.schemas import Email, EmailAnalysis, Category, Priority
 
@@ -22,7 +22,7 @@ def test_ollama_client_sends_correct_payload():
     client = OllamaClient("http://fakeurl", client=mock_client)
     schema = {"type": "object", "properties": {"french": {"type": "string"}}, "required": ["french"]}
     
-    res = asyncio.run(client.generate("qwen3:4b", "Translate hello", schema))
+    res, metrics = asyncio.run(client.generate("qwen3:4b", "Translate hello", schema))
 
     assert res == '{"french": "bonjour"}'
     mock_client.post.assert_called_once_with(
@@ -33,6 +33,7 @@ def test_ollama_client_sends_correct_payload():
             "format": schema,
             "stream": False,
             "think": False,
+            "keep_alive": "30m",
             "options": {"temperature": 0.0}
         }
     )
@@ -50,7 +51,7 @@ def test_ollama_client_empty_response():
     mock_client.post.return_value = mock_response
 
     client = OllamaClient("http://fakeurl", client=mock_client)
-    res = asyncio.run(client.generate("qwen3:4b", "Translate hello", {}))
+    res, metrics = asyncio.run(client.generate("qwen3:4b", "Translate hello", {}))
     assert res == ""
 
 def test_ollama_client_http_error():
@@ -79,9 +80,9 @@ def test_ai_service_analyze_email_success():
     client = OllamaClient("http://fakeurl", client=mock_client)
     service = AIService(client, "qwen3:4b")
 
-    with patch.object(client, 'generate', return_value=json.dumps(analysis_data)) as mock_gen:
+    with patch.object(client, 'generate', return_value=(json.dumps(analysis_data), InferenceMetrics())) as mock_gen:
         email = Email(id="1", sender="a@b.com", subject="Subj", body="Body")
-        res = asyncio.run(service.analyze_email(email))
+        res, metrics = asyncio.run(service.analyze_email(email))
         assert isinstance(res, EmailAnalysis)
         assert res.short_summary == "Test Summary"
         assert res.priority == Priority.high

@@ -1,7 +1,16 @@
-import csv, io, uuid, secrets, hashlib, base64
+"""Alfred local FastAPI application.
+
+Routes are organized here for simplicity. The architecture separates:
+- Routes (this file): HTTP request/response handling
+- Services: Business logic (AI analysis, task derivation)
+- Infrastructure: External system clients (Ollama, Gmail)
+- Repository: Data access layer
+"""
+import csv, io, uuid, secrets, hashlib, base64, json, asyncio
+from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
-from fastapi import FastAPI, UploadFile, File, HTTPException, Query
-from fastapi.responses import JSONResponse, HTMLResponse
+from fastapi import FastAPI, UploadFile, File, HTTPException, Query, Request
+from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .db.repositories import Repository
@@ -10,18 +19,141 @@ from .mail.normalizer import normalized_email
 from .mail.fingerprint import content_fingerprint
 from .mail.briefing_fingerprint import briefing_fingerprint, BRIEFING_SCHEMA_VERSION
 from .mail.providers.gmail import GmailProvider
-from .ai.ollama_client import OllamaClient, OllamaUnavailable
+from .ai.ollama_client import OllamaClient, OllamaUnavailable, OllamaTimeout, OllamaInvalidResponse, OllamaModelMissing
 from .ai.service import AIService
+from .services.task_derivation import derive_tasks, rebuild_tasks_from_analyses, DERIVATION_VERSION
 from .schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task
 
 settings = get_settings()
-repo = Repository(settings.database_path)
-ai = AIService(OllamaClient(settings.ollama_base_url), settings.ollama_model)
 
-# Instantiate Gmail provider
+# ── Shared state ──
+repo = Repository(settings.database_path)
+ollama_client = OllamaClient(settings.ollama_base_url)
+ai = AIService(ollama_client, settings.ollama_model)
 gmail_provider = GmailProvider(settings.gmail_client_id, settings.gmail_client_secret)
 
 OAUTH_STATES = {}  # state -> {"verifier": verifier, "redirect_uri": redirect_uri}
+
+# ── Analysis progress events (SSE) ──
+progress_subscribers: list[asyncio.Queue] = []
+
+def _broadcast_progress(event: dict):
+    """Send a progress event to all SSE subscribers."""
+    for q in progress_subscribers:
+        try:
+            q.put_nowait(event)
+        except asyncio.QueueFull:
+            pass
+
+
+# ── Background analysis worker ──
+analysis_queue: asyncio.Queue = asyncio.Queue()
+_worker_task: asyncio.Task | None = None
+_worker_running = False
+
+async def _analysis_worker():
+    """Background worker that processes analysis jobs from the queue."""
+    global _worker_running
+    _worker_running = True
+    consecutive_failures = 0
+    max_consecutive_failures = 5
+
+    while _worker_running:
+        try:
+            email_id = await asyncio.wait_for(analysis_queue.get(), timeout=1.0)
+        except asyncio.TimeoutError:
+            continue
+        except asyncio.CancelledError:
+            break
+
+        e = repo.email(email_id)
+        if not e:
+            analysis_queue.task_done()
+            continue
+
+        fp = content_fingerprint(e)
+        cached = repo.cached_analysis(e.id, fp, settings.ollama_model)
+        if cached:
+            # Already analyzed, derive tasks and skip
+            _derive_and_save_tasks(e, cached)
+            _broadcast_progress({
+                "type": "analysis_complete", "email_id": e.id, "cached": True,
+                "pending": analysis_queue.qsize()
+            })
+            analysis_queue.task_done()
+            consecutive_failures = 0
+            continue
+
+        try:
+            analysis, metrics = await ai.analyze_email(e)
+            repo.save_analysis(e.id, fp, settings.ollama_model, analysis)
+
+            # Record inference metrics
+            repo.record_inference_metric(
+                job_id=f"analyze_{e.id}", model=settings.ollama_model,
+                total_ms=metrics.total_ms, load_ms=metrics.load_ms,
+                prompt_eval_ms=metrics.prompt_eval_ms, eval_ms=metrics.eval_ms,
+                prompt_tokens=metrics.prompt_tokens, output_tokens=metrics.output_tokens,
+                cache_hit=False, success=True
+            )
+
+            # Derive tasks from analysis
+            _derive_and_save_tasks(e, analysis)
+
+            _broadcast_progress({
+                "type": "analysis_complete", "email_id": e.id, "cached": False,
+                "pending": analysis_queue.qsize(),
+                "total_ms": round(metrics.total_ms, 1),
+            })
+            consecutive_failures = 0
+
+        except (OllamaUnavailable, OllamaTimeout) as ex:
+            consecutive_failures += 1
+            _broadcast_progress({
+                "type": "analysis_error", "email_id": e.id,
+                "error": type(ex).__name__,
+                "pending": analysis_queue.qsize(),
+            })
+            if consecutive_failures >= max_consecutive_failures:
+                _broadcast_progress({
+                    "type": "worker_paused",
+                    "reason": f"Ollama unavailable after {max_consecutive_failures} consecutive failures",
+                    "pending": analysis_queue.qsize(),
+                })
+                # Wait before retrying
+                await asyncio.sleep(30)
+                consecutive_failures = 0
+
+        except (OllamaInvalidResponse, OllamaModelMissing) as ex:
+            _broadcast_progress({
+                "type": "analysis_error", "email_id": e.id,
+                "error": type(ex).__name__,
+                "pending": analysis_queue.qsize(),
+            })
+
+        except Exception:
+            _broadcast_progress({
+                "type": "analysis_error", "email_id": e.id,
+                "error": "UNKNOWN",
+                "pending": analysis_queue.qsize(),
+            })
+
+        finally:
+            analysis_queue.task_done()
+
+
+def _derive_and_save_tasks(email: Email, analysis: EmailAnalysis):
+    """Derive tasks from analysis and persist them, deduplicating."""
+    tasks = derive_tasks(email, analysis)
+    new_tasks = []
+    for t in tasks:
+        fp = getattr(t, 'fingerprint', None)
+        if fp and repo.task_exists_by_fingerprint(fp):
+            continue
+        new_tasks.append(t)
+    if new_tasks:
+        repo.save_tasks_batch(new_tasks)
+
 
 def generate_pkce_pair():
     verifier = secrets.token_urlsafe(64)
@@ -29,27 +161,88 @@ def generate_pkce_pair():
     challenge = base64.urlsafe_b64encode(sha256_hash).decode('ascii').replace('=', '')
     return verifier, challenge
 
-app = FastAPI(title='Alfred local API')
+
+# ── Lifespan ──
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global _worker_task, _worker_running
+
+    # Startup: preload model and start worker
+    try:
+        await ai.preload()
+    except Exception:
+        pass  # Non-fatal: first inference will be slower
+
+    # Rebuild tasks from cached analyses if needed (migration from v1 to v2)
+    try:
+        rebuilt = rebuild_tasks_from_analyses(repo, settings.ollama_model)
+        if rebuilt > 0:
+            print(f"[Alfred] Rebuilt {rebuilt} tasks with derivation v{DERIVATION_VERSION}")
+    except Exception:
+        pass
+
+    # Start background analysis worker
+    _worker_task = asyncio.create_task(_analysis_worker())
+
+    yield
+
+    # Shutdown
+    _worker_running = False
+    if _worker_task:
+        _worker_task.cancel()
+        try:
+            await _worker_task
+        except asyncio.CancelledError:
+            pass
+    repo.close()
+
+
+app = FastAPI(title='Alfred local API', lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:5173', 'tauri://localhost'],
+    allow_origins=['http://localhost:5173', 'http://127.0.0.1:5173', 'tauri://localhost'],
     allow_methods=['*'],
     allow_headers=['*']
 )
 
+
+# ── Error handlers ──
 @app.exception_handler(OllamaUnavailable)
-async def ollama_error(_, e):
+async def ollama_unavailable_handler(_, e):
     return JSONResponse(
         status_code=503,
         content={'error': {'code': 'OLLAMA_UNAVAILABLE', 'message': str(e), 'details': {'model': settings.ollama_model}}}
     )
 
+@app.exception_handler(OllamaTimeout)
+async def ollama_timeout_handler(_, e):
+    return JSONResponse(
+        status_code=504,
+        content={'error': {'code': 'OLLAMA_TIMEOUT', 'message': str(e), 'details': {'model': settings.ollama_model}}}
+    )
+
+@app.exception_handler(OllamaInvalidResponse)
+async def ollama_invalid_handler(_, e):
+    return JSONResponse(
+        status_code=502,
+        content={'error': {'code': 'OLLAMA_INVALID_RESPONSE', 'message': str(e), 'details': {'model': settings.ollama_model}}}
+    )
+
+@app.exception_handler(OllamaModelMissing)
+async def ollama_model_missing_handler(_, e):
+    return JSONResponse(
+        status_code=503,
+        content={'error': {'code': 'OLLAMA_MODEL_MISSING', 'message': str(e), 'details': {'model': settings.ollama_model}}}
+    )
+
+
+# ── Health & Config ──
 @app.get('/health')
 async def health():
     try:
         await ai.health()
         return {'status': 'ok', 'ai': 'ready'}
-    except OllamaUnavailable:
+    except (OllamaUnavailable, OllamaTimeout):
         return {'status': 'ok', 'ai': 'unavailable'}
 
 @app.get('/api/config')
@@ -60,7 +253,8 @@ def config():
         'database_path': str(settings.database_path)
     }
 
-# --- EMAIL ACCOUNTS ---
+
+# ── Accounts ──
 @app.get('/api/accounts')
 def get_accounts():
     return repo.accounts()
@@ -91,39 +285,32 @@ async def gmail_callback(code: str = Query(...), state: str = Query(...), redire
         )
     actual_redirect = redirect_uri or state_data["redirect_uri"]
     verifier = state_data["verifier"]
-    
+
     try:
-        # Exchange code for tokens
         tokens = await gmail_provider.exchange_code(code, actual_redirect, verifier)
         access_token = tokens["access_token"]
         refresh_token = tokens.get("refresh_token", "")
         expires_in = tokens.get("expires_in", 3600)
-        
-        # Query user profile email
+
         profile = await gmail_provider.get_user_info(access_token)
         email_address = profile["email"]
         name = profile.get("name", email_address.split("@")[0])
-        
+
         account_id = f"gmail_{email_address}"
-        
-        # Save credentials securely
+
         enc_access = encrypt_token(access_token)
         enc_refresh = encrypt_token(refresh_token)
         expires_at = (datetime.now(timezone.utc) + timedelta(seconds=expires_in)).isoformat()
-        
+
         account = EmailAccount(
-            id=account_id,
-            provider="gmail",
-            email_address=email_address,
-            display_name=name,
-            connection_status="connected",
-            last_sync_at=None,
-            sync_cursor=None
+            id=account_id, provider="gmail", email_address=email_address,
+            display_name=name, connection_status="connected",
+            last_sync_at=None, sync_cursor=None
         )
-        
+
         repo.save_account(account)
         repo.save_credentials(account_id, enc_refresh, enc_access, expires_at)
-        
+
         html_content = """
         <html>
         <head>
@@ -138,7 +325,6 @@ async def gmail_callback(code: str = Query(...), state: str = Query(...), redire
             <h1>Alfred Successfully Connected!</h1>
             <p>Gmail account authorization was successful. You can close this window now and return to Alfred.</p>
             <script>
-                // Post success message to opener if applicable
                 if (window.opener) {
                     window.opener.postMessage('auth_success', '*');
                 }
@@ -147,40 +333,11 @@ async def gmail_callback(code: str = Query(...), state: str = Query(...), redire
         </html>
         """
         return HTMLResponse(content=html_content, status_code=200)
-    except Exception as e:
+    except Exception:
         return HTMLResponse(
-            content=f"<html><body><h1>Authentication Failed</h1><p>{str(e)}</p></body></html>",
+            content="<html><body><h1>Authentication Failed</h1><p>An error occurred during OAuth. Please try again.</p></body></html>",
             status_code=500
         )
-
-@app.post('/api/accounts/{account_id}/sync')
-async def sync_account(account_id: str, load_older: bool = Query(False)):
-    account = repo.account(account_id)
-    if not account:
-        raise HTTPException(status_code=404, detail="Email account not found")
-        
-    creds = repo.credentials(account_id)
-    if not creds:
-        raise HTTPException(status_code=400, detail="OAuth credentials missing for this account")
-        
-    # Decrypt token secrets
-    access_token = decrypt_token(creds["encrypted_access_token"])
-    refresh_token = decrypt_token(creds["encrypted_refresh_token"])
-    
-    cred_payload = {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "expires_at": creds["expires_at"]
-    }
-    
-    try:
-        if account.provider == "gmail":
-            res = await gmail_provider.sync_messages(account, cred_payload, repo, load_older=load_older)
-            return res
-        else:
-            raise HTTPException(status_code=400, detail="Unsupported account provider")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Sync error: {str(e)}")
 
 @app.delete('/api/accounts/{account_id}')
 def delete_account(account_id: str):
@@ -190,14 +347,98 @@ def delete_account(account_id: str):
     repo.delete_account(account_id)
     return {"status": "deleted"}
 
-# --- EMAILS ---
+
+# ── Sync ──
+@app.post('/api/accounts/{account_id}/sync')
+async def sync_account(account_id: str, load_older: bool = Query(False)):
+    account = repo.account(account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Email account not found")
+
+    creds = repo.credentials(account_id)
+    if not creds:
+        raise HTTPException(status_code=400, detail="OAuth credentials missing for this account")
+
+    access_token = decrypt_token(creds["encrypted_access_token"])
+    refresh_token = decrypt_token(creds["encrypted_refresh_token"])
+
+    cred_payload = {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "expires_at": creds["expires_at"]
+    }
+
+    try:
+        if account.provider == "gmail":
+            res = await gmail_provider.sync_messages(account, cred_payload, repo, load_older=load_older)
+
+            # Enqueue analysis jobs for unanalyzed emails (non-blocking)
+            imported = res.get("imported", 0)
+            if imported > 0:
+                all_emails = repo.emails(account_id)
+                enqueued = 0
+                for e in all_emails:
+                    fp = content_fingerprint(e)
+                    if not repo.cached_analysis(e.id, fp, settings.ollama_model):
+                        await analysis_queue.put(e.id)
+                        enqueued += 1
+                res["analysis_enqueued"] = enqueued
+
+            return res
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported account provider")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Sync error: {str(e)}")
+
+
+# ── Analysis Progress (SSE) ──
+@app.get('/api/analysis/progress')
+async def analysis_progress():
+    """Server-Sent Events endpoint for real-time analysis progress."""
+    q: asyncio.Queue = asyncio.Queue(maxsize=100)
+    progress_subscribers.append(q)
+
+    async def event_stream():
+        try:
+            # Send initial status
+            yield f"data: {json.dumps({'type': 'status', 'pending': analysis_queue.qsize()})}\n\n"
+            while True:
+                try:
+                    event = await asyncio.wait_for(q.get(), timeout=15.0)
+                    yield f"data: {json.dumps(event)}\n\n"
+                except asyncio.TimeoutError:
+                    # Send keepalive
+                    yield f"data: {json.dumps({'type': 'heartbeat', 'pending': analysis_queue.qsize()})}\n\n"
+        except asyncio.CancelledError:
+            pass
+        finally:
+            progress_subscribers.remove(q)
+
+    return StreamingResponse(event_stream(), media_type="text/event-stream")
+
+@app.get('/api/analysis/status')
+def analysis_status():
+    """Get current analysis queue status."""
+    return {
+        "pending": analysis_queue.qsize(),
+        "worker_running": _worker_running,
+    }
+
+
+# ── Emails ──
 @app.get('/api/emails')
 def get_emails(q: str | None = None, priority: str | None = None, needs_reply: bool | None = None, account_id: str | None = None):
-    result = repo.emails(account_id)
+    if q:
+        # Use FTS5 or SQL search
+        result = repo.search_emails(q)
+    else:
+        result = repo.emails(account_id)
+
+    # Attach cached analyses
     for e in result:
         e.analysis = repo.cached_analysis(e.id, content_fingerprint(e), settings.ollama_model)
-    if q:
-        result = [e for e in result if q.lower() in (e.subject + ' ' + e.sender + ' ' + e.body).lower()]
+
+    # Apply filters
     if priority:
         result = [e for e in result if e.analysis and e.analysis.priority.value == priority]
     if needs_reply is not None:
@@ -217,15 +458,18 @@ async def import_csv(file: UploadFile = File(...)):
     text = (await file.read()).decode('utf-8-sig', errors='replace')
     rows = list(csv.DictReader(io.StringIO(text)))
     seen = set()
-    count = 0
+    batch = []
     for i, row in enumerate(rows):
         e = normalized_email(row, i)
         if e.id in seen:
             continue
         seen.add(e.id)
-        repo.upsert_email(e, content_fingerprint(e))
-        count += 1
-    return {'imported': count, 'skipped_duplicates': len(rows) - count}
+        batch.append((e, content_fingerprint(e)))
+
+    if batch:
+        repo.upsert_emails_batch(batch)
+
+    return {'imported': len(batch), 'skipped_duplicates': len(rows) - len(batch)}
 
 @app.post('/api/emails/{email_id}/analyze')
 async def analyze(email_id: str):
@@ -236,35 +480,44 @@ async def analyze(email_id: str):
     cached = repo.cached_analysis(e.id, fp, settings.ollama_model)
     if cached:
         return {'analysis': cached, 'cached': True}
-    analysis = await ai.analyze_email(e)
+
+    analysis, metrics = await ai.analyze_email(e)
     repo.save_analysis(e.id, fp, settings.ollama_model, analysis)
+
+    # Derive tasks
+    _derive_and_save_tasks(e, analysis)
+
     return {'analysis': analysis, 'cached': False}
 
 @app.post('/api/emails/analyze')
 async def analyze_all():
-    result = []
+    """Enqueue all unanalyzed emails for background analysis."""
+    enqueued = 0
     for e in repo.emails():
-        result.append(await analyze(e.id))
-    return {'processed': len(result), 'cached': sum(x['cached'] for x in result)}
+        fp = content_fingerprint(e)
+        if not repo.cached_analysis(e.id, fp, settings.ollama_model):
+            await analysis_queue.put(e.id)
+            enqueued += 1
+    return {'enqueued': enqueued, 'message': 'Analysis jobs queued for background processing.'}
 
 @app.post('/api/emails/{email_id}/draft')
 async def draft(email_id: str):
     e = repo.email(email_id)
     if not e:
         return JSONResponse(status_code=404, content={'error': {'code': 'EMAIL_NOT_FOUND', 'message': 'Email was not found.', 'details': {}}})
-    
-    # Extract bounding thread history
+
+    # Use efficient thread query instead of loading all emails
     thread_emails = []
     if e.thread_id:
-        all_emails = repo.emails()
-        thread_emails = [x for x in all_emails if x.thread_id == e.thread_id]
-        
+        thread_emails = repo.emails_by_thread(e.thread_id)
+
     draft_reply_text = await ai.draft_reply(e, thread_emails)
     return {'draft': draft_reply_text}
 
-# --- BRIEFINGS ---
+
+# ── Briefings ──
 @app.get('/api/briefing')
-async def briefing():
+async def briefing_get():
     return await generate_briefing()
 
 @app.post('/api/briefing/generate')
@@ -280,7 +533,8 @@ async def generate_briefing():
     repo.save_briefing(fingerprint, settings.ollama_model, generated, BRIEFING_SCHEMA_VERSION)
     return generated
 
-# --- TASKS ---
+
+# ── Tasks ──
 @app.get('/api/tasks')
 def get_tasks():
     return repo.tasks()
