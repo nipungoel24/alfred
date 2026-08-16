@@ -24,6 +24,8 @@ PROMPT_VERSION = "2"
 # Measured: qwen3:4b context is 32K tokens. 2000 chars ≈ 500-700 tokens.
 # Full email body + prompt + schema ≈ 1200 tokens, well within context.
 MAX_BODY_CHARS = 2000
+_BRIEFING_META_LANGUAGE = re.compile(r'\b(the user has (provided|received)|dataset|analy[sz]ed emails?|email messages with detailed)\b', re.I)
+_ISO_TIMESTAMP = re.compile(r'\b\d{4}-\d{2}-\d{2}T\d{2}:\d{2}')
 
 ANALYSIS_PROMPT = '''You are Alfred, a private executive inbox assistant. Analyze exactly one email and return only JSON matching the supplied schema.
 
@@ -88,6 +90,21 @@ def _prepare_body(body: str) -> str:
         text = text[:MAX_BODY_CHARS] + '\n[...truncated]'
     
     return text or "(empty)"
+
+
+def _owner_facing_briefing_summary(urgent: int, high: int, reply: int, deadline_count: int) -> str:
+    """Produce a factual fallback when a small local model describes its input instead of the inbox."""
+    attention = urgent + high
+    sentences = [
+        "Most of your inbox can wait." if attention == 0 else f"{attention} message{' needs' if attention == 1 else 's need'} your attention."
+    ]
+    if urgent:
+        sentences.append(f"Start with {urgent} urgent item{'s' if urgent != 1 else ''}.")
+    if reply:
+        sentences.append(f"{reply} message{' needs' if reply == 1 else 's need'} a reply.")
+    if deadline_count:
+        sentences.append(f"{deadline_count} deadline{' is' if deadline_count == 1 else 's are'} coming up.")
+    return " ".join(sentences)
 
 
 class AIService:
@@ -192,7 +209,11 @@ class AIService:
         
         compact = [item.model_dump(mode='json') for item in items]
         prompt = (
-            'Create an executive inbox briefing from these already-validated compact email analyses. '
+            'You are Alfred, a private executive inbox assistant. Create a concise, direct briefing for the inbox owner '
+            'from the compact analyses below. Write executive_summary in 2-4 short sentences that say what matters first, '
+            'using natural second-person language. Never say "the user has provided", "the dataset", "the analyzed emails", '
+            'or describe the input. Do not include raw ISO timestamps; use only dates or wording already present in the compact data. '
+            'Prioritize explicit actions, deadlines, security, payments, and direct requests; newsletters and promotions can wait. '
             'Do not invent facts or deadlines. Return JSON matching the supplied schema. '
             + json.dumps(compact)
         )
@@ -201,6 +222,10 @@ class AIService:
             self.model, prompt, InboxBriefing.model_json_schema()
         )
         briefing = InboxBriefing.model_validate_json(raw_text)
+        if _BRIEFING_META_LANGUAGE.search(briefing.executive_summary) or _ISO_TIMESTAMP.search(briefing.executive_summary):
+            briefing = briefing.model_copy(update={
+                'executive_summary': _owner_facing_briefing_summary(urgent, high, reply, len(deadlines))
+            })
         
         # Override counts with locally computed values
         return briefing.model_copy(update={

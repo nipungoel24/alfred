@@ -6,7 +6,7 @@ Routes are organized here for simplicity. The architecture separates:
 - Infrastructure: External system clients (Ollama, Gmail)
 - Repository: Data access layer
 """
-import csv, io, uuid, secrets, hashlib, base64, json, asyncio
+import csv, io, uuid, secrets, hashlib, base64, json, asyncio, logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 from fastapi import FastAPI, UploadFile, File, HTTPException, Query, Request
@@ -25,6 +25,7 @@ from .services.task_derivation import derive_tasks, rebuild_tasks_from_analyses,
 from .schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task
 
 settings = get_settings()
+logger = logging.getLogger("alfred.oauth")
 
 # ── Shared state ──
 repo = Repository(settings.database_path)
@@ -286,23 +287,43 @@ async def connect_gmail(redirect_uri: str = Query(...)):
     auth_url = await gmail_provider.get_auth_url(redirect_uri, state, challenge)
     return {"url": auth_url}
 
+def _oauth_callback_page(success: bool) -> HTMLResponse:
+    title = "Gmail connected" if success else "Couldn't connect Gmail"
+    message = (
+        "You can close this window and return to Alfred."
+        if success else "Alfred couldn't complete Google authorization. Return to Alfred and try again."
+    )
+    accent = "#5bd6a0" if success else "#f28b82"
+    status = 200 if success else 400
+    return HTMLResponse(content=f'''<!doctype html><html><head><meta charset="utf-8"><title>Alfred</title>
+    <style>body{{margin:0;min-height:100vh;display:grid;place-items:center;background:#080a12;color:#eaecf5;font:15px "Segoe UI",system-ui,sans-serif}}main{{width:min(440px,calc(100% - 48px));padding:40px;border:1px solid rgba(255,255,255,.1);border-radius:16px;background:rgba(20,24,38,.92);box-shadow:0 18px 48px rgba(0,0,0,.42)}}.brand{{font-weight:800;letter-spacing:.14em;font-size:14px}}.dot{{width:9px;height:9px;border-radius:50%;background:{accent};display:inline-block;margin-right:8px}}h1{{margin:22px 0 10px;font-size:28px}}p{{margin:0;color:#b0b5cc;line-height:1.55}}a{{display:inline-block;margin-top:28px;padding:9px 14px;border-radius:7px;background:#7c6cf2;color:white;text-decoration:none;font-weight:600}}</style></head>
+    <body><main><div class="brand">ALFRED</div><h1><span class="dot"></span>{title}</h1><p>{message}</p><a href="http://localhost:5173">Return to Alfred</a></main>
+    <script>if ({str(success).lower()} && window.opener) window.opener.postMessage('auth_success', '*');</script></body></html>''', status_code=status)
+
+
 @app.get('/api/accounts/gmail/callback')
-async def gmail_callback(code: str = Query(...), state: str = Query(...), redirect_uri: str | None = Query(None)):
+async def gmail_callback(code: str | None = Query(None), state: str | None = Query(None), redirect_uri: str | None = Query(None), error: str | None = Query(None)):
+    if error:
+        logger.warning("oauth_authorization_denied")
+        return _oauth_callback_page(False)
+    if not code or not state:
+        logger.warning("oauth_state_missing")
+        return _oauth_callback_page(False)
     state_data = OAUTH_STATES.pop(state, None)
     if not state_data:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid or expired OAuth state parameter."
-        )
+        logger.warning("oauth_state_invalid")
+        return _oauth_callback_page(False)
     actual_redirect = redirect_uri or state_data["redirect_uri"]
     verifier = state_data["verifier"]
 
+    stage = "token_exchange_failed"
     try:
         tokens = await gmail_provider.exchange_code(code, actual_redirect, verifier)
         access_token = tokens["access_token"]
         refresh_token = tokens.get("refresh_token", "")
         expires_in = tokens.get("expires_in", 3600)
 
+        stage = "profile_request_failed"
         profile = await gmail_provider.get_user_info(access_token)
         email_address = profile["email"]
         name = profile.get("name", email_address.split("@")[0])
@@ -322,33 +343,10 @@ async def gmail_callback(code: str = Query(...), state: str = Query(...), redire
         repo.save_account(account)
         repo.save_credentials(account_id, enc_refresh, enc_access, expires_at)
 
-        html_content = """
-        <html>
-        <head>
-            <title>Alfred Authorized</title>
-            <style>
-                body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #121214; color: #e1e1e6; text-align: center; padding-top: 100px; }
-                h1 { color: #00e676; }
-                p { font-size: 1.1em; color: #a9a9b2; }
-            </style>
-        </head>
-        <body>
-            <h1>Alfred Successfully Connected!</h1>
-            <p>Gmail account authorization was successful. You can close this window now and return to Alfred.</p>
-            <script>
-                if (window.opener) {
-                    window.opener.postMessage('auth_success', '*');
-                }
-            </script>
-        </body>
-        </html>
-        """
-        return HTMLResponse(content=html_content, status_code=200)
-    except Exception:
-        return HTMLResponse(
-            content="<html><body><h1>Authentication Failed</h1><p>An error occurred during OAuth. Please try again.</p></body></html>",
-            status_code=500
-        )
+        return _oauth_callback_page(True)
+    except Exception as exc:
+        logger.warning("oauth_%s: %s", stage, type(exc).__name__)
+        return _oauth_callback_page(False)
 
 @app.delete('/api/accounts/{account_id}')
 def delete_account(account_id: str):
@@ -545,16 +543,16 @@ async def draft(email_id: str):
 # ── Briefings ──
 @app.get('/api/briefing')
 async def briefing_get():
-    return await generate_briefing()
+    return await generate_briefing(force=False)
 
 @app.post('/api/briefing/generate')
-async def generate_briefing():
+async def generate_briefing(force: bool = True):
     emails = repo.emails()
     for e in emails:
         e.analysis = repo.cached_analysis(e.id, content_fingerprint(e), settings.ollama_model)
     fingerprint = briefing_fingerprint(emails, settings.ollama_model)
     cached = repo.cached_briefing(fingerprint, settings.ollama_model, BRIEFING_SCHEMA_VERSION)
-    if cached:
+    if cached and not force:
         return cached
     generated = await ai.generate_inbox_briefing(emails)
     repo.save_briefing(fingerprint, settings.ollama_model, generated, BRIEFING_SCHEMA_VERSION)
