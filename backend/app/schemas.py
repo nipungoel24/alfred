@@ -15,13 +15,12 @@ class Deadline(BaseModel):
     due_at: str | None = Field(None, description="The explicit date/time when it is due (e.g. '5 PM today', 'Friday', '2026-08-16'). Do NOT invent precise dates if not mentioned.")
     confidence: str = Field("explicit", description="Confidence level of the deadline extraction: 'explicit' or 'inferred'.")
 
-class ImportantEntity(BaseModel): type: str; value: str
+
 class EmailAnalysis(BaseModel):
     short_summary: str; category: Category; priority: Priority; priority_score: int = Field(ge=0, le=100)
     reason_for_priority: str; needs_reply: bool
     action_items: list[ActionItem] = Field(default_factory=list, description="List of individual actions required.")
     deadlines: list[Deadline] = Field(default_factory=list, description="List of deadlines explicitly mentioned in the email (e.g. 'by Friday', 'before 5 PM today'). Keep empty if timing is ambiguous (like 'soon', 'asap') or missing.")
-    important_entities: list[ImportantEntity] = Field(default_factory=list); important_details: list[str] = Field(default_factory=list)
 class Email(BaseModel):
     id: str; thread_id: str | None = None; account_id: str | None = None; sender: str; sender_name: str | None = None; recipients: list[str] = Field(default_factory=list)
     subject: str; body: str; received_at: datetime | None = None; source_metadata: dict[str, Any] = Field(default_factory=dict)

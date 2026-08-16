@@ -1,7 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef } from 'react';
-import { tasks as fetchTasks, toggleTask, deleteTask, Task } from '../../api/emails';
+import { tasks as fetchTasks, toggleTask, deleteTask } from '../../api/emails';
 
 export function TasksPage() {
   const queryClient = useQueryClient();

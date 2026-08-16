@@ -1,28 +1,28 @@
 {
   "resources": {
-    "rss_mb": 43.07,
-    "vms_mb": 31.7
+    "rss_mb": 44.32,
+    "vms_mb": 31.78
   },
   "database": [],
   "ollama": [
     {
       "label": "ollama_first_inference",
-      "total_ms": 3830.193399975542,
+      "total_ms": 5512.8279000055045,
       "metrics": {
-        "total_ms": 3813.2977,
-        "load_ms": 335.5421,
-        "prompt_eval_ms": 414.7745,
-        "eval_ms": 3011.4372,
+        "total_ms": 5498.1556,
+        "load_ms": 315.3472,
+        "prompt_eval_ms": 335.3393,
+        "eval_ms": 4797.9483,
         "prompt_tokens": 11,
         "output_tokens": 225
       }
     },
     {
       "label": "ollama_warm_inference",
-      "p50_total_ms": 5277.05,
-      "p50_load_ms": 298.13,
-      "p50_prompt_eval_ms": 18.18,
-      "p50_eval_ms": 4897.95,
+      "p50_total_ms": 6951.69,
+      "p50_load_ms": 319.48,
+      "p50_prompt_eval_ms": 25.91,
+      "p50_eval_ms": 6499.7,
       "p50_prompt_tokens": 14,
       "p50_output_tokens": 365,
       "iterations": 5

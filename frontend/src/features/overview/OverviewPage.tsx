@@ -1,5 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { briefing, Briefing } from '../../api/emails';
+import { briefing } from '../../api/emails';
 import { PriorityBadge } from '../../components/PriorityBadge';
 
 export function OverviewPage() {

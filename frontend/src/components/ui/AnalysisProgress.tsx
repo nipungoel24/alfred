@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 type ProgressEvent = 
@@ -13,6 +13,7 @@ export function AnalysisProgress() {
   const [pending, setPending] = useState(0);
   const [latestEvent, setLatestEvent] = useState<ProgressEvent | null>(null);
   const queryClient = useQueryClient();
+  const invalidationTimer = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     const eventSource = new EventSource('http://127.0.0.1:8765/api/analysis/progress');
@@ -25,12 +26,12 @@ export function AnalysisProgress() {
           setLatestEvent(data);
           
           // Debounce invalidations to prevent backend request storms during fast processing
-          if (!(window as any).__invalidationTimer) {
-            (window as any).__invalidationTimer = setTimeout(() => {
+          if (!invalidationTimer.current) {
+            invalidationTimer.current = setTimeout(() => {
               queryClient.invalidateQueries({ queryKey: ['emails'] });
               queryClient.invalidateQueries({ queryKey: ['tasks'] });
               queryClient.invalidateQueries({ queryKey: ['briefing'] });
-              (window as any).__invalidationTimer = null;
+              invalidationTimer.current = null;
             }, 1000);
           }
         }

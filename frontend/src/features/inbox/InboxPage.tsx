@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef } from 'react';
-import { emails as fetchEmails, Email } from '../../api/emails';
+import { emails as fetchEmails } from '../../api/emails';
 import { PriorityBadge } from '../../components/PriorityBadge';
 import { EmailDetail } from '../email/EmailDetail';
 
@@ -13,7 +13,7 @@ interface InboxPageProps {
 
 export function InboxPage({ priorityFilter = '', needsReplyFilter = null }: InboxPageProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeAccount, setActiveAccount] = useState('all');
+  const [activeAccount] = useState('all');
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
 
   const { data: emails = [], isLoading } = useQuery({

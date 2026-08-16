@@ -91,9 +91,11 @@ def _normalize_action(description: str) -> str:
     return text
 
 
-def task_fingerprint(thread_id: str | None, normalized_action: str, deadline: str | None) -> str:
-    """Create a stable fingerprint for task deduplication."""
-    payload = f"{thread_id or ''}|{normalized_action}|{deadline or ''}"
+def task_fingerprint(thread_id: str | None, normalized_action: str) -> str:
+    """Create a stable fingerprint for task deduplication.
+    We omit the deadline so that updates in the same thread overwrite the old deadline.
+    """
+    payload = f"{thread_id or ''}|{normalized_action}"
     return hashlib.sha256(payload.encode('utf-8')).hexdigest()[:16]
 
 
@@ -129,7 +131,7 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
             continue
         
         normalized = _normalize_action(item.description)
-        fp = task_fingerprint(email.thread_id, normalized, item.deadline)
+        fp = task_fingerprint(email.thread_id, normalized)
         
         # Skip duplicates within this email
         if fp in seen_fingerprints:
@@ -139,7 +141,7 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
         confidence = _assign_confidence(item, analysis)
         
         task = Task(
-            id=f"task_{email.id}_{idx}",
+            id=f"task_{fp}",
             source_email_id=email.id,
             source_thread_id=email.thread_id,
             title=item.description,
@@ -159,7 +161,7 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
     # Deadlines that are NOT already represented by action items
     for idx, dl in enumerate(analysis.deadlines):
         normalized = _normalize_action(dl.description)
-        fp = task_fingerprint(email.thread_id, normalized, dl.due_at)
+        fp = task_fingerprint(email.thread_id, normalized)
         
         if fp in seen_fingerprints:
             continue
