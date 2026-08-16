@@ -339,11 +339,15 @@ class Repository:
         self.con.commit()
 
     def _task_from_row(self, r) -> Task:
-        return Task(
+        task = Task(
             id=r['id'], source_email_id=r['source_email_id'], source_thread_id=r['source_thread_id'],
             title=r['title'], description=r['description'], due_at=r['due_at'],
             priority=r['priority'], status=r['status'], created_at=r['created_at']
         )
+        task.derivation_version = r['derivation_version']
+        task.confidence = r['confidence']
+        task.fingerprint = r['fingerprint']
+        return task
 
     # ──────────────────────────────────────────────
     # JOBS
