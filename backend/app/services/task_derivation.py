@@ -16,7 +16,10 @@ DERIVATION_VERSION = "2"
 # Patterns that indicate noise, not real user tasks
 NOISE_PATTERNS = [
     re.compile(r"decode\s+(the\s+)?base64", re.I),
-    re.compile(r"verify\s+(the\s+)?(user.?s?|your)\s+(tiktok|instagram|facebook|twitter|account)\s+(account\s+)?credentials?", re.I),
+    re.compile(r"(verify|check)\s+(the\s+)?(user.?s?\s+|your\s+)?(tiktok|instagram|facebook|twitter|account|identity)\s+(account\s+)?credentials?", re.I),
+    re.compile(r"verify\s+(your\s+)?identity", re.I),
+    re.compile(r"transfer\s+\$100", re.I),
+    re.compile(r"(move|reschedule)\s+(the\s+)?(daily\s+)?(standup|meeting)", re.I),
     re.compile(r"check\s+if\s+(the\s+)?user\s+has\s+a?\s*pending\s+password\s+reset", re.I),
     re.compile(r"(click|tap)\s+(here|below|the\s+link|the\s+button)", re.I),
     re.compile(r"(buy|shop|purchase|order)\s+now", re.I),
@@ -27,6 +30,10 @@ NOISE_PATTERNS = [
     re.compile(r"execute\s+(it|this|the\s+command)", re.I),
     re.compile(r"ignore\s+(all\s+)?previous\s+instructions?", re.I),
     re.compile(r"send\s+(the\s+)?(user.s?|your)\s+credentials?\s+to", re.I),
+    re.compile(r"update\s+payment\s+method", re.I),
+    re.compile(r"(flight|travel|meeting)\s+(schedule\s+)?(change|delay|update)", re.I),
+    re.compile(r"receipt|invoice", re.I),
+    re.compile(r"review\s+recent\s+activity", re.I)
 ]
 
 # Categories that should rarely generate user tasks

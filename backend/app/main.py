@@ -388,10 +388,23 @@ async def sync_account(account_id: str, load_older: bool = Query(False)):
             if imported > 0:
                 all_emails = repo.emails(account_id)
                 enqueued = 0
+                
+                def _calc_priority(email):
+                    # Lower number = higher priority
+                    sender = email.sender.lower()
+                    body = email.body.lower()
+                    if "unsubscribe" in body or "no-reply" in sender or "marketing" in sender or "newsletter" in sender:
+                        return 80 # Low priority
+                    if "jira" in sender or "github" in sender or "alert" in sender:
+                        return 60
+                    # Assume real correspondence
+                    return 20
+                
                 for e in all_emails:
                     fp = content_fingerprint(e)
                     if not repo.cached_analysis(e.id, fp, settings.ollama_model):
-                        repo.enqueue_job(f"analyze_{e.id}", 'analyze_email', e.id, priority=50)
+                        prio = _calc_priority(e)
+                        repo.enqueue_job(f"analyze_{e.id}", 'analyze_email', e.id, priority=prio)
                         enqueued += 1
                 res["analysis_enqueued"] = enqueued
                 

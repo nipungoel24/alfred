@@ -73,20 +73,35 @@ async def benchmark_ollama():
         start = time.perf_counter()
         res, metrics = await client.generate(settings.ollama_model, "Hi", None)
         cold_time = (time.perf_counter() - start) * 1000
-        results.append({"label": "ollama_first_inference", "total_ms": cold_time, "metrics": {"total_ms": metrics.total_ms, "prompt_eval_ms": metrics.prompt_eval_ms, "eval_ms": metrics.eval_ms}})
+        results.append({
+            "label": "ollama_first_inference", 
+            "total_ms": cold_time, 
+            "metrics": {
+                "total_ms": metrics.total_ms, 
+                "load_ms": metrics.load_ms,
+                "prompt_eval_ms": metrics.prompt_eval_ms, 
+                "eval_ms": metrics.eval_ms,
+                "prompt_tokens": metrics.prompt_tokens,
+                "output_tokens": metrics.output_tokens,
+            }
+        })
         
         # 2. Warm inference
         print("  Benchmarking Ollama (warm inferences)...")
-        warm_times = []
+        warm_metrics_list = []
         for _ in range(5):
             start = time.perf_counter()
-            _, _ = await client.generate(settings.ollama_model, "Write a short summary", None)
-            warm_times.append((time.perf_counter() - start) * 1000)
+            _, metrics = await client.generate(settings.ollama_model, "Write a short summary", None)
+            warm_metrics_list.append(metrics)
             
         results.append({
             "label": "ollama_warm_inference", 
-            "p50_ms": round(statistics.median(warm_times), 2),
-            "max_ms": round(max(warm_times), 2),
+            "p50_total_ms": round(statistics.median([m.total_ms for m in warm_metrics_list]), 2),
+            "p50_load_ms": round(statistics.median([m.load_ms for m in warm_metrics_list]), 2),
+            "p50_prompt_eval_ms": round(statistics.median([m.prompt_eval_ms for m in warm_metrics_list]), 2),
+            "p50_eval_ms": round(statistics.median([m.eval_ms for m in warm_metrics_list]), 2),
+            "p50_prompt_tokens": round(statistics.median([m.prompt_tokens for m in warm_metrics_list]), 2),
+            "p50_output_tokens": round(statistics.median([m.output_tokens for m in warm_metrics_list]), 2),
             "iterations": 5
         })
     except Exception as e:
