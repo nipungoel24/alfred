@@ -53,15 +53,48 @@ def test_all_scope_includes_archived(repo):
     assert ids == {"in1", "arch1", "arch2"}
 
 
-def test_all_scope_excludes_spam_trash_draft_sent(repo):
+def test_all_scope_excludes_spam_trash_draft_only(repo):
+    # All Mail = received inbox + archived received + SENT.
+    # Spam, Trash, and Draft are never shown.
     repo.upsert_email(_email("in1", ["INBOX"]), "1")
     repo.upsert_email(_email("arch1", ["UNREAD"]), "2")
+    repo.upsert_email(_email("sent1", ["SENT"]), "6")
     repo.upsert_email(_email("spam1", ["SPAM"]), "3")
     repo.upsert_email(_email("trash1", ["TRASH"]), "4")
     repo.upsert_email(_email("draft1", ["DRAFT"]), "5")
-    repo.upsert_email(_email("sent1", ["SENT"]), "6")
     ids = {e.id for e in repo.emails_filtered(scope="all")}
-    assert ids == {"in1", "arch1"}
+    assert ids == {"in1", "arch1", "sent1"}
+
+
+def test_all_scope_kind_filters(repo):
+    repo.upsert_email(_email("in1", ["INBOX"]), "1")
+    repo.upsert_email(_email("arch1", ["UNREAD"]), "2")
+    repo.upsert_email(_email("sent1", ["SENT"]), "3")
+    assert {e.id for e in repo.emails_filtered(scope="all", kind="received")} == {"in1", "arch1"}
+    assert {e.id for e in repo.emails_filtered(scope="all", kind="sent")} == {"sent1"}
+    assert {e.id for e in repo.emails_filtered(scope="all", kind="archived")} == {"arch1"}
+
+
+def test_sent_visible_but_excluded_from_intelligence(repo):
+    repo.upsert_email(_email("sent1", ["SENT"]), "1")
+    # visible in All Mail
+    assert {e.id for e in repo.emails_filtered(scope="all")} == {"sent1"}
+    # never in inbox scope
+    assert repo.emails_filtered(scope="inbox") == []
+    # sent never feeds the pipeline
+    from backend.app.mail.eligibility import MailEligibilityPolicy
+    assert MailEligibilityPolicy.should_include_in_briefing(["SENT"]) is False
+    assert MailEligibilityPolicy.should_schedule_analysis(["SENT"]) is False
+    assert MailEligibilityPolicy.pipeline_eligibility(["SENT"]).value == "excluded"
+    # and never enters the analysis queue
+    assert repo.eligible_emails_without_analysis("qwen3:4b") == []
+
+
+def test_draft_excluded_from_all_mail_and_search(repo):
+    repo.upsert_email(_email("draft1", ["DRAFT"], sender="drafter@x.com"), "1")
+    repo.upsert_email(_email("in1", ["INBOX"]), "2")
+    assert {e.id for e in repo.emails_filtered(scope="all")} == {"in1"}
+    assert {e.id for e in repo.search_emails("drafter")} == set()
 
 
 def test_category_ignored_in_all_scope(repo):
@@ -205,10 +238,12 @@ def test_backfill_first_page_and_resume(mock_get, repo):
     assert res["imported"] == 2
     assert res["has_more"] is True
 
-    # cursor persisted with the page token
+    # typed cursor persisted with the page token and counters
     cursor = json.loads(repo.account("gmail_user").sync_cursor)
+    assert cursor["backfill_state"] == "running"
     assert cursor["backfill_page_token"] == "page_2"
-    assert cursor.get("backfill_complete") is False
+    assert cursor["backfill_imported"] == 2
+    assert cursor["backfill_pages"] == 1
 
     # Page 2 (resume after restart): one message, no nextPageToken
     list2 = MagicMock(); list2.status_code = 200
@@ -226,7 +261,10 @@ def test_backfill_first_page_and_resume(mock_get, repo):
     assert res2["complete"] is True
 
     cursor2 = json.loads(repo.account("gmail_user").sync_cursor)
-    assert cursor2["backfill_complete"] is True
+    assert cursor2["backfill_state"] == "complete"
+    assert cursor2["backfill_page_token"] is None
+    assert cursor2["backfill_imported"] == 3
+    assert cursor2["backfill_pages"] == 2
 
     # duplicates skipped (idempotent)
     res3 = asyncio.run(provider.backfill_messages(repo.account("gmail_user"), creds, repo))

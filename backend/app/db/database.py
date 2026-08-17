@@ -79,7 +79,8 @@ CREATE TABLE IF NOT EXISTS jobs (
     started_at TEXT,
     completed_at TEXT,
     error_code TEXT,
-    error_message TEXT
+    error_message TEXT,
+    not_before TEXT
 );
 CREATE TABLE IF NOT EXISTS inference_metrics (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -109,6 +110,7 @@ CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status, created_at DESC);
 CREATE INDEX IF NOT EXISTS idx_tasks_source ON tasks(source_email_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_thread ON tasks(source_thread_id);
 CREATE INDEX IF NOT EXISTS idx_jobs_status_priority ON jobs(status, priority DESC, created_at ASC);
+CREATE INDEX IF NOT EXISTS idx_jobs_status_notbefore ON jobs(status, not_before);
 """
 
 # FTS5 virtual table for full-text search
@@ -256,6 +258,13 @@ def _migrate(connection: sqlite3.Connection):
         col_name = col.split()[0]  # Handle "derivation_version TEXT DEFAULT '1'" -> "derivation_version"
         if col_name not in task_cols:
             cursor.execute(f"ALTER TABLE tasks ADD COLUMN {col}")
+
+    # jobs table migrations (scheduled/backoff-aware queueing)
+    cursor.execute("PRAGMA table_info(jobs)")
+    job_cols = {row["name"] for row in cursor.fetchall()}
+    for col, col_type in [("not_before", "TEXT")]:
+        if col not in job_cols:
+            cursor.execute(f"ALTER TABLE jobs ADD COLUMN {col} {col_type}")
 
     connection.commit()
 

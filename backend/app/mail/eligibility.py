@@ -73,6 +73,26 @@ class GmailCategory(str, Enum):
     FORUMS = "forums"
 
 
+class BackfillState(str, Enum):
+    """Typed, persisted state of the progressive All Mail backfill.
+
+    Owned by the backend job system — the frontend only observes it.
+    """
+    NOT_STARTED = "not_started"
+    RUNNING = "running"
+    PAUSED = "paused"
+    COMPLETE = "complete"
+    FAILED = "failed"
+
+
+# All Mail scope: everything locally synchronized except spam/trash/draft.
+# Sent-only messages ARE listed (with a SENT indicator) but never treated
+# as incoming attention. DRAFT messages are excluded from All Mail lists
+# and search entirely — Round 1 has no draft editing, so showing them
+# would be more confusing than hiding them (documented product decision).
+ALL_MAIL_STATES = {MailboxState.ACTIVE_INBOX, MailboxState.ARCHIVED, MailboxState.SENT}
+
+
 CATEGORY_LABEL_TO_UI = {
     LABEL_CATEGORY_PERSONAL: GmailCategory.PRIMARY,
     LABEL_CATEGORY_PROMOTIONS: GmailCategory.PROMOTIONS,
@@ -168,6 +188,23 @@ class MailEligibilityPolicy:
     @staticmethod
     def is_excluded(label_ids: list[str] | set[str] | None) -> bool:
         return mailbox_state_from_labels(label_ids) != MailboxState.ACTIVE_INBOX
+
+    @staticmethod
+    def is_sent(label_ids: list[str] | set[str] | None) -> bool:
+        """Sent-only message (SENT label, no INBOX)."""
+        labels = set(label_ids or [])
+        return LABEL_SENT in labels and LABEL_INBOX not in labels
+
+    @staticmethod
+    def is_archived(label_ids: list[str] | set[str] | None) -> bool:
+        """Archived received message (no INBOX, not sent/spam/trash/draft)."""
+        return mailbox_state_from_labels(label_ids) == MailboxState.ARCHIVED
+
+    @staticmethod
+    def should_display_in_all_mail(label_ids: list[str] | set[str] | None) -> bool:
+        """All Mail = received inbox, archived received, and sent messages.
+        Spam, Trash, and Draft are never shown."""
+        return mailbox_state_from_labels(label_ids) in ALL_MAIL_STATES
 
     @staticmethod
     def is_important_gmail(label_ids: list[str] | set[str] | None) -> bool:

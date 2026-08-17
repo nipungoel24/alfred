@@ -193,6 +193,7 @@ class Repository:
                         category: str | None = None,
                         mailbox_state: str | None = None,
                         scope: str = 'inbox',
+                        kind: str | None = None,
                         include_excluded: bool = False,
                         query: str | None = None,
                         limit: int = 200, offset: int = 0) -> list[Email]:
@@ -200,14 +201,14 @@ class Repository:
 
         Scopes:
         - 'inbox' (default): active Gmail INBOX only; category tabs apply.
-        - 'all': active inbox + archived — all locally synced mail except
-          spam/trash/draft/sent-only. Gmail tab semantics are NOT forced
-          onto archived messages, so `category` is ignored in this scope.
+        - 'all': the real All Mail — received inbox, archived received,
+          AND sent messages. Spam/Trash/Draft never appear. `kind` refines
+          it (received | sent | archived); `category` is ignored here
+          (Gmail tab semantics belong to the Inbox experience).
         - include_excluded=True bypasses the scope (internal use only).
 
-        Archived messages remain visible in 'all' while their pipeline
-        eligibility (briefing/attention/tasks) stays excluded — visibility
-        and intelligence eligibility are separate concepts.
+        Archived/sent visibility never widens intelligence eligibility —
+        those stay inbox-only per MailEligibilityPolicy.
         """
         sql = 'SELECT payload FROM emails WHERE 1=1'
         params: list = []
@@ -219,7 +220,14 @@ class Repository:
                 sql += ' AND mailbox_state=?'
                 params.append(mailbox_state)
         elif scope == 'all':
-            sql += ' AND mailbox_state IN ("active_inbox","archived")'
+            if kind == 'received':
+                sql += ' AND mailbox_state IN ("active_inbox","archived")'
+            elif kind == 'sent':
+                sql += ' AND mailbox_state="sent"'
+            elif kind == 'archived':
+                sql += ' AND mailbox_state="archived"'
+            else:
+                sql += ' AND mailbox_state IN ("active_inbox","archived","sent")'
         else:
             sql += ' AND mailbox_state="active_inbox"'
         if category and scope != 'all':
@@ -240,8 +248,8 @@ class Repository:
         """Scope + category counts derived from stored Gmail labels.
 
         - inbox: active Gmail INBOX messages
-        - all_mail: inbox + archived (everything except spam/trash/
-          draft/sent-only)
+        - all_mail: inbox + archived received + sent (the real All Mail;
+          spam/trash/draft excluded)
         - excluded: everything outside all_mail
         - categories: inbox-scoped tab counts (tab semantics belong to
           the Inbox experience)
@@ -255,12 +263,12 @@ class Repository:
         ).fetchone()[0]
         all_mail = self.con.execute(
             f'SELECT COUNT(*) FROM emails WHERE {acct_where} '
-            'AND mailbox_state IN ("active_inbox","archived")',
+            'AND mailbox_state IN ("active_inbox","archived","sent")',
             params
         ).fetchone()[0]
         excluded = self.con.execute(
             f'SELECT COUNT(*) FROM emails WHERE {acct_where} '
-            'AND mailbox_state NOT IN ("active_inbox","archived")',
+            'AND mailbox_state NOT IN ("active_inbox","archived","sent")',
             params
         ).fetchone()[0]
         rows = self.con.execute(
@@ -311,14 +319,15 @@ class Repository:
     def search_emails(self, query: str, limit=100) -> list[Email]:
         """Full-text search using FTS5 if available, falling back to LIKE.
 
-        Global search covers ALL locally synced non-spam/non-trash mail
-        (active inbox + archived). Spam/trash/draft/sent-only rows never
+        Global search covers the FULL synchronized mailbox: active inbox,
+        archived received, and sent messages. Spam/trash/draft rows never
         surface through search.
         """
         try:
             rows = self.con.execute(
                 "SELECT e.payload FROM emails_fts f JOIN emails e ON f.rowid = e.rowid "
-                "WHERE emails_fts MATCH ? AND e.mailbox_state IN ('active_inbox','archived') "
+                "WHERE emails_fts MATCH ? "
+                "AND e.mailbox_state IN ('active_inbox','archived','sent') "
                 "ORDER BY rank LIMIT ?",
                 (query, limit)
             ).fetchall()
@@ -327,7 +336,8 @@ class Repository:
             # FTS5 not available, fall back to LIKE search
             like_q = f"%{query}%"
             rows = self.con.execute(
-                "SELECT payload FROM emails WHERE mailbox_state IN ('active_inbox','archived') "
+                "SELECT payload FROM emails "
+                "WHERE mailbox_state IN ('active_inbox','archived','sent') "
                 "AND (sender_col LIKE ? OR subject_col LIKE ?) LIMIT ?",
                 (like_q, like_q, limit)
             ).fetchall()
@@ -602,26 +612,85 @@ class Repository:
     # JOBS
     # ──────────────────────────────────────────────
 
-    def enqueue_job(self, job_id: str, job_type: str, target_id: str, priority: int = 50):
+    def enqueue_job(self, job_id: str, job_type: str, target_id: str, priority: int = 50,
+                    not_before: str | None = None):
         """Enqueue a background job. Idempotent — skips if job already exists."""
         self.con.execute(
-            'INSERT OR IGNORE INTO jobs (id, job_type, target_id, priority, status, created_at) '
-            'VALUES (?,?,?,?,?,?)',
-            (job_id, job_type, target_id, priority, 'queued', datetime.now(timezone.utc).isoformat())
+            'INSERT OR IGNORE INTO jobs (id, job_type, target_id, priority, status, created_at, not_before) '
+            'VALUES (?,?,?,?,?,?,?)',
+            (job_id, job_type, target_id, priority, 'queued',
+             datetime.now(timezone.utc).isoformat(), not_before)
         )
         self.con.commit()
 
-    def next_job(self, job_type: str = None):
-        """Get the next queued job by priority."""
+    def next_job(self, job_type: str = None, now_iso: str | None = None):
+        """Get the next queued job by priority, honouring not_before.
+
+        Jobs whose not_before timestamp is still in the future are not
+        returned — this is how the backfill worker rate-limits itself
+        (bounded page + scheduled next page) without blocking polling.
+        """
+        now_iso = now_iso or datetime.now(timezone.utc).isoformat()
         if job_type:
             r = self.con.execute(
-                'SELECT * FROM jobs WHERE status="queued" AND job_type=? ORDER BY priority DESC, created_at ASC LIMIT 1',
-                (job_type,)
+                'SELECT * FROM jobs WHERE status="queued" AND job_type=? '
+                'AND (not_before IS NULL OR not_before <= ?) '
+                'ORDER BY priority DESC, created_at ASC LIMIT 1',
+                (job_type, now_iso)
             ).fetchone()
         else:
             r = self.con.execute(
-                'SELECT * FROM jobs WHERE status="queued" ORDER BY priority DESC, created_at ASC LIMIT 1'
+                'SELECT * FROM jobs WHERE status="queued" '
+                'AND (not_before IS NULL OR not_before <= ?) '
+                'ORDER BY priority DESC, created_at ASC LIMIT 1',
+                (now_iso,)
             ).fetchone()
+        return dict(r) if r else None
+
+    def requeue_job(self, job_id: str, not_before: str | None = None):
+        """Re-arm a job for its next bounded run (resets attempts/errors).
+
+        Used by the backfill worker after each successful page: the same
+        durable job row is re-queued with a not_before rate-limit instead
+        of creating new rows forever.
+        """
+        self.con.execute(
+            'UPDATE jobs SET status="queued", attempts=0, started_at=NULL, '
+            'completed_at=NULL, error_code=NULL, error_message=NULL, not_before=? '
+            'WHERE id=?',
+            (not_before, job_id)
+        )
+        self.con.commit()
+
+    def rearm_terminal_job(self, job_id: str):
+        """Re-arm a job row that finished or paused, when work remains.
+
+        Covers the resume path: a 'succeeded'/'cancelled'/'failed'/'paused'
+        row becomes queued again (attempts reset, backoff cleared). Rows
+        that are currently queued/running or in retry backoff are left
+        untouched.
+        """
+        self.con.execute(
+            'UPDATE jobs SET status="queued", attempts=0, not_before=NULL, '
+            'started_at=NULL, completed_at=NULL, error_code=NULL, error_message=NULL '
+            "WHERE id=? AND status IN ('succeeded','cancelled','failed','paused')",
+            (job_id,)
+        )
+        self.con.commit()
+
+    def retry_job_with_backoff(self, job_id: str, error_code: str, error_message: str,
+                               not_before: str):
+        """Mark a job retryable_failed with a not_before backoff timestamp."""
+        self.con.execute(
+            'UPDATE jobs SET status="retryable_failed", completed_at=?, error_code=?, '
+            'error_message=?, not_before=? WHERE id=?',
+            (datetime.now(timezone.utc).isoformat(), error_code, error_message,
+             not_before, job_id)
+        )
+        self.con.commit()
+
+    def job(self, job_id: str):
+        r = self.con.execute('SELECT * FROM jobs WHERE id=?', (job_id,)).fetchone()
         return dict(r) if r else None
 
     def update_job_status(self, job_id: str, status: str, error_code: str = None, error_message: str = None):
@@ -671,6 +740,16 @@ class Repository:
         """Reset retryable_failed jobs back to queued if under max_attempts."""
         self.con.execute(
             'UPDATE jobs SET status="queued" WHERE status="retryable_failed" AND attempts < max_attempts'
+        )
+        self.con.commit()
+
+    def promote_due_jobs(self, now_iso: str | None = None):
+        """Promote retryable_failed jobs whose backoff window has elapsed."""
+        now_iso = now_iso or datetime.now(timezone.utc).isoformat()
+        self.con.execute(
+            'UPDATE jobs SET status="queued", not_before=NULL '
+            'WHERE status="retryable_failed" AND (not_before IS NULL OR not_before <= ?)',
+            (now_iso,)
         )
         self.con.commit()
 

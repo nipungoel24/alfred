@@ -115,8 +115,8 @@ class GmailProvider(MailProvider):
         return access_token
 
     async def backfill_messages(self, account: EmailAccount, credentials: Dict[str, Any],
-                                repo, page_size: int = 50) -> Dict[str, Any]:
-        """Progressive All Mail backfill — ONE page per call.
+                                repo, page_size: int = 40) -> Dict[str, Any]:
+        """Progressive All Mail backfill — ONE bounded page per call.
 
         Phase B of the sync strategy: pages through messages that are NOT
         in the inbox (archived + sent) using `q=-label:INBOX`, which Gmail
@@ -124,29 +124,28 @@ class GmailProvider(MailProvider):
         never arrive here by construction; Drafts are not in messages.list.
 
         One page per invocation keeps the UI and the AI queue unblocked.
-        The backfill page token persists in the account sync cursor, so a
-        restart resumes exactly where it stopped. Duplicates are skipped
-        via the local cache (idempotent).
+        The typed backfill state (see mail/backfill.py) persists in the
+        account sync cursor, so a restart resumes exactly where it stopped.
+        Duplicates are skipped via the local cache (idempotent).
         """
-        import json
+        from ..backfill import (
+            normalize_cursor, dump_cursor, set_state, record_success, status_payload,
+        )
+        from ..eligibility import BackfillState
         access_token = await self._ensure_access_token(account, credentials, repo)
         headers = {"Authorization": f"Bearer {access_token}"}
 
-        cursor_data: Dict[str, Any] = {}
-        if account.sync_cursor:
-            try:
-                cursor_data = json.loads(account.sync_cursor)
-            except Exception:
-                cursor_data = {}
-
-        if cursor_data.get("backfill_complete"):
-            return {"imported": 0, "skipped_duplicates": 0, "label_updates": 0,
-                    "has_more": False, "complete": True}
+        cursor_data = normalize_cursor(account.sync_cursor)
+        state = cursor_data.get("backfill_state")
+        if state == BackfillState.COMPLETE.value:
+            return {**status_payload(cursor_data), "imported": 0,
+                    "skipped_duplicates": 0, "label_updates": 0, "has_more": False}
 
         backfill_page_token = cursor_data.get("backfill_page_token")
         imported = 0
         skipped = 0
         label_updates = 0
+        estimate = None
 
         async with httpx.AsyncClient() as client:
             params: Dict[str, Any] = {
@@ -161,6 +160,7 @@ class GmailProvider(MailProvider):
             r.raise_for_status()
             res_json = r.json()
             messages_list = res_json.get("messages", [])
+            estimate = res_json.get("resultSizeEstimate")
 
             for msg in messages_list:
                 msg_id = msg.get("id")
@@ -174,8 +174,8 @@ class GmailProvider(MailProvider):
                     skipped += 1
                     continue
                 # Fetch full detail for new messages (body needed for the
-                # local mailbox; archived messages are NOT enqueued for
-                # analysis — eligibility stays inbox-only).
+                # local mailbox; archived/sent messages are NOT enqueued
+                # for analysis — eligibility stays inbox-only).
                 try:
                     r_detail = await client.get(
                         f"{self.gmail_base_url}/messages/{msg_id}", headers=headers
@@ -189,15 +189,39 @@ class GmailProvider(MailProvider):
                     pass  # Ignore individual message load errors
 
             new_page_token = res_json.get("nextPageToken")
-            cursor_data["backfill_page_token"] = new_page_token
-            cursor_data["backfill_complete"] = not bool(new_page_token)
-            account.sync_cursor = json.dumps(cursor_data)
+            cursor_data = record_success(
+                cursor_data, imported, new_page_token or None, estimate
+            )
+            if new_page_token:
+                set_state(cursor_data, BackfillState.RUNNING)
+            else:
+                set_state(cursor_data, BackfillState.COMPLETE)
+            account.sync_cursor = dump_cursor(cursor_data)
             repo.save_account(account)
 
-            return {"imported": imported, "skipped_duplicates": skipped,
-                    "label_updates": label_updates,
-                    "has_more": bool(new_page_token),
-                    "complete": not bool(new_page_token)}
+            return {**status_payload(cursor_data), "imported": imported,
+                    "skipped_duplicates": skipped, "label_updates": label_updates,
+                    "has_more": bool(new_page_token)}
+
+    async def fetch_backfill_estimate(self, access_token: str) -> int | None:
+        """Cheap one-shot resultSizeEstimate for the backfill query.
+
+        One messages.list call with maxResults=1 — never downloads bodies.
+        resultSizeEstimate is approximate by Gmail's own definition.
+        """
+        headers = {"Authorization": f"Bearer {access_token}"}
+        try:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    f"{self.gmail_base_url}/messages",
+                    headers=headers,
+                    params={"q": "-label:INBOX", "maxResults": 1,
+                            "includeSpamTrash": "false"}
+                )
+                r.raise_for_status()
+                return r.json().get("resultSizeEstimate")
+        except Exception:
+            return None
 
     async def sync_messages(self, account: EmailAccount, credentials: Dict[str, Any], repo, load_older: bool = False) -> Dict[str, Any]:
         import json

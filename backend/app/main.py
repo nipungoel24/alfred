@@ -9,6 +9,7 @@ Routes are organized here for simplicity. The architecture separates:
 import csv, io, uuid, secrets, hashlib, base64, json, asyncio, logging
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
+import httpx
 from fastapi import FastAPI, UploadFile, File, HTTPException, Query, Request
 from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -19,7 +20,10 @@ from .mail.normalizer import normalized_email
 from .mail.fingerprint import content_fingerprint
 from .mail.briefing_fingerprint import briefing_fingerprint, BRIEFING_SCHEMA_VERSION
 from .mail.providers.gmail import GmailProvider
-from .mail.eligibility import MailEligibilityPolicy, GmailCategory
+from .mail.eligibility import MailEligibilityPolicy, GmailCategory, BackfillState
+from .mail.backfill import (
+    normalize_cursor, dump_cursor, set_state, record_failure, status_payload,
+)
 from .ai.ollama_client import OllamaClient, OllamaUnavailable, OllamaTimeout, OllamaInvalidResponse, OllamaModelMissing
 from .ai.service import AIService
 from .services.task_derivation import derive_tasks, rebuild_tasks_from_analyses, DERIVATION_VERSION
@@ -52,6 +56,136 @@ def _broadcast_progress(event: dict):
 _worker_task: asyncio.Task | None = None
 _worker_running = False
 WORKER_CONCURRENCY = 1
+
+# ── Progressive All Mail backfill (backend-owned) ──
+BACKFILL_JOB_TYPE = 'backfill_gmail'
+BACKFILL_PRIORITY = 5          # always below analysis (100..10)
+BACKFILL_PAGE_SIZE = 40        # bounded Gmail page
+BACKFILL_PAGE_INTERVAL_S = 2.5 # yield between pages (rate limit)
+_backfill_task: asyncio.Task | None = None
+_backfill_running = False
+
+
+def _backfill_job_id(account_id: str) -> str:
+    return f"backfill_{account_id}"
+
+
+async def _backfill_worker():
+    """Durable worker for the progressive All Mail backfill.
+
+    Owns the sync loop: one bounded Gmail page per run, persist cursor +
+    counters, then re-queue the SAME durable job row with a not_before
+    rate-limit. Transient Gmail errors back off exponentially; after the
+    attempt budget the backfill state becomes 'failed'. Priority is kept
+    below every analysis job so active-inbox intelligence is never starved.
+    """
+    global _backfill_running
+    _backfill_running = True
+
+    while _backfill_running:
+        # Promote retryable jobs whose backoff has elapsed
+        repo.promote_due_jobs()
+
+        job = repo.next_job(BACKFILL_JOB_TYPE)
+        if not job:
+            await asyncio.sleep(2.0)
+            continue
+
+        job_id = job['id']
+        account_id = job['target_id']
+
+        account = repo.account(account_id)
+        creds = repo.credentials(account_id) if account else None
+        if not account or not creds:
+            repo.update_job_status(job_id, 'failed', error_message='Account or credentials missing')
+            await asyncio.sleep(5.0)
+            continue
+
+        cursor_data = normalize_cursor(account.sync_cursor)
+        state = cursor_data.get('backfill_state')
+        if state == BackfillState.PAUSED.value:
+            repo.update_job_status(job_id, 'paused')
+            await asyncio.sleep(5.0)
+            continue
+        if state == BackfillState.COMPLETE.value:
+            repo.update_job_status(job_id, 'succeeded')
+            continue
+
+        repo.update_job_status(job_id, 'running')
+
+        cred_payload = {
+            "access_token": decrypt_token(creds['encrypted_access_token']),
+            "refresh_token": decrypt_token(creds['encrypted_refresh_token']),
+            "expires_at": creds['expires_at']
+        }
+
+        try:
+            res = await gmail_provider.backfill_messages(
+                account, cred_payload, repo, page_size=BACKFILL_PAGE_SIZE
+            )
+            if res.get('has_more'):
+                next_run = (datetime.now(timezone.utc)
+                            + timedelta(seconds=BACKFILL_PAGE_INTERVAL_S)).isoformat()
+                repo.requeue_job(job_id, not_before=next_run)
+            else:
+                repo.update_job_status(job_id, 'succeeded')
+            _broadcast_progress({"type": "backfill_progress",
+                                 "account_id": account_id, "status": res})
+        except httpx.HTTPStatusError as ex:
+            code = ex.response.status_code
+            attempts = int(job['attempts'] or 0) + 1
+            _mark_backfill_failure(account, code, str(ex)[:200])
+            if code in (401, 403) or attempts >= int(job['max_attempts'] or 3):
+                _set_backfill_state(account, BackfillState.FAILED)
+                repo.update_job_status(job_id, 'failed', error_code=f'HTTP_{code}',
+                                       error_message=str(ex)[:200])
+            else:
+                backoff = min(30 * (2 ** (attempts - 1)), 600)
+                next_run = (datetime.now(timezone.utc)
+                            + timedelta(seconds=backoff)).isoformat()
+                repo.retry_job_with_backoff(job_id, f'HTTP_{code}', str(ex)[:200], next_run)
+            _broadcast_progress({"type": "backfill_progress",
+                                 "account_id": account_id,
+                                 "status": {"state": cursor_data.get('backfill_state')}})
+        except Exception as ex:
+            attempts = int(job['attempts'] or 0) + 1
+            _mark_backfill_failure(account, 'UNKNOWN', str(ex)[:200])
+            if attempts >= int(job['max_attempts'] or 3):
+                _set_backfill_state(account, BackfillState.FAILED)
+                repo.update_job_status(job_id, 'failed', error_code='UNKNOWN',
+                                       error_message=str(ex)[:200])
+            else:
+                backoff = min(30 * (2 ** (attempts - 1)), 600)
+                next_run = (datetime.now(timezone.utc)
+                            + timedelta(seconds=backoff)).isoformat()
+                repo.retry_job_with_backoff(job_id, 'UNKNOWN', str(ex)[:200], next_run)
+
+
+def _set_backfill_state(account: EmailAccount, state: BackfillState):
+    cursor_data = normalize_cursor(account.sync_cursor)
+    set_state(cursor_data, state)
+    account.sync_cursor = dump_cursor(cursor_data)
+    repo.save_account(account)
+
+
+def _mark_backfill_failure(account: EmailAccount, code: str, message: str):
+    cursor_data = normalize_cursor(account.sync_cursor)
+    record_failure(cursor_data, code, message)
+    account.sync_cursor = dump_cursor(cursor_data)
+    repo.save_account(account)
+
+
+def _ensure_backfill_job(account_id: str):
+    """Start/resume the durable backfill job for an account (idempotent).
+
+    Creates the job row if absent AND re-arms it if a previous run left it
+    succeeded/cancelled/failed/paused while the account's backfill state
+    says work remains. Rows in retry backoff keep their backoff.
+    """
+    job_id = _backfill_job_id(account_id)
+    repo.enqueue_job(job_id, BACKFILL_JOB_TYPE, account_id, priority=BACKFILL_PRIORITY)
+    repo.rearm_terminal_job(job_id)
+
 
 async def _analysis_worker():
     """Background worker that processes analysis jobs from SQLite."""
@@ -220,9 +354,42 @@ async def _label_backfill():
         pass
 
 
+async def _backfill_estimate_once():
+    """One-shot resultSizeEstimate for accounts whose backfill is already
+    complete but never recorded an estimate (legacy cursors). Cheap:
+    a single maxResults=1 messages.list call per account, once ever."""
+    try:
+        for account in repo.accounts():
+            if account.provider != 'gmail' or account.connection_status != 'connected':
+                continue
+            cursor_data = normalize_cursor(account.sync_cursor)
+            if cursor_data.get('backfill_state') != BackfillState.COMPLETE.value:
+                continue
+            if cursor_data.get('backfill_estimate') is not None:
+                continue
+            creds = repo.credentials(account.id)
+            if not creds:
+                continue
+            cred_payload = {
+                "access_token": decrypt_token(creds['encrypted_access_token']),
+                "refresh_token": decrypt_token(creds['encrypted_refresh_token']),
+                "expires_at": creds['expires_at']
+            }
+            access_token = await gmail_provider._ensure_access_token(
+                account, cred_payload, repo
+            )
+            estimate = await gmail_provider.fetch_backfill_estimate(access_token)
+            if estimate is not None:
+                cursor_data['backfill_estimate'] = int(estimate)
+                account.sync_cursor = dump_cursor(cursor_data)
+                repo.save_account(account)
+    except Exception:
+        pass
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    global _worker_task, _worker_running
+    global _worker_task, _worker_running, _backfill_task, _backfill_running
 
     # Startup: preload model and start worker
     try:
@@ -243,23 +410,40 @@ async def lifespan(app: FastAPI):
     except Exception:
         pass
 
-    # Start background analysis worker
+    # Resume durable backfill jobs for accounts left not_started/running.
+    # Backend owns the loop — the frontend only observes progress.
+    try:
+        for account in repo.accounts():
+            if account.provider != 'gmail' or account.connection_status != 'connected':
+                continue
+            cursor_data = normalize_cursor(account.sync_cursor)
+            state = cursor_data.get('backfill_state')
+            if state in (BackfillState.NOT_STARTED.value, BackfillState.RUNNING.value):
+                _ensure_backfill_job(account.id)
+    except Exception:
+        pass
+
+    # Start background workers
     _worker_task = asyncio.create_task(_analysis_worker())
+    _backfill_task = asyncio.create_task(_backfill_worker())
 
     # Backfill Gmail labels for legacy rows (non-blocking, metadata only)
-    backfill_task = asyncio.create_task(_label_backfill())
+    label_task = asyncio.create_task(_label_backfill())
+    # One-shot estimate for legacy-complete backfills (cheap, non-blocking)
+    estimate_task = asyncio.create_task(_backfill_estimate_once())
 
     yield
 
     # Shutdown
     _worker_running = False
-    if _worker_task:
-        _worker_task.cancel()
-        try:
-            await _worker_task
-        except asyncio.CancelledError:
-            pass
-    backfill_task.cancel()
+    _backfill_running = False
+    for task in (_worker_task, _backfill_task, label_task, estimate_task):
+        if task:
+            task.cancel()
+            try:
+                await task
+            except asyncio.CancelledError:
+                pass
     repo.close()
 
 
@@ -327,15 +511,12 @@ def get_accounts():
     result = []
     for acc in accounts:
         entry = acc.model_dump(mode='json')
-        # Derived backfill status for progressive All Mail sync (frontend
-        # polls /backfill while incomplete).
-        backfill_complete = False
-        try:
-            cursor = json.loads(acc.sync_cursor) if acc.sync_cursor else {}
-            backfill_complete = bool(cursor.get("backfill_complete"))
-        except Exception:
-            pass
-        entry["backfill_complete"] = backfill_complete
+        # Typed backfill status for the observer UI (state, counters,
+        # estimate — never tokens or secrets).
+        cursor_data = normalize_cursor(acc.sync_cursor)
+        status = status_payload(cursor_data)
+        entry["backfill"] = status
+        entry["backfill_complete"] = status["complete"]
         result.append(entry)
     return result
 
@@ -467,6 +648,17 @@ async def sync_account(account_id: str, load_older: bool = Query(False)):
                 enqueued += 1
             res["analysis_enqueued"] = enqueued
 
+            # Backend-owned All Mail backfill: kick off the durable job after
+            # the first sync (idempotent; the worker owns the loop).
+            cursor_data = normalize_cursor(account.sync_cursor)
+            if cursor_data.get('backfill_state') in (
+                BackfillState.NOT_STARTED.value, BackfillState.FAILED.value,
+            ):
+                set_state(cursor_data, BackfillState.RUNNING)
+                account.sync_cursor = dump_cursor(cursor_data)
+                repo.save_account(account)
+                _ensure_backfill_job(account.id)
+
             # Notify worker to wake up (via progress mechanism or sleep cycle)
             _broadcast_progress({"type": "jobs_enqueued", "count": enqueued, "pending": repo.pending_job_count('analyze_email')})
 
@@ -479,37 +671,48 @@ async def sync_account(account_id: str, load_older: bool = Query(False)):
 
 @app.post('/api/accounts/{account_id}/backfill')
 async def backfill_account(account_id: str):
-    """Progressive All Mail backfill — ONE page per call.
+    """Start/resume the durable All Mail backfill (backend-owned).
 
-    Pages through archived/sent Gmail mail (never spam/trash/drafts) and
-    persists the backfill page token in the sync cursor, so restarts
-    resume cleanly. Does not enqueue analysis for archived messages and
-    never blocks the UI or the AI queue.
+    Marks the typed backfill state RUNNING and arms the persistent job;
+    the background worker pages through archived/sent Gmail mail (never
+    spam/trash/drafts) with bounded pages and rate limiting. The frontend
+    observes progress via /api/accounts — it never owns the loop.
     """
     account = repo.account(account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Email account not found")
 
-    creds = repo.credentials(account_id)
-    if not creds:
-        raise HTTPException(status_code=400, detail="OAuth credentials missing for this account")
+    cursor_data = normalize_cursor(account.sync_cursor)
+    if cursor_data.get('backfill_state') == BackfillState.COMPLETE.value:
+        return {"status": status_payload(cursor_data), "action": "already_complete"}
 
-    access_token = decrypt_token(creds["encrypted_access_token"])
-    refresh_token = decrypt_token(creds["encrypted_refresh_token"])
+    set_state(cursor_data, BackfillState.RUNNING)
+    account.sync_cursor = dump_cursor(cursor_data)
+    repo.save_account(account)
+    _ensure_backfill_job(account_id)
+    return {"status": status_payload(cursor_data), "action": "resumed"}
 
-    cred_payload = {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-        "expires_at": creds["expires_at"]
-    }
 
-    try:
-        if account.provider == "gmail":
-            return await gmail_provider.backfill_messages(account, cred_payload, repo)
-        else:
-            raise HTTPException(status_code=400, detail="Unsupported account provider")
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Backfill error: {str(e)}")
+@app.post('/api/accounts/{account_id}/backfill/pause')
+async def pause_backfill(account_id: str):
+    """Pause the durable backfill. Progress and cursor are preserved."""
+    account = repo.account(account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Email account not found")
+    cursor_data = normalize_cursor(account.sync_cursor)
+    set_state(cursor_data, BackfillState.PAUSED)
+    account.sync_cursor = dump_cursor(cursor_data)
+    repo.save_account(account)
+    return {"status": status_payload(cursor_data), "action": "paused"}
+
+
+@app.get('/api/accounts/{account_id}/backfill')
+def backfill_status(account_id: str):
+    """Observer-facing backfill status (typed state, counters, estimate)."""
+    account = repo.account(account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Email account not found")
+    return status_payload(normalize_cursor(account.sync_cursor))
 
 
 # ── Analysis Progress (SSE) ──
@@ -558,18 +761,21 @@ def get_email_counts(account_id: str | None = None):
 @app.get('/api/emails')
 def get_emails(q: str | None = None, priority: str | None = None, needs_reply: bool | None = None,
                account_id: str | None = None, category: str | None = None,
-               scope: str = 'inbox', limit: int = 200, offset: int = 0):
+               scope: str = 'inbox', kind: str | None = None,
+               limit: int = 200, offset: int = 0):
     if category is not None and category not in VALID_CATEGORIES:
         raise HTTPException(status_code=400, detail=f"Unknown category: {category}")
     if scope not in ('inbox', 'all'):
         raise HTTPException(status_code=400, detail=f"Unknown scope: {scope}")
+    if kind is not None and kind not in ('received', 'sent', 'archived'):
+        raise HTTPException(status_code=400, detail=f"Unknown kind: {kind}")
 
     # DB-driven filtering: scope + eligibility + search context.
-    # scope=all includes archived mail but NOT spam/trash/draft/sent-only;
-    # category tabs apply only to the inbox scope.
+    # scope=all = the real All Mail (inbox + archived + sent); kind refines
+    # it. Category tabs apply only to the inbox scope.
     result = repo.emails_filtered(
         account_id=account_id, category=category if scope == 'inbox' else None,
-        query=q, scope=scope,
+        query=q, scope=scope, kind=kind if scope == 'all' else None,
         include_excluded=False, limit=limit, offset=offset
     )
 
