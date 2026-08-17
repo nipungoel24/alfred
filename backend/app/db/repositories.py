@@ -57,6 +57,7 @@ class Repository:
              email.sender.lower(), email.subject, email.received_at.isoformat() if email.received_at else None,
              json.dumps(label_ids), state, category, eligibility)
         )
+        self._update_fts_one(email.id, email)
 
     def upsert_email_commit(self, email: Email, fingerprint: str):
         """Insert or update a single email with immediate commit."""
@@ -68,8 +69,6 @@ class Repository:
         with transaction(self.con) as _:
             for email, fingerprint in email_fingerprint_pairs:
                 self.upsert_email(email, fingerprint)
-        # Update FTS index
-        self._update_fts_batch([e.id for e, _ in email_fingerprint_pairs])
 
     def emails(self, account_id=None, limit=500, offset=0):
         """Fetch emails ordered by received_at descending."""
@@ -193,28 +192,39 @@ class Repository:
     def emails_filtered(self, account_id: str | None = None,
                         category: str | None = None,
                         mailbox_state: str | None = None,
+                        scope: str = 'inbox',
                         include_excluded: bool = False,
                         query: str | None = None,
                         limit: int = 200, offset: int = 0) -> list[Email]:
         """Fetch emails with typed filters, DB-side (no JS filtering).
 
-        Default: only pipeline-visible messages (ACTIVE or DEFERRED).
-        Set include_excluded=True to surface spam/trash/archived rows too.
+        Scopes:
+        - 'inbox' (default): active Gmail INBOX only; category tabs apply.
+        - 'all': active inbox + archived — all locally synced mail except
+          spam/trash/draft/sent-only. Gmail tab semantics are NOT forced
+          onto archived messages, so `category` is ignored in this scope.
+        - include_excluded=True bypasses the scope (internal use only).
+
+        Archived messages remain visible in 'all' while their pipeline
+        eligibility (briefing/attention/tasks) stays excluded — visibility
+        and intelligence eligibility are separate concepts.
         """
         sql = 'SELECT payload FROM emails WHERE 1=1'
         params: list = []
         if account_id:
             sql += ' AND account_id=?'
             params.append(account_id)
-        if category:
+        if include_excluded:
+            if mailbox_state:
+                sql += ' AND mailbox_state=?'
+                params.append(mailbox_state)
+        elif scope == 'all':
+            sql += ' AND mailbox_state IN ("active_inbox","archived")'
+        else:
+            sql += ' AND mailbox_state="active_inbox"'
+        if category and scope != 'all':
             sql += ' AND gmail_category=?'
             params.append(category)
-        if mailbox_state:
-            sql += ' AND mailbox_state=?'
-            params.append(mailbox_state)
-        if not include_excluded:
-            sql += ' AND mailbox_state=?'
-            params.append('active_inbox')
         if query:
             # Category-contextual search (substring on indexed subject/sender
             # columns; FTS path keeps full-text ranking for broad searches).
@@ -227,10 +237,14 @@ class Repository:
         return [Email.model_validate_json(r['payload']) for r in rows]
 
     def email_counts(self, account_id: str | None = None) -> dict:
-        """Category + state counts derived from stored Gmail labels.
+        """Scope + category counts derived from stored Gmail labels.
 
-        Counts cover the ACTIVE Gmail inbox only; excluded spam/trash are
-        reported separately so the UI never shows them as inbox mail.
+        - inbox: active Gmail INBOX messages
+        - all_mail: inbox + archived (everything except spam/trash/
+          draft/sent-only)
+        - excluded: everything outside all_mail
+        - categories: inbox-scoped tab counts (tab semantics belong to
+          the Inbox experience)
         """
         acct_where = 'account_id=?' if account_id else '1=1'
         params = (account_id,) if account_id else ()
@@ -239,8 +253,14 @@ class Repository:
             f'SELECT COUNT(*) FROM emails WHERE {acct_where} AND mailbox_state="active_inbox"',
             params
         ).fetchone()[0]
+        all_mail = self.con.execute(
+            f'SELECT COUNT(*) FROM emails WHERE {acct_where} '
+            'AND mailbox_state IN ("active_inbox","archived")',
+            params
+        ).fetchone()[0]
         excluded = self.con.execute(
-            f'SELECT COUNT(*) FROM emails WHERE {acct_where} AND mailbox_state != "active_inbox"',
+            f'SELECT COUNT(*) FROM emails WHERE {acct_where} '
+            'AND mailbox_state NOT IN ("active_inbox","archived")',
             params
         ).fetchone()[0]
         rows = self.con.execute(
@@ -254,6 +274,7 @@ class Repository:
             if cat in category_counts:
                 category_counts[cat] = r[1]
         return {'active_inbox': active_inbox,
+                'all_mail': all_mail,
                 'excluded': excluded,
                 'categories': category_counts}
 
@@ -278,19 +299,27 @@ class Repository:
 
     def delete_email(self, email_id: str):
         self.con.execute('DELETE FROM emails WHERE id=?', (email_id,))
+        try:
+            self.con.execute(
+                'DELETE FROM emails_fts WHERE rowid NOT IN (SELECT rowid FROM emails)'
+            )
+        except Exception:
+            pass
         self.con.execute('DELETE FROM tasks WHERE source_email_id=?', (email_id,))
         self.con.commit()
 
     def search_emails(self, query: str, limit=100) -> list[Email]:
         """Full-text search using FTS5 if available, falling back to LIKE.
 
-        Always restricted to pipeline-visible (active inbox) messages —
-        spam/trash/archived rows can never surface through search.
+        Global search covers ALL locally synced non-spam/non-trash mail
+        (active inbox + archived). Spam/trash/draft/sent-only rows never
+        surface through search.
         """
         try:
             rows = self.con.execute(
                 "SELECT e.payload FROM emails_fts f JOIN emails e ON f.rowid = e.rowid "
-                "WHERE emails_fts MATCH ? AND e.mailbox_state='active_inbox' ORDER BY rank LIMIT ?",
+                "WHERE emails_fts MATCH ? AND e.mailbox_state IN ('active_inbox','archived') "
+                "ORDER BY rank LIMIT ?",
                 (query, limit)
             ).fetchall()
             return [Email.model_validate_json(r['payload']) for r in rows]
@@ -298,7 +327,7 @@ class Repository:
             # FTS5 not available, fall back to LIKE search
             like_q = f"%{query}%"
             rows = self.con.execute(
-                "SELECT payload FROM emails WHERE mailbox_state='active_inbox' "
+                "SELECT payload FROM emails WHERE mailbox_state IN ('active_inbox','archived') "
                 "AND (sender_col LIKE ? OR subject_col LIKE ?) LIMIT ?",
                 (like_q, like_q, limit)
             ).fetchall()
@@ -312,19 +341,18 @@ class Repository:
         ).fetchall()
         return [Email.model_validate_json(r['payload']) for r in rows]
 
-    def _update_fts_batch(self, email_ids: list[str]):
-        """Update FTS5 index for a batch of email IDs."""
+    def _update_fts_one(self, email_id: str, email: Email):
+        """Keep the FTS5 index in sync for a single upsert."""
         try:
-            for eid in email_ids:
-                email = self.email(eid)
-                if email:
-                    # Delete old FTS entry if exists, then insert
-                    self.con.execute(
-                        "INSERT INTO emails_fts(rowid, subject, sender, body) "
-                        "SELECT rowid, ?, ?, ? FROM emails WHERE id=?",
-                        (email.subject, email.sender, email.body[:5000], eid)
-                    )
-            self.con.commit()
+            self.con.execute(
+                "DELETE FROM emails_fts WHERE rowid = (SELECT rowid FROM emails WHERE id=?)",
+                (email_id,)
+            )
+            self.con.execute(
+                "INSERT INTO emails_fts(rowid, subject, sender, body) "
+                "SELECT rowid, ?, ?, ? FROM emails WHERE id=?",
+                (email.subject, email.sender, email.body[:5000], email_id)
+            )
         except Exception:
             pass  # FTS5 not available
 

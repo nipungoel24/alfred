@@ -443,7 +443,14 @@ def test_email_api_excluded_mail_never_listed(repo, tmp_path):
 
         counts = client.get("/api/emails/counts").json()
         assert counts["active_inbox"] == 1
-        assert counts["excluded"] == 3
+        # Archived counts toward All Mail now, not toward excluded
+        assert counts["all_mail"] == 2
+        assert counts["excluded"] == 2
+
+        # All Mail scope surfaces archived but never spam/trash
+        r_all = client.get("/api/emails", params={"scope": "all"})
+        assert r_all.status_code == 200
+        assert {e["id"] for e in r_all.json()} == {"ok", "a1"}
 
         # analyze excluded → 409
         assert client.post("/api/emails/s1/analyze").status_code == 409

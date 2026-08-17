@@ -323,7 +323,21 @@ def config():
 # ── Accounts ──
 @app.get('/api/accounts')
 def get_accounts():
-    return repo.accounts()
+    accounts = repo.accounts()
+    result = []
+    for acc in accounts:
+        entry = acc.model_dump(mode='json')
+        # Derived backfill status for progressive All Mail sync (frontend
+        # polls /backfill while incomplete).
+        backfill_complete = False
+        try:
+            cursor = json.loads(acc.sync_cursor) if acc.sync_cursor else {}
+            backfill_complete = bool(cursor.get("backfill_complete"))
+        except Exception:
+            pass
+        entry["backfill_complete"] = backfill_complete
+        result.append(entry)
+    return result
 
 @app.post('/api/accounts/gmail/connect')
 async def connect_gmail(redirect_uri: str = Query(...)):
@@ -463,6 +477,41 @@ async def sync_account(account_id: str, load_older: bool = Query(False)):
         raise HTTPException(status_code=500, detail=f"Sync error: {str(e)}")
 
 
+@app.post('/api/accounts/{account_id}/backfill')
+async def backfill_account(account_id: str):
+    """Progressive All Mail backfill — ONE page per call.
+
+    Pages through archived/sent Gmail mail (never spam/trash/drafts) and
+    persists the backfill page token in the sync cursor, so restarts
+    resume cleanly. Does not enqueue analysis for archived messages and
+    never blocks the UI or the AI queue.
+    """
+    account = repo.account(account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Email account not found")
+
+    creds = repo.credentials(account_id)
+    if not creds:
+        raise HTTPException(status_code=400, detail="OAuth credentials missing for this account")
+
+    access_token = decrypt_token(creds["encrypted_access_token"])
+    refresh_token = decrypt_token(creds["encrypted_refresh_token"])
+
+    cred_payload = {
+        "access_token": access_token,
+        "refresh_token": refresh_token,
+        "expires_at": creds["expires_at"]
+    }
+
+    try:
+        if account.provider == "gmail":
+            return await gmail_provider.backfill_messages(account, cred_payload, repo)
+        else:
+            raise HTTPException(status_code=400, detail="Unsupported account provider")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Backfill error: {str(e)}")
+
+
 # ── Analysis Progress (SSE) ──
 @app.get('/api/analysis/progress')
 async def analysis_progress():
@@ -509,13 +558,18 @@ def get_email_counts(account_id: str | None = None):
 @app.get('/api/emails')
 def get_emails(q: str | None = None, priority: str | None = None, needs_reply: bool | None = None,
                account_id: str | None = None, category: str | None = None,
-               limit: int = 200, offset: int = 0):
+               scope: str = 'inbox', limit: int = 200, offset: int = 0):
     if category is not None and category not in VALID_CATEGORIES:
         raise HTTPException(status_code=400, detail=f"Unknown category: {category}")
+    if scope not in ('inbox', 'all'):
+        raise HTTPException(status_code=400, detail=f"Unknown scope: {scope}")
 
-    # DB-driven filtering: category + eligibility + search context.
+    # DB-driven filtering: scope + eligibility + search context.
+    # scope=all includes archived mail but NOT spam/trash/draft/sent-only;
+    # category tabs apply only to the inbox scope.
     result = repo.emails_filtered(
-        account_id=account_id, category=category, query=q,
+        account_id=account_id, category=category if scope == 'inbox' else None,
+        query=q, scope=scope,
         include_excluded=False, limit=limit, offset=offset
     )
 

@@ -102,6 +102,7 @@ CREATE INDEX IF NOT EXISTS idx_emails_account_imported ON emails(account_id, imp
 CREATE INDEX IF NOT EXISTS idx_emails_thread ON emails(thread_id);
 CREATE INDEX IF NOT EXISTS idx_emails_received ON emails(received_at_col DESC);
 CREATE INDEX IF NOT EXISTS idx_emails_state_category ON emails(account_id, mailbox_state, gmail_category, received_at_col DESC);
+CREATE INDEX IF NOT EXISTS idx_emails_state_received ON emails(mailbox_state, received_at_col DESC);
 CREATE INDEX IF NOT EXISTS idx_emails_eligibility ON emails(pipeline_eligibility);
 CREATE INDEX IF NOT EXISTS idx_analysis_email ON email_analysis(email_id);
 CREATE INDEX IF NOT EXISTS idx_tasks_status ON tasks(status, created_at DESC);

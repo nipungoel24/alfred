@@ -85,41 +85,127 @@ class GmailProvider(MailProvider):
         except Exception:
             return None
 
-    async def sync_messages(self, account: EmailAccount, credentials: Dict[str, Any], repo, load_older: bool = False) -> Dict[str, Any]:
-        import json
+    async def _ensure_access_token(self, account, credentials: Dict[str, Any], repo) -> str:
+        """Return a valid access token, refreshing via the refresh token when
+        the stored token is expired. Shared by sync and backfill paths."""
         access_token = credentials.get("access_token")
         refresh_token = credentials.get("refresh_token")
         expires_at_str = credentials.get("expires_at")
 
-        # Check and refresh token if expired
-        is_expired = False
+        is_expired = True
         if expires_at_str:
             try:
                 expires_at = datetime.fromisoformat(expires_at_str)
-                if datetime.now(timezone.utc) >= expires_at:
-                    is_expired = True
+                is_expired = datetime.now(timezone.utc) >= expires_at
             except ValueError:
                 is_expired = True
-        else:
-            is_expired = True
 
         if is_expired and refresh_token:
+            res = await self.refresh_tokens(refresh_token)
+            access_token = res.get("access_token")
+            expires_in = res.get("expires_in", 3600)
+            new_expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
+            from ...db.secure_store import encrypt_token
+            repo.save_credentials(
+                account.id,
+                encrypt_token(refresh_token),
+                encrypt_token(access_token),
+                new_expires_at.isoformat()
+            )
+        return access_token
+
+    async def backfill_messages(self, account: EmailAccount, credentials: Dict[str, Any],
+                                repo, page_size: int = 50) -> Dict[str, Any]:
+        """Progressive All Mail backfill — ONE page per call.
+
+        Phase B of the sync strategy: pages through messages that are NOT
+        in the inbox (archived + sent) using `q=-label:INBOX`, which Gmail
+        serves newest-first with includeSpamTrash=false. Spam and Trash
+        never arrive here by construction; Drafts are not in messages.list.
+
+        One page per invocation keeps the UI and the AI queue unblocked.
+        The backfill page token persists in the account sync cursor, so a
+        restart resumes exactly where it stopped. Duplicates are skipped
+        via the local cache (idempotent).
+        """
+        import json
+        access_token = await self._ensure_access_token(account, credentials, repo)
+        headers = {"Authorization": f"Bearer {access_token}"}
+
+        cursor_data: Dict[str, Any] = {}
+        if account.sync_cursor:
             try:
-                res = await self.refresh_tokens(refresh_token)
-                access_token = res.get("access_token")
-                expires_in = res.get("expires_in", 3600)
-                new_expires_at = datetime.now(timezone.utc) + timedelta(seconds=expires_in)
-                
-                # Encrypt and save updated credentials
-                from ...db.secure_store import encrypt_token
-                enc_access = encrypt_token(access_token)
-                enc_refresh = encrypt_token(refresh_token)
-                repo.save_credentials(account.id, enc_refresh, enc_access, new_expires_at.isoformat())
-            except Exception as e:
-                # Set account status to error if refresh fails
-                account.connection_status = "error"
-                repo.save_account(account)
-                raise e
+                cursor_data = json.loads(account.sync_cursor)
+            except Exception:
+                cursor_data = {}
+
+        if cursor_data.get("backfill_complete"):
+            return {"imported": 0, "skipped_duplicates": 0, "label_updates": 0,
+                    "has_more": False, "complete": True}
+
+        backfill_page_token = cursor_data.get("backfill_page_token")
+        imported = 0
+        skipped = 0
+        label_updates = 0
+
+        async with httpx.AsyncClient() as client:
+            params: Dict[str, Any] = {
+                "q": "-label:INBOX",
+                "maxResults": page_size,
+                "includeSpamTrash": "false",
+            }
+            if backfill_page_token:
+                params["pageToken"] = backfill_page_token
+
+            r = await client.get(f"{self.gmail_base_url}/messages", headers=headers, params=params)
+            r.raise_for_status()
+            res_json = r.json()
+            messages_list = res_json.get("messages", [])
+
+            for msg in messages_list:
+                msg_id = msg.get("id")
+                if not msg_id:
+                    continue
+                if repo.email_exists(msg_id):
+                    labels = msg.get("labelIds")
+                    if labels:
+                        repo.update_email_labels(msg_id, labels)
+                        label_updates += 1
+                    skipped += 1
+                    continue
+                # Fetch full detail for new messages (body needed for the
+                # local mailbox; archived messages are NOT enqueued for
+                # analysis — eligibility stays inbox-only).
+                try:
+                    r_detail = await client.get(
+                        f"{self.gmail_base_url}/messages/{msg_id}", headers=headers
+                    )
+                    r_detail.raise_for_status()
+                    msg_detail = r_detail.json()
+                    normalized = self._normalize_message(msg_detail, account.id)
+                    repo.upsert_email(normalized, content_fingerprint(normalized))
+                    imported += 1
+                except Exception:
+                    pass  # Ignore individual message load errors
+
+            new_page_token = res_json.get("nextPageToken")
+            cursor_data["backfill_page_token"] = new_page_token
+            cursor_data["backfill_complete"] = not bool(new_page_token)
+            account.sync_cursor = json.dumps(cursor_data)
+            repo.save_account(account)
+
+            return {"imported": imported, "skipped_duplicates": skipped,
+                    "label_updates": label_updates,
+                    "has_more": bool(new_page_token),
+                    "complete": not bool(new_page_token)}
+
+    async def sync_messages(self, account: EmailAccount, credentials: Dict[str, Any], repo, load_older: bool = False) -> Dict[str, Any]:
+        import json
+        access_token = await self._ensure_access_token(account, credentials, repo)
+        if not access_token:
+            account.connection_status = "error"
+            repo.save_account(account)
+            raise Exception("Gmail access token refresh failed")
 
         headers = {"Authorization": f"Bearer {access_token}"}
         
