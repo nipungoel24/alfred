@@ -65,7 +65,11 @@ export function MessageReader({ emailId, intelVisible, onToggleIntel }: MessageR
           <article className="reader-inner reveal">
             <h2 className="reader-subject">{email.subject}</h2>
             <div className="reader-meta">
-              <span className="reader-sender-avatar" aria-hidden="true">
+              <span
+                className="reader-sender-avatar"
+                aria-hidden="true"
+                style={{ background: avatarGradient(email.sender) }}
+              >
                 {initialOf(email.sender_name || email.sender)}
               </span>
               <div>
@@ -96,6 +100,18 @@ export function MessageReader({ emailId, intelVisible, onToggleIntel }: MessageR
 function initialOf(sender: string): string {
   const trimmed = sender.trim();
   return trimmed ? trimmed[0].toUpperCase() : '?';
+}
+
+/* Deterministic gradient identity per sender — quiet chromatic energy,
+   never random per render. */
+export function avatarGradient(sender: string): string {
+  let hash = 0;
+  const key = sender.trim().toLowerCase();
+  for (let i = 0; i < key.length; i++) {
+    hash = (hash * 31 + key.charCodeAt(i)) | 0;
+  }
+  const hue = ((hash % 360) + 360) % 360;
+  return `linear-gradient(135deg, hsl(${hue} 68% 56%) 0%, hsl(${(hue + 46) % 360} 72% 46%) 100%)`;
 }
 
 function formatTimeLong(dateStr?: string | null): string {

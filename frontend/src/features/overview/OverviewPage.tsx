@@ -54,8 +54,8 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
           </p>
         </header>
 
-        {/* Flat metric strip — no cards */}
-        <div className="metrics-strip metrics-strip-flat reveal" style={{ ['--stagger' as string]: 1 }}>
+        {/* Flat metric strip — premium glass tiles */}
+        <div className="metrics-strip-flat reveal" style={{ ['--stagger' as string]: 1 }}>
           <Metric value={brief?.high_priority_count ?? 0} label="Important" onClick={() => onNavigate('mail')} />
           <Metric value={brief?.needs_reply_count ?? 0} label="Needs Reply" accent onClick={() => onNavigate('mail')} />
           <Metric value={brief?.deadline_count ?? 0} label="Deadlines" onClick={() => onNavigate('deadlines')} />
@@ -75,31 +75,35 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
                 )}
               </div>
               {attentionItems.length ? (
-                <div className="overview-rows">
-                  {attentionItems.map(item => (
-                    <button
-                      key={item.email_id}
-                      type="button"
-                      className="overview-row"
-                      onClick={() => onNavigate('mail')}
-                      aria-label={`${item.sender}: ${item.subject}`}
-                    >
-                      <span className="overview-row-main">
-                        <span className="overview-row-title">{item.subject}</span>
-                        <span className="overview-row-meta">
-                          {item.sender}
-                          {item.why_it_matters ? ` · ${item.why_it_matters}` : ''}
+                <div className="overview-panel">
+                  <div className="overview-rows">
+                    {attentionItems.map(item => (
+                      <button
+                        key={item.email_id}
+                        type="button"
+                        className="overview-row"
+                        onClick={() => onNavigate('mail')}
+                        aria-label={`${item.sender}: ${item.subject}`}
+                      >
+                        <span className="overview-row-main">
+                          <span className="overview-row-title">{item.subject}</span>
+                          <span className="overview-row-meta">
+                            {item.sender}
+                            {item.why_it_matters ? ` · ${item.why_it_matters}` : ''}
+                          </span>
                         </span>
-                      </span>
-                      <span className="overview-row-side">
-                        <span className={`badge badge-${item.priority}`}>{item.priority}</span>
-                        {item.needs_reply && <span className="badge badge-reply">Reply</span>}
-                      </span>
-                    </button>
-                  ))}
+                        <span className="overview-row-side">
+                          <span className={`badge badge-${item.priority}`}>{item.priority}</span>
+                          {item.needs_reply && <span className="badge badge-reply">Reply</span>}
+                        </span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
               ) : (
-                <p className="overview-empty"><CheckSquare size={15} aria-hidden="true" /> All clear — nothing urgent right now.</p>
+                <div className="overview-panel">
+                  <p className="overview-empty"><CheckSquare size={15} aria-hidden="true" /> All clear — nothing urgent right now.</p>
+                </div>
               )}
             </section>
 
@@ -117,7 +121,9 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
                     {generateBriefing.isPending ? 'Generating…' : 'Refresh'}
                   </button>
                 </div>
-                <p className="overview-briefing">{brief.executive_summary}</p>
+                <div className="accent-wash overview-briefing-panel">
+                  <p className="overview-briefing">{brief.executive_summary}</p>
+                </div>
               </section>
             )}
           </div>
@@ -134,21 +140,25 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
                 ) : null}
               </div>
               {brief?.deadlines?.length ? (
-                <div className="overview-rows">
-                  {brief.deadlines.slice(0, 6).map((item, idx) => (
-                    <div key={idx} className="overview-row overview-row-static">
-                      <span className="overview-row-main">
-                        <span className="overview-row-title">{item.subject}</span>
-                        <span className="overview-row-meta">{item.sender}</span>
-                      </span>
-                      <span className="overview-row-side">
-                        <span className="overview-due">{item.deadline}</span>
-                      </span>
-                    </div>
-                  ))}
+                <div className="overview-panel">
+                  <div className="overview-rows">
+                    {brief.deadlines.slice(0, 6).map((item, idx) => (
+                      <div key={idx} className="overview-row overview-row-static">
+                        <span className="overview-row-main">
+                          <span className="overview-row-title">{item.subject}</span>
+                          <span className="overview-row-meta">{item.sender}</span>
+                        </span>
+                        <span className="overview-row-side">
+                          <span className="overview-due">{item.deadline}</span>
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               ) : (
-                <p className="overview-empty"><Clock size={15} aria-hidden="true" /> No upcoming deadlines.</p>
+                <div className="overview-panel">
+                  <p className="overview-empty"><Clock size={15} aria-hidden="true" /> No upcoming deadlines.</p>
+                </div>
               )}
             </section>
           </aside>

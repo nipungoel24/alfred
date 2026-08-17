@@ -70,6 +70,14 @@ export default function App() {
 
   return (
     <div className="app-shell">
+      {/* Ambient aurora — quiet Siri-like glow behind the product UI */}
+      <div className="ambient-layer" aria-hidden="true">
+        <span className="ambient-orb orb-violet" />
+        <span className="ambient-orb orb-indigo" />
+        <span className="ambient-orb orb-cyan" />
+        <span className="ambient-orb orb-pink" />
+      </div>
+
       <IconRail
         page={page}
         onNavigate={handleNavigate}
