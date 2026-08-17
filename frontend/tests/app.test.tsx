@@ -166,7 +166,7 @@ describe('Alfred Frontend Application', () => {
     expect(screen.getByText('Inbox')).toBeInTheDocument();
     expect(screen.getByText('Important')).toBeInTheDocument();
     expect(screen.getByText('Deadlines')).toBeInTheDocument();
-    expect(screen.getByText('Needs Your Attention')).toBeInTheDocument();
+    expect(screen.getByText('Needs attention')).toBeInTheDocument();
   }, 15000);
 
   it('navigates to Mail workspace via the rail', async () => {
@@ -182,7 +182,7 @@ describe('Alfred Frontend Application', () => {
 
     await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
     expect(screen.getByRole('tab', { name: /Promotions/ })).toBeInTheDocument();
-    expect(screen.getByRole('searchbox')).toBeInTheDocument();
+    expect(screen.getByRole('searchbox', { name: 'Search all mail' })).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('Payment failed - action required today')).toBeInTheDocument();
     });

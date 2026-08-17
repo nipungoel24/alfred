@@ -51,8 +51,15 @@ export default function App() {
 
   const handleNavigate = useCallback((next: AppPage) => {
     setPage(next);
-    setSearchQuery('');
+    if (next !== 'mail') setSearchQuery('');
   }, []);
+
+  // Typing a global search always lands in the mail workspace, where the
+  // results span all locally synced non-spam/non-trash mail.
+  const handleSearchChange = useCallback((value: string) => {
+    setSearchQuery(value);
+    if (value.trim().length > 0 && page !== 'mail') setPage('mail');
+  }, [page]);
 
   const accountInitial = useMemo(
     () => (gmailAccount?.display_name?.[0] ?? gmailAccount?.email_address?.[0] ?? '').toUpperCase(),
@@ -74,7 +81,7 @@ export default function App() {
         title={meta.title}
         subtitle={meta.subtitle}
         searchValue={searchQuery}
-        onSearchChange={setSearchQuery}
+        onSearchChange={handleSearchChange}
         aiReady={aiReady}
         accountInitial={accountInitial || undefined}
       />
@@ -84,6 +91,7 @@ export default function App() {
         {page === 'mail' && (
           <MailWorkspace
             searchQuery={searchQuery}
+            onClearSearch={() => setSearchQuery('')}
             syncState={{
               syncing: syncMutation.isPending,
               lastSyncAt: gmailAccount?.last_sync_at ?? null,

@@ -44,10 +44,10 @@ export function WorkspaceHeader({
           ref={inputRef}
           id="global-search"
           type="search"
-          placeholder="Search mail…"
+          placeholder="Search all mail…"
           value={searchValue}
           onChange={e => onSearchChange(e.target.value)}
-          aria-label="Search mail"
+          aria-label="Search all mail"
         />
         <span className="search-shortcut">Ctrl K</span>
       </div>

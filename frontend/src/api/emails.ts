@@ -2,11 +2,13 @@ import { api } from './client';
 
 export type Priority = 'urgent' | 'high' | 'medium' | 'low';
 export type MailCategory = 'primary' | 'promotions' | 'social' | 'updates' | 'forums';
+export type MailScope = 'inbox' | 'all';
 
 export const CATEGORY_ORDER: MailCategory[] = ['primary', 'promotions', 'social', 'updates', 'forums'];
 
 export type EmailCounts = {
   active_inbox: number;
+  all_mail: number;
   excluded: number;
   categories: Record<MailCategory, number>;
 };
@@ -70,7 +72,8 @@ export type EmailAccount = {
   last_sync_at?: string | null;
   sync_cursor?: string | null;
   created_at?: string | null;
-  updated_at?: string | null
+  updated_at?: string | null;
+  backfill_complete?: boolean
 };
 
 export type Task = {
@@ -91,6 +94,7 @@ export const emails = (options: {
   needsReply?: boolean | null;
   accountId?: string;
   category?: MailCategory | null;
+  scope?: MailScope;
   limit?: number;
   offset?: number;
 } = {}) => {
@@ -100,6 +104,7 @@ export const emails = (options: {
   if (options.needsReply !== null && options.needsReply !== undefined) params.push(`needs_reply=${options.needsReply}`);
   if (options.accountId) params.push(`account_id=${encodeURIComponent(options.accountId)}`);
   if (options.category) params.push(`category=${encodeURIComponent(options.category)}`);
+  if (options.scope && options.scope !== 'inbox') params.push(`scope=${encodeURIComponent(options.scope)}`);
   if (options.limit !== undefined) params.push(`limit=${options.limit}`);
   if (options.offset !== undefined) params.push(`offset=${options.offset}`);
   const queryStr = params.length ? `?${params.join('&')}` : '';
@@ -120,6 +125,7 @@ export const health = () => api<Health>('/health');
 export const accounts = () => api<EmailAccount[]>('/api/accounts');
 export const connectGmail = (redirectUri: string) => api<{ url: string }>(`/api/accounts/gmail/connect?redirect_uri=${encodeURIComponent(redirectUri)}`, { method: 'POST' });
 export const syncAccount = (id: string, loadOlder = false) => api<{ imported: number; skipped_duplicates: number; has_more?: boolean }>(`/api/accounts/${id}/sync?load_older=${loadOlder}`, { method: 'POST' });
+export const backfillAccount = (id: string) => api<{ imported: number; skipped_duplicates: number; label_updates?: number; has_more: boolean; complete: boolean }>(`/api/accounts/${id}/backfill`, { method: 'POST' });
 export const deleteAccount = (id: string) => api<{ status: string }>(`/api/accounts/${id}`, { method: 'DELETE' });
 
 // Task management

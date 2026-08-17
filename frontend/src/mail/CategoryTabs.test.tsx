@@ -5,6 +5,7 @@ import { CATEGORY_ORDER } from '../api/emails';
 
 const counts = {
   active_inbox: 7,
+  all_mail: 9,
   excluded: 2,
   categories: { primary: 3, promotions: 2, social: 0, updates: 1, forums: 1 },
 };
