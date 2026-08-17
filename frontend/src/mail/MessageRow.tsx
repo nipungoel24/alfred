@@ -30,6 +30,9 @@ export const MessageRow = memo(function MessageRow({
   const important = gmailImportant || analysis?.priority === 'high' || analysis?.priority === 'urgent';
   const needsReply = analysis?.needs_reply;
   const isLater = laterIds.has(email.id);
+  const isSent = email.label_ids?.includes('SENT');
+  const isArchived = !email.label_ids?.includes('INBOX') && !isSent
+    && !email.label_ids?.includes('SPAM') && !email.label_ids?.includes('TRASH');
 
   const timeLabel = formatTime(email.received_at);
   const snippet = bodySnippet(email);
@@ -56,6 +59,8 @@ export const MessageRow = memo(function MessageRow({
       <div className="message-subject">{email.subject}</div>
       <div className="message-snippet">{snippet}</div>
       <div className="message-row-bottom">
+        {isSent && <span className="badge badge-sent">Sent</span>}
+        {isArchived && <span className="badge badge-neutral">Archived</span>}
         {important && (
           <span className={`badge ${analysis?.priority === 'urgent' ? 'badge-urgent' : 'badge-high'}`}>
             {analysis?.priority === 'urgent' ? 'Urgent' : 'Important'}

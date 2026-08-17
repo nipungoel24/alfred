@@ -1,7 +1,13 @@
+import { useState } from 'react';
 import { LayoutDashboard, Mail, CheckSquare, Clock, UserCircle, Settings } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type AppPage = 'overview' | 'mail' | 'tasks' | 'deadlines' | 'accounts' | 'settings';
+
+// Approved Alfred brand asset (symbol-only mark). If the generated asset
+// has not been copied into frontend/public yet, the rail falls back to a
+// minimal violet block until the file exists.
+const BRAND_ICON_URL = '/alfred-icon.png';
 
 interface RailItem {
   page: AppPage;
@@ -29,9 +35,21 @@ interface IconRailProps {
 }
 
 export function IconRail({ page, onNavigate, aiReady, gmailConnected }: IconRailProps) {
+  const [brandFailed, setBrandFailed] = useState(false);
+
   return (
     <aside className="icon-rail" aria-label="Primary navigation">
-      <div className="rail-brand" aria-hidden="true">A</div>
+      <div className="rail-brand" aria-hidden="true">
+        {!brandFailed && (
+          <img
+            src={BRAND_ICON_URL}
+            alt=""
+            className="rail-brand-icon"
+            onError={() => setBrandFailed(true)}
+          />
+        )}
+        {brandFailed && <span className="rail-brand-fallback">A</span>}
+      </div>
       <nav className="rail-nav" aria-label="Alfred sections">
         {PRIMARY.map(item => (
           <RailButton key={item.page} item={item} active={page === item.page} onClick={() => onNavigate(item.page)} />

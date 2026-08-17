@@ -3,8 +3,20 @@ import { api } from './client';
 export type Priority = 'urgent' | 'high' | 'medium' | 'low';
 export type MailCategory = 'primary' | 'promotions' | 'social' | 'updates' | 'forums';
 export type MailScope = 'inbox' | 'all';
+export type MailKind = 'received' | 'sent' | 'archived';
 
 export const CATEGORY_ORDER: MailCategory[] = ['primary', 'promotions', 'social', 'updates', 'forums'];
+
+export type BackfillStatus = {
+  state: 'not_started' | 'running' | 'paused' | 'complete' | 'failed';
+  complete: boolean;
+  estimate: number | null;
+  imported: number;
+  pages: number;
+  remaining_estimate: number | null;
+  last_page_at: string | null;
+  last_error: string | null;
+};
 
 export type EmailCounts = {
   active_inbox: number;
@@ -73,7 +85,8 @@ export type EmailAccount = {
   sync_cursor?: string | null;
   created_at?: string | null;
   updated_at?: string | null;
-  backfill_complete?: boolean
+  backfill_complete?: boolean;
+  backfill?: BackfillStatus
 };
 
 export type Task = {
@@ -95,6 +108,7 @@ export const emails = (options: {
   accountId?: string;
   category?: MailCategory | null;
   scope?: MailScope;
+  kind?: MailKind | null;
   limit?: number;
   offset?: number;
 } = {}) => {
@@ -105,6 +119,7 @@ export const emails = (options: {
   if (options.accountId) params.push(`account_id=${encodeURIComponent(options.accountId)}`);
   if (options.category) params.push(`category=${encodeURIComponent(options.category)}`);
   if (options.scope && options.scope !== 'inbox') params.push(`scope=${encodeURIComponent(options.scope)}`);
+  if (options.kind) params.push(`kind=${encodeURIComponent(options.kind)}`);
   if (options.limit !== undefined) params.push(`limit=${options.limit}`);
   if (options.offset !== undefined) params.push(`offset=${options.offset}`);
   const queryStr = params.length ? `?${params.join('&')}` : '';
@@ -125,7 +140,8 @@ export const health = () => api<Health>('/health');
 export const accounts = () => api<EmailAccount[]>('/api/accounts');
 export const connectGmail = (redirectUri: string) => api<{ url: string }>(`/api/accounts/gmail/connect?redirect_uri=${encodeURIComponent(redirectUri)}`, { method: 'POST' });
 export const syncAccount = (id: string, loadOlder = false) => api<{ imported: number; skipped_duplicates: number; has_more?: boolean }>(`/api/accounts/${id}/sync?load_older=${loadOlder}`, { method: 'POST' });
-export const backfillAccount = (id: string) => api<{ imported: number; skipped_duplicates: number; label_updates?: number; has_more: boolean; complete: boolean }>(`/api/accounts/${id}/backfill`, { method: 'POST' });
+export const backfillAccount = (id: string) => api<{ status: BackfillStatus; action: string }>(`/api/accounts/${id}/backfill`, { method: 'POST' });
+export const pauseBackfill = (id: string) => api<{ status: BackfillStatus; action: string }>(`/api/accounts/${id}/backfill/pause`, { method: 'POST' });
 export const deleteAccount = (id: string) => api<{ status: string }>(`/api/accounts/${id}`, { method: 'DELETE' });
 
 // Task management

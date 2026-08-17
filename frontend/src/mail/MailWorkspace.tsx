@@ -1,11 +1,12 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ReactNode } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { RefreshCw, Star, MessageSquareReply, Archive, Search, X } from 'lucide-react';
+import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { RefreshCw, Star, MessageSquareReply, Archive, Search, X, Pause, Play } from 'lucide-react';
 import {
-  emails as fetchEmails, emailCounts, accounts as fetchAccounts, backfillAccount,
+  emails as fetchEmails, emailCounts, accounts as fetchAccounts,
+  backfillAccount, pauseBackfill,
 } from '../api/emails';
-import type { MailCategory, MailScope } from '../api/emails';
+import type { MailCategory, MailKind, MailScope } from '../api/emails';
 import { CATEGORY_ORDER } from '../api/emails';
 import { CategoryTabs } from './CategoryTabs';
 import { MessageList } from './MessageList';
@@ -14,7 +15,7 @@ import { IntelligencePanel } from '../intelligence/IntelligencePanel';
 import type { RowFilter } from './MessageRow';
 
 const LATER_KEY = 'alfred-later-ids';
-const BACKFILL_POLL_MS = 20_000;
+const ACCOUNTS_REFRESH_MS = 15_000;
 
 function readLaterIds(): Set<string> {
   try {
@@ -43,15 +44,13 @@ interface MailWorkspaceProps {
 export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequestSync }: MailWorkspaceProps) {
   const queryClient = useQueryClient();
   const [view, setView] = useState<MailScope>('inbox');
+  const [kind, setKind] = useState<MailKind | null>(null);
   const [category, setCategory] = useState<MailCategory>('primary');
   const [filter, setFilter] = useState<RowFilter>('all');
   const [viewFilter, setViewFilter] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [intelVisible, setIntelVisible] = useState(true);
   const [laterIds, setLaterIds] = useState<Set<string>>(readLaterIds);
-  const [backfillState, setBackfillState] = useState<{ active: boolean; importing: boolean }>({
-    active: false, importing: false,
-  });
 
   const globalSearchActive = searchQuery.trim().length > 0;
   const scope: MailScope = globalSearchActive ? 'all' : view;
@@ -63,20 +62,23 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
     staleTime: 15_000,
   });
 
+  // Passive observation of backend-owned backfill state.
   const { data: accountsList = [] } = useQuery({
     queryKey: ['accounts'],
     queryFn: fetchAccounts,
-    staleTime: 60_000,
+    staleTime: 10_000,
+    refetchInterval: ACCOUNTS_REFRESH_MS,
   });
 
   const gmailAccount = accountsList.find(a => a.provider === 'gmail' && a.connection_status === 'connected');
-  const backfillIncomplete = Boolean(gmailAccount && gmailAccount.backfill_complete === false);
+  const backfill = gmailAccount?.backfill;
 
   const { data: emailsList = [], isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['emails', { view, category, filter, globalSearchActive, searchQuery, viewFilter }],
+    queryKey: ['emails', { view, kind, category, filter, globalSearchActive, searchQuery, viewFilter }],
     queryFn: () => fetchEmails({
       category: globalSearchActive || view === 'all' ? null : category,
       scope,
+      kind: globalSearchActive ? null : view === 'all' ? kind : null,
       priority: filter === 'important' && !globalSearchActive ? 'high' : undefined,
       needsReply: filter === 'reply' && !globalSearchActive ? true : undefined,
       query: activeQuery || undefined,
@@ -85,34 +87,20 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
     staleTime: 15_000,
   });
 
-  // Progressive All Mail backfill — one page per poll, never blocking.
-  const accountId = gmailAccount?.id;
-  useEffect(() => {
-    if (!backfillIncomplete || !accountId) return;
-    let running = false;
-    const poll = async () => {
-      if (running) return;
-      running = true;
-      setBackfillState(s => ({ ...s, active: true, importing: true }));
-      try {
-        const res = await backfillAccount(accountId);
-        if (res.complete || !res.has_more) {
-          setBackfillState({ active: false, importing: false });
-          await queryClient.invalidateQueries({ queryKey: ['accounts'] });
-        }
-      } catch {
-        /* transient failure — retry on the next tick */
-      } finally {
-        running = false;
-        setBackfillState(s => ({ ...s, importing: false }));
-        await queryClient.invalidateQueries({ queryKey: ['emailCounts'] });
-        await queryClient.invalidateQueries({ queryKey: ['emails'] });
-      }
-    };
-    void poll();
-    const interval = setInterval(() => void poll(), BACKFILL_POLL_MS);
-    return () => clearInterval(interval);
-  }, [backfillIncomplete, accountId, queryClient]);
+  // Backfill controls: start/resume + pause. The loop itself lives in the
+  // backend worker; these only flip the typed state and arm the job.
+  const backfillMutation = useMutation({
+    mutationFn: (id: string) => backfillAccount(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    },
+  });
+  const pauseMutation = useMutation({
+    mutationFn: (id: string) => pauseBackfill(id),
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: ['accounts'] });
+    },
+  });
 
   const displayedEmails = useMemo(() => {
     if (globalSearchActive) return emailsList;
@@ -183,12 +171,21 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
             />
           )}
 
-          {backfillState.active && (
-            <div className="backfill-status" role="status">
-              <span className="btn-spinner" aria-hidden="true" />
-              {backfillState.importing ? 'Syncing older mail…' : 'Older mail loading…'}
+          {!globalSearchActive && view === 'all' && (
+            <div className="allmail-kind-switch" role="tablist" aria-label="All Mail filter">
+              <KindButton label="All" active={kind === null} onClick={() => setKind(null)} />
+              <KindButton label="Received" active={kind === 'received'} onClick={() => setKind('received')} />
+              <KindButton label="Sent" active={kind === 'sent'} onClick={() => setKind('sent')} />
+              <KindButton label="Archived" active={kind === 'archived'} onClick={() => setKind('archived')} />
             </div>
           )}
+
+          <BackfillStatusLine
+            backfill={backfill}
+            onResume={() => gmailAccount && backfillMutation.mutate(gmailAccount.id)}
+            onPause={() => gmailAccount && pauseMutation.mutate(gmailAccount.id)}
+            busy={backfillMutation.isPending || pauseMutation.isPending}
+          />
         </div>
 
         <div className="mail-pane-toolbar" role="toolbar" aria-label="Mail filters">
@@ -270,6 +267,59 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
   );
 }
 
+function BackfillStatusLine({ backfill, onResume, onPause, busy }: {
+  backfill?: import('../api/emails').BackfillStatus;
+  onResume: () => void;
+  onPause: () => void;
+  busy: boolean;
+}) {
+  if (!backfill) return null;
+  const { state, imported, remaining_estimate: remaining, complete, last_error: lastError } = backfill;
+
+  if (complete) {
+    return (
+      <div className="backfill-status complete" role="status">
+        All mail synced
+        {imported > 0 && <span className="backfill-detail">{imported} older messages local</span>}
+      </div>
+    );
+  }
+
+  let label: string;
+  if (state === 'paused') label = 'Syncing paused';
+  else if (state === 'failed') label = 'Syncing failed';
+  else label = 'Syncing older mail…';
+
+  return (
+    <div className="backfill-status" role="status">
+      {state === 'running' && <span className="btn-spinner" aria-hidden="true" />}
+      <span>{label}</span>
+      {state === 'running' && (
+        <span className="backfill-detail">
+          {imported > 0 && `${imported} synced`}
+          {imported > 0 && remaining !== null ? ` · ` : ''}
+          {remaining !== null && `~${remaining} remaining`}
+        </span>
+      )}
+      {state === 'failed' && lastError && (
+        <button type="button" className="backfill-retry" onClick={onResume} disabled={busy}>
+          Retry
+        </button>
+      )}
+      {state === 'running' && (
+        <button type="button" className="backfill-retry" onClick={onPause} disabled={busy} aria-label="Pause syncing older mail">
+          <Pause size={11} aria-hidden="true" />
+        </button>
+      )}
+      {state === 'paused' && (
+        <button type="button" className="backfill-retry" onClick={onResume} disabled={busy} aria-label="Resume syncing older mail">
+          <Play size={11} aria-hidden="true" />
+        </button>
+      )}
+    </div>
+  );
+}
+
 function ViewButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
   return (
     <button
@@ -277,6 +327,20 @@ function ViewButton({ label, active, onClick }: { label: string; active: boolean
       role="tab"
       aria-selected={active}
       className={`view-tab ${active ? 'active' : ''}`}
+      onClick={onClick}
+    >
+      {label}
+    </button>
+  );
+}
+
+function KindButton({ label, active, onClick }: { label: string; active: boolean; onClick: () => void }) {
+  return (
+    <button
+      type="button"
+      role="tab"
+      aria-selected={active}
+      className={`kind-tab ${active ? 'active' : ''}`}
       onClick={onClick}
     >
       {label}

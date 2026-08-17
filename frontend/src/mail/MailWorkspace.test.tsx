@@ -50,28 +50,47 @@ const archivedEmail: Email = {
   analysis: null,
 };
 
+const sentEmail: Email = {
+  id: 's1',
+  sender: 'me@gmail.com',
+  sender_name: 'Me',
+  recipients: ['client@corp.com'],
+  subject: 'Re: proposal follow-up',
+  body: 'Attached the updated proposal.',
+  received_at: '2026-07-01T09:00:00Z',
+  label_ids: ['SENT'],
+  analysis: null,
+};
+
 vi.mock('../api/emails', async (importOriginal) => {
   const original = await importOriginal<typeof import('../api/emails')>();
   return {
     ...original,
-    emails: vi.fn((options?: { category?: string | null; scope?: string; query?: string }) => {
+    emails: vi.fn((options?: { category?: string | null; scope?: string; kind?: string | null; query?: string }) => {
       if (options?.query) {
         return Promise.resolve([archivedEmail]);
       }
+      if (options?.scope === 'all' && options?.kind === 'sent') {
+        return Promise.resolve([sentEmail]);
+      }
+      if (options?.scope === 'all' && options?.kind === 'archived') {
+        return Promise.resolve([archivedEmail]);
+      }
       if (options?.scope === 'all') {
-        return Promise.resolve([primaryEmail, archivedEmail]);
+        return Promise.resolve([primaryEmail, archivedEmail, sentEmail]);
       }
       if (options?.category === 'promotions') return Promise.resolve([promoEmail]);
       return Promise.resolve([primaryEmail]);
     }),
     emailCounts: vi.fn(() => Promise.resolve({
       active_inbox: 2,
-      all_mail: 3,
+      all_mail: 4,
       excluded: 0,
       categories: { primary: 1, promotions: 1, social: 0, updates: 0, forums: 0 },
     })),
     emailDetails: vi.fn((id: string) => Promise.resolve(
-      id === 'p1' ? primaryEmail : id === 'pr1' ? promoEmail : archivedEmail)),
+      id === 'p1' ? primaryEmail : id === 'pr1' ? promoEmail
+        : id === 'a1' ? archivedEmail : sentEmail)),
     accounts: vi.fn(() => Promise.resolve([
       {
         id: 'gmail_user',
@@ -79,9 +98,20 @@ vi.mock('../api/emails', async (importOriginal) => {
         email_address: 'user@gmail.com',
         display_name: 'User',
         connection_status: 'connected',
-        backfill_complete: true,
+        backfill: {
+          state: 'complete',
+          complete: true,
+          estimate: null,
+          imported: 55,
+          pages: 2,
+          remaining_estimate: null,
+          last_page_at: null,
+          last_error: null,
+        },
       },
     ])),
+    backfillAccount: vi.fn(() => Promise.resolve({ action: 'resumed', status: {} })),
+    pauseBackfill: vi.fn(() => Promise.resolve({ action: 'paused', status: {} })),
   };
 });
 
@@ -125,17 +155,95 @@ describe('MailWorkspace', () => {
     await waitFor(() => {
       expect(screen.getByText('Archived planning notes')).toBeInTheDocument();
     });
-    // still shows inbox mail too
+    // still shows inbox mail and sent mail too
     expect(screen.getByText('Q3 planning needed')).toBeInTheDocument();
+    expect(screen.getByText('Re: proposal follow-up')).toBeInTheDocument();
 
-    // category tabs disappear in All Mail view
+    // category tabs disappear in All Mail view; kind filters appear
     expect(screen.queryByRole('tab', { name: /Promotions/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Sent' })).toBeInTheDocument();
+    expect(screen.getByRole('tab', { name: 'Archived' })).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('tab', { name: 'Inbox' }));
     await waitFor(() => {
       expect(screen.queryByText('Archived planning notes')).not.toBeInTheDocument();
     });
     expect(screen.getByRole('tab', { name: /Promotions/ })).toBeInTheDocument();
+  });
+
+  it('All Mail kind filters narrow to Sent and Archived', async () => {
+    renderWorkspace();
+    await waitFor(() => {
+      expect(screen.getByText('Q3 planning needed')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('tab', { name: 'All Mail' }));
+    await waitFor(() => {
+      expect(screen.getByText('Archived planning notes')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Sent' }));
+    await waitFor(() => {
+      expect(screen.getByText('Re: proposal follow-up')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('Q3 planning needed')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByRole('tab', { name: 'Archived' }));
+    await waitFor(() => {
+      expect(screen.getByText('Archived planning notes')).toBeInTheDocument();
+    });
+    expect(screen.queryByText('Re: proposal follow-up')).not.toBeInTheDocument();
+  });
+
+  it('marks Sent and Archived rows with badges', async () => {
+    renderWorkspace();
+    await waitFor(() => {
+      expect(screen.getByText('Q3 planning needed')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('tab', { name: 'All Mail' }));
+    await waitFor(() => {
+      expect(screen.getByText('Archived planning notes')).toBeInTheDocument();
+    });
+    // kind tab + row badge both exist for each label
+    expect(screen.getAllByText('Sent').length).toBeGreaterThanOrEqual(2);
+    expect(screen.getAllByText('Archived').length).toBeGreaterThanOrEqual(2);
+  });
+
+  it('shows completed backfill status near All Mail', async () => {
+    renderWorkspace();
+    await waitFor(() => {
+      expect(screen.getByText('All mail synced')).toBeInTheDocument();
+    });
+    expect(screen.getByText('55 older messages local')).toBeInTheDocument();
+  });
+
+  it('shows progress and pause control while syncing older mail', async () => {
+    const { accounts: accountsMock } = await import('../api/emails');
+    vi.mocked(accountsMock).mockResolvedValue([
+      {
+        id: 'gmail_user',
+        provider: 'gmail',
+        email_address: 'user@gmail.com',
+        display_name: 'User',
+        connection_status: 'connected',
+        backfill: {
+          state: 'running',
+          complete: false,
+          estimate: 2100,
+          imported: 450,
+          pages: 11,
+          remaining_estimate: 1650,
+          last_page_at: null,
+          last_error: null,
+        },
+      },
+    ] as never);
+    renderWorkspace();
+    await waitFor(() => {
+      expect(screen.getByText('Syncing older mail…')).toBeInTheDocument();
+    });
+    expect(screen.getByText(/450 synced/)).toBeInTheDocument();
+    expect(screen.getByText(/~1650 remaining/)).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Pause syncing older mail' })).toBeInTheDocument();
   });
 
   it('switches to Promotions category and renders promotions', async () => {

@@ -23,7 +23,7 @@ const PAGE_META: Record<AppPage, { title: string; subtitle?: string }> = {
 };
 
 export default function App() {
-  const [page, setPage] = useState<AppPage>('overview');
+  const [page, setPage] = useState<AppPage>('mail');
   const [searchQuery, setSearchQuery] = useState('');
   const queryClient = useQueryClient();
 

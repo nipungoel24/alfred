@@ -42,6 +42,19 @@
   font-size: 15px;
   letter-spacing: 0.02em;
   flex-shrink: 0;
+  overflow: hidden;
+}
+
+.rail-brand-icon {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  display: block;
+}
+
+.rail-brand-fallback {
+  display: block;
+  line-height: 1;
 }
 
 .rail-nav {
@@ -367,6 +380,49 @@
   border-radius: var(--radius-sm);
 }
 
+/* All Mail kind filter — compact tabs under the view switch */
+.allmail-kind-switch {
+  display: flex;
+  gap: 2px;
+  padding: 0 8px 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  margin-bottom: 0;
+}
+
+.kind-tab {
+  padding: 5px 10px 7px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--text-muted);
+  position: relative;
+  transition: color var(--motion-micro);
+}
+
+.kind-tab:hover {
+  color: var(--text-primary);
+}
+
+.kind-tab.active {
+  color: var(--text-primary);
+}
+
+.kind-tab.active::after {
+  content: '';
+  position: absolute;
+  left: 8px;
+  right: 8px;
+  bottom: 0;
+  height: 2px;
+  background: var(--accent);
+  transform-origin: left;
+  animation: underline-in var(--motion-hover) ease-out;
+}
+
+@keyframes underline-in {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
 .backfill-status {
   display: flex;
   align-items: center;
@@ -374,6 +430,33 @@
   margin: 0 8px 8px;
   font-size: var(--text-xs);
   color: var(--text-muted);
+  min-height: 18px;
+}
+
+.backfill-status.complete {
+  color: var(--text-faint);
+}
+
+.backfill-detail {
+  color: var(--text-faint);
+}
+
+.backfill-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 2px 6px;
+  font-size: 10.5px;
+  font-weight: 700;
+  color: var(--accent-text);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xs);
+  transition: background-color var(--motion-micro), border-color var(--motion-micro);
+}
+
+.backfill-retry:hover {
+  background: var(--accent-soft);
+  border-color: var(--border-hover);
 }
 
 /* ── Category tabs: text + thin underline + brutalist active edge ── */
@@ -1154,6 +1237,7 @@
 .badge-reply   { background: var(--accent-soft);        color: var(--accent-text); }
 .badge-success { background: var(--success-soft);       color: var(--success); }
 .badge-neutral { background: var(--bg-sunken);          color: var(--text-secondary); }
+.badge-sent    { background: var(--info-soft);          color: var(--info); }
 
 /* ═══════════════════════════════════════════════════════════════
    GENERIC PAGE SCAFFOLD

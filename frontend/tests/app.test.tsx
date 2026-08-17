@@ -161,6 +161,10 @@ describe('Alfred Frontend Application', () => {
       </QueryClientProvider>
     );
 
+    // Mail is the default page now; Overview is a secondary surface.
+    await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Overview' }));
+
     await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
 
     expect(screen.getByText('Inbox')).toBeInTheDocument();
@@ -169,23 +173,26 @@ describe('Alfred Frontend Application', () => {
     expect(screen.getByText('Needs attention')).toBeInTheDocument();
   }, 15000);
 
-  it('navigates to Mail workspace via the rail', async () => {
+  it('opens Mail workspace by default and navigates via the rail', async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
     );
 
-    await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
-
-    fireEvent.click(screen.getByRole('button', { name: 'Mail' }));
-
+    // Default landing page is the Mattered-style mail workspace
     await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
     expect(screen.getByRole('tab', { name: /Promotions/ })).toBeInTheDocument();
     expect(screen.getByRole('searchbox', { name: 'Search all mail' })).toBeInTheDocument();
     await waitFor(() => {
       expect(screen.getByText('Payment failed - action required today')).toBeInTheDocument();
     });
+
+    // Rail navigation to other surfaces still works
+    fireEvent.click(screen.getByRole('button', { name: 'Overview' }));
+    await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Mail' }));
+    await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
   }, 15000);
 
   it('uses high-priority email analysis when the briefing has no attention items', async () => {
@@ -199,6 +206,9 @@ describe('Alfred Frontend Application', () => {
         <App />
       </QueryClientProvider>
     );
+
+    await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Overview' }));
 
     expect(await screen.findByText('Payment failed - action required today', {}, { timeout: 8000 })).toBeInTheDocument();
   }, 15000);
