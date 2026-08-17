@@ -1,0 +1,83 @@
+/* ═══════════════════════════════════════════════════════════════
+   ALFRED MOTION — every keyframe and reveal utility in one place.
+   Transform/opacity only. All motion dies with reduced-motion.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Page/section entry (staggered) ── */
+.reveal {
+  animation: reveal-up var(--motion-reveal) cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation-delay: calc(var(--stagger, 0) * 45ms);
+}
+
+@keyframes reveal-up {
+  from { opacity: 0; transform: translateY(7px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Floating pane reveal ── */
+.pane-in {
+  animation: pane-in var(--motion-pane) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes pane-in {
+  from { opacity: 0; transform: translateY(10px) scale(0.985); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* ── Slide-ups for bottom surfaces ── */
+.slide-up {
+  animation: slide-up var(--motion-pane) cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@keyframes slide-up {
+  from { transform: translateY(100%); opacity: 0.6; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+
+/* ── Underline sweep for tabs ── */
+@keyframes underline-in {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* ── Skeleton shimmer ── */
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Spinners ── */
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* ── Ambient aurora drift — extremely slow, transform-only ── */
+@keyframes drift-a {
+  from { transform: translate3d(0, 0, 0) scale(1); }
+  to   { transform: translate3d(6vw, 4vh, 0) scale(1.12); }
+}
+
+@keyframes drift-b {
+  from { transform: translate3d(0, 0, 0) scale(1.05); }
+  to   { transform: translate3d(-5vw, 6vh, 0) scale(0.95); }
+}
+
+@keyframes drift-c {
+  from { transform: translate3d(0, 0, 0) scale(0.96); }
+  to   { transform: translate3d(3vw, -5vh, 0) scale(1.08); }
+}
+
+/* ── Soft pulse for status indicators ── */
+@keyframes soft-pulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.45; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0ms !important;
+    animation-delay: 0ms !important;
+    transition-duration: 0ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -21,6 +21,7 @@ body {
   background: var(--bg-app);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
   transition: background-color var(--motion-pane), color var(--motion-pane);
 }
 
@@ -59,13 +60,7 @@ img {
   display: block;
 }
 
-:focus-visible {
-  outline: 2px solid var(--border-focus);
-  outline-offset: 2px;
-  border-radius: var(--radius-sm);
-}
-
-/* Scrollbars — token-aware */
+/* Scrollbars — token-aware, overlay-thin */
 ::-webkit-scrollbar {
   width: 8px;
   height: 8px;
@@ -88,11 +83,7 @@ img {
   border: 2px solid transparent;
 }
 
-/* Shared reduced-motion guard for CSS animations */
-@media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
-    animation-duration: 0ms !important;
-    animation-delay: 0ms !important;
-    transition-duration: 0ms !important;
-  }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) transparent;
 }

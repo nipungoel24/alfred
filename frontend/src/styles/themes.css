@@ -1,0 +1,176 @@
+/* ═══════════════════════════════════════════════════════════════
+   ALFRED THEMES — the complete color system per resolved theme.
+   Semantic colors, ambient aurora colors, glass surfaces, elevation.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ────────────────────────────────────────────────
+   LIGHT — cool neutral, Siri-like ambient energy,
+   translucent white surfaces, quiet chromatic glow
+   ──────────────────────────────────────────────── */
+:root[data-theme='light'] {
+  color-scheme: light;
+
+  --bg-app:            #f2f3f8;
+  --bg-panel:          rgba(255, 255, 255, 0.66);
+  --bg-panel-solid:    #ffffff;
+  --bg-panel-subtle:   rgba(250, 250, 252, 0.72);
+  --bg-raised:         rgba(255, 255, 255, 0.82);
+  --bg-sunken:         rgba(30, 34, 48, 0.045);
+  --bg-input:          rgba(255, 255, 255, 0.60);
+  --bg-input-hover:    rgba(255, 255, 255, 0.85);
+  --bg-row-hover:      rgba(46, 52, 74, 0.045);
+  --bg-row-active:     rgba(109, 90, 224, 0.10);
+  --bg-row-selected:   rgba(109, 90, 224, 0.065);
+  --bg-overlay:        rgba(22, 26, 38, 0.30);
+
+  --border-subtle:     rgba(30, 34, 48, 0.075);
+  --border-default:    rgba(30, 34, 48, 0.14);
+  --border-hover:      rgba(30, 34, 48, 0.24);
+  --border-focus:      rgba(109, 90, 224, 0.55);
+
+  --text-primary:      #1f2430;
+  --text-secondary:    #49506a;
+  --text-muted:        #7c84a0;
+  --text-faint:        #a5abc2;
+  --text-inverse:      #ffffff;
+
+  --accent:            #6d5ae0;
+  --accent-hover:      #7c6ae8;
+  --accent-active:     #5d4cc9;
+  --accent-soft:       rgba(109, 90, 224, 0.11);
+  --accent-text:       #5a49d0;
+
+  --success:           #15936a;
+  --success-soft:      rgba(21, 147, 106, 0.11);
+  --warning:           #b07d1a;
+  --warning-soft:      rgba(176, 125, 26, 0.12);
+  --danger:            #d04848;
+  --danger-soft:       rgba(208, 72, 72, 0.10);
+  --info:              #2e7fd6;
+  --info-soft:         rgba(46, 127, 214, 0.10);
+
+  --priority-urgent-bg:  rgba(208, 72, 72, 0.11);
+  --priority-urgent-fg:  #bd3535;
+  --priority-high-bg:    rgba(176, 125, 26, 0.13);
+  --priority-high-fg:    #8a650c;
+  --priority-medium-bg:  rgba(46, 127, 214, 0.11);
+  --priority-medium-fg:  #2268ba;
+  --priority-low-bg:     rgba(90, 100, 130, 0.10);
+  --priority-low-fg:     #5a6280;
+
+  --scrollbar-thumb:        rgba(30, 34, 48, 0.18);
+  --scrollbar-thumb-hover:  rgba(30, 34, 48, 0.30);
+
+  --skeleton-base: rgba(30, 34, 48, 0.055);
+  --skeleton-peak: rgba(30, 34, 48, 0.12);
+
+  --unread-dot: var(--accent);
+
+  /* ── Ambient aurora (quiet pastel energy) ── */
+  --ambient-opacity: 0.85;
+  --ambient-violet: rgba(134, 102, 255, 0.20);
+  --ambient-indigo: rgba(92, 124, 255, 0.17);
+  --ambient-cyan:   rgba(64, 190, 224, 0.15);
+  --ambient-pink:   rgba(240, 128, 200, 0.10);
+
+  /* ── Glass surfaces ── */
+  --glass-rail:    rgba(255, 255, 255, 0.52);
+  --glass-header:  rgba(255, 255, 255, 0.60);
+  --glass-pane:    rgba(255, 255, 255, 0.55);
+  --glass-panel:   rgba(255, 255, 255, 0.66);
+  --glass-strong:  rgba(255, 255, 255, 0.82);
+  --glass-input:   rgba(255, 255, 255, 0.55);
+
+  /* ── Elevation ── */
+  --shadow-1: 0 1px 2px rgba(30, 34, 48, 0.05);
+  --shadow-2: 0 4px 14px rgba(30, 34, 48, 0.07);
+  --shadow-3: 0 14px 42px rgba(30, 34, 48, 0.13);
+  --shadow-accent: 0 2px 10px rgba(109, 90, 224, 0.18);
+  --highlight-top: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+}
+
+/* ────────────────────────────────────────────────
+   DARK — deep graphite/midnight, cinematic glow,
+   layered translucent surfaces, calm accents
+   ──────────────────────────────────────────────── */
+:root[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg-app:            #0b0d13;
+  --bg-panel:          rgba(19, 22, 32, 0.60);
+  --bg-panel-solid:    #131620;
+  --bg-panel-subtle:   rgba(22, 26, 38, 0.62);
+  --bg-raised:         rgba(27, 31, 45, 0.80);
+  --bg-sunken:         rgba(0, 0, 0, 0.28);
+  --bg-input:          rgba(255, 255, 255, 0.05);
+  --bg-input-hover:    rgba(255, 255, 255, 0.085);
+  --bg-row-hover:      rgba(255, 255, 255, 0.04);
+  --bg-row-active:     rgba(139, 123, 245, 0.13);
+  --bg-row-selected:   rgba(139, 123, 245, 0.09);
+  --bg-overlay:        rgba(4, 6, 10, 0.55);
+
+  --border-subtle:     rgba(255, 255, 255, 0.06);
+  --border-default:    rgba(255, 255, 255, 0.11);
+  --border-hover:      rgba(255, 255, 255, 0.20);
+  --border-focus:      rgba(139, 123, 245, 0.65);
+
+  --text-primary:      #edeff4;
+  --text-secondary:    #aab2c4;
+  --text-muted:        #717b96;
+  --text-faint:        #4d5670;
+  --text-inverse:      #13141c;
+
+  --accent:            #8b7bf5;
+  --accent-hover:      #9e90f8;
+  --accent-active:     #7a69e8;
+  --accent-soft:       rgba(139, 123, 245, 0.15);
+  --accent-text:       #a99cf9;
+
+  --success:           #3ecf8e;
+  --success-soft:      rgba(62, 207, 142, 0.13);
+  --warning:           #e8b44f;
+  --warning-soft:      rgba(232, 180, 79, 0.13);
+  --danger:            #ef7d7d;
+  --danger-soft:       rgba(239, 125, 125, 0.13);
+  --info:              #5fa8f5;
+  --info-soft:         rgba(95, 168, 245, 0.13);
+
+  --priority-urgent-bg:  rgba(239, 125, 125, 0.14);
+  --priority-urgent-fg:  #f2a0a0;
+  --priority-high-bg:    rgba(232, 180, 79, 0.13);
+  --priority-high-fg:    #ecc878;
+  --priority-medium-bg:  rgba(95, 168, 245, 0.13);
+  --priority-medium-fg:  #92c0f7;
+  --priority-low-bg:     rgba(148, 163, 184, 0.10);
+  --priority-low-fg:     #9aa4bd;
+
+  --scrollbar-thumb:        rgba(255, 255, 255, 0.13);
+  --scrollbar-thumb-hover:  rgba(255, 255, 255, 0.24);
+
+  --skeleton-base: rgba(255, 255, 255, 0.05);
+  --skeleton-peak: rgba(255, 255, 255, 0.11);
+
+  --unread-dot: var(--accent);
+
+  /* ── Ambient aurora (deep, calm, cinematic) ── */
+  --ambient-opacity: 0.75;
+  --ambient-violet: rgba(126, 96, 255, 0.15);
+  --ambient-indigo: rgba(72, 118, 255, 0.11);
+  --ambient-cyan:   rgba(48, 170, 210, 0.09);
+  --ambient-pink:   rgba(224, 96, 190, 0.07);
+
+  /* ── Glass surfaces ── */
+  --glass-rail:    rgba(16, 19, 28, 0.60);
+  --glass-header:  rgba(14, 17, 25, 0.62);
+  --glass-pane:    rgba(18, 21, 31, 0.56);
+  --glass-panel:   rgba(21, 25, 36, 0.62);
+  --glass-strong:  rgba(27, 31, 45, 0.82);
+  --glass-input:   rgba(0, 0, 0, 0.24);
+
+  /* ── Elevation ── */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-2: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 18px 50px rgba(0, 0, 0, 0.50);
+  --shadow-accent: 0 4px 18px rgba(139, 123, 245, 0.22);
+  --highlight-top: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+}

@@ -1,0 +1,136 @@
+/* ═══════════════════════════════════════════════════════════════
+   ALFRED SURFACES — the ambient aurora background system and the
+   disciplined glass/elevation vocabulary.
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ── Ambient background system ──────────────────────────────────
+   Quiet Siri-like aurora: blurred color clouds drifting behind the
+   product UI. Pointer-events none; never scrolls; never flickers.
+   ─────────────────────────────────────────────────────────────── */
+.ambient-layer {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-ambient);
+  pointer-events: none;
+  overflow: hidden;
+  background: var(--bg-app);
+}
+
+.ambient-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(90px);
+  opacity: var(--ambient-opacity);
+  transform: translateZ(0);
+  will-change: transform;
+}
+
+.ambient-orb.orb-violet {
+  width: 62vw;
+  height: 62vw;
+  min-width: 560px;
+  min-height: 560px;
+  left: -18vw;
+  top: -22vw;
+  background: var(--ambient-violet);
+  animation: drift-a 110s ease-in-out infinite alternate;
+}
+
+.ambient-orb.orb-indigo {
+  width: 56vw;
+  height: 56vw;
+  min-width: 480px;
+  min-height: 480px;
+  right: -20vw;
+  top: 8vh;
+  background: var(--ambient-indigo);
+  animation: drift-b 130s ease-in-out infinite alternate;
+}
+
+.ambient-orb.orb-cyan {
+  width: 44vw;
+  height: 44vw;
+  min-width: 380px;
+  min-height: 380px;
+  left: 30vw;
+  bottom: -24vw;
+  background: var(--ambient-cyan);
+  animation: drift-c 120s ease-in-out infinite alternate;
+}
+
+.ambient-orb.orb-pink {
+  width: 30vw;
+  height: 30vw;
+  min-width: 280px;
+  min-height: 280px;
+  right: 16vw;
+  bottom: -14vw;
+  background: var(--ambient-pink);
+  animation: drift-b 140s ease-in-out infinite alternate-reverse;
+}
+
+/* ── Glass vocabulary (disciplined, readable) ── */
+.glass-rail {
+  background: var(--glass-rail);
+  backdrop-filter: blur(var(--blur-strong)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(150%);
+}
+
+.glass-header {
+  background: var(--glass-header);
+  backdrop-filter: blur(var(--blur-strong)) saturate(160%);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(160%);
+  box-shadow: var(--highlight-top), var(--shadow-1);
+}
+
+.glass-pane {
+  background: var(--glass-pane);
+  backdrop-filter: blur(var(--blur-soft)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--blur-soft)) saturate(140%);
+}
+
+.glass-panel {
+  background: var(--glass-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  backdrop-filter: blur(var(--blur-soft)) saturate(140%);
+  -webkit-backdrop-filter: blur(var(--blur-soft)) saturate(140%);
+  box-shadow: var(--highlight-top), var(--shadow-2);
+}
+
+/* Floating / elevated glass (intelligence pane, dialogs) */
+.glass-floating {
+  background: var(--glass-strong);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-xl);
+  backdrop-filter: blur(var(--blur-strong)) saturate(150%);
+  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(150%);
+  box-shadow: var(--highlight-top), var(--shadow-3);
+}
+
+/* Frosted input surface */
+.glass-input {
+  background: var(--glass-input);
+  border: 1px solid var(--border-subtle);
+  backdrop-filter: blur(var(--blur-soft)) saturate(130%);
+  -webkit-backdrop-filter: blur(var(--blur-soft)) saturate(130%);
+}
+
+/* ── Elevation helpers ── */
+.elev-1 { box-shadow: var(--shadow-1); }
+.elev-2 { box-shadow: var(--shadow-2); }
+.elev-3 { box-shadow: var(--shadow-3); }
+
+.surface-highlight {
+  box-shadow: var(--highlight-top);
+}
+
+/* ── Quiet accent wash (Alfred briefing, special panels) ── */
+.accent-wash {
+  background:
+    radial-gradient(120% 160% at 100% 0%, var(--accent-soft) 0%, transparent 55%),
+    var(--glass-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--highlight-top), var(--shadow-2);
+}
