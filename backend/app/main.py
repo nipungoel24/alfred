@@ -19,6 +19,7 @@ from .mail.normalizer import normalized_email
 from .mail.fingerprint import content_fingerprint
 from .mail.briefing_fingerprint import briefing_fingerprint, BRIEFING_SCHEMA_VERSION
 from .mail.providers.gmail import GmailProvider
+from .mail.eligibility import MailEligibilityPolicy, GmailCategory
 from .ai.ollama_client import OllamaClient, OllamaUnavailable, OllamaTimeout, OllamaInvalidResponse, OllamaModelMissing
 from .ai.service import AIService
 from .services.task_derivation import derive_tasks, rebuild_tasks_from_analyses, DERIVATION_VERSION
@@ -74,6 +75,18 @@ async def _analysis_worker():
         e = repo.email(email_id)
         if not e:
             repo.update_job_status(job_id, 'failed', error_message='Email not found')
+            continue
+
+        # Eligibility guard: a message that became spam/trash/archived after
+        # enqueueing must not be analyzed by the background queue. Reads the
+        # persisted projection (source of truth at runtime).
+        persisted = repo.email_eligibility(email_id)
+        if not persisted or persisted['pipeline_eligibility'] == 'excluded':
+            repo.update_job_status(job_id, 'cancelled', error_message='Email no longer pipeline-eligible')
+            _broadcast_progress({
+                "type": "analysis_cancelled", "email_id": e.id,
+                "pending": repo.pending_job_count('analyze_email')
+            })
             continue
 
         fp = content_fingerprint(e)
@@ -150,7 +163,14 @@ async def _analysis_worker():
 
 
 def _derive_and_save_tasks(email: Email, analysis: EmailAnalysis):
-    """Derive tasks from analysis and persist them, deduplicating."""
+    """Derive tasks from analysis and persist them, deduplicating.
+
+    Excluded source mail (spam/trash/archived) never produces new tasks —
+    the guard also covers mid-analysis label transitions.
+    """
+    persisted = repo.email_eligibility(email.id)
+    if not persisted or persisted['pipeline_eligibility'] == 'excluded':
+        return
     tasks = derive_tasks(email, analysis)
     new_tasks = []
     for t in tasks:
@@ -170,6 +190,36 @@ def generate_pkce_pair():
 
 
 # ── Lifespan ──
+async def _label_backfill():
+    """Refresh Gmail labels for cached rows missing mailbox state.
+
+    Uses format=METADATA only — no body transfers. Runs once per startup,
+    opportunistically, without blocking the API.
+    """
+    try:
+        pending = repo.emails_missing_labels()
+        if not pending:
+            return
+        gmail_accounts = [a for a in repo.accounts()
+                          if a.provider == 'gmail' and a.connection_status == 'connected']
+        if not gmail_accounts:
+            return
+        account = gmail_accounts[0]
+        creds = repo.credentials(account.id)
+        if not creds:
+            return
+        access_token = decrypt_token(creds['encrypted_access_token'])
+        refreshed = 0
+        for msg_id in pending:
+            labels = await gmail_provider.refresh_message_labels(access_token, msg_id)
+            if labels is not None and repo.update_email_labels(msg_id, labels):
+                refreshed += 1
+        if refreshed:
+            print(f"[Alfred] Backfilled Gmail labels for {refreshed} cached messages")
+    except Exception:
+        pass
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     global _worker_task, _worker_running
@@ -196,6 +246,9 @@ async def lifespan(app: FastAPI):
     # Start background analysis worker
     _worker_task = asyncio.create_task(_analysis_worker())
 
+    # Backfill Gmail labels for legacy rows (non-blocking, metadata only)
+    backfill_task = asyncio.create_task(_label_backfill())
+
     yield
 
     # Shutdown
@@ -206,6 +259,7 @@ async def lifespan(app: FastAPI):
             await _worker_task
         except asyncio.CancelledError:
             pass
+    backfill_task.cancel()
     repo.close()
 
 
@@ -381,33 +435,26 @@ async def sync_account(account_id: str, load_older: bool = Query(False)):
         if account.provider == "gmail":
             res = await gmail_provider.sync_messages(account, cred_payload, repo, load_older=load_older)
 
-            # Enqueue analysis jobs for unanalyzed emails (non-blocking)
-            imported = res.get("imported", 0)
-            if imported > 0:
-                all_emails = repo.emails(account_id)
-                enqueued = 0
-                
-                def _calc_priority(email):
-                    # Lower number = higher priority
-                    sender = email.sender.lower()
-                    body = email.body.lower()
-                    if "unsubscribe" in body or "no-reply" in sender or "marketing" in sender or "newsletter" in sender:
-                        return 80 # Low priority
-                    if "jira" in sender or "github" in sender or "alert" in sender:
-                        return 60
-                    # Assume real correspondence
-                    return 20
-                
-                for e in all_emails:
-                    fp = content_fingerprint(e)
-                    if not repo.cached_analysis(e.id, fp, settings.ollama_model):
-                        prio = _calc_priority(e)
-                        repo.enqueue_job(f"analyze_{e.id}", 'analyze_email', e.id, priority=prio)
-                        enqueued += 1
-                res["analysis_enqueued"] = enqueued
-                
-                # Notify worker to wake up (via progress mechanism or sleep cycle)
-                _broadcast_progress({"type": "jobs_enqueued", "count": enqueued, "pending": repo.pending_job_count('analyze_email')})
+            # Enqueue analysis jobs for unanalyzed eligible emails (non-blocking)
+            enqueued = 0
+            candidates = repo.eligible_emails_without_analysis(settings.ollama_model, account_id=account.id)
+            for e in candidates:
+                # Central policy: scheduling order (not final priority) and
+                # lazy low-value categories.
+                if not MailEligibilityPolicy.should_schedule_analysis(e.label_ids):
+                    continue
+                fp = content_fingerprint(e)
+                if repo.cached_analysis(e.id, fp, settings.ollama_model):
+                    continue
+                prio = MailEligibilityPolicy.analysis_queue_priority(
+                    e.label_ids, unread=MailEligibilityPolicy.is_unread(e.label_ids)
+                )
+                repo.enqueue_job(f"analyze_{e.id}", 'analyze_email', e.id, priority=prio)
+                enqueued += 1
+            res["analysis_enqueued"] = enqueued
+
+            # Notify worker to wake up (via progress mechanism or sleep cycle)
+            _broadcast_progress({"type": "jobs_enqueued", "count": enqueued, "pending": repo.pending_job_count('analyze_email')})
 
             return res
         else:
@@ -451,21 +498,39 @@ def analysis_status():
 
 
 # ── Emails ──
+VALID_CATEGORIES = {c.value for c in GmailCategory}
+
+@app.get('/api/emails/counts')
+def get_email_counts(account_id: str | None = None):
+    """Live category + mailbox-state counts (DB-derived, never hardcoded)."""
+    return repo.email_counts(account_id)
+
+
 @app.get('/api/emails')
-def get_emails(q: str | None = None, priority: str | None = None, needs_reply: bool | None = None, account_id: str | None = None):
-    if q:
-        # Use FTS5 or SQL search
-        result = repo.search_emails(q)
-    else:
-        result = repo.emails(account_id)
+def get_emails(q: str | None = None, priority: str | None = None, needs_reply: bool | None = None,
+               account_id: str | None = None, category: str | None = None,
+               limit: int = 200, offset: int = 0):
+    if category is not None and category not in VALID_CATEGORIES:
+        raise HTTPException(status_code=400, detail=f"Unknown category: {category}")
+
+    # DB-driven filtering: category + eligibility + search context.
+    result = repo.emails_filtered(
+        account_id=account_id, category=category, query=q,
+        include_excluded=False, limit=limit, offset=offset
+    )
 
     # Attach cached analyses
     for e in result:
         e.analysis = repo.cached_analysis(e.id, content_fingerprint(e), settings.ollama_model)
 
-    # Apply filters
+    # Apply semantic filters on top of the already-eligible window.
+    # 'high' means Important: urgent AND high both qualify.
     if priority:
-        result = [e for e in result if e.analysis and e.analysis.priority.value == priority]
+        if priority == 'high':
+            result = [e for e in result if e.analysis
+                      and e.analysis.priority.value in ('high', 'urgent')]
+        else:
+            result = [e for e in result if e.analysis and e.analysis.priority.value == priority]
     if needs_reply is not None:
         result = [e for e in result if e.analysis and e.analysis.needs_reply == needs_reply]
     return result
@@ -501,6 +566,13 @@ async def analyze(email_id: str):
     e = repo.email(email_id)
     if not e:
         return JSONResponse(status_code=404, content={'error': {'code': 'EMAIL_NOT_FOUND', 'message': 'Email was not found.', 'details': {}}})
+    # User-requested analysis: allowed for active + deferred (opened promo/
+    # social); refused for excluded (spam/trash/draft/sent/archived).
+    persisted = repo.email_eligibility(email_id)
+    if not persisted or persisted['pipeline_eligibility'] == 'excluded':
+        return JSONResponse(status_code=409, content={
+            'error': {'code': 'EMAIL_EXCLUDED', 'message': 'This message is no longer part of the active inbox and is not analyzed.', 'details': {}}
+        })
     fp = content_fingerprint(e)
     cached = repo.cached_analysis(e.id, fp, settings.ollama_model)
     if cached:
@@ -516,13 +588,20 @@ async def analyze(email_id: str):
 
 @app.post('/api/emails/analyze')
 async def analyze_all():
-    """Enqueue all unanalyzed emails for background analysis."""
+    """Enqueue all eligible unanalyzed emails for background analysis."""
     enqueued = 0
-    for e in repo.emails():
+    candidates = repo.eligible_emails_without_analysis(settings.ollama_model)
+    for e in candidates:
+        if not MailEligibilityPolicy.should_schedule_analysis(e.label_ids):
+            continue
         fp = content_fingerprint(e)
-        if not repo.cached_analysis(e.id, fp, settings.ollama_model):
-            await analysis_queue.put(e.id)
-            enqueued += 1
+        if repo.cached_analysis(e.id, fp, settings.ollama_model):
+            continue
+        prio = MailEligibilityPolicy.analysis_queue_priority(
+            e.label_ids, unread=MailEligibilityPolicy.is_unread(e.label_ids)
+        )
+        repo.enqueue_job(f"analyze_{e.id}", 'analyze_email', e.id, priority=prio)
+        enqueued += 1
     return {'enqueued': enqueued, 'message': 'Analysis jobs queued for background processing.'}
 
 @app.post('/api/emails/{email_id}/draft')
@@ -541,15 +620,31 @@ async def draft(email_id: str):
 
 
 # ── Briefings ──
+def _briefing_eligible_emails() -> list[Email]:
+    """One authoritative briefing candidate set: active inbox, not spam/
+    trash/draft/sent-only, promo/social only with strong attention signals.
+    """
+    emails = repo.emails_filtered(include_excluded=False, limit=1000)
+    for e in emails:
+        e.analysis = repo.cached_analysis(e.id, content_fingerprint(e), settings.ollama_model)
+    result = []
+    for e in emails:
+        if MailEligibilityPolicy.should_include_in_briefing(
+            e.label_ids,
+            analysis_priority=e.analysis.priority.value if e.analysis else None,
+            needs_reply=e.analysis.needs_reply if e.analysis else None,
+        ):
+            result.append(e)
+    return result
+
+
 @app.get('/api/briefing')
 async def briefing_get():
     return await generate_briefing(force=False)
 
 @app.post('/api/briefing/generate')
 async def generate_briefing(force: bool = True):
-    emails = repo.emails()
-    for e in emails:
-        e.analysis = repo.cached_analysis(e.id, content_fingerprint(e), settings.ollama_model)
+    emails = _briefing_eligible_emails()
     fingerprint = briefing_fingerprint(emails, settings.ollama_model)
     cached = repo.cached_briefing(fingerprint, settings.ollama_model, BRIEFING_SCHEMA_VERSION)
     if cached and not force:
@@ -562,7 +657,9 @@ async def generate_briefing(force: bool = True):
 # ── Tasks ──
 @app.get('/api/tasks')
 def get_tasks():
-    return repo.tasks()
+    """Active projection: derived tasks whose source email is excluded are
+    hidden here but their rows are preserved."""
+    return repo.active_tasks()
 
 @app.post('/api/tasks/{task_id}/toggle')
 def toggle_task(task_id: str):

@@ -125,7 +125,7 @@ def test_gmail_sync_initial(mock_get, mock_gmail, temp_repo):
     assert cursor["history_id"] == "9999"
     assert cursor["next_page_token"] == "page_token_xyz"
 
-# 4. Incremental Sync (using history API) & Deletions
+# 4. Incremental Sync (using history API), label mutations, and non-destructive deletion
 @patch("httpx.AsyncClient.get")
 def test_gmail_sync_incremental(mock_get, mock_gmail, temp_repo):
     # Start with an already synced account
@@ -147,7 +147,8 @@ def test_gmail_sync_incremental(mock_get, mock_gmail, temp_repo):
         account_id="gmail_user",
         sender="billing@saas.com",
         subject="Renewal failed",
-        body="Please update your card"
+        body="Please update your card",
+        label_ids=["INBOX", "UNREAD", "CATEGORY_PERSONAL"]
     )
     temp_repo.upsert_email(existing_email, "hash_100")
 
@@ -160,7 +161,8 @@ def test_gmail_sync_incremental(mock_get, mock_gmail, temp_repo):
                 "id": "10000",
                 "messagesAdded": [
                     {
-                        "message": {"id": "gmail_msg_101", "threadId": "gmail_thread_200"}
+                        "message": {"id": "gmail_msg_101", "threadId": "gmail_thread_200",
+                                    "labelIds": ["INBOX", "UNREAD"]}
                     }
                 ],
                 "messagesDeleted": [
@@ -178,6 +180,7 @@ def test_gmail_sync_incremental(mock_get, mock_gmail, temp_repo):
         "id": "gmail_msg_101",
         "threadId": "gmail_thread_200",
         "internalDate": "1786786975000",
+        "labelIds": ["INBOX", "UNREAD", "CATEGORY_PERSONAL"],
         "payload": {
             "headers": [
                 {"name": "From", "value": "Billing Department <billing@saas.com>"},
@@ -212,8 +215,18 @@ def test_gmail_sync_incremental(mock_get, mock_gmail, temp_repo):
 
     # Verify msg_101 is imported
     assert temp_repo.email("gmail_msg_101") is not None
-    # Verify msg_100 is deleted
-    assert temp_repo.email("gmail_msg_100") is None
+    # Verify msg_100 is NOT deleted: source row is retained for history
+    # integrity and marked excluded instead.
+    retained = temp_repo.email("gmail_msg_100")
+    assert retained is not None
+
+    from backend.app.db.database import connect
+    con = temp_repo.con
+    row = con.execute(
+        'SELECT mailbox_state, pipeline_eligibility FROM emails WHERE id="gmail_msg_100"'
+    ).fetchone()
+    assert row["mailbox_state"] == "trash"
+    assert row["pipeline_eligibility"] == "excluded"
 
     # Check updated cursor
     updated_account = temp_repo.account("gmail_user")

@@ -68,6 +68,23 @@ class GmailProvider(MailProvider):
             r.raise_for_status()
             return r.json()
 
+    async def refresh_message_labels(self, access_token: str, msg_id: str) -> list[str] | None:
+        """Fetch ONLY the current label set of a message (format=METADATA).
+
+        Returns None on any API error. Never transfers message bodies.
+        """
+        headers = {"Authorization": f"Bearer {access_token}"}
+        try:
+            async with httpx.AsyncClient() as client:
+                r = await client.get(
+                    f"{self.gmail_base_url}/messages/{msg_id}",
+                    headers=headers, params={"format": "METADATA"}
+                )
+                r.raise_for_status()
+                return r.json().get("labelIds") or []
+        except Exception:
+            return None
+
     async def sync_messages(self, account: EmailAccount, credentials: Dict[str, Any], repo, load_older: bool = False) -> Dict[str, Any]:
         import json
         access_token = credentials.get("access_token")
@@ -120,6 +137,7 @@ class GmailProvider(MailProvider):
 
         imported = 0
         skipped = 0
+        label_updates = 0
 
         async with httpx.AsyncClient() as client:
             # Helper to fetch and upsert full details for a message ID
@@ -136,17 +154,42 @@ class GmailProvider(MailProvider):
                 repo.upsert_email(normalized, content_fingerprint(normalized))
                 imported += 1
 
+            # Helper: refresh ONLY the label set of a cached message via
+            # format=METADATA (no body transfer).
+            async def refresh_labels(msg_id) -> bool:
+                nonlocal label_updates
+                try:
+                    r = await client.get(
+                        f"{self.gmail_base_url}/messages/{msg_id}",
+                        headers=headers, params={"format": "METADATA"}
+                    )
+                    r.raise_for_status()
+                    labels = r.json().get("labelIds") or []
+                    if repo.update_email_labels(msg_id, labels):
+                        label_updates += 1
+                    return True
+                except Exception:
+                    return False
+
             if load_older:
                 if not next_page_token:
                     return {"imported": 0, "skipped_duplicates": 0, "message": "No older messages to load"}
                 
-                params = {"q": "label:INBOX", "maxResults": 50, "pageToken": next_page_token}
+                params = {"q": "label:INBOX", "maxResults": 50, "pageToken": next_page_token,
+                          "includeSpamTrash": "false"}
                 r = await client.get(f"{self.gmail_base_url}/messages", headers=headers, params=params)
                 r.raise_for_status()
                 res_json = r.json()
                 
                 messages_list = res_json.get("messages", [])
                 for msg in messages_list:
+                    if repo.email_exists(msg["id"]):
+                        labels = msg.get("labelIds")
+                        if labels:
+                            repo.update_email_labels(msg["id"], labels)
+                            label_updates += 1
+                        skipped += 1
+                        continue
                     await import_message_id(msg["id"])
 
                 # Update next page token, keeping history_id unchanged
@@ -157,7 +200,8 @@ class GmailProvider(MailProvider):
                 }
                 account.sync_cursor = json.dumps(new_cursor)
                 repo.save_account(account)
-                return {"imported": imported, "skipped_duplicates": skipped, "has_more": bool(new_next_page)}
+                return {"imported": imported, "skipped_duplicates": skipped,
+                        "label_updates": label_updates, "has_more": bool(new_next_page)}
 
             # Regular Sync Flow
             run_full_sync = False
@@ -192,14 +236,23 @@ class GmailProvider(MailProvider):
                 r_profile.raise_for_status()
                 latest_history_id = r_profile.json().get("historyId")
 
-                # 2. Fetch the first page of inbox messages
-                params = {"q": "label:INBOX", "maxResults": 50}
+                # 2. Fetch the first page of inbox messages.
+                #    includeSpamTrash=false: normal inbox acquisition must
+                #    never pull Spam/Trash into Alfred.
+                params = {"q": "label:INBOX", "maxResults": 50, "includeSpamTrash": "false"}
                 r = await client.get(f"{self.gmail_base_url}/messages", headers=headers, params=params)
                 r.raise_for_status()
                 res_json = r.json()
                 
                 messages_list = res_json.get("messages", [])
                 for msg in messages_list:
+                    if repo.email_exists(msg["id"]):
+                        labels = msg.get("labelIds")
+                        if labels:
+                            repo.update_email_labels(msg["id"], labels)
+                            label_updates += 1
+                        skipped += 1
+                        continue
                     await import_message_id(msg["id"])
 
                 # 3. Store new cursor
@@ -212,36 +265,74 @@ class GmailProvider(MailProvider):
                 account.last_sync_at = datetime.now(timezone.utc).isoformat()
                 account.connection_status = "connected"
                 repo.save_account(account)
-                return {"imported": imported, "skipped_duplicates": skipped}
+                return {"imported": imported, "skipped_duplicates": skipped,
+                        "label_updates": label_updates}
 
             else:
                 # Process incremental history changes
                 new_messages = []
                 deleted_messages = []
+                label_changed = []  # (msg_id, has_full_label_set_in_event)
                 for record in history_records:
                     # Collect added messages
                     for added in record.get("messagesAdded", []):
                         msg = added.get("message", {})
                         if msg.get("id"):
-                            new_messages.append(msg["id"])
+                            new_messages.append(msg)
                     # Collect deleted messages
                     for deleted in record.get("messagesDeleted", []):
                         msg = deleted.get("message", {})
                         if msg.get("id"):
                             deleted_messages.append(msg["id"])
+                    # Label mutations
+                    for changed in record.get("labelsAdded", []):
+                        msg = changed.get("message", {})
+                        if msg.get("id"):
+                            label_changed.append(msg)
+                    for changed in record.get("labelsRemoved", []):
+                        msg = changed.get("message", {})
+                        if msg.get("id"):
+                            label_changed.append(msg)
 
                 # Remove duplicates from our local list
-                new_messages = list(dict.fromkeys(new_messages))
-                deleted_messages = list(dict.fromkeys(deleted_messages))
+                new_ids = list(dict.fromkeys(m.get("id") for m in new_messages))
+                deleted_ids = list(dict.fromkeys(deleted_messages))
+                label_changed_ids = list(dict.fromkeys(
+                    m.get("id") for m in label_changed
+                    if isinstance(m, dict) and m.get("id")
+                ))
 
-                for msg_id in new_messages:
-                    try:
-                        await import_message_id(msg_id)
-                    except Exception:
-                        pass # Ignore individual message load errors
+                # Track messages already handled so refresh skips them
+                handled_ids = set()
 
-                for msg_id in deleted_messages:
-                    repo.delete_email(msg_id)
+                for msg in new_messages:
+                    msg_id = msg["id"]
+                    handled_ids.add(msg_id)
+                    labels = set(msg.get("labelIds") or [])
+                    if repo.email_exists(msg_id):
+                        # Cached: refresh full label set via metadata
+                        await refresh_labels(msg_id)
+                        continue
+                    # Uncached: import only if it is (now) an active inbox
+                    # message and not spam/trash. History-added spam stays
+                    # out of Alfred entirely.
+                    if "INBOX" in labels and "SPAM" not in labels and "TRASH" not in labels:
+                        try:
+                            await import_message_id(msg_id)
+                        except Exception:
+                            pass  # Ignore individual message load errors
+                    # else: spam/trash/archived arrivals are intentionally skipped
+
+                for changed_id in label_changed_ids:
+                    if changed_id in handled_ids or not repo.email_exists(changed_id):
+                        continue
+                    await refresh_labels(changed_id)
+
+                # Permanently-deleted messages: retain source row for
+                # history/thread integrity but exclude from Alfred entirely.
+                for msg_id in deleted_ids:
+                    if repo.email_exists(msg_id):
+                        repo.mark_email_excluded(msg_id)
 
                 # Get latest historyId from profile
                 r_profile = await client.get(f"https://gmail.googleapis.com/gmail/v1/users/me/profile", headers=headers)
@@ -256,7 +347,8 @@ class GmailProvider(MailProvider):
                 account.last_sync_at = datetime.now(timezone.utc).isoformat()
                 account.connection_status = "connected"
                 repo.save_account(account)
-                return {"imported": imported, "skipped_duplicates": skipped}
+                return {"imported": imported, "skipped_duplicates": skipped,
+                        "label_updates": label_updates}
 
     def _normalize_message(self, detail: Dict[str, Any], account_id: str) -> Email:
         headers = detail.get("payload", {}).get("headers", [])
@@ -284,6 +376,18 @@ class GmailProvider(MailProvider):
         received_ms = int(detail.get("internalDate", 0))
         received_at = datetime.fromtimestamp(received_ms / 1000.0, timezone.utc)
 
+        label_ids = [str(l) for l in detail.get("labelIds", []) or []]
+
+        # Lean metadata only — the full raw payload (with base64 bodies) is
+        # never persisted twice.
+        snippet = detail.get("snippet", "") or ""
+        raw_meta = {
+            "labelIds": label_ids,
+            "internalDate": detail.get("internalDate"),
+            "sizeEstimate": detail.get("sizeEstimate"),
+            "snippet": snippet[:500],
+        }
+
         return Email(
             id=detail.get("id"),
             thread_id=detail.get("threadId"),
@@ -294,7 +398,8 @@ class GmailProvider(MailProvider):
             subject=subject,
             body=body,
             received_at=received_at,
-            source_metadata={"gmail_raw": detail}
+            label_ids=label_ids,
+            source_metadata={"gmail_raw": raw_meta}
         )
 
     def _clean_html(self, html: str) -> str:

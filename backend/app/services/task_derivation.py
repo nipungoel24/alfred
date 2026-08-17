@@ -205,7 +205,12 @@ def rebuild_tasks_from_analyses(repo, model: str):
     1. Delete all tasks from old derivation versions
     2. Re-derive from cached analyses (no Ollama re-invocation needed)
     3. Preserve user-modified task statuses where possible
+
+    Pipeline-ineligible source mail (spam/trash/archived) never produces
+    new tasks during rebuild — stale analyses stay cached but hidden.
     """
+    from ..mail.eligibility import MailEligibilityPolicy
+
     # Delete old auto-derived tasks
     repo.delete_tasks_by_derivation_version("1")
     
@@ -215,6 +220,8 @@ def rebuild_tasks_from_analyses(repo, model: str):
     global_fingerprints = set()
     
     for email, analysis in pairs:
+        if MailEligibilityPolicy.pipeline_eligibility(email.label_ids) == 'excluded':
+            continue
         tasks = derive_tasks(email, analysis)
         for task in tasks:
             fp = getattr(task, 'fingerprint', None)
