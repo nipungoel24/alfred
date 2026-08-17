@@ -4,11 +4,18 @@ Responsibilities:
 - CRUD for emails, analyses, briefings, accounts, credentials, tasks, jobs
 - Batch operations with transaction support
 - NO business logic (task derivation, AI invocation, etc.)
+  EXCEPT mailbox-state persistence, which delegates to the single
+  MailEligibilityPolicy module (derivation lives there; this layer only
+  stores the derived columns).
 """
 from datetime import datetime, timezone
 import json
 from .database import connect, transaction
 from ..schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task
+from ..mail.eligibility import (
+    MailEligibilityPolicy, gmail_category_from_labels,
+    mailbox_state_from_labels,
+)
 
 
 class Repository:
@@ -27,15 +34,28 @@ class Repository:
 
     def upsert_email(self, email: Email, fingerprint: str):
         """Insert or update a single email. Caller manages transaction."""
+        label_ids = list(email.label_ids or [])
+        labels = set(label_ids)
+        if not labels and not email.account_id:
+            # Legacy CSV imports have no Gmail mailbox concept: they are
+            # treated as active inbox mail (conceptually INBOX only).
+            labels = {'INBOX'}
+        state = mailbox_state_from_labels(labels).value
+        category = gmail_category_from_labels(labels).value
+        eligibility = MailEligibilityPolicy.pipeline_eligibility(labels).value
         self.con.execute(
-            'INSERT INTO emails (id, payload, content_hash, imported_at, account_id, thread_id, sender_col, subject_col, received_at_col) '
-            'VALUES(?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+            'INSERT INTO emails (id, payload, content_hash, imported_at, account_id, thread_id, sender_col, subject_col, received_at_col, '
+            'label_ids_json, mailbox_state, gmail_category, pipeline_eligibility) '
+            'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
             'payload=excluded.payload, content_hash=excluded.content_hash, imported_at=excluded.imported_at, '
             'account_id=excluded.account_id, thread_id=excluded.thread_id, '
-            'sender_col=excluded.sender_col, subject_col=excluded.subject_col, received_at_col=excluded.received_at_col',
+            'sender_col=excluded.sender_col, subject_col=excluded.subject_col, received_at_col=excluded.received_at_col, '
+            'label_ids_json=excluded.label_ids_json, mailbox_state=excluded.mailbox_state, '
+            'gmail_category=excluded.gmail_category, pipeline_eligibility=excluded.pipeline_eligibility',
             (email.id, email.model_dump_json(), fingerprint,
              datetime.now(timezone.utc).isoformat(), email.account_id, email.thread_id,
-             email.sender.lower(), email.subject, email.received_at.isoformat() if email.received_at else None)
+             email.sender.lower(), email.subject, email.received_at.isoformat() if email.received_at else None,
+             json.dumps(label_ids), state, category, eligibility)
         )
 
     def upsert_email_commit(self, email: Email, fingerprint: str):
@@ -80,17 +100,197 @@ class Repository:
         r = self.con.execute('SELECT 1 FROM emails WHERE id=? LIMIT 1', (email_id,)).fetchone()
         return r is not None
 
+    def email_eligibility(self, email_id: str) -> dict | None:
+        """Persisted eligibility projection for one message.
+
+        These columns are recomputed on every label change and are the
+        single source of truth for pipeline policy at runtime (they
+        include the non-Gmail legacy-import fallback).
+        """
+        r = self.con.execute(
+            'SELECT mailbox_state, gmail_category, pipeline_eligibility, label_ids_json '
+            'FROM emails WHERE id=?', (email_id,)
+        ).fetchone()
+        if not r:
+            return None
+        labels = []
+        try:
+            if r['label_ids_json']:
+                labels = json.loads(r['label_ids_json'])
+        except Exception:
+            pass
+        return {
+            'mailbox_state': r['mailbox_state'],
+            'gmail_category': r['gmail_category'],
+            'pipeline_eligibility': r['pipeline_eligibility'],
+            'label_ids': labels,
+        }
+
+    def update_email_labels(self, email_id: str, label_ids: list[str]) -> bool:
+        """Recompute mailbox state / category / eligibility for a message.
+
+        Used by Gmail history labelAdded/labelRemoved events and metadata
+        refreshes. Source payload is NOT destroyed — only eligibility is.
+        Returns False when the message is not cached locally.
+        """
+        labels = set(label_ids or [])
+        state = mailbox_state_from_labels(labels).value
+        category = gmail_category_from_labels(labels).value
+        eligibility = MailEligibilityPolicy.pipeline_eligibility(labels).value
+        cur = self.con.execute(
+            'UPDATE emails SET label_ids_json=?, mailbox_state=?, gmail_category=?, pipeline_eligibility=? '
+            'WHERE id=?',
+            (json.dumps(sorted(labels)), state, category, eligibility, email_id)
+        )
+        if cur.rowcount == 0:
+            self.con.commit()
+            return False
+        # Keep the in-payload label_ids consistent for future reads.
+        row = self.con.execute('SELECT payload FROM emails WHERE id=?', (email_id,)).fetchone()
+        if row:
+            try:
+                email = Email.model_validate_json(row['payload'])
+                email.label_ids = sorted(labels)
+                self.con.execute('UPDATE emails SET payload=? WHERE id=?',
+                                 (email.model_dump_json(), email_id))
+            except Exception:
+                pass
+        self.con.commit()
+        return True
+
+    def mark_email_excluded(self, email_id: str) -> bool:
+        """Exclude a cached message from all current-attention projections.
+
+        Used when Gmail reports permanent deletion (messagesDeleted): the
+        source row is preserved for history/thread integrity but can no
+        longer feed briefing, tasks, deadlines, needs-reply, or the queue.
+        """
+        cur = self.con.execute(
+            'UPDATE emails SET mailbox_state=?, pipeline_eligibility=? WHERE id=?',
+            ('trash', 'excluded', email_id)
+        )
+        self.con.commit()
+        return cur.rowcount > 0
+
+    def emails_missing_labels(self, account_id: str | None = None, limit: int = 200) -> list[str]:
+        """IDs of cached Gmail messages whose label set is unknown.
+
+        Only provider-sourced rows are eligible for metadata refresh;
+        legacy CSV imports (no account) never need it.
+        """
+        if account_id:
+            rows = self.con.execute(
+                'SELECT id FROM emails WHERE account_id=? AND label_ids_json IS NULL LIMIT ?',
+                (account_id, limit)
+            ).fetchall()
+        else:
+            rows = self.con.execute(
+                'SELECT id FROM emails WHERE account_id IS NOT NULL AND label_ids_json IS NULL LIMIT ?',
+                (limit,)
+            ).fetchall()
+        return [r['id'] for r in rows]
+
+    def emails_filtered(self, account_id: str | None = None,
+                        category: str | None = None,
+                        mailbox_state: str | None = None,
+                        include_excluded: bool = False,
+                        query: str | None = None,
+                        limit: int = 200, offset: int = 0) -> list[Email]:
+        """Fetch emails with typed filters, DB-side (no JS filtering).
+
+        Default: only pipeline-visible messages (ACTIVE or DEFERRED).
+        Set include_excluded=True to surface spam/trash/archived rows too.
+        """
+        sql = 'SELECT payload FROM emails WHERE 1=1'
+        params: list = []
+        if account_id:
+            sql += ' AND account_id=?'
+            params.append(account_id)
+        if category:
+            sql += ' AND gmail_category=?'
+            params.append(category)
+        if mailbox_state:
+            sql += ' AND mailbox_state=?'
+            params.append(mailbox_state)
+        if not include_excluded:
+            sql += ' AND mailbox_state=?'
+            params.append('active_inbox')
+        if query:
+            # Category-contextual search (substring on indexed subject/sender
+            # columns; FTS path keeps full-text ranking for broad searches).
+            like = f'%{query}%'
+            sql += ' AND (subject_col LIKE ? OR sender_col LIKE ?)'
+            params.extend([like, like])
+        sql += ' ORDER BY received_at_col DESC LIMIT ? OFFSET ?'
+        params.extend([limit, offset])
+        rows = self.con.execute(sql, params).fetchall()
+        return [Email.model_validate_json(r['payload']) for r in rows]
+
+    def email_counts(self, account_id: str | None = None) -> dict:
+        """Category + state counts derived from stored Gmail labels.
+
+        Counts cover the ACTIVE Gmail inbox only; excluded spam/trash are
+        reported separately so the UI never shows them as inbox mail.
+        """
+        acct_where = 'account_id=?' if account_id else '1=1'
+        params = (account_id,) if account_id else ()
+
+        active_inbox = self.con.execute(
+            f'SELECT COUNT(*) FROM emails WHERE {acct_where} AND mailbox_state="active_inbox"',
+            params
+        ).fetchone()[0]
+        excluded = self.con.execute(
+            f'SELECT COUNT(*) FROM emails WHERE {acct_where} AND mailbox_state != "active_inbox"',
+            params
+        ).fetchone()[0]
+        rows = self.con.execute(
+            f'SELECT gmail_category, COUNT(*) FROM emails '
+            f'WHERE {acct_where} AND mailbox_state="active_inbox" GROUP BY gmail_category',
+            params
+        ).fetchall()
+        category_counts = {'primary': 0, 'promotions': 0, 'social': 0, 'updates': 0, 'forums': 0}
+        for r in rows:
+            cat = r[0] or 'primary'
+            if cat in category_counts:
+                category_counts[cat] = r[1]
+        return {'active_inbox': active_inbox,
+                'excluded': excluded,
+                'categories': category_counts}
+
+    def eligible_emails_without_analysis(self, model: str, schema='1',
+                                         account_id: str | None = None) -> list[Email]:
+        """ACTIVE-Inbox messages that still need analysis (for the queue).
+
+        Never schedules excluded (spam/trash/draft/sent/archived) mail.
+        """
+        where = 'WHERE e.mailbox_state="active_inbox"'
+        params: list = [model, schema]
+        if account_id:
+            where += ' AND e.account_id=?'
+            params.append(account_id)
+        rows = self.con.execute(
+            'SELECT e.payload FROM emails e LEFT JOIN email_analysis a '
+            'ON a.email_id = e.id AND a.model_name=? AND a.schema_version=? '
+            + where + ' AND a.email_id IS NULL',
+            tuple(params)
+        ).fetchall()
+        return [Email.model_validate_json(r['payload']) for r in rows]
+
     def delete_email(self, email_id: str):
         self.con.execute('DELETE FROM emails WHERE id=?', (email_id,))
         self.con.execute('DELETE FROM tasks WHERE source_email_id=?', (email_id,))
         self.con.commit()
 
     def search_emails(self, query: str, limit=100) -> list[Email]:
-        """Full-text search using FTS5 if available, falling back to LIKE."""
+        """Full-text search using FTS5 if available, falling back to LIKE.
+
+        Always restricted to pipeline-visible (active inbox) messages —
+        spam/trash/archived rows can never surface through search.
+        """
         try:
             rows = self.con.execute(
                 "SELECT e.payload FROM emails_fts f JOIN emails e ON f.rowid = e.rowid "
-                "WHERE emails_fts MATCH ? ORDER BY rank LIMIT ?",
+                "WHERE emails_fts MATCH ? AND e.mailbox_state='active_inbox' ORDER BY rank LIMIT ?",
                 (query, limit)
             ).fetchall()
             return [Email.model_validate_json(r['payload']) for r in rows]
@@ -98,7 +298,8 @@ class Repository:
             # FTS5 not available, fall back to LIKE search
             like_q = f"%{query}%"
             rows = self.con.execute(
-                "SELECT payload FROM emails WHERE sender_col LIKE ? OR subject_col LIKE ? LIMIT ?",
+                "SELECT payload FROM emails WHERE mailbox_state='active_inbox' "
+                "AND (sender_col LIKE ? OR subject_col LIKE ?) LIMIT ?",
                 (like_q, like_q, limit)
             ).fetchall()
             return [Email.model_validate_json(r['payload']) for r in rows]
@@ -304,6 +505,26 @@ class Repository:
             ).fetchall()
         else:
             rows = self.con.execute('SELECT * FROM tasks ORDER BY created_at DESC').fetchall()
+        return [self._task_from_row(r) for r in rows]
+
+    def active_tasks(self, status=None) -> list[Task]:
+        """Current-attention task projection.
+
+        Tasks whose source email is no longer pipeline-eligible (spam,
+        trash, draft, sent-only, archived) are hidden from the ACTIVE
+        projection but their rows are preserved. Tasks without a source
+        email (user-created) always appear.
+        """
+        sql = (
+            'SELECT t.* FROM tasks t LEFT JOIN emails e ON e.id = t.source_email_id '
+            'WHERE (t.source_email_id IS NULL OR e.mailbox_state = "active_inbox")'
+        )
+        params: tuple = ()
+        if status:
+            sql += ' AND t.status=?'
+            params = (status,)
+        sql += ' ORDER BY t.created_at DESC'
+        rows = self.con.execute(sql, params).fetchall()
         return [self._task_from_row(r) for r in rows]
 
     def tasks_by_thread(self, thread_id: str) -> list[Task]:

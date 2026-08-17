@@ -24,6 +24,7 @@ class EmailAnalysis(BaseModel):
 class Email(BaseModel):
     id: str; thread_id: str | None = None; account_id: str | None = None; sender: str; sender_name: str | None = None; recipients: list[str] = Field(default_factory=list)
     subject: str; body: str; received_at: datetime | None = None; source_metadata: dict[str, Any] = Field(default_factory=dict)
+    label_ids: list[str] = Field(default_factory=list)
     analysis: EmailAnalysis | None = None
 class BriefingItem(BaseModel): email_id: str; sender: str; subject: str; short_summary: str; priority: Priority; why_it_matters: str; deadline: str | None = None; needs_reply: bool
 class InboxBriefing(BaseModel):
