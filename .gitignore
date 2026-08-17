@@ -16,6 +16,7 @@ venv/
 .pytest-tmp/
 node_modules/
 frontend/dist/
+frontend/*.tsbuildinfo
 desktop/src-tauri/target/
 desktop/src-tauri/binaries/
 *.spec

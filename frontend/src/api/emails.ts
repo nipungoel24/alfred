@@ -1,6 +1,15 @@
 import { api } from './client';
 
 export type Priority = 'urgent' | 'high' | 'medium' | 'low';
+export type MailCategory = 'primary' | 'promotions' | 'social' | 'updates' | 'forums';
+
+export const CATEGORY_ORDER: MailCategory[] = ['primary', 'promotions', 'social', 'updates', 'forums'];
+
+export type EmailCounts = {
+  active_inbox: number;
+  excluded: number;
+  categories: Record<MailCategory, number>;
+};
 
 export type Analysis = {
   short_summary: string;
@@ -24,6 +33,7 @@ export type Email = {
   subject: string;
   body: string;
   received_at?: string | null;
+  label_ids: string[];
   analysis?: Analysis | null
 };
 
@@ -75,15 +85,28 @@ export type Task = {
   created_at?: string | null
 };
 
-export const emails = (query = '', priority = '', needsReply: boolean | null = null, accountId = '') => {
-  const params = [];
-  if (query) params.push(`q=${encodeURIComponent(query)}`);
-  if (priority) params.push(`priority=${encodeURIComponent(priority)}`);
-  if (needsReply !== null) params.push(`needs_reply=${needsReply}`);
-  if (accountId) params.push(`account_id=${encodeURIComponent(accountId)}`);
+export const emails = (options: {
+  query?: string;
+  priority?: string;
+  needsReply?: boolean | null;
+  accountId?: string;
+  category?: MailCategory | null;
+  limit?: number;
+  offset?: number;
+} = {}) => {
+  const params: string[] = [];
+  if (options.query) params.push(`q=${encodeURIComponent(options.query)}`);
+  if (options.priority) params.push(`priority=${encodeURIComponent(options.priority)}`);
+  if (options.needsReply !== null && options.needsReply !== undefined) params.push(`needs_reply=${options.needsReply}`);
+  if (options.accountId) params.push(`account_id=${encodeURIComponent(options.accountId)}`);
+  if (options.category) params.push(`category=${encodeURIComponent(options.category)}`);
+  if (options.limit !== undefined) params.push(`limit=${options.limit}`);
+  if (options.offset !== undefined) params.push(`offset=${options.offset}`);
   const queryStr = params.length ? `?${params.join('&')}` : '';
   return api<Email[]>(`/api/emails${queryStr}`);
 };
+
+export const emailCounts = () => api<EmailCounts>('/api/emails/counts');
 
 export const emailDetails = (id: string) => api<Email>(`/api/emails/${id}`);
 export const analyze = (id: string) => api<{ analysis: Analysis; cached: boolean }>(`/api/emails/${id}/analyze`, { method: 'POST' });

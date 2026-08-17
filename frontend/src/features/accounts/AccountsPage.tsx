@@ -25,8 +25,9 @@ export function AccountsPage() {
   const syncMutation = useMutation({
     mutationFn: (id: string) => syncAccount(id, false),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['accounts'] });
-      queryClient.invalidateQueries({ queryKey: ['emails'] });
+      void queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      void queryClient.invalidateQueries({ queryKey: ['emails'] });
+      void queryClient.invalidateQueries({ queryKey: ['emailCounts'] });
     },
   });
 
@@ -46,58 +47,58 @@ export function AccountsPage() {
   }, [queryClient]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      <div className="page-header">
-        <div>
-          <h1 className="page-title">Connected Accounts</h1>
-          <div className="page-subtitle">Manage your email providers</div>
+    <div className="page-scroll">
+      <div style={{ maxWidth: 760, margin: '0 auto', padding: 'var(--space-6) var(--space-6) var(--space-10)' }}>
+        <div className="reveal">
+          <h1 className="page-title" style={{ fontSize: 'var(--text-xl)' }}>Connected Accounts</h1>
+          <p className="page-subtitle" style={{ marginBottom: 'var(--space-5)' }}>
+            Alfred reads your Gmail mailbox. Analysis stays on this device.
+          </p>
         </div>
-        {accounts.length === 0 && (
-          <button
-            className="btn btn-primary"
-            onClick={() => connectMutation.mutate('http://127.0.0.1:8765/api/accounts/gmail/callback')}
-            disabled={connectMutation.isPending}
-          >
-            <Mail size={14} />
-            {connectMutation.isPending ? 'Connecting...' : 'Connect Gmail'}
-          </button>
-        )}
-      </div>
 
-      <div style={{ flex: 1, overflowY: 'auto', padding: '0 var(--space-6)', paddingBottom: 'var(--space-6)' }}>
         {connectMutation.isError && (
-          <div className="banner banner-danger">
+          <div className="banner banner-danger" style={{ marginBottom: 'var(--space-4)' }}>
             Failed to connect account. Ensure Google credentials are configured.
           </div>
         )}
 
         {isLoading ? (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
-            {[1,2].map(i => <div key={i} className="skeleton" style={{ height: 90, borderRadius: 'var(--radius-lg)' }} />)}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-3)' }}>
+            {[1, 2].map(i => <div key={i} className="skeleton" style={{ height: 84 }} />)}
           </div>
         ) : accounts.length === 0 ? (
-          <div className="empty-state">
-            <UserCircle />
+          <div className="empty-state" style={{ border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)' }}>
+            <UserCircle aria-hidden="true" />
             <p>No accounts connected. Connect a Gmail account to get started.</p>
+            <button
+              type="button"
+              className="btn btn-primary"
+              style={{ marginTop: 'var(--space-3)' }}
+              onClick={() => connectMutation.mutate('http://127.0.0.1:8765/api/accounts/gmail/callback')}
+              disabled={connectMutation.isPending}
+            >
+              <Mail size={14} aria-hidden="true" />
+              {connectMutation.isPending ? 'Connecting…' : 'Connect Gmail'}
+            </button>
           </div>
         ) : (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-4)' }}>
             {accounts.map(acc => (
-              <div key={acc.id} className="account-card">
-                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)' }}>
+              <div key={acc.id} className="account-card reveal">
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-4)', minWidth: 0 }}>
                   <div style={{
-                    width: 40, height: 40, borderRadius: 'var(--radius-md)',
-                    background: 'var(--accent-soft)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    width: 38, height: 38, borderRadius: 'var(--radius-md)',
+                    background: 'var(--accent-soft)', display: 'grid', placeItems: 'center', flexShrink: 0,
                   }}>
-                    <Mail size={18} style={{ color: 'var(--accent)' }} />
+                    <Mail size={17} style={{ color: 'var(--accent)' }} aria-hidden="true" />
                   </div>
-                  <div>
+                  <div style={{ minWidth: 0 }}>
                     <div style={{ fontWeight: 600, fontSize: 'var(--text-md)' }}>
                       {acc.display_name || 'Gmail'}
                     </div>
-                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginTop: 2 }}>
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 'var(--space-3)', marginTop: 2, flexWrap: 'wrap' }}>
                       <span>{acc.email_address}</span>
-                      <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                      <span style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                         <span className={`status-dot ${acc.connection_status === 'connected' ? 'online' : 'offline'}`} />
                         {acc.connection_status}
                       </span>
@@ -105,21 +106,25 @@ export function AccountsPage() {
                     </div>
                   </div>
                 </div>
-                <div style={{ display: 'flex', gap: 'var(--space-2)' }}>
+                <div style={{ display: 'flex', gap: 'var(--space-2)', flexShrink: 0 }}>
                   <button
-                    className="btn btn-surface"
+                    type="button"
+                    className="btn btn-surface btn-sm"
                     onClick={() => syncMutation.mutate(acc.id)}
                     disabled={syncMutation.isPending && syncMutation.variables === acc.id}
                   >
-                    <RefreshCw size={14} style={syncMutation.isPending && syncMutation.variables === acc.id ? { animation: 'spin 1s linear infinite' } : undefined} />
-                    {syncMutation.isPending && syncMutation.variables === acc.id ? 'Syncing...' : 'Sync Now'}
+                    {syncMutation.isPending && syncMutation.variables === acc.id
+                      ? <span className="btn-spinner" aria-hidden="true" />
+                      : <RefreshCw size={13} aria-hidden="true" />}
+                    {syncMutation.isPending && syncMutation.variables === acc.id ? 'Syncing…' : 'Sync Now'}
                   </button>
                   <button
-                    className="btn btn-danger"
+                    type="button"
+                    className="btn btn-danger btn-sm"
                     onClick={() => deleteMutation.mutate(acc.id)}
                     disabled={deleteMutation.isPending}
                   >
-                    <Unplug size={14} />
+                    <Unplug size={13} aria-hidden="true" />
                     Disconnect
                   </button>
                 </div>

@@ -5,6 +5,7 @@ type ProgressEvent =
   | { type: 'status'; pending: number }
   | { type: 'analysis_complete'; email_id: string; cached: boolean; pending: number; total_ms?: number }
   | { type: 'analysis_error'; email_id: string; error: string; pending: number }
+  | { type: 'analysis_cancelled'; email_id: string; pending: number }
   | { type: 'worker_paused'; reason: string; pending: number }
   | { type: 'heartbeat'; pending: number }
   | { type: 'jobs_enqueued'; count: number; pending: number };
@@ -16,7 +17,7 @@ export function AnalysisProgress() {
   const invalidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const eventSource = new EventSource('http://127.0.0.1:8765/api/analysis/progress');
+    const eventSource = new EventSource(`${import.meta.env.VITE_ALFRED_API_URL ?? 'http://127.0.0.1:8765'}/api/analysis/progress`);
 
     eventSource.onmessage = (event) => {
       try {
@@ -29,19 +30,19 @@ export function AnalysisProgress() {
           if (!invalidationTimer.current) {
             invalidationTimer.current = setTimeout(() => {
               queryClient.invalidateQueries({ queryKey: ['emails'] });
+              queryClient.invalidateQueries({ queryKey: ['emailCounts'] });
               queryClient.invalidateQueries({ queryKey: ['tasks'] });
               queryClient.invalidateQueries({ queryKey: ['briefing'] });
               invalidationTimer.current = null;
             }, 1000);
           }
         }
-      } catch (err) {
-        console.error('Failed to parse SSE event', err);
+      } catch {
+        /* malformed SSE payload — ignore */
       }
     };
 
-    eventSource.onerror = (err) => {
-      console.error('SSE Error:', err);
+    eventSource.onerror = () => {
       eventSource.close();
     };
 
@@ -53,15 +54,18 @@ export function AnalysisProgress() {
   if (pending === 0) return null;
 
   return (
-    <div className="analysis-progress-bar">
-      <div className="progress-spinner"></div>
-      <div className="progress-text">
-        <strong>Analyzing {pending} emails in background...</strong>
+    <div className="analysis-progress-bar" role="status" aria-live="polite">
+      <div className="progress-spinner" aria-hidden="true" />
+      <div>
+        <strong>Analyzing {pending} messages in background…</strong>
         {latestEvent?.type === 'analysis_complete' && (
           <span className="text-muted"> (Last: {latestEvent.total_ms}ms)</span>
         )}
         {latestEvent?.type === 'analysis_error' && (
           <span className="text-danger"> (Error: {latestEvent.error})</span>
+        )}
+        {latestEvent?.type === 'analysis_cancelled' && (
+          <span className="text-muted"> (Skipped: no longer in active inbox)</span>
         )}
       </div>
     </div>

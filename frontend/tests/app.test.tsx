@@ -1,15 +1,17 @@
 // @vitest-environment jsdom
-import React from 'react';
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
 import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from '../src/App';
 import * as api from '../src/api/emails';
 
-// Mock the API methods
-vi.mock('../src/api/emails', () => {
+vi.mock('../src/api/emails', async (importOriginal) => {
+  const actual = await importOriginal<typeof import('../src/api/emails')>();
   return {
+    ...actual,
     emails: vi.fn(),
+    emailCounts: vi.fn(),
+    emailDetails: vi.fn(),
     briefing: vi.fn(),
     analyze: vi.fn(),
     draft: vi.fn(),
@@ -19,9 +21,9 @@ vi.mock('../src/api/emails', () => {
     deleteAccount: vi.fn(),
     tasks: vi.fn(),
     toggleTask: vi.fn(),
-    deleteTask: vi.fn()
-    ,health: vi.fn(),
-    regenerateBriefing: vi.fn()
+    deleteTask: vi.fn(),
+    health: vi.fn(),
+    regenerateBriefing: vi.fn(),
   };
 });
 
@@ -34,6 +36,8 @@ describe('Alfred Frontend Application', () => {
       subject: 'Payment failed - action required today',
       body: 'Our payment processor rejected the subscription renewal.',
       recipients: ['user@domain.com'],
+      received_at: '2026-08-17T09:00:00Z',
+      label_ids: ['INBOX', 'UNREAD', 'CATEGORY_PERSONAL'],
       analysis: {
         short_summary: 'SaaS payment rejected',
         category: 'finance',
@@ -42,8 +46,9 @@ describe('Alfred Frontend Application', () => {
         reason_for_priority: 'Service interruption today',
         needs_reply: true,
         action_items: [{ description: 'Update card by 5 PM' }],
-        deadlines: [{ description: 'Pay invoice', due_at: 'before 5 PM today', confidence: 'explicit' }]
-      }
+        deadlines: [{ description: 'Pay invoice', due_at: 'before 5 PM today', confidence: 'explicit' }],
+        important_details: [],
+      },
     },
     {
       id: 'email_b',
@@ -52,8 +57,10 @@ describe('Alfred Frontend Application', () => {
       subject: 'Weekly Tech Digest',
       body: 'Welcome to your weekly tech digest.',
       recipients: ['user@domain.com'],
-      analysis: null // Not analyzed yet
-    }
+      received_at: '2026-08-16T09:00:00Z',
+      label_ids: ['INBOX', 'CATEGORY_PROMOTIONS'],
+      analysis: null,
+    },
   ];
 
   const mockBriefing = {
@@ -72,11 +79,11 @@ describe('Alfred Frontend Application', () => {
         priority: 'urgent',
         why_it_matters: 'Service interruption today',
         deadline: 'before 5 PM today',
-        needs_reply: true
-      }
+        needs_reply: true,
+      },
     ],
     important_updates: [],
-    can_wait_or_review_later: []
+    can_wait_or_review_later: [],
   };
 
   const mockAccounts = [
@@ -86,8 +93,8 @@ describe('Alfred Frontend Application', () => {
       email_address: 'user@gmail.com',
       display_name: 'User',
       connection_status: 'connected',
-      last_sync_at: '2026-08-15T09:00:00Z'
-    }
+      last_sync_at: '2026-08-15T09:00:00Z',
+    },
   ];
 
   const mockTasks = [
@@ -100,34 +107,34 @@ describe('Alfred Frontend Application', () => {
       due_at: '5 PM today',
       priority: 'urgent',
       status: 'pending',
-      created_at: '2026-08-15T09:00:00Z'
-    }
+      created_at: '2026-08-15T09:00:00Z',
+    },
   ];
 
   let queryClient: QueryClient;
 
   beforeEach(() => {
-    // Mock EventSource globally for JSDOM
     global.EventSource = class {
-      onmessage: any = null;
-      onerror: any = null;
+      onmessage: (event: MessageEvent) => void = () => {};
+      onerror: () => void = () => {};
       close = vi.fn();
       constructor() {}
-    } as any;
+    } as unknown as typeof EventSource;
 
     queryClient = new QueryClient({
-      defaultOptions: {
-        queries: {
-          retry: false,
-        },
-      },
+      defaultOptions: { queries: { retry: false, staleTime: Infinity } },
     });
     vi.clearAllMocks();
-    vi.mocked(api.emails).mockResolvedValue(mockEmails as any);
-    vi.mocked(api.briefing).mockResolvedValue(mockBriefing as any);
-    vi.mocked(api.regenerateBriefing).mockResolvedValue(mockBriefing as any);
-    vi.mocked(api.accounts).mockResolvedValue(mockAccounts as any);
-    vi.mocked(api.tasks).mockResolvedValue(mockTasks as any);
+    vi.mocked(api.emails).mockResolvedValue(mockEmails as never);
+    vi.mocked(api.emailCounts).mockResolvedValue({
+      active_inbox: 2,
+      excluded: 0,
+      categories: { primary: 1, promotions: 1, social: 0, updates: 0, forums: 0 },
+    } as never);
+    vi.mocked(api.briefing).mockResolvedValue(mockBriefing as never);
+    vi.mocked(api.regenerateBriefing).mockResolvedValue(mockBriefing as never);
+    vi.mocked(api.accounts).mockResolvedValue(mockAccounts as never);
+    vi.mocked(api.tasks).mockResolvedValue(mockTasks as never);
     vi.mocked(api.health).mockResolvedValue({ status: 'ok', ai: 'ready' });
   });
 
@@ -135,36 +142,19 @@ describe('Alfred Frontend Application', () => {
     cleanup();
   });
 
-  it('renders the branding and local-first status', async () => {
+  it('renders the icon rail and local-first status', async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
     );
-    expect(await screen.findByText(/ALFRED/)).toBeDefined();
-    expect(screen.getByText(/Smart Inbox/)).toBeDefined();
-    expect(screen.getByText(/Local AI/)).toBeDefined();
+    expect(await screen.findByRole('button', { name: 'Mail' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Overview' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Tasks' })).toBeInTheDocument();
+    expect(await screen.findByText(/AI Ready/)).toBeInTheDocument();
   }, 15000);
 
-  it('renders briefing metrics and top attention cards', async () => {
-    render(
-      <QueryClientProvider client={queryClient}>
-        <App />
-      </QueryClientProvider>
-    );
-    
-    await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
-
-    // Check Metrics render
-    expect(screen.getByText('Analyzed')).toBeDefined();
-    expect(screen.getAllByText('Important').length).toBeGreaterThan(1);
-    expect(screen.getAllByText('Deadlines').length).toBeGreaterThan(1);
-    
-    // The attention section remains visible alongside the briefing.
-    expect(screen.getByText('Needs Your Attention')).toBeDefined();
-  }, 15000);
-
-  it('navigates to Inbox and applies filters', async () => {
+  it('renders briefing metrics and top attention items on Overview', async () => {
     render(
       <QueryClientProvider client={queryClient}>
         <App />
@@ -173,22 +163,43 @@ describe('Alfred Frontend Application', () => {
 
     await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
 
-    // Click "Inbox" sidebar button
-    const inboxBtn = screen.getByRole('button', { name: 'Inbox' });
-    fireEvent.click(inboxBtn);
+    expect(screen.getByText('Inbox')).toBeInTheDocument();
+    expect(screen.getByText('Important')).toBeInTheDocument();
+    expect(screen.getByText('Deadlines')).toBeInTheDocument();
+    expect(screen.getByText('Needs Your Attention')).toBeInTheDocument();
+  }, 15000);
 
-    // Should display inbox view (we check for search input since virtualized rows might not mount in JSDOM)
-    await screen.findByPlaceholderText('Filter emails...', {}, { timeout: 8000 });
+  it('navigates to Mail workspace via the rail', async () => {
+    render(
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    );
+
+    await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
+
+    fireEvent.click(screen.getByRole('button', { name: 'Mail' }));
+
+    await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
+    expect(screen.getByRole('tab', { name: /Promotions/ })).toBeInTheDocument();
+    expect(screen.getByRole('searchbox')).toBeInTheDocument();
+    await waitFor(() => {
+      expect(screen.getByText('Payment failed - action required today')).toBeInTheDocument();
+    });
   }, 15000);
 
   it('uses high-priority email analysis when the briefing has no attention items', async () => {
-    vi.mocked(api.briefing).mockResolvedValue({ ...mockBriefing, top_attention_items: [], deadlines: [] } as any);
+    vi.mocked(api.briefing).mockResolvedValue({
+      ...mockBriefing,
+      top_attention_items: [],
+      deadlines: [],
+    } as never);
     render(
       <QueryClientProvider client={queryClient}>
         <App />
       </QueryClientProvider>
     );
 
-    expect(await screen.findByText('Payment failed - action required today', {}, { timeout: 8000 })).toBeDefined();
+    expect(await screen.findByText('Payment failed - action required today', {}, { timeout: 8000 })).toBeInTheDocument();
   }, 15000);
 });

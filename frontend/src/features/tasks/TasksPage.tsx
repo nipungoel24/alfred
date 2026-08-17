@@ -31,24 +31,25 @@ export function TasksPage() {
   const rowVirtualizer = useVirtualizer({
     count: displayTasks.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 64,
-    overscan: 5,
+    estimateSize: () => 60,
+    overscan: 8,
   });
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
-      {/* Header */}
-      <div className="page-header">
+      <div className="page-head">
         <div>
           <h1 className="page-title">Tasks</h1>
           <div className="page-subtitle">{pendingTasks.length} pending · {completedTasks.length} completed</div>
         </div>
-        <div style={{ display: 'flex', gap: 'var(--space-1)' }}>
+        <div style={{ display: 'flex', gap: 2, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)' }}>
           {(['pending', 'completed', 'all'] as const).map(f => (
             <button
               key={f}
-              className={`btn ${filter === f ? 'btn-primary btn-sm' : 'btn-ghost btn-sm'}`}
+              type="button"
+              className={`btn btn-sm ${filter === f ? 'btn-primary' : 'btn-ghost'}`}
               onClick={() => setFilter(f)}
+              aria-pressed={filter === f}
             >
               {f.charAt(0).toUpperCase() + f.slice(1)}
             </button>
@@ -56,33 +57,29 @@ export function TasksPage() {
         </div>
       </div>
 
-      {/* Task list */}
       {isLoading ? (
-        <div style={{ padding: 'var(--space-5)' }}>
+        <div style={{ padding: 'var(--space-4) var(--space-6)' }} aria-busy="true">
           {[...Array(5)].map((_, i) => (
-            <div key={i} style={{ display: 'flex', gap: 'var(--space-3)', padding: '14px var(--space-5)', borderBottom: '1px solid var(--border-subtle)' }}>
-              <div className="skeleton" style={{ width: 18, height: 18 }} />
-              <div style={{ flex: 1 }}>
-                <div className="skeleton" style={{ width: '60%', height: 14, marginBottom: 6 }} />
-                <div className="skeleton" style={{ width: '30%', height: 12 }} />
-              </div>
+            <div key={i} className="skeleton-row">
+              <div className="skeleton" style={{ width: '60%', height: 13 }} />
+              <div className="skeleton" style={{ width: '30%', height: 11 }} />
             </div>
           ))}
         </div>
       ) : displayTasks.length === 0 ? (
         <div className="empty-state">
-          <CheckSquare />
+          <CheckSquare aria-hidden="true" />
           <p>{filter === 'pending' ? 'No pending tasks.' : filter === 'completed' ? 'No completed tasks.' : 'No tasks found.'}</p>
         </div>
       ) : (
-        <div ref={parentRef} style={{ flex: 1, overflowY: 'auto' }}>
+        <div ref={parentRef} style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: 'var(--space-2) var(--space-6)' }}>
           <div style={{ height: rowVirtualizer.getTotalSize(), width: '100%', position: 'relative' }}>
             {rowVirtualizer.getVirtualItems().map(virtualRow => {
               const task = displayTasks[virtualRow.index];
               const isCompleted = task.status === 'completed';
               return (
                 <div
-                  key={virtualRow.index}
+                  key={task.id}
                   data-index={virtualRow.index}
                   ref={rowVirtualizer.measureElement}
                   style={{
@@ -93,16 +90,17 @@ export function TasksPage() {
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                 >
-                  <div className="task-row">
+                  <div className="list-row" style={{ borderBottom: virtualRow.index === displayTasks.length - 1 ? 'none' : undefined }}>
                     <button
+                      type="button"
                       className={`task-checkbox ${isCompleted ? 'checked' : ''}`}
                       onClick={() => toggleMutation.mutate(task.id)}
                       disabled={toggleMutation.isPending}
                       aria-label={isCompleted ? 'Mark incomplete' : 'Mark complete'}
                     >
-                      {isCompleted && <Check size={12} />}
+                      {isCompleted && <Check aria-hidden="true" />}
                     </button>
-                    <div className="task-body">
+                    <div style={{ flex: 1, minWidth: 0 }}>
                       <div className={`task-title ${isCompleted ? 'completed' : ''}`}>{task.title}</div>
                       {task.description && (
                         <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
@@ -110,21 +108,18 @@ export function TasksPage() {
                         </div>
                       )}
                       <div className="task-meta">
-                        {task.due_at && (
-                          <span style={{ color: 'var(--accent-text)' }}>Due: {task.due_at}</span>
-                        )}
-                        {task.priority && (
-                          <span className={`badge badge-${task.priority}`}>{task.priority}</span>
-                        )}
+                        {task.due_at && <span style={{ color: 'var(--accent-text)' }}>Due: {task.due_at}</span>}
+                        {task.priority && <span className={`badge badge-${task.priority}`}>{task.priority}</span>}
                       </div>
                     </div>
                     <button
+                      type="button"
                       className="icon-btn"
                       onClick={() => deleteMutation.mutate(task.id)}
                       disabled={deleteMutation.isPending}
                       aria-label="Delete task"
                     >
-                      <Trash2 size={14} />
+                      <Trash2 aria-hidden="true" />
                     </button>
                   </div>
                 </div>
