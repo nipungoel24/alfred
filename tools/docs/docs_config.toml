@@ -1,0 +1,34 @@
+# Alfred documentation generator configuration.
+# All paths are relative to the repository root.
+
+[vault]
+path = "docs/obsidian"
+generated_dir = "99 - Generated"
+
+[sources]
+python_roots = ["backend/app", "backend/tests", "tests"]
+typescript_roots = ["frontend/src", "frontend/tests"]
+rust_roots = ["desktop/src-tauri/src"]
+
+[ignore]
+paths = [
+    "node_modules",
+    "dist",
+    "target",
+    "__pycache__",
+    ".pytest_cache",
+    ".git",
+    "build",
+    ".preview-data",
+    "cache",
+    "venv",
+    "src",            # legacy pre-Alfred prototype (Streamlit/Groq)
+    "config",         # legacy pre-Alfred prototype configuration
+    "Data_clean",     # legacy data tooling
+]
+
+[analysis]
+min_visibility = "module"   # module | public | all (unused today; kept for future)
+include_nested_functions = true
+include_constants = true
+exclude_magic_methods = true
