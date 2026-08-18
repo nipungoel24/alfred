@@ -147,9 +147,9 @@ export function IntelligencePanel({ email, onClose }: IntelligencePanelProps) {
                 {draftMutation.isSuccess && (
                   <div className="reveal" style={{ marginTop: 'var(--space-3)' }}>
                     <div className="intel-section-label">Draft reply</div>
-                    <p className="intel-why" style={{ whiteSpace: 'pre-wrap', color: 'var(--text-secondary)' }}>
+                    <div className="draft-panel">
                       {draftMutation.data.draft}
-                    </p>
+                    </div>
                   </div>
                 )}
               </section>

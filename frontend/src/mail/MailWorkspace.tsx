@@ -254,6 +254,8 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
         emailId={selectedId}
         intelVisible={intelVisible}
         onToggleIntel={() => setIntelVisible(v => !v)}
+        laterIds={laterIds}
+        onToggleLater={toggleLater}
       />
 
       {/* ── Alfred intelligence pane ── */}

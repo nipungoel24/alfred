@@ -1,5 +1,7 @@
 import { useState } from 'react';
-import { LayoutDashboard, Mail, CheckSquare, Clock, UserCircle, Settings } from 'lucide-react';
+import {
+  LayoutDashboard, Mail, CheckSquare, Clock, UserCircle, Settings, Cpu,
+} from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 
 export type AppPage = 'overview' | 'mail' | 'tasks' | 'deadlines' | 'accounts' | 'settings';
@@ -60,23 +62,23 @@ export function IconRail({ page, onNavigate, aiReady, gmailConnected }: IconRail
         {SECONDARY.map(item => (
           <RailButton key={item.page} item={item} active={page === item.page} onClick={() => onNavigate(item.page)} />
         ))}
+      </nav>
+      <div className="rail-status" aria-label="Connection status">
         <span
-          className="rail-item"
-          data-label={aiReady ? 'Local AI ready' : 'Local AI unavailable'}
-          title={aiReady ? 'Local AI ready' : 'Local AI unavailable'}
-          aria-hidden="true"
+          className={`rail-status-item ${aiReady ? 'ok' : 'down'}`}
+          data-label={aiReady ? 'Alfred AI ready' : 'Alfred AI offline'}
+          title={aiReady ? 'Local AI · qwen3:4b' : 'Local AI unavailable'}
         >
-          <span className={`status-dot ${aiReady ? 'online' : 'offline'}`} />
+          <Cpu size={16} strokeWidth={1.75} aria-hidden="true" />
         </span>
         <span
-          className="rail-item"
+          className={`rail-status-item ${gmailConnected ? 'ok' : 'down'}`}
           data-label={gmailConnected ? 'Gmail connected' : 'Gmail disconnected'}
           title={gmailConnected ? 'Gmail connected' : 'Gmail disconnected'}
-          aria-hidden="true"
         >
-          <span className={`status-dot ${gmailConnected ? 'online' : 'offline'}`} />
+          <Mail size={16} strokeWidth={1.75} aria-hidden="true" />
         </span>
-      </nav>
+      </div>
     </aside>
   );
 }

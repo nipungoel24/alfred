@@ -53,7 +53,10 @@ export function WorkspaceHeader({
       </div>
 
       <div className="header-actions">
-        <span className="status-chip" title="Local AI runtime">
+        <span
+          className="status-chip"
+          title={aiReady ? 'Local AI · qwen3:4b' : 'Local AI unavailable — start Ollama to resume analysis'}
+        >
           <span className={`status-dot ${aiReady ? 'online' : 'offline'}`} />
           {aiReady ? 'AI Ready' : 'AI Offline'}
         </span>

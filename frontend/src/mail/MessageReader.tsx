@@ -1,5 +1,6 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Paperclip, MailOpen, PanelRight } from 'lucide-react';
+import { Paperclip, MailOpen, Archive, ArchiveRestore, Copy, Check, PanelRight } from 'lucide-react';
 import { emailDetails } from '../api/emails';
 import type { Email } from '../api/emails';
 
@@ -7,9 +8,15 @@ interface MessageReaderProps {
   emailId: string | null;
   intelVisible: boolean;
   onToggleIntel: () => void;
+  laterIds: ReadonlySet<string>;
+  onToggleLater: (id: string) => void;
 }
 
-export function MessageReader({ emailId, intelVisible, onToggleIntel }: MessageReaderProps) {
+export function MessageReader({
+  emailId, intelVisible, onToggleIntel, laterIds, onToggleLater,
+}: MessageReaderProps) {
+  const [copied, setCopied] = useState(false);
+
   const { data: email, isLoading, isError } = useQuery({
     queryKey: ['email', emailId],
     queryFn: () => emailDetails(emailId ?? ''),
@@ -17,23 +24,64 @@ export function MessageReader({ emailId, intelVisible, onToggleIntel }: MessageR
     staleTime: 30_000,
   });
 
+  const isLater = Boolean(emailId && laterIds.has(emailId));
+
+  const handleCopy = async () => {
+    if (!email) return;
+    const text = `Subject: ${email.subject}\nFrom: ${email.sender_name || email.sender} <${email.sender}>\nDate: ${formatTimeLong(email.received_at)}\n\n${email.body}`;
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+    }
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1600);
+  };
+
   return (
     <section className="reader-pane" aria-label="Message reader">
-      <div className="reader-strip">
-        <span className="strip-title">Message</span>
+      {/* Sticky toolbar — real actions only */}
+      <div className="reader-toolbar" role="toolbar" aria-label="Reader actions">
+        <span className="toolbar-title">Message</span>
         <span className="spacer" />
-        {emailId && (
-          <button
-            type="button"
-            className={`icon-btn outlined ${intelVisible ? 'active' : ''}`}
-            onClick={onToggleIntel}
-            aria-label={intelVisible ? 'Hide Alfred intelligence' : 'Show Alfred intelligence'}
-            aria-pressed={intelVisible}
-            title="Toggle Alfred Intelligence"
-          >
-            <PanelRight />
-          </button>
+        {emailId && email && (
+          <>
+            <button
+              type="button"
+              className={`toolbar-action ${isLater ? 'active' : ''}`}
+              onClick={() => onToggleLater(email.id)}
+              aria-pressed={isLater}
+              title={isLater ? 'Remove from Later' : 'Save for Later'}
+            >
+              {isLater ? <ArchiveRestore aria-hidden="true" /> : <Archive aria-hidden="true" />}
+              Later
+            </button>
+            <button
+              type="button"
+              className={`toolbar-action ${copied ? 'copied' : ''}`}
+              onClick={handleCopy}
+              title="Copy message text"
+            >
+              {copied ? <Check aria-hidden="true" /> : <Copy aria-hidden="true" />}
+              {copied ? 'Copied' : 'Copy'}
+            </button>
+          </>
         )}
+        <button
+          type="button"
+          className={`toolbar-action ${intelVisible ? 'active' : ''}`}
+          onClick={onToggleIntel}
+          aria-pressed={intelVisible}
+          title={intelVisible ? 'Hide Alfred Intelligence' : 'Show Alfred Intelligence'}
+        >
+          <PanelRight aria-hidden="true" />
+          Intelligence
+        </button>
       </div>
 
       {!emailId ? (
@@ -52,44 +100,54 @@ export function MessageReader({ emailId, intelVisible, onToggleIntel }: MessageR
         </div>
       ) : isLoading || !email ? (
         <div className="reader-scroll" aria-busy="true">
-          <div className="reader-inner">
-            <div className="skeleton" style={{ width: '75%', height: 22, marginBottom: 16 }} />
-            <div className="skeleton" style={{ width: 160, height: 14, marginBottom: 24 }} />
-            <div className="skeleton" style={{ width: '100%', height: 12, marginBottom: 8 }} />
-            <div className="skeleton" style={{ width: '92%', height: 12, marginBottom: 8 }} />
-            <div className="skeleton" style={{ width: '85%', height: 12 }} />
+          <div className="reader-surface">
+            <div className="reader-document">
+              <div className="skeleton" style={{ width: '78%', height: 24, marginBottom: 24 }} />
+              <div style={{ display: 'flex', gap: 12, alignItems: 'center', marginBottom: 20 }}>
+                <div className="skeleton" style={{ width: 40, height: 40, borderRadius: 10 }} />
+                <div style={{ flex: 1 }}>
+                  <div className="skeleton" style={{ width: 140, height: 14, marginBottom: 6 }} />
+                  <div className="skeleton" style={{ width: 220, height: 12 }} />
+                </div>
+              </div>
+              <div className="skeleton" style={{ width: '100%', height: 14, marginBottom: 10 }} />
+              <div className="skeleton" style={{ width: '94%', height: 14, marginBottom: 10 }} />
+              <div className="skeleton" style={{ width: '88%', height: 14 }} />
+            </div>
           </div>
         </div>
       ) : (
         <div className="reader-scroll">
-          <article className="reader-inner reveal">
-            <h2 className="reader-subject">{email.subject}</h2>
-            <div className="reader-meta">
-              <span
-                className="reader-sender-avatar"
-                aria-hidden="true"
-                style={{ background: avatarGradient(email.sender) }}
-              >
-                {initialOf(email.sender_name || email.sender)}
-              </span>
-              <div>
-                <div className="reader-sender">{email.sender_name || email.sender}</div>
-                <div className="reader-sender-mail">
-                  {email.sender} · to {email.recipients?.join(', ') || 'you'}
+          <article className="reader-surface">
+            <div className="reader-document">
+              <h2 className="reader-subject">{email.subject}</h2>
+              <div className="reader-meta">
+                <span
+                  className="reader-sender-avatar"
+                  aria-hidden="true"
+                  style={{ background: avatarGradient(email.sender) }}
+                >
+                  {initialOf(email.sender_name || email.sender)}
+                </span>
+                <div style={{ minWidth: 0 }}>
+                  <div className="reader-sender">{email.sender_name || email.sender}</div>
+                  <div className="reader-sender-mail">
+                    {email.sender} · to {email.recipients?.join(', ') || 'you'}
+                  </div>
                 </div>
+                <span className="reader-date">{formatTimeLong(email.received_at)}</span>
               </div>
-              <span className="reader-date">{formatTimeLong(email.received_at)}</span>
+
+              <div className="reader-body">{email.body}</div>
+
+              {hasAttachments(email) && (
+                <div className="attachment-row" title="Attachment metadata from Gmail">
+                  <Paperclip aria-hidden="true" />
+                  <span>{attachmentLabel(email)}</span>
+                  <span className="attachment-meta">Gmail attachment</span>
+                </div>
+              )}
             </div>
-
-            <div className="reader-body">{email.body || '(Empty message)'}</div>
-
-            {hasAttachments(email) && (
-              <div className="attachment-row" title="Attachment metadata from Gmail">
-                <Paperclip aria-hidden="true" />
-                <span>{attachmentLabel(email)}</span>
-                <span className="attachment-meta">Gmail attachment</span>
-              </div>
-            )}
           </article>
         </div>
       )}

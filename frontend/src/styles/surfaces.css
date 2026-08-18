@@ -19,52 +19,52 @@
 .ambient-orb {
   position: absolute;
   border-radius: 50%;
-  filter: blur(90px);
+  filter: blur(110px);
   opacity: var(--ambient-opacity);
   transform: translateZ(0);
   will-change: transform;
 }
 
 .ambient-orb.orb-violet {
-  width: 62vw;
-  height: 62vw;
-  min-width: 560px;
-  min-height: 560px;
-  left: -18vw;
-  top: -22vw;
+  width: 54vw;
+  height: 54vw;
+  min-width: 520px;
+  min-height: 520px;
+  left: -16vw;
+  top: -20vw;
   background: var(--ambient-violet);
   animation: drift-a 110s ease-in-out infinite alternate;
 }
 
 .ambient-orb.orb-indigo {
-  width: 56vw;
-  height: 56vw;
-  min-width: 480px;
-  min-height: 480px;
-  right: -20vw;
-  top: 8vh;
+  width: 48vw;
+  height: 48vw;
+  min-width: 440px;
+  min-height: 440px;
+  right: -18vw;
+  top: 6vh;
   background: var(--ambient-indigo);
   animation: drift-b 130s ease-in-out infinite alternate;
 }
 
 .ambient-orb.orb-cyan {
-  width: 44vw;
-  height: 44vw;
-  min-width: 380px;
-  min-height: 380px;
+  width: 38vw;
+  height: 38vw;
+  min-width: 340px;
+  min-height: 340px;
   left: 30vw;
-  bottom: -24vw;
+  bottom: -22vw;
   background: var(--ambient-cyan);
   animation: drift-c 120s ease-in-out infinite alternate;
 }
 
 .ambient-orb.orb-pink {
-  width: 30vw;
-  height: 30vw;
-  min-width: 280px;
-  min-height: 280px;
-  right: 16vw;
-  bottom: -14vw;
+  width: 26vw;
+  height: 26vw;
+  min-width: 240px;
+  min-height: 240px;
+  right: 18vw;
+  bottom: -12vw;
   background: var(--ambient-pink);
   animation: drift-b 140s ease-in-out infinite alternate-reverse;
 }
