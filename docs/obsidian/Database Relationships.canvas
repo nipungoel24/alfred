@@ -1,0 +1,93 @@
+{
+  "nodes": [
+    {
+      "id": "focus",
+      "type": "file",
+      "file": "06 - Database/Database Overview.md",
+      "x": 340,
+      "y": 300,
+      "width": 320,
+      "height": 120
+    },
+    {
+      "id": "n0",
+      "type": "file",
+      "file": "06 - Database/Tables/emails.md",
+      "x": 0,
+      "y": 0,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n1",
+      "type": "file",
+      "file": "06 - Database/Tables/email_analysis.md",
+      "x": 300,
+      "y": 0,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n2",
+      "type": "file",
+      "file": "06 - Database/Tables/tasks.md",
+      "x": 0,
+      "y": 260,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n3",
+      "type": "file",
+      "file": "06 - Database/Tables/jobs.md",
+      "x": 300,
+      "y": 260,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n4",
+      "type": "file",
+      "file": "06 - Database/Tables/accounts.md",
+      "x": 0,
+      "y": 520,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n5",
+      "type": "file",
+      "file": "06 - Database/Tables/credentials.md",
+      "x": 300,
+      "y": 520,
+      "width": 300,
+      "height": 120
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "fromNode": "focus",
+      "toNode": "n0",
+      "label": "content_hash"
+    },
+    {
+      "id": "e1",
+      "fromNode": "n0",
+      "toNode": "n1",
+      "label": "derives"
+    },
+    {
+      "id": "e2",
+      "fromNode": "focus",
+      "toNode": "n2",
+      "label": "queue target"
+    },
+    {
+      "id": "e3",
+      "fromNode": "n3",
+      "toNode": "n4",
+      "label": "1:1"
+    }
+  ]
+}

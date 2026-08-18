@@ -1,0 +1,48 @@
+---
+type: function
+generated: true
+language: python
+layer: backend
+module: backend.app.main
+qualified_name: backend.app.main.lifespan
+source: backend/app/main.py
+line: 391
+status: active
+tags: [backend, function, critical-path]
+---
+
+# lifespan
+
+> Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
+
+## Purpose
+
+Purpose inferred from usage: `lifespan` in `backend/app/main.py`.
+
+## Location
+
+`backend/app/main.py:391`
+
+## Signature
+
+```python
+(app: FastAPI)
+```
+
+## Parameters
+
+- `app` (`FastAPI`)
+
+## Calls
+
+- `create_task` (`asyncio.create_task`, calls-inferred)
+- [[backend.app.mail.backfill.normalize_cursor|normalize_cursor]] (calls)
+- [[backend.app.services.task_derivation.rebuild_tasks_from_analyses|rebuild_tasks_from_analyses]] (calls)
+
+## Writes
+
+- [[table_jobs]]
+
+## Side Effects
+
+- async I/O; SQLite

@@ -1,0 +1,32 @@
+---
+type: function
+generated: true
+language: typescript
+layer: frontend
+qualified_name: frontend.src.mail.MessageReader.formatTimeLong
+source: frontend/src/mail/MessageReader.tsx
+status: active
+tags: [function, frontend]
+---
+
+# formatTimeLong
+
+> Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
+
+## Purpose
+
+Function declared in `frontend/src/mail/MessageReader.tsx`.
+
+## Location
+
+`frontend/src/mail/MessageReader.tsx`
+
+## Signature
+
+```ts
+function formatTimeLong(dateStr?: string | null): string
+```
+
+## Related
+
+- [[frontend.src.mail.MessageReader|MessageReader]] (module)

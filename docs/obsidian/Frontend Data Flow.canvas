@@ -1,0 +1,69 @@
+{
+  "nodes": [
+    {
+      "id": "focus",
+      "type": "file",
+      "file": "03 - Data Flows/Frontend Data Fetch Flow.md",
+      "x": 340,
+      "y": 300,
+      "width": 320,
+      "height": 120
+    },
+    {
+      "id": "n0",
+      "type": "file",
+      "file": "05 - Frontend/Frontend Overview.md",
+      "x": 0,
+      "y": 0,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n1",
+      "type": "file",
+      "file": "03 - Data Flows/SSE Progress Flow.md",
+      "x": 300,
+      "y": 0,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n2",
+      "type": "file",
+      "file": "07 - API/API Map.md",
+      "x": 0,
+      "y": 260,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n3",
+      "type": "file",
+      "file": "10 - UX/Design System.md",
+      "x": 300,
+      "y": 260,
+      "width": 300,
+      "height": 120
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "fromNode": "focus",
+      "toNode": "n0",
+      "label": "progress"
+    },
+    {
+      "id": "e1",
+      "fromNode": "focus",
+      "toNode": "n1",
+      "label": "endpoints"
+    },
+    {
+      "id": "e2",
+      "fromNode": "focus",
+      "toNode": "n2",
+      "label": "tokens"
+    }
+  ]
+}

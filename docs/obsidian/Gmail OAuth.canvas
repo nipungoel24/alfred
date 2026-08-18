@@ -1,0 +1,69 @@
+{
+  "nodes": [
+    {
+      "id": "focus",
+      "type": "file",
+      "file": "03 - Data Flows/Gmail OAuth Flow.md",
+      "x": 340,
+      "y": 300,
+      "width": 320,
+      "height": 120
+    },
+    {
+      "id": "n0",
+      "type": "file",
+      "file": "09 - Gmail/Google OAuth.md",
+      "x": 0,
+      "y": 0,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n1",
+      "type": "file",
+      "file": "09 - Gmail/DPAPI.md",
+      "x": 300,
+      "y": 0,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n2",
+      "type": "file",
+      "file": "13 - Security/OAuth Security.md",
+      "x": 0,
+      "y": 260,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n3",
+      "type": "file",
+      "file": "09 - Gmail/Token Storage.md",
+      "x": 300,
+      "y": 260,
+      "width": 300,
+      "height": 120
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "fromNode": "focus",
+      "toNode": "n0",
+      "label": "encrypts"
+    },
+    {
+      "id": "e1",
+      "fromNode": "focus",
+      "toNode": "n1",
+      "label": "threats"
+    },
+    {
+      "id": "e2",
+      "fromNode": "n1",
+      "toNode": "n2",
+      "label": "storage"
+    }
+  ]
+}

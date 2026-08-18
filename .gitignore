@@ -19,6 +19,9 @@ frontend/dist/
 frontend/*.tsbuildinfo
 desktop/src-tauri/target/
 desktop/src-tauri/binaries/
+desktop/branding/
+docs/obsidian/.obsidian/workspace.json
+docs/obsidian/.obsidian/workspace-mobile.json
 *.spec
 build/
 dist/

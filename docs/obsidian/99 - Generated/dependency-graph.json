@@ -1,0 +1,5036 @@
+{
+  "nodes": [
+    {
+      "id": "app.schemas.ActionItem",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "app.schemas.Email",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "app.schemas.EmailAnalysis",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "app.services.task_derivation.derive_tasks",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "asyncio.Queue",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "asyncio.create_task",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "asyncio.run",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "asyncio.sleep",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "asyncio.wait_for",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.ai.ollama_client.InferenceMetrics",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.InferenceMetrics.__init__",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaClient",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaClient.__init__",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaClient.generate",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaClient.health",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaClient.preload_model",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaInvalidResponse",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaModelMissing",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaTimeout",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaUnavailable",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.service.AIService",
+      "type": "class",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.ai.service.AIService.__init__",
+      "type": "function",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.ai.service.AIService.analyze_email",
+      "type": "function",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.ai.service.AIService.draft_reply",
+      "type": "function",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.ai.service.AIService.generate_inbox_briefing",
+      "type": "function",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.ai.service.AIService.health",
+      "type": "function",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.ai.service.AIService.preload",
+      "type": "function",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.ai.service._owner_facing_briefing_summary",
+      "type": "function",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.ai.service._prepare_body",
+      "type": "function",
+      "source": "backend/app/ai/service.py"
+    },
+    {
+      "id": "backend.app.config.Settings",
+      "type": "class",
+      "source": "backend/app/config.py"
+    },
+    {
+      "id": "backend.app.config.get_settings",
+      "type": "function",
+      "source": "backend/app/config.py"
+    },
+    {
+      "id": "backend.app.db.database._migrate",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
+      "id": "backend.app.db.database.connect",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
+      "id": "backend.app.db.database.transaction",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository",
+      "type": "class",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.__init__",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository._task_from_row",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository._update_fts_one",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.account",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.accounts",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.active_tasks",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.all_analyses_with_emails",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.cached_analysis",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.cached_briefing",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.close",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.completed_job_count",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.con.commit",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.con.execute",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.credentials",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.delete_account",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.delete_email",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.delete_task",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.delete_tasks_by_derivation_version",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.eligible_emails_without_analysis",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.email",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.email.model_dump_json",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.email.received_at.isoformat",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.email.sender.lower",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.email_count",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.email_counts",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.email_eligibility",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.email_exists",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.emails",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.emails_by_thread",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.emails_filtered",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.emails_missing_labels",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.enqueue_job",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.failed_job_count",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.job",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.mark_email_excluded",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.next_job",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.pending_job_count",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.promote_due_jobs",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.rearm_terminal_job",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.record_inference_metric",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.requeue_job",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.reset_retryable_jobs",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.retry_job_with_backoff",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.save_account",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.save_analysis",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.save_briefing",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.save_credentials",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.save_task",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.save_tasks_batch",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.search_emails",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.task",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.task_exists_by_fingerprint",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.tasks",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.tasks_by_email",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.tasks_by_thread",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.update_email_labels",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.update_job_status",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.upsert_email",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.upsert_email_commit",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.upsert_emails_batch",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.secure_store._win_decrypt",
+      "type": "function",
+      "source": "backend/app/db/secure_store.py"
+    },
+    {
+      "id": "backend.app.db.secure_store._win_encrypt",
+      "type": "function",
+      "source": "backend/app/db/secure_store.py"
+    },
+    {
+      "id": "backend.app.db.secure_store.decrypt_token",
+      "type": "function",
+      "source": "backend/app/db/secure_store.py"
+    },
+    {
+      "id": "backend.app.db.secure_store.encrypt_token",
+      "type": "function",
+      "source": "backend/app/db/secure_store.py"
+    },
+    {
+      "id": "backend.app.mail.backfill.dump_cursor",
+      "type": "function",
+      "source": "backend/app/mail/backfill.py"
+    },
+    {
+      "id": "backend.app.mail.backfill.normalize_cursor",
+      "type": "function",
+      "source": "backend/app/mail/backfill.py"
+    },
+    {
+      "id": "backend.app.mail.backfill.record_failure",
+      "type": "function",
+      "source": "backend/app/mail/backfill.py"
+    },
+    {
+      "id": "backend.app.mail.backfill.record_success",
+      "type": "function",
+      "source": "backend/app/mail/backfill.py"
+    },
+    {
+      "id": "backend.app.mail.backfill.set_state",
+      "type": "function",
+      "source": "backend/app/mail/backfill.py"
+    },
+    {
+      "id": "backend.app.mail.backfill.status_payload",
+      "type": "function",
+      "source": "backend/app/mail/backfill.py"
+    },
+    {
+      "id": "backend.app.mail.briefing_fingerprint.briefing_fingerprint",
+      "type": "function",
+      "source": "backend/app/mail/briefing_fingerprint.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.BackfillState",
+      "type": "class",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.GmailCategory",
+      "type": "class",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy",
+      "type": "class",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.analysis_queue_priority",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.gmail_category",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.is_archived",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.is_excluded",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.is_important_gmail",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.is_sent",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.is_unread",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.mailbox_state",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.should_display_in_all_mail",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.should_display_in_inbox",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.should_include_in_attention",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.should_include_in_briefing",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailEligibilityPolicy.should_schedule_analysis",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.MailboxState",
+      "type": "class",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.PipelineEligibility",
+      "type": "class",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "type": "function",
+      "source": "backend/app/mail/eligibility.py"
+    },
+    {
+      "id": "backend.app.mail.fingerprint.content_fingerprint",
+      "type": "function",
+      "source": "backend/app/mail/fingerprint.py"
+    },
+    {
+      "id": "backend.app.mail.normalizer.normalize_text",
+      "type": "function",
+      "source": "backend/app/mail/normalizer.py"
+    },
+    {
+      "id": "backend.app.mail.normalizer.normalized_email",
+      "type": "function",
+      "source": "backend/app/mail/normalizer.py"
+    },
+    {
+      "id": "backend.app.mail.providers.base.MailProvider",
+      "type": "class",
+      "source": "backend/app/mail/providers/base.py"
+    },
+    {
+      "id": "backend.app.mail.providers.base.MailProvider.exchange_code",
+      "type": "function",
+      "source": "backend/app/mail/providers/base.py"
+    },
+    {
+      "id": "backend.app.mail.providers.base.MailProvider.get_auth_url",
+      "type": "function",
+      "source": "backend/app/mail/providers/base.py"
+    },
+    {
+      "id": "backend.app.mail.providers.base.MailProvider.get_user_info",
+      "type": "function",
+      "source": "backend/app/mail/providers/base.py"
+    },
+    {
+      "id": "backend.app.mail.providers.base.MailProvider.refresh_tokens",
+      "type": "function",
+      "source": "backend/app/mail/providers/base.py"
+    },
+    {
+      "id": "backend.app.mail.providers.base.MailProvider.send_draft_reply",
+      "type": "function",
+      "source": "backend/app/mail/providers/base.py"
+    },
+    {
+      "id": "backend.app.mail.providers.base.MailProvider.sync_messages",
+      "type": "function",
+      "source": "backend/app/mail/providers/base.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider",
+      "type": "class",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.__init__",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider._clean_html",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider._ensure_access_token",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider._extract_body",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider._normalize_message",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.exchange_code",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.fetch_backfill_estimate",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.get_auth_url",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.get_user_info",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.refresh_message_labels",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.refresh_tokens",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "type": "function",
+      "source": "backend/app/mail/providers/gmail.py"
+    },
+    {
+      "id": "backend.app.main._analysis_worker",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._backfill_estimate_once",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._backfill_job_id",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._backfill_worker",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._briefing_eligible_emails",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._broadcast_progress",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._derive_and_save_tasks",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._ensure_backfill_job",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._label_backfill",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._mark_backfill_failure",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._oauth_callback_page",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._set_backfill_state",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.analysis_progress",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.analysis_progress.event_stream",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.analysis_status",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.analyze",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.analyze_all",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.backfill_account",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.backfill_status",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.briefing_get",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.config",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.connect_gmail",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.delete_account",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.delete_task",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.draft",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.generate_briefing",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.generate_pkce_pair",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.get_accounts",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.get_email",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.get_email_counts",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.get_emails",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.get_tasks",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.gmail_callback",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.health",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.import_csv",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.lifespan",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.ollama_invalid_handler",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.ollama_model_missing_handler",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.ollama_timeout_handler",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.ollama_unavailable_handler",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.pause_backfill",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.sync_account",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.toggle_task",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.schemas.ActionItem",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.BriefingItem",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.Category",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.Deadline",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.Email",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.Email.model_validate_json",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.schemas.EmailAccount",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.EmailAnalysis",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.EmailAnalysis.model_json_schema",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.schemas.EmailAnalysis.model_validate_json",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.schemas.ErrorDetail",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.InboxBriefing",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.InboxBriefing.model_json_schema",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.schemas.InboxBriefing.model_validate_json",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.schemas.Priority",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.Task",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation._assign_confidence",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation._is_noise",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation._is_user_actionable",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation._normalize_action",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation.derive_tasks",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation.task_fingerprint",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_migration.TaskMigrationService",
+      "type": "class",
+      "source": "backend/app/services/task_migration.py"
+    },
+    {
+      "id": "backend.app.services.task_migration.TaskMigrationService.__init__",
+      "type": "function",
+      "source": "backend/app/services/task_migration.py"
+    },
+    {
+      "id": "backend.app.services.task_migration.TaskMigrationService.run_migration",
+      "type": "function",
+      "source": "backend/app/services/task_migration.py"
+    },
+    {
+      "id": "backend.tests.test_allmail._account",
+      "type": "function",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail._base64",
+      "type": "function",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail._detail",
+      "type": "function",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail._email",
+      "type": "function",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.repo",
+      "type": "function",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_all_scope_excludes_spam_trash_draft_only",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_all_scope_includes_archived",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_all_scope_kind_filters",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_archived_excluded_from_intelligence",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_archived_tasks_not_in_active_projection",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_backfill_never_requests_spam_trash",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_category_ignored_in_all_scope",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_counts_report_inbox_allmail_excluded",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_draft_excluded_from_all_mail_and_search",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_inbox_scope_shows_active_inbox_only",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_pagination_in_all_scope",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_search_covers_archived_not_spam",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_allmail.test_sent_visible_but_excluded_from_intelligence",
+      "type": "test",
+      "source": "backend/tests/test_allmail.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs._future",
+      "type": "function",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs._past",
+      "type": "function",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.repo",
+      "type": "function",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_backfill_job_is_single_durable_row",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_backfill_priority_is_below_analysis",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_backoff_and_promotion_cycle",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_next_job_honours_not_before",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_normalize_fresh_cursor",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_normalize_legacy_complete_cursor",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_normalize_legacy_running_cursor",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_rearm_does_not_touch_backoff_retries",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_rearm_terminal_job_for_resume",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_requeue_resets_attempts_and_errors",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_status_payload_complete",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_backfill_jobs.test_status_payload_remaining_estimate",
+      "type": "test",
+      "source": "backend/tests/test_backfill_jobs.py"
+    },
+    {
+      "id": "backend.tests.test_core.analysis",
+      "type": "function",
+      "source": "backend/tests/test_core.py"
+    },
+    {
+      "id": "backend.tests.test_core.email",
+      "type": "function",
+      "source": "backend/tests/test_core.py"
+    },
+    {
+      "id": "backend.tests.test_core.test_analysis_cache_invalidates_content_and_model",
+      "type": "test",
+      "source": "backend/tests/test_core.py"
+    },
+    {
+      "id": "backend.tests.test_core.test_briefing_cache_invalidates_when_analysis_changes",
+      "type": "test",
+      "source": "backend/tests/test_core.py"
+    },
+    {
+      "id": "backend.tests.test_core.test_fingerprint_is_deterministic_and_changes",
+      "type": "test",
+      "source": "backend/tests/test_core.py"
+    },
+    {
+      "id": "backend.tests.test_core.test_normalizer_treats_html_as_safe_text",
+      "type": "test",
+      "source": "backend/tests/test_core.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility._email",
+      "type": "function",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.repo",
+      "type": "function",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_active_tasks_exclude_spam_sourced",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_archive_to_inbox_restores",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_archived_state",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_briefing_excludes_spam_trash_archived",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_briefing_promotions_with_strong_signal_included",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_briefing_promotions_without_signal_excluded",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_category_counts_derive_from_labels",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_category_filter_is_db_driven",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_email_api_excluded_mail_never_listed",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_gmail_important_is_p0",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_inbox_forums",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_inbox_primary",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_inbox_promotions",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_inbox_social",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_inbox_to_archive_excludes",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_inbox_to_spam_excludes",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_inbox_updates",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_inbox_without_category_is_primary",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_label_only_history_update_recomputes_state",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_lazy_categories_not_scheduled_by_default",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_mixed_label_thread_keeps_active_messages_visible",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_permanent_delete_marks_excluded_not_destroyed",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_scheduling_order_by_category",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_search_within_category_context",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_sent_and_draft_are_excluded",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_spam_state",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_spam_to_inbox_restores_eligibility",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_spam_transition_hides_from_projections",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_spam_wins_over_inbox",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_trash_state",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_eligibility.test_updates_with_required_action_eligible_for_semantic_analysis",
+      "type": "test",
+      "source": "backend/tests/test_eligibility.py"
+    },
+    {
+      "id": "backend.tests.test_extended.get_analysis",
+      "type": "function",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.get_email",
+      "type": "function",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_ambiguous_deadline_handling",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_api_endpoint_flows",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_briefing_deadline_aggregation",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_cache_hit_and_invalidation",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_explicit_deadline_schema_handling",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_malformed_json_response",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_malicious_html_normalization",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_model_unavailable",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_ollama_empty_response",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_persistence_restart",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_extended.test_prompt_injection_safety",
+      "type": "test",
+      "source": "backend/tests/test_extended.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.base64_encode_string",
+      "type": "function",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.mock_gmail",
+      "type": "function",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.temp_repo",
+      "type": "function",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.test_gmail_html_sanitisation",
+      "type": "test",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.test_gmail_oauth_url_generation",
+      "type": "test",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery",
+      "type": "test",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "type": "test",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.test_gmail_sync_initial",
+      "type": "test",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.test_gmail_sync_load_older",
+      "type": "test",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.test_gmail_token_exchange",
+      "type": "test",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_golden_corpus.test_golden_corpus",
+      "type": "test",
+      "source": "backend/tests/test_golden_corpus.py"
+    },
+    {
+      "id": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "type": "test",
+      "source": "backend/tests/test_ollama_mock.py"
+    },
+    {
+      "id": "backend.tests.test_ollama_mock.test_ollama_client_empty_response",
+      "type": "test",
+      "source": "backend/tests/test_ollama_mock.py"
+    },
+    {
+      "id": "backend.tests.test_ollama_mock.test_ollama_client_http_error",
+      "type": "test",
+      "source": "backend/tests/test_ollama_mock.py"
+    },
+    {
+      "id": "backend.tests.test_ollama_mock.test_ollama_client_sends_correct_payload",
+      "type": "test",
+      "source": "backend/tests/test_ollama_mock.py"
+    },
+    {
+      "id": "backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines",
+      "type": "test",
+      "source": "backend/tests/test_task_derivation.py"
+    },
+    {
+      "id": "backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint",
+      "type": "test",
+      "source": "backend/tests/test_task_derivation.py"
+    },
+    {
+      "id": "backend.tests.test_task_derivation.test_derive_tasks_ignores_newsletters_unless_urgent",
+      "type": "test",
+      "source": "backend/tests/test_task_derivation.py"
+    },
+    {
+      "id": "backend.tests.test_task_derivation.test_derive_tasks_ignores_noise",
+      "type": "test",
+      "source": "backend/tests/test_task_derivation.py"
+    },
+    {
+      "id": "backend.tests.test_task_derivation.test_derive_tasks_ignores_third_party_owner",
+      "type": "test",
+      "source": "backend/tests/test_task_derivation.py"
+    },
+    {
+      "id": "backend.tests.test_task_derivation.test_is_noise_filtering",
+      "type": "test",
+      "source": "backend/tests/test_task_derivation.py"
+    },
+    {
+      "id": "backend.tests.test_task_migration.repo",
+      "type": "function",
+      "source": "backend/tests/test_task_migration.py"
+    },
+    {
+      "id": "backend.tests.test_task_migration.temp_db",
+      "type": "function",
+      "source": "backend/tests/test_task_migration.py"
+    },
+    {
+      "id": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "type": "test",
+      "source": "backend/tests/test_task_migration.py"
+    },
+    {
+      "id": "backend.tests.test_task_migration.test_migration_rollback",
+      "type": "test",
+      "source": "backend/tests/test_task_migration.py"
+    },
+    {
+      "id": "backend.tests.test_task_migration.test_migration_rollback.crashing_analyses",
+      "type": "function",
+      "source": "backend/tests/test_task_migration.py"
+    },
+    {
+      "id": "base64.b64decode",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "base64.b64encode",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "base64.urlsafe_b64decode",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "base64.urlsafe_b64encode",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "csv.DictReader",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "datetime.datetime.fromisoformat",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "datetime.datetime.fromtimestamp",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "datetime.datetime.now",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "datetime.timedelta",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "desktop.src-tauri.src.main.main",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "fastapi.HTTPException",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "fastapi.responses.HTMLResponse",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "fastapi.responses.JSONResponse",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "fastapi.responses.StreamingResponse",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "fastapi.testclient.TestClient",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "frontend.src.App.App",
+      "type": "react_components",
+      "source": "frontend/src/App.tsx"
+    },
+    {
+      "id": "frontend.src.api.client.api",
+      "type": "functions",
+      "source": "frontend/src/api/client.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.Analysis",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.BackfillStatus",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.Briefing",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.BriefingItem",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.Email",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.EmailAccount",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.EmailCounts",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.Health",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.MailCategory",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.MailKind",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.MailScope",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.Priority",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.Task",
+      "type": "types",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.accounts",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.analyze",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.backfillAccount",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.briefing",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.connectGmail",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.deleteAccount",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.deleteTask",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.draft",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.emailCounts",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.emailDetails",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.emails",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.health",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.pauseBackfill",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.regenerateBriefing",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.syncAccount",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.tasks",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.api.emails.toggleTask",
+      "type": "functions",
+      "source": "frontend/src/api/emails.ts"
+    },
+    {
+      "id": "frontend.src.components.ui.AnalysisProgress.AnalysisProgress",
+      "type": "react_components",
+      "source": "frontend/src/components/ui/AnalysisProgress.tsx"
+    },
+    {
+      "id": "frontend.src.components.ui.AnalysisProgress.ProgressEvent",
+      "type": "types",
+      "source": "frontend/src/components/ui/AnalysisProgress.tsx"
+    },
+    {
+      "id": "frontend.src.features.accounts.AccountsPage.AccountsPage",
+      "type": "react_components",
+      "source": "frontend/src/features/accounts/AccountsPage.tsx"
+    },
+    {
+      "id": "frontend.src.features.deadlines.DeadlinesPage.DeadlinesPage",
+      "type": "react_components",
+      "source": "frontend/src/features/deadlines/DeadlinesPage.tsx"
+    },
+    {
+      "id": "frontend.src.features.overview.OverviewPage.Metric",
+      "type": "react_components",
+      "source": "frontend/src/features/overview/OverviewPage.tsx"
+    },
+    {
+      "id": "frontend.src.features.overview.OverviewPage.OverviewPage",
+      "type": "react_components",
+      "source": "frontend/src/features/overview/OverviewPage.tsx"
+    },
+    {
+      "id": "frontend.src.features.overview.OverviewPage.OverviewPageProps",
+      "type": "types",
+      "source": "frontend/src/features/overview/OverviewPage.tsx"
+    },
+    {
+      "id": "frontend.src.features.settings.SettingsPage.SettingsPage",
+      "type": "react_components",
+      "source": "frontend/src/features/settings/SettingsPage.tsx"
+    },
+    {
+      "id": "frontend.src.features.tasks.TasksPage.TasksPage",
+      "type": "react_components",
+      "source": "frontend/src/features/tasks/TasksPage.tsx"
+    },
+    {
+      "id": "frontend.src.intelligence.IntelligencePanel.IntelligencePanel",
+      "type": "react_components",
+      "source": "frontend/src/intelligence/IntelligencePanel.tsx"
+    },
+    {
+      "id": "frontend.src.intelligence.IntelligencePanel.IntelligencePanelProps",
+      "type": "types",
+      "source": "frontend/src/intelligence/IntelligencePanel.tsx"
+    },
+    {
+      "id": "frontend.src.layout.IconRail.AppPage",
+      "type": "types",
+      "source": "frontend/src/layout/IconRail.tsx"
+    },
+    {
+      "id": "frontend.src.layout.IconRail.IconRail",
+      "type": "react_components",
+      "source": "frontend/src/layout/IconRail.tsx"
+    },
+    {
+      "id": "frontend.src.layout.IconRail.IconRailProps",
+      "type": "types",
+      "source": "frontend/src/layout/IconRail.tsx"
+    },
+    {
+      "id": "frontend.src.layout.IconRail.RailButton",
+      "type": "react_components",
+      "source": "frontend/src/layout/IconRail.tsx"
+    },
+    {
+      "id": "frontend.src.layout.IconRail.RailItem",
+      "type": "types",
+      "source": "frontend/src/layout/IconRail.tsx"
+    },
+    {
+      "id": "frontend.src.layout.WorkspaceHeader.WorkspaceHeader",
+      "type": "react_components",
+      "source": "frontend/src/layout/WorkspaceHeader.tsx"
+    },
+    {
+      "id": "frontend.src.layout.WorkspaceHeader.WorkspaceHeaderProps",
+      "type": "types",
+      "source": "frontend/src/layout/WorkspaceHeader.tsx"
+    },
+    {
+      "id": "frontend.src.layout.WorkspaceHeader.test.renderHeader",
+      "type": "functions",
+      "source": "frontend/src/layout/WorkspaceHeader.test.tsx"
+    },
+    {
+      "id": "frontend.src.mail.CategoryTabs.CategoryTabs",
+      "type": "react_components",
+      "source": "frontend/src/mail/CategoryTabs.tsx"
+    },
+    {
+      "id": "frontend.src.mail.CategoryTabs.CategoryTabsProps",
+      "type": "types",
+      "source": "frontend/src/mail/CategoryTabs.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.BackfillStatusLine",
+      "type": "react_components",
+      "source": "frontend/src/mail/MailWorkspace.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.FilterButton",
+      "type": "react_components",
+      "source": "frontend/src/mail/MailWorkspace.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.KindButton",
+      "type": "react_components",
+      "source": "frontend/src/mail/MailWorkspace.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.MailWorkspace",
+      "type": "react_components",
+      "source": "frontend/src/mail/MailWorkspace.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.MailWorkspaceProps",
+      "type": "types",
+      "source": "frontend/src/mail/MailWorkspace.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.ViewButton",
+      "type": "react_components",
+      "source": "frontend/src/mail/MailWorkspace.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.persistLaterIds",
+      "type": "functions",
+      "source": "frontend/src/mail/MailWorkspace.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.readLaterIds",
+      "type": "functions",
+      "source": "frontend/src/mail/MailWorkspace.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MailWorkspace.test.renderWorkspace",
+      "type": "functions",
+      "source": "frontend/src/mail/MailWorkspace.test.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageList.MessageList",
+      "type": "react_components",
+      "source": "frontend/src/mail/MessageList.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageList.MessageListProps",
+      "type": "types",
+      "source": "frontend/src/mail/MessageList.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageReader.MessageReader",
+      "type": "react_components",
+      "source": "frontend/src/mail/MessageReader.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageReader.MessageReaderProps",
+      "type": "types",
+      "source": "frontend/src/mail/MessageReader.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageReader.attachmentLabel",
+      "type": "functions",
+      "source": "frontend/src/mail/MessageReader.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageReader.avatarGradient",
+      "type": "functions",
+      "source": "frontend/src/mail/MessageReader.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageReader.formatTimeLong",
+      "type": "functions",
+      "source": "frontend/src/mail/MessageReader.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageReader.hasAttachments",
+      "type": "functions",
+      "source": "frontend/src/mail/MessageReader.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageReader.initialOf",
+      "type": "functions",
+      "source": "frontend/src/mail/MessageReader.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageRow.MessageRow",
+      "type": "react_components",
+      "source": "frontend/src/mail/MessageRow.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageRow.MessageRowProps",
+      "type": "types",
+      "source": "frontend/src/mail/MessageRow.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageRow.RowFilter",
+      "type": "types",
+      "source": "frontend/src/mail/MessageRow.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageRow.bodySnippet",
+      "type": "functions",
+      "source": "frontend/src/mail/MessageRow.tsx"
+    },
+    {
+      "id": "frontend.src.mail.MessageRow.formatTime",
+      "type": "functions",
+      "source": "frontend/src/mail/MessageRow.tsx"
+    },
+    {
+      "id": "frontend.src.theme.ThemeProvider.ThemeContextValue",
+      "type": "types",
+      "source": "frontend/src/theme/ThemeProvider.tsx"
+    },
+    {
+      "id": "frontend.src.theme.ThemeProvider.ThemeProvider",
+      "type": "react_components",
+      "source": "frontend/src/theme/ThemeProvider.tsx"
+    },
+    {
+      "id": "frontend.src.theme.ThemeProvider.test.Probe",
+      "type": "react_components",
+      "source": "frontend/src/theme/ThemeProvider.test.tsx"
+    },
+    {
+      "id": "frontend.src.theme.ThemeProvider.useTheme",
+      "type": "hooks",
+      "source": "frontend/src/theme/ThemeProvider.tsx"
+    },
+    {
+      "id": "frontend.src.theme.ThemeToggle.ThemeToggle",
+      "type": "react_components",
+      "source": "frontend/src/theme/ThemeToggle.tsx"
+    },
+    {
+      "id": "frontend.src.theme.themeStore.ResolvedTheme",
+      "type": "types",
+      "source": "frontend/src/theme/themeStore.ts"
+    },
+    {
+      "id": "frontend.src.theme.themeStore.ThemePreference",
+      "type": "types",
+      "source": "frontend/src/theme/themeStore.ts"
+    },
+    {
+      "id": "frontend.src.theme.themeStore.applyTheme",
+      "type": "functions",
+      "source": "frontend/src/theme/themeStore.ts"
+    },
+    {
+      "id": "frontend.src.theme.themeStore.readStoredPreference",
+      "type": "functions",
+      "source": "frontend/src/theme/themeStore.ts"
+    },
+    {
+      "id": "frontend.src.theme.themeStore.resolveTheme",
+      "type": "functions",
+      "source": "frontend/src/theme/themeStore.ts"
+    },
+    {
+      "id": "frontend.src.theme.themeStore.storePreference",
+      "type": "functions",
+      "source": "frontend/src/theme/themeStore.ts"
+    },
+    {
+      "id": "frontend.src.theme.themeStore.systemTheme",
+      "type": "functions",
+      "source": "frontend/src/theme/themeStore.ts"
+    },
+    {
+      "id": "frontend.src.theme.themeStore.test.mockSystemTheme",
+      "type": "functions",
+      "source": "frontend/src/theme/themeStore.test.ts"
+    },
+    {
+      "id": "hashlib.sha256",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "html.unescape",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "httpx.AsyncClient",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "httpx.HTTPError",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "httpx.URL",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "io.StringIO",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "json.dumps",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "json.load",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "json.loads",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "os.close",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "os.path.exists",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "os.remove",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "pathlib.Path",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "pytest.raises",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "re.match",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "re.sub",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "secrets.token_urlsafe",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "sqlite3.connect",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "src.utils.extract_domain",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "src.utils.format_timestamp",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "src.utils.get_category_emoji",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "src.utils.get_email_preview",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "src.utils.get_priority_color",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "src.utils.get_sender_initials",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tempfile.mkstemp",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tests.test_utils.TestConfiguration",
+      "type": "class",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestConfiguration.test_email_categories_exist",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestConfiguration.test_priority_levels_exist",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestConfiguration.test_priority_levels_order",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestUtilityFunctions",
+      "type": "class",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestUtilityFunctions.test_extract_domain",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestUtilityFunctions.test_format_timestamp",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestUtilityFunctions.test_get_category_emoji",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestUtilityFunctions.test_get_email_preview",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestUtilityFunctions.test_get_priority_color",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "tests.test_utils.TestUtilityFunctions.test_get_sender_initials",
+      "type": "test",
+      "source": "tests/test_utils.py"
+    },
+    {
+      "id": "unittest.mock.AsyncMock",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "unittest.mock.MagicMock",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "unittest.mock.patch.object",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "uuid.uuid4",
+      "type": "external",
+      "source": null
+    }
+  ],
+  "edges": [
+    {
+      "from": "backend.app.ai.ollama_client.OllamaClient.__init__",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.ollama_client.OllamaClient.generate",
+      "to": "re.sub",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service.AIService.analyze_email",
+      "to": "backend.app.schemas.EmailAnalysis.model_json_schema",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service.AIService.analyze_email",
+      "to": "backend.app.schemas.EmailAnalysis.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service.AIService.analyze_email",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service.AIService.draft_reply",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service.AIService.generate_inbox_briefing",
+      "to": "backend.app.schemas.BriefingItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.ai.service.AIService.generate_inbox_briefing",
+      "to": "backend.app.schemas.InboxBriefing.model_json_schema",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service.AIService.generate_inbox_briefing",
+      "to": "backend.app.schemas.InboxBriefing.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service.AIService.generate_inbox_briefing",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service._prepare_body",
+      "to": "re.match",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.service._prepare_body",
+      "to": "re.sub",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.database.connect",
+      "to": "sqlite3.connect",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.__init__",
+      "to": "backend.app.db.database.connect",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository._task_from_row",
+      "to": "backend.app.schemas.Task",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.account",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.accounts",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.all_analyses_with_emails",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.all_analyses_with_emails",
+      "to": "backend.app.schemas.EmailAnalysis.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.cached_analysis",
+      "to": "backend.app.schemas.EmailAnalysis.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.cached_briefing",
+      "to": "backend.app.schemas.InboxBriefing.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.eligible_emails_without_analysis",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.email",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.email_eligibility",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.emails",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.emails_by_thread",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.emails_filtered",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.enqueue_job",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.next_job",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.promote_due_jobs",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.record_inference_metric",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.retry_job_with_backoff",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.save_account",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.save_analysis",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.save_briefing",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.save_task",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.save_tasks_batch",
+      "to": "backend.app.db.database.transaction",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.save_tasks_batch",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.search_emails",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.update_email_labels",
+      "to": "backend.app.db.repositories.Repository.email.model_dump_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.update_email_labels",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.update_email_labels",
+      "to": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.update_email_labels",
+      "to": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.update_email_labels",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.update_email_labels",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.update_job_status",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_email",
+      "to": "backend.app.db.repositories.Repository.email.model_dump_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_email",
+      "to": "backend.app.db.repositories.Repository.email.received_at.isoformat",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_email",
+      "to": "backend.app.db.repositories.Repository.email.sender.lower",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_email",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_email",
+      "to": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_email",
+      "to": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_email",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_email",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.upsert_emails_batch",
+      "to": "backend.app.db.database.transaction",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.secure_store.decrypt_token",
+      "to": "base64.b64decode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.secure_store.encrypt_token",
+      "to": "base64.b64encode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.backfill.dump_cursor",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.backfill.normalize_cursor",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.backfill.record_success",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.briefing_fingerprint.briefing_fingerprint",
+      "to": "hashlib.sha256",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.briefing_fingerprint.briefing_fingerprint",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.fingerprint.content_fingerprint",
+      "to": "backend.app.mail.normalizer.normalize_text",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.fingerprint.content_fingerprint",
+      "to": "hashlib.sha256",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.normalizer.normalize_text",
+      "to": "html.unescape",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.normalizer.normalize_text",
+      "to": "re.sub",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.normalizer.normalized_email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.normalizer.normalized_email",
+      "to": "datetime.datetime.fromisoformat",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._ensure_access_token",
+      "to": "backend.app.db.repositories.Repository.save_credentials",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._ensure_access_token",
+      "to": "datetime.datetime.fromisoformat",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._ensure_access_token",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._ensure_access_token",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._extract_body",
+      "to": "base64.urlsafe_b64decode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._normalize_message",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._normalize_message",
+      "to": "datetime.datetime.fromtimestamp",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
+      "to": "backend.app.db.repositories.Repository.email_exists",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
+      "to": "backend.app.db.repositories.Repository.save_account",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
+      "to": "backend.app.db.repositories.Repository.update_email_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.exchange_code",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.fetch_backfill_estimate",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.get_auth_url",
+      "to": "httpx.URL",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.get_user_info",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.refresh_message_labels",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.refresh_tokens",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "backend.app.db.repositories.Repository.email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "backend.app.db.repositories.Repository.email_exists",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "backend.app.db.repositories.Repository.mark_email_excluded",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "backend.app.db.repositories.Repository.save_account",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "backend.app.db.repositories.Repository.update_email_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main._analysis_worker",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main._analysis_worker",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._backfill_estimate_once",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._backfill_estimate_once",
+      "to": "backend.app.mail.backfill.dump_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._backfill_estimate_once",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._backfill_worker",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main._backfill_worker",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._backfill_worker",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._backfill_worker",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main._backfill_worker",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main._briefing_eligible_emails",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_include_in_briefing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._briefing_eligible_emails",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._derive_and_save_tasks",
+      "to": "backend.app.services.task_derivation.derive_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._label_backfill",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._mark_backfill_failure",
+      "to": "backend.app.mail.backfill.dump_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._mark_backfill_failure",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._mark_backfill_failure",
+      "to": "backend.app.mail.backfill.record_failure",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._oauth_callback_page",
+      "to": "fastapi.responses.HTMLResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main._set_backfill_state",
+      "to": "backend.app.mail.backfill.dump_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._set_backfill_state",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._set_backfill_state",
+      "to": "backend.app.mail.backfill.set_state",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.analysis_progress",
+      "to": "asyncio.Queue",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.analysis_progress",
+      "to": "asyncio.wait_for",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.analysis_progress",
+      "to": "fastapi.responses.StreamingResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.analysis_progress",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.analysis_progress.event_stream",
+      "to": "asyncio.wait_for",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.analysis_progress.event_stream",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.analyze",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.analyze",
+      "to": "fastapi.responses.JSONResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.analyze_all",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.analysis_queue_priority",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.analyze_all",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.is_unread",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.analyze_all",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_schedule_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.analyze_all",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.backfill_account",
+      "to": "backend.app.mail.backfill.dump_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.backfill_account",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.backfill_account",
+      "to": "backend.app.mail.backfill.set_state",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.backfill_account",
+      "to": "backend.app.mail.backfill.status_payload",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.backfill_account",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.backfill_status",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.backfill_status",
+      "to": "backend.app.mail.backfill.status_payload",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.backfill_status",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.connect_gmail",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.connect_gmail",
+      "to": "uuid.uuid4",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.delete_account",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.delete_task",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.draft",
+      "to": "fastapi.responses.JSONResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.generate_briefing",
+      "to": "backend.app.mail.briefing_fingerprint.briefing_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.generate_pkce_pair",
+      "to": "base64.urlsafe_b64encode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.generate_pkce_pair",
+      "to": "hashlib.sha256",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.generate_pkce_pair",
+      "to": "secrets.token_urlsafe",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.get_accounts",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.get_accounts",
+      "to": "backend.app.mail.backfill.status_payload",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.get_email",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.get_email",
+      "to": "fastapi.responses.JSONResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.get_emails",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.get_emails",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.gmail_callback",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.gmail_callback",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.gmail_callback",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.gmail_callback",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.import_csv",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.import_csv",
+      "to": "backend.app.mail.normalizer.normalized_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.import_csv",
+      "to": "csv.DictReader",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.import_csv",
+      "to": "io.StringIO",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.lifespan",
+      "to": "asyncio.create_task",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.lifespan",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.lifespan",
+      "to": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.ollama_invalid_handler",
+      "to": "fastapi.responses.JSONResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.ollama_model_missing_handler",
+      "to": "fastapi.responses.JSONResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.ollama_timeout_handler",
+      "to": "fastapi.responses.JSONResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.ollama_unavailable_handler",
+      "to": "fastapi.responses.JSONResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.pause_backfill",
+      "to": "backend.app.mail.backfill.dump_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.pause_backfill",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.pause_backfill",
+      "to": "backend.app.mail.backfill.set_state",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.pause_backfill",
+      "to": "backend.app.mail.backfill.status_payload",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.pause_backfill",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "backend.app.mail.backfill.dump_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "backend.app.mail.backfill.set_state",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.analysis_queue_priority",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.is_unread",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_schedule_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.sync_account",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.toggle_task",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.services.task_derivation._normalize_action",
+      "to": "re.sub",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.services.task_derivation.derive_tasks",
+      "to": "backend.app.schemas.Task",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.services.task_derivation.derive_tasks",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "to": "backend.app.db.repositories.Repository.all_analyses_with_emails",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "to": "backend.app.db.repositories.Repository.delete_tasks_by_derivation_version",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "to": "backend.app.db.repositories.Repository.save_tasks_batch",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "to": "backend.app.db.repositories.Repository.task_exists_by_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.services.task_derivation.task_fingerprint",
+      "to": "hashlib.sha256",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.services.task_migration.TaskMigrationService.run_migration",
+      "to": "backend.app.services.task_derivation.derive_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail._account",
+      "to": "backend.app.db.repositories.Repository.save_account",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail._account",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail._email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.repo",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_all_scope_excludes_spam_trash_draft_only",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_all_scope_excludes_spam_trash_draft_only",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_all_scope_includes_archived",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_all_scope_includes_archived",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_all_scope_kind_filters",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_all_scope_kind_filters",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_excluded_from_intelligence",
+      "to": "backend.app.db.repositories.Repository.eligible_emails_without_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_excluded_from_intelligence",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_excluded_from_intelligence",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_excluded_from_intelligence",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_include_in_briefing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_excluded_from_intelligence",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_schedule_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_tasks_not_in_active_projection",
+      "to": "backend.app.db.repositories.Repository.active_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_tasks_not_in_active_projection",
+      "to": "backend.app.db.repositories.Repository.save_tasks_batch",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_tasks_not_in_active_projection",
+      "to": "backend.app.db.repositories.Repository.tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_archived_tasks_not_in_active_projection",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "backend.app.db.repositories.Repository.account",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "backend.app.db.repositories.Repository.email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "backend.app.db.repositories.Repository.email_counts",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "backend.app.mail.providers.gmail.GmailProvider",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_first_page_and_resume",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_never_requests_spam_trash",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_never_requests_spam_trash",
+      "to": "backend.app.mail.providers.gmail.GmailProvider",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_never_requests_spam_trash",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_never_requests_spam_trash",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_never_requests_spam_trash",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "backend.app.db.repositories.Repository.email_counts",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "backend.app.db.repositories.Repository.email_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "backend.app.mail.providers.gmail.GmailProvider",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_category_ignored_in_all_scope",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_category_ignored_in_all_scope",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_counts_report_inbox_allmail_excluded",
+      "to": "backend.app.db.repositories.Repository.email_counts",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_counts_report_inbox_allmail_excluded",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_draft_excluded_from_all_mail_and_search",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_draft_excluded_from_all_mail_and_search",
+      "to": "backend.app.db.repositories.Repository.search_emails",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_draft_excluded_from_all_mail_and_search",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_inbox_scope_shows_active_inbox_only",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_inbox_scope_shows_active_inbox_only",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_pagination_in_all_scope",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_pagination_in_all_scope",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_search_covers_archived_not_spam",
+      "to": "backend.app.db.repositories.Repository.search_emails",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_search_covers_archived_not_spam",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_sent_visible_but_excluded_from_intelligence",
+      "to": "backend.app.db.repositories.Repository.eligible_emails_without_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_sent_visible_but_excluded_from_intelligence",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_sent_visible_but_excluded_from_intelligence",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_sent_visible_but_excluded_from_intelligence",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_sent_visible_but_excluded_from_intelligence",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_include_in_briefing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_allmail.test_sent_visible_but_excluded_from_intelligence",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_schedule_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs._future",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs._future",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs._past",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs._past",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.repo",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backfill_job_is_single_durable_row",
+      "to": "backend.app.db.repositories.Repository.enqueue_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backfill_job_is_single_durable_row",
+      "to": "backend.app.db.repositories.Repository.pending_job_count",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backfill_priority_is_below_analysis",
+      "to": "backend.app.db.repositories.Repository.enqueue_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backfill_priority_is_below_analysis",
+      "to": "backend.app.db.repositories.Repository.next_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backoff_and_promotion_cycle",
+      "to": "backend.app.db.repositories.Repository.enqueue_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backoff_and_promotion_cycle",
+      "to": "backend.app.db.repositories.Repository.next_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backoff_and_promotion_cycle",
+      "to": "backend.app.db.repositories.Repository.promote_due_jobs",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backoff_and_promotion_cycle",
+      "to": "backend.app.db.repositories.Repository.retry_job_with_backoff",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_backoff_and_promotion_cycle",
+      "to": "backend.app.db.repositories.Repository.update_job_status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_next_job_honours_not_before",
+      "to": "backend.app.db.repositories.Repository.enqueue_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_next_job_honours_not_before",
+      "to": "backend.app.db.repositories.Repository.next_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_normalize_fresh_cursor",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_normalize_legacy_complete_cursor",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_normalize_legacy_complete_cursor",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_normalize_legacy_running_cursor",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_normalize_legacy_running_cursor",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_does_not_touch_backoff_retries",
+      "to": "backend.app.db.repositories.Repository.enqueue_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_does_not_touch_backoff_retries",
+      "to": "backend.app.db.repositories.Repository.job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_does_not_touch_backoff_retries",
+      "to": "backend.app.db.repositories.Repository.rearm_terminal_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_does_not_touch_backoff_retries",
+      "to": "backend.app.db.repositories.Repository.retry_job_with_backoff",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_does_not_touch_backoff_retries",
+      "to": "backend.app.db.repositories.Repository.update_job_status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_terminal_job_for_resume",
+      "to": "backend.app.db.repositories.Repository.enqueue_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_terminal_job_for_resume",
+      "to": "backend.app.db.repositories.Repository.job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_terminal_job_for_resume",
+      "to": "backend.app.db.repositories.Repository.rearm_terminal_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_rearm_terminal_job_for_resume",
+      "to": "backend.app.db.repositories.Repository.update_job_status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_requeue_resets_attempts_and_errors",
+      "to": "backend.app.db.repositories.Repository.enqueue_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_requeue_resets_attempts_and_errors",
+      "to": "backend.app.db.repositories.Repository.job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_requeue_resets_attempts_and_errors",
+      "to": "backend.app.db.repositories.Repository.requeue_job",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_requeue_resets_attempts_and_errors",
+      "to": "backend.app.db.repositories.Repository.update_job_status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_status_payload_complete",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_status_payload_complete",
+      "to": "backend.app.mail.backfill.set_state",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_status_payload_complete",
+      "to": "backend.app.mail.backfill.status_payload",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_status_payload_remaining_estimate",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_backfill_jobs.test_status_payload_remaining_estimate",
+      "to": "backend.app.mail.backfill.status_payload",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.analysis",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.test_analysis_cache_invalidates_content_and_model",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.test_analysis_cache_invalidates_content_and_model",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.test_briefing_cache_invalidates_when_analysis_changes",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.test_briefing_cache_invalidates_when_analysis_changes",
+      "to": "backend.app.mail.briefing_fingerprint.briefing_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.test_briefing_cache_invalidates_when_analysis_changes",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.test_briefing_cache_invalidates_when_analysis_changes",
+      "to": "backend.app.schemas.InboxBriefing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.test_fingerprint_is_deterministic_and_changes",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_core.test_normalizer_treats_html_as_safe_text",
+      "to": "backend.app.mail.normalizer.normalized_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility._email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.repo",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_active_tasks_exclude_spam_sourced",
+      "to": "backend.app.db.repositories.Repository.active_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_active_tasks_exclude_spam_sourced",
+      "to": "backend.app.db.repositories.Repository.save_tasks_batch",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_active_tasks_exclude_spam_sourced",
+      "to": "backend.app.db.repositories.Repository.tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_active_tasks_exclude_spam_sourced",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_archive_to_inbox_restores",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_archived_state",
+      "to": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_briefing_excludes_spam_trash_archived",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_include_in_briefing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_briefing_promotions_with_strong_signal_included",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_include_in_briefing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_briefing_promotions_without_signal_excluded",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_include_in_briefing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_category_counts_derive_from_labels",
+      "to": "backend.app.db.repositories.Repository.email_counts",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_category_counts_derive_from_labels",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_category_filter_is_db_driven",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_category_filter_is_db_driven",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_email_api_excluded_mail_never_listed",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_gmail_important_is_p0",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.analysis_queue_priority",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "backend.app.db.repositories.Repository.email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "backend.app.db.repositories.Repository.email_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "backend.app.db.repositories.Repository.save_account",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached",
+      "to": "backend.app.db.repositories.Repository.email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached",
+      "to": "backend.app.db.repositories.Repository.save_account",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_forums",
+      "to": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_primary",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_display_in_inbox",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_primary",
+      "to": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_primary",
+      "to": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_promotions",
+      "to": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_promotions",
+      "to": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_social",
+      "to": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_to_archive_excludes",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_to_spam_excludes",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_updates",
+      "to": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_inbox_without_category_is_primary",
+      "to": "backend.app.mail.eligibility.gmail_category_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_label_only_history_update_recomputes_state",
+      "to": "backend.app.db.repositories.Repository.email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_label_only_history_update_recomputes_state",
+      "to": "backend.app.db.repositories.Repository.email_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_label_only_history_update_recomputes_state",
+      "to": "backend.app.db.repositories.Repository.update_email_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_label_only_history_update_recomputes_state",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_lazy_categories_not_scheduled_by_default",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_schedule_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_mixed_label_thread_keeps_active_messages_visible",
+      "to": "backend.app.db.repositories.Repository.con.commit",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_mixed_label_thread_keeps_active_messages_visible",
+      "to": "backend.app.db.repositories.Repository.con.execute",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_mixed_label_thread_keeps_active_messages_visible",
+      "to": "backend.app.db.repositories.Repository.emails_by_thread",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_mixed_label_thread_keeps_active_messages_visible",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_mixed_label_thread_keeps_active_messages_visible",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_permanent_delete_marks_excluded_not_destroyed",
+      "to": "backend.app.db.repositories.Repository.email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_permanent_delete_marks_excluded_not_destroyed",
+      "to": "backend.app.db.repositories.Repository.email_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_permanent_delete_marks_excluded_not_destroyed",
+      "to": "backend.app.db.repositories.Repository.mark_email_excluded",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_permanent_delete_marks_excluded_not_destroyed",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_search_within_category_context",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_search_within_category_context",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_search_within_category_context",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_sent_and_draft_are_excluded",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_state",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_display_in_inbox",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_state",
+      "to": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_to_inbox_restores_eligibility",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_transition_hides_from_projections",
+      "to": "backend.app.db.repositories.Repository.email_counts",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_transition_hides_from_projections",
+      "to": "backend.app.db.repositories.Repository.email_exists",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_transition_hides_from_projections",
+      "to": "backend.app.db.repositories.Repository.emails_filtered",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_transition_hides_from_projections",
+      "to": "backend.app.db.repositories.Repository.update_email_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_transition_hides_from_projections",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_spam_wins_over_inbox",
+      "to": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_trash_state",
+      "to": "backend.app.mail.eligibility.mailbox_state_from_labels",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_updates_with_required_action_eligible_for_semantic_analysis",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.pipeline_eligibility",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_eligibility.test_updates_with_required_action_eligible_for_semantic_analysis",
+      "to": "backend.app.mail.eligibility.MailEligibilityPolicy.should_schedule_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.get_analysis",
+      "to": "backend.app.schemas.Deadline",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.get_analysis",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.get_email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_api_endpoint_flows",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_api_endpoint_flows",
+      "to": "backend.app.schemas.InboxBriefing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_api_endpoint_flows",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_api_endpoint_flows",
+      "to": "os.remove",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_api_endpoint_flows",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_briefing_deadline_aggregation",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_briefing_deadline_aggregation",
+      "to": "backend.app.ai.service.AIService",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_briefing_deadline_aggregation",
+      "to": "backend.app.schemas.Deadline",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_briefing_deadline_aggregation",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_briefing_deadline_aggregation",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_cache_hit_and_invalidation",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_cache_hit_and_invalidation",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_explicit_deadline_schema_handling",
+      "to": "backend.app.schemas.Deadline",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_malformed_json_response",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_malformed_json_response",
+      "to": "backend.app.ai.service.AIService",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_malformed_json_response",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_malformed_json_response",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_malicious_html_normalization",
+      "to": "backend.app.mail.normalizer.normalized_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_model_unavailable",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_model_unavailable",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_model_unavailable",
+      "to": "httpx.HTTPError",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_model_unavailable",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_model_unavailable",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_ollama_empty_response",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_ollama_empty_response",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_ollama_empty_response",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_ollama_empty_response",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_persistence_restart",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_persistence_restart",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_prompt_injection_safety",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_extended.test_prompt_injection_safety",
+      "to": "backend.app.ai.service.AIService",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_prompt_injection_safety",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_extended.test_prompt_injection_safety",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.mock_gmail",
+      "to": "backend.app.mail.providers.gmail.GmailProvider",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.temp_repo",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_oauth_url_generation",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_incremental",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_initial",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_initial",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_initial",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_initial",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_initial",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_initial",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_load_older",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_load_older",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_load_older",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_load_older",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_load_older",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_load_older",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_sync_load_older",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_token_exchange",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_token_exchange",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_golden_corpus.test_golden_corpus",
+      "to": "app.schemas.ActionItem",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_golden_corpus.test_golden_corpus",
+      "to": "app.schemas.Email",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_golden_corpus.test_golden_corpus",
+      "to": "app.schemas.EmailAnalysis",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_golden_corpus.test_golden_corpus",
+      "to": "app.services.task_derivation.derive_tasks",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_golden_corpus.test_golden_corpus",
+      "to": "json.load",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_golden_corpus.test_golden_corpus",
+      "to": "pathlib.Path",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "to": "backend.app.ai.ollama_client.InferenceMetrics",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "to": "backend.app.ai.service.AIService",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "to": "json.dumps",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
+      "to": "unittest.mock.patch.object",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_empty_response",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_empty_response",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_empty_response",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_empty_response",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_http_error",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_http_error",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_http_error",
+      "to": "httpx.HTTPError",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_http_error",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_http_error",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_sends_correct_payload",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_sends_correct_payload",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_sends_correct_payload",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ollama_mock.test_ollama_client_sends_correct_payload",
+      "to": "unittest.mock.MagicMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines",
+      "to": "backend.app.schemas.Deadline",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines",
+      "to": "backend.app.services.task_derivation.derive_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint",
+      "to": "backend.app.schemas.ActionItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint",
+      "to": "backend.app.schemas.Deadline",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint",
+      "to": "backend.app.services.task_derivation.derive_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_newsletters_unless_urgent",
+      "to": "backend.app.schemas.ActionItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_newsletters_unless_urgent",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_newsletters_unless_urgent",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_newsletters_unless_urgent",
+      "to": "backend.app.services.task_derivation.derive_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_noise",
+      "to": "backend.app.schemas.ActionItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_noise",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_noise",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_noise",
+      "to": "backend.app.services.task_derivation.derive_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_third_party_owner",
+      "to": "backend.app.schemas.ActionItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_third_party_owner",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_third_party_owner",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_derive_tasks_ignores_third_party_owner",
+      "to": "backend.app.services.task_derivation.derive_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_derivation.test_is_noise_filtering",
+      "to": "backend.app.services.task_derivation._is_noise",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.repo",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.temp_db",
+      "to": "os.close",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.temp_db",
+      "to": "os.path.exists",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.temp_db",
+      "to": "os.remove",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.temp_db",
+      "to": "pathlib.Path",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.temp_db",
+      "to": "tempfile.mkstemp",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.db.repositories.Repository.accounts",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.db.repositories.Repository.con.commit",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.db.repositories.Repository.con.execute",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.db.repositories.Repository.email_count",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.db.repositories.Repository.save_account",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.db.repositories.Repository.save_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.db.repositories.Repository.upsert_email_commit",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.schemas.ActionItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.schemas.Deadline",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.schemas.EmailAccount",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "backend.app.services.task_migration.TaskMigrationService",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_rollback",
+      "to": "backend.app.db.repositories.Repository.save_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_rollback",
+      "to": "backend.app.db.repositories.Repository.tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_rollback",
+      "to": "backend.app.db.repositories.Repository.upsert_email_commit",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_rollback",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_rollback",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_rollback",
+      "to": "backend.app.services.task_migration.TaskMigrationService",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_rollback",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_migration.test_migration_rollback",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "tests.test_utils.TestUtilityFunctions.test_extract_domain",
+      "to": "src.utils.extract_domain",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "tests.test_utils.TestUtilityFunctions.test_format_timestamp",
+      "to": "src.utils.format_timestamp",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "tests.test_utils.TestUtilityFunctions.test_get_category_emoji",
+      "to": "src.utils.get_category_emoji",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "tests.test_utils.TestUtilityFunctions.test_get_email_preview",
+      "to": "src.utils.get_email_preview",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "tests.test_utils.TestUtilityFunctions.test_get_priority_color",
+      "to": "src.utils.get_priority_color",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "tests.test_utils.TestUtilityFunctions.test_get_sender_initials",
+      "to": "src.utils.get_sender_initials",
+      "relation": "calls-inferred"
+    }
+  ]
+}

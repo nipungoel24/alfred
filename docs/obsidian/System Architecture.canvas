@@ -1,0 +1,120 @@
+{
+  "nodes": [
+    {
+      "id": "focus",
+      "type": "file",
+      "file": "02 - Architecture/System Architecture.md",
+      "x": 340,
+      "y": 300,
+      "width": 320,
+      "height": 120
+    },
+    {
+      "id": "n0",
+      "type": "file",
+      "file": "02 - Architecture/Backend Architecture.md",
+      "x": 0,
+      "y": 0,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n1",
+      "type": "file",
+      "file": "02 - Architecture/Frontend Architecture.md",
+      "x": 340,
+      "y": 0,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n2",
+      "type": "file",
+      "file": "02 - Architecture/Gmail Architecture.md",
+      "x": 0,
+      "y": 260,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n3",
+      "type": "file",
+      "file": "02 - Architecture/AI Architecture.md",
+      "x": 340,
+      "y": 260,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n4",
+      "type": "file",
+      "file": "02 - Architecture/Database Architecture.md",
+      "x": 170,
+      "y": 500,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n5",
+      "type": "file",
+      "file": "02 - Architecture/Security Architecture.md",
+      "x": 510,
+      "y": 500,
+      "width": 300,
+      "height": 120
+    },
+    {
+      "id": "n6",
+      "type": "file",
+      "file": "02 - Architecture/Desktop Architecture.md",
+      "x": 170,
+      "y": 740,
+      "width": 300,
+      "height": 120
+    }
+  ],
+  "edges": [
+    {
+      "id": "e0",
+      "fromNode": "focus",
+      "toNode": "n0",
+      "label": "HTTP+SSE"
+    },
+    {
+      "id": "e1",
+      "fromNode": "focus",
+      "toNode": "n1",
+      "label": "OAuth"
+    },
+    {
+      "id": "e2",
+      "fromNode": "focus",
+      "toNode": "n2",
+      "label": "Ollama"
+    },
+    {
+      "id": "e3",
+      "fromNode": "focus",
+      "toNode": "n3",
+      "label": "SQLite"
+    },
+    {
+      "id": "e4",
+      "fromNode": "n2",
+      "toNode": "n3",
+      "label": "analyses"
+    },
+    {
+      "id": "e5",
+      "fromNode": "focus",
+      "toNode": "n4",
+      "label": "threat model"
+    },
+    {
+      "id": "e6",
+      "fromNode": "n5",
+      "toNode": "focus",
+      "label": "wraps"
+    }
+  ]
+}
