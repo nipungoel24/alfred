@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.config
 source: backend/app/main.py
-line: 535
+line: 544
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,4 +23,4 @@ Purpose inferred from usage: `config` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:535`
+`backend/app/main.py:544`

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.backend_info
 source: desktop/src-tauri/src/main.rs
-line: 162
+line: 167
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `backend_info` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:162`
+`desktop/src-tauri/src/main.rs:167`
 
 ## Signature
 

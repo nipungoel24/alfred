@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.shutdown_backend
 source: desktop/src-tauri/src/main.rs
-line: 151
+line: 156
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `shutdown_backend` in `desktop/src-tauri/src/main.r
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:151`
+`desktop/src-tauri/src/main.rs:156`
 
 ## Signature
 

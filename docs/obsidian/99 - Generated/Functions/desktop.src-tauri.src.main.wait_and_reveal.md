@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.wait_and_reveal
 source: desktop/src-tauri/src/main.rs
-line: 132
+line: 137
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `wait_and_reveal` in `desktop/src-tauri/src/main.rs
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:132`
+`desktop/src-tauri/src/main.rs:137`
 
 ## Signature
 

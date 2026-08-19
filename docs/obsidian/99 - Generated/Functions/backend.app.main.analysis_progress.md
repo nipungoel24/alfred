@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.analysis_progress
 source: backend/app/main.py
-line: 756
+line: 765
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Server-Sent Events endpoint for real-time analysis progress.
 
 ## Location
 
-`backend/app/main.py:756`
+`backend/app/main.py:765`
 
 ## Signature
 

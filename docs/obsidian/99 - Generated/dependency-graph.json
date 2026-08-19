@@ -1356,6 +1356,11 @@
       "source": "backend/tests/test_desktop_auth.py"
     },
     {
+      "id": "backend.tests.test_desktop_auth.test_oauth_callback_is_exempt_from_token",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
       "id": "backend.tests.test_desktop_auth.test_query_token_form_for_sse",
       "type": "test",
       "source": "backend/tests/test_desktop_auth.py"
@@ -4094,6 +4099,11 @@
     },
     {
       "from": "backend.tests.test_desktop_auth.test_no_token_means_no_auth",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_oauth_callback_is_exempt_from_token",
       "to": "fastapi.testclient.TestClient",
       "relation": "calls-inferred"
     },

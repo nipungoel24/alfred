@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.runtime_token_middleware
 source: backend/app/main.py
-line: 464
+line: 471
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `runtime_token_middleware` in `backend/app/main.py`
 
 ## Location
 
-`backend/app/main.py:464`
+`backend/app/main.py:471`
 
 ## Signature
 

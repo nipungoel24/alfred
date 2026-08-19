@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.retry_backend
 source: desktop/src-tauri/src/main.rs
-line: 174
+line: 179
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `retry_backend` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:174`
+`desktop/src-tauri/src/main.rs:179`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.shutdown_backend
 source: backend/app/main.py
-line: 479
+line: 488
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Graceful in-process shutdown requested by the desktop shell.
 
 ## Location
 
-`backend/app/main.py:479`
+`backend/app/main.py:488`
 
 ## Signature
 

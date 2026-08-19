@@ -659,6 +659,7 @@
     "backend.tests.test_desktop_auth.test_api_requires_token",
     "backend.tests.test_desktop_auth.test_health_requires_token_when_enabled",
     "backend.tests.test_desktop_auth.test_no_token_means_no_auth",
+    "backend.tests.test_desktop_auth.test_oauth_callback_is_exempt_from_token",
     "backend.tests.test_desktop_auth.test_query_token_form_for_sse",
     "backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected",
     "backend.tests.test_eligibility.test_active_tasks_exclude_spam_sourced",
