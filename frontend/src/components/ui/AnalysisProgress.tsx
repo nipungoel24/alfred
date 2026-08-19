@@ -1,5 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
+import { sseUrl } from '../../api/client';
 
 type ProgressEvent = 
   | { type: 'status'; pending: number }
@@ -17,7 +18,7 @@ export function AnalysisProgress() {
   const invalidationTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
-    const eventSource = new EventSource(`${import.meta.env.VITE_ALFRED_API_URL ?? 'http://127.0.0.1:8765'}/api/analysis/progress`);
+    const eventSource = new EventSource(sseUrl('/api/analysis/progress'));
 
     eventSource.onmessage = (event) => {
       try {
