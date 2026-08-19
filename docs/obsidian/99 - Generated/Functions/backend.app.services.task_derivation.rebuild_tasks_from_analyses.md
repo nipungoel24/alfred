@@ -43,7 +43,7 @@ Rebuild all derived tasks from cached analyses using the current derivation logi
 
 ## Called By
 
-- [[backend.app.main.lifespan|lifespan]]
+- [[backend.app.main._startup_background|_startup_background]]
 
 ## Reads
 

@@ -16,32 +16,31 @@ Evidence-based status of the Alfred system. Classifications: **implemented** (co
 - Gmail sync (initial, incremental historyId, pagination) — [[Gmail Incremental Sync Flow]]; real-world verified, duplicates=0 through the packaged sidecar.
 - Mailbox model + eligibility policy — corpus-tested ([[backend.tests.test_eligibility]]).
 - All Mail + backend-owned backfill — tested + real-world restart-resume verified ([[All Mail Backfill Flow]]).
-- Analysis queue, structured AI (qwen3:4b), task derivation v2, briefing/drafts — tested; golden corpus; real Ollama runs (including through the packaged sidecar).
-- SSE progress — repaired in this pass (status endpoints previously referenced a removed queue object) and covered by tests.
-- Light/dark premium UI — Vitest suite.
-- Desktop session auth + dynamic port + graceful shutdown + single instance — [[ADR-015 - Desktop Session Authentication]], [[ADR-016 - Tauri-Owned Sidecar Lifecycle]]; backend-tested + live-verified.
+- Analysis queue, structured AI (qwen3:4b), task derivation v2, briefing/drafts — tested; golden corpus; real Ollama runs through the packaged sidecar.
+- SSE progress, light/dark premium UI — Vitest suite.
+- Desktop session auth + dynamic port + graceful shutdown + single instance — backend-tested + live-verified ([[ADR-015 - Desktop Session Authentication]], [[ADR-016 - Tauri-Owned Sidecar Lifecycle]]).
 
-## Native-tested + installed-app tested (closure pass)
+## Native-tested + installed-app tested
 
-- Toolchain: rustc 1.90 / MSVC 14.44 / WebView2 151.
-- `cargo fmt --check` / `cargo check` / `cargo clippy`: clean.
-- Native window: opens, sidecar auto-starts on a dynamic port, health gate reveals the UI, close → 0 orphan processes, port released.
-- Single instance: second launch focuses the first window; no second sidecar/DB writer.
-- Force-kill recovery: app survives backend death; relaunch restores everything (149 emails / 87 analyses / 21 tasks / 88 succeeded jobs intact, no duplicates).
-- Installed app: launched from Start Menu install (`%LOCALAPPDATA%\Alfred`), real AppData loaded, real Gmail incremental sync (28 messages, 0 duplicates), Ollama analysis + briefing 200 through the installed binary.
-- Installer: NSIS `Alfred_0.1.0_x64-setup.exe`, silent install verified, uninstall registration + Start Menu verified, uninstall preserves the SQLite database.
-- **FRESH INSTALLED-APP OAUTH VERIFIED**: brand-new isolated profile (accounts=0) → real Google consent in the system browser → loopback callback → DPAPI token persistence → account Connected → first sync (50 imported, 0 duplicates, cursor stored, backfill completed) → first-run AI (44 analyses, priorities/needs-reply/deadlines populated, 9 tasks derived, briefing 200). Test profile deleted afterward; normal AppData untouched. This run also exposed and fixed a release blocker: the runtime-token middleware was rejecting the browser's unauthenticated OAuth callback (now exempted — its security is the one-time PKCE state).
-- **Ollama outage/recovery verified with normal data**: outage → `ai: unavailable`, cached inbox/tasks still served, briefing returns scoped 503, jobs retry with backoff, no crash, no cloud fallback; restart Ollama → auto-recovery, analyses resume.
+- Toolchain: rustc 1.90 / MSVC 14.44 / WebView2 151; `cargo fmt/check/clippy` clean.
+- Native window, sidecar auto-start on dynamic port, readiness gate, close → 0 orphans, single instance, force-kill recovery.
+- **FRESH INSTALLED-APP OAUTH VERIFIED** (real Google consent, fresh isolated profile, first sync 50/0 duplicates, first-run AI 44 analyses + 9 tasks + briefing).
+- Ollama outage/recovery verified with normal data (cached UI served, scoped 503, auto-recovery).
+- Installer installed/uninstalled repeatedly; uninstall preserves the SQLite DB.
+
+## Startup incident (fixed + re-verified)
+
+A release-candidate field failure ("couldn't start its local service") was root-caused to a three-part startup defect and fixed; **5/5 consecutive clean Start Menu launches succeed in 2.7–4.6s** with authenticated health, distinct dynamic ports, and zero orphans. See [[ADR-018 - Health-Before-Heavy-Startup]] and [[Debugging]].
 
 ## Packaged but unsigned
 
-- **Signing: UNSIGNED DEVELOPMENT RELEASE** — no Authenticode certificate; SmartScreen will warn. Blocking item for public distribution.
+- **Signing: UNSIGNED DEVELOPMENT RELEASE** — no Authenticode certificate; SmartScreen will warn.
 - Brand icon is a generated placeholder (`tools/generate_icons.py`) pending the approved Alfred mark.
 
 ## Outstanding (human steps)
 
-- Final visual QA at 1280×720 / 1366×768 / 1440×900 / 1920×1080 — the installed app is left running for review; no release-blocking defect known.
-- Manual webview observation of the Ollama-offline UI states (backend/UX behavior verified via API surface + unit tests).
+- Final visual QA at 1280×720 / 1366×768 / 1440×900 / 1920×1080 — no release-blocking defect known.
+- Manual webview observation of offline UI states (verified via API surface + tests).
 
 ## Known constraints
 

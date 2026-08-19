@@ -19,7 +19,8 @@ tags: [module, frontend]
 
 ## Imports
 
-- `react` â† useEffect, useState
-- `@tanstack/react-query` â† useQuery, useQueryClient
-- `lucide-react` â† Sparkles, RefreshCw
+- `react` â† useCallback, useEffect, useRef, useState
+- `@tanstack/react-query` â† useQueryClient
+- `lucide-react` â† Sparkles, RefreshCw, FileText
 - `../api/emails` â† health
+- `../api/client` â† initApi

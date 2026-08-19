@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.http_request
 source: desktop/src-tauri/src/main.rs
-line: 108
+line: 156
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `http_request` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:108`
+`desktop/src-tauri/src/main.rs:156`
 
 ## Signature
 

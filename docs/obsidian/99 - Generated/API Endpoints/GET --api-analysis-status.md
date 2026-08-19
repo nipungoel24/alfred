@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.analysis_status
 source: backend/app/main.py
-line: 789
+line: 798
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,4 +23,4 @@ Get current analysis queue status (jobs-table derived).
 
 ## Location
 
-`backend/app/main.py:789`
+`backend/app/main.py:798`

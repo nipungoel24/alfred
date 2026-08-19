@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.spawn_backend
 source: desktop/src-tauri/src/main.rs
-line: 65
+line: 98
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `spawn_backend` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:65`
+`desktop/src-tauri/src/main.rs:98`
 
 ## Signature
 

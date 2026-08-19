@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.gmail_callback
 source: backend/app/main.py
-line: 599
+line: 608
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `gmail_callback` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:599`
+`backend/app/main.py:608`
 
 ## Signature
 

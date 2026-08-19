@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.delete_account
 source: backend/app/main.py
-line: 646
+line: 655
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Purpose inferred from usage: `delete_account` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:646`
+`backend/app/main.py:655`
 
 ## Parameters
 

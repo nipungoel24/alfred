@@ -21,6 +21,11 @@
       "source": null
     },
     {
+      "id": "asyncio.Event",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "asyncio.Queue",
       "type": "external",
       "source": null
@@ -836,6 +841,11 @@
       "source": "backend/app/main.py"
     },
     {
+      "id": "backend.app.main._startup_background",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
       "id": "backend.app.main.analysis_progress",
       "type": "function",
       "source": "backend/app/main.py"
@@ -1371,6 +1381,26 @@
       "source": "backend/tests/test_desktop_auth.py"
     },
     {
+      "id": "backend.tests.test_desktop_startup.startup_app",
+      "type": "function",
+      "source": "backend/tests/test_desktop_startup.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup",
+      "type": "test",
+      "source": "backend/tests/test_desktop_startup.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup.slow_preload",
+      "type": "function",
+      "source": "backend/tests/test_desktop_startup.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_startup.test_oauth_callback_exempt_under_token",
+      "type": "test",
+      "source": "backend/tests/test_desktop_startup.py"
+    },
+    {
       "id": "backend.tests.test_eligibility._email",
       "type": "function",
       "source": "backend/tests/test_eligibility.py"
@@ -1786,6 +1816,11 @@
       "source": null
     },
     {
+      "id": "desktop.src-tauri.src.main.backend_alive",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.backend_info",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
@@ -1801,12 +1836,22 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.log_path",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.main",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
       "id": "desktop.src-tauri.src.main.pick_free_port",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_status",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1822,6 +1867,11 @@
     },
     {
       "id": "desktop.src-tauri.src.main.spawn_backend",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.startup_log",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -2129,6 +2179,11 @@
       "id": "frontend.src.layout.StartupGate.StartupGate",
       "type": "react_components",
       "source": "frontend/src/layout/StartupGate.tsx"
+    },
+    {
+      "id": "frontend.src.layout.StartupGate.test.flushTimers",
+      "type": "functions",
+      "source": "frontend/src/layout/StartupGate.test.tsx"
     },
     {
       "id": "frontend.src.layout.StartupGate.test.renderGate",
@@ -2529,6 +2584,11 @@
       "id": "tests.test_utils.TestUtilityFunctions.test_get_sender_initials",
       "type": "test",
       "source": "tests/test_utils.py"
+    },
+    {
+      "id": "time.perf_counter",
+      "type": "external",
+      "source": null
     },
     {
       "id": "unittest.mock.AsyncMock",
@@ -3158,6 +3218,16 @@
       "relation": "calls"
     },
     {
+      "from": "backend.app.main._startup_background",
+      "to": "backend.app.mail.backfill.normalize_cursor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._startup_background",
+      "to": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
       "from": "backend.app.main.analysis_progress",
       "to": "asyncio.Queue",
       "relation": "calls-inferred"
@@ -3376,16 +3446,6 @@
       "from": "backend.app.main.lifespan",
       "to": "asyncio.create_task",
       "relation": "calls-inferred"
-    },
-    {
-      "from": "backend.app.main.lifespan",
-      "to": "backend.app.mail.backfill.normalize_cursor",
-      "relation": "calls"
-    },
-    {
-      "from": "backend.app.main.lifespan",
-      "to": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
-      "relation": "calls"
     },
     {
       "from": "backend.app.main.ollama_invalid_handler",
@@ -4114,6 +4174,36 @@
     },
     {
       "from": "backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup",
+      "to": "asyncio.Event",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup",
+      "to": "time.perf_counter",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup.slow_preload",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_startup.test_oauth_callback_exempt_under_token",
       "to": "fastapi.testclient.TestClient",
       "relation": "calls-inferred"
     },

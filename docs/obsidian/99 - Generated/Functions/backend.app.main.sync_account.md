@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.sync_account
 source: backend/app/main.py
-line: 656
+line: 665
 status: active
 tags: [backend, function, critical-path, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `sync_account` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:656`
+`backend/app/main.py:665`
 
 ## Signature
 

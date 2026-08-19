@@ -27,16 +27,6 @@ React component declared in `frontend/src/layout/StartupGate.tsx`.
 export function StartupGate(
 ```
 
-## React Query usage
-
-- `{
-    queryKey: ['health', 'gate'],
-    queryFn: health,
-    retry: false,
-    refetchInterval: state === 'starting' ? 800 : false,
-    staleTime: 0,
-  }`
-
 ## Related
 
 - [[frontend.src.layout.StartupGate|StartupGate]] (module)

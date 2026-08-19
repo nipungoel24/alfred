@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main.analysis_progress
 qualified_name: backend.app.main.analysis_progress.event_stream
 source: backend/app/main.py
-line: 770
+line: 779
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `event_stream` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:770`
+`backend/app/main.py:779`
 
 ## Signature
 

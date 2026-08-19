@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.ollama_timeout_handler
 source: backend/app/main.py
-line: 513
+line: 522
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `ollama_timeout_handler` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:513`
+`backend/app/main.py:522`
 
 ## Signature
 

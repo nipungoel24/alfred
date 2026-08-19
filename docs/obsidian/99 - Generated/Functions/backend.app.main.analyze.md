@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.analyze
 source: backend/app/main.py
-line: 870
+line: 879
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `analyze` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:870`
+`backend/app/main.py:879`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.lifespan
 source: backend/app/main.py
-line: 391
+line: 430
 status: active
 tags: [backend, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `lifespan` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:391`
+`backend/app/main.py:430`
 
 ## Signature
 
@@ -36,13 +36,7 @@ Purpose inferred from usage: `lifespan` in `backend/app/main.py`.
 ## Calls
 
 - `create_task` (`asyncio.create_task`, calls-inferred)
-- [[backend.app.mail.backfill.normalize_cursor|normalize_cursor]] (calls)
-- [[backend.app.services.task_derivation.rebuild_tasks_from_analyses|rebuild_tasks_from_analyses]] (calls)
-
-## Writes
-
-- [[table_jobs]]
 
 ## Side Effects
 
-- async I/O; SQLite
+- async I/O

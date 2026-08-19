@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.pause_backfill
 source: backend/app/main.py
-line: 742
+line: 751
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Pause the durable backfill. Progress and cursor are preserved.
 
 ## Location
 
-`backend/app/main.py:742`
+`backend/app/main.py:751`
 
 ## Signature
 

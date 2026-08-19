@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.backfill_status
 source: backend/app/main.py
-line: 755
+line: 764
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Observer-facing backfill status (typed state, counters, estimate).
 
 ## Location
 
-`backend/app/main.py:755`
+`backend/app/main.py:764`
 
 ## Signature
 

@@ -24,7 +24,7 @@ Function declared in `frontend/src/api/client.ts`.
 ## Signature
 
 ```ts
-export async function initApi(): Promise<void>
+export async function initApi(retries = 20, intervalMs = 400): Promise<void>
 ```
 
 ## Related
