@@ -1977,6 +1977,27 @@ button.overview-row:hover {
   animation: startup-slide 1.1s ease-in-out infinite;
 }
 
+.startup-diagnostic {
+  font-size: var(--text-xs);
+  color: var(--text-muted);
+}
+
+.startup-code {
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  color: var(--warning);
+  letter-spacing: 0.02em;
+}
+
+.startup-logs {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 10.5px;
+  color: var(--text-faint);
+  font-family: var(--font-mono);
+}
+
 @keyframes startup-slide {
   0%   { transform: translateX(-100%); }
   100% { transform: translateX(400%); }

@@ -387,22 +387,25 @@ async def _backfill_estimate_once():
         pass
 
 
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    global _worker_task, _worker_running, _backfill_task, _backfill_running
+async def _startup_background():
+    """Slow startup work that must NOT block /health readiness.
 
-    # Startup: preload model and start worker
+    Moved out of the lifespan pre-yield path: model preload can take many
+    seconds (Ollama loads qwen3:4b into memory) and uvicorn serves no
+    requests while the lifespan is pending. The desktop shell polls
+    /health with a bounded timeout, so health MUST respond immediately
+    after the socket binds.
+    """
     try:
         await ai.preload()
     except Exception:
         pass  # Non-fatal: first inference will be slower
 
-    # Rebuild tasks from cached analyses if needed (migration from v1 to v2)
+    # Rebuild tasks from cached analyses if needed (migration v1→v2)
     try:
         rebuilt = rebuild_tasks_from_analyses(repo, settings.ollama_model)
         if rebuilt > 0:
             print(f"[Alfred] Rebuilt {rebuilt} tasks with derivation v{DERIVATION_VERSION}")
-            
         # Reset any stuck 'running' jobs to 'queued' on startup
         repo.con.execute('UPDATE jobs SET status="queued" WHERE status="running"')
         repo.reset_retryable_jobs()
@@ -411,7 +414,6 @@ async def lifespan(app: FastAPI):
         pass
 
     # Resume durable backfill jobs for accounts left not_started/running.
-    # Backend owns the loop — the frontend only observes progress.
     try:
         for account in repo.accounts():
             if account.provider != 'gmail' or account.connection_status != 'connected':
@@ -423,21 +425,28 @@ async def lifespan(app: FastAPI):
     except Exception:
         pass
 
-    # Start background workers
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    global _worker_task, _worker_running, _backfill_task, _backfill_running
+
+    # ── FAST path only: workers + one-shots. ──
+    # Slow work (model preload, task rebuild, queue healing, backfill
+    # resume) runs in _startup_background AFTER the server starts serving,
+    # so the desktop shell's authenticated /health probe answers within
+    # seconds of socket bind — never hanging on a cold Ollama load.
     _worker_task = asyncio.create_task(_analysis_worker())
     _backfill_task = asyncio.create_task(_backfill_worker())
-
-    # Backfill Gmail labels for legacy rows (non-blocking, metadata only)
     label_task = asyncio.create_task(_label_backfill())
-    # One-shot estimate for legacy-complete backfills (cheap, non-blocking)
     estimate_task = asyncio.create_task(_backfill_estimate_once())
+    startup_task = asyncio.create_task(_startup_background())
 
     yield
 
     # Shutdown
     _worker_running = False
     _backfill_running = False
-    for task in (_worker_task, _backfill_task, label_task, estimate_task):
+    for task in (_worker_task, _backfill_task, label_task, estimate_task, startup_task):
         if task:
             task.cancel()
             try:

@@ -9,9 +9,13 @@
 //! - poll backend health before revealing the workspace
 //! - graceful shutdown via POST /api/shutdown, then kill
 //! - expose `backend_info` / `retry_backend` to the frontend only
+//! - safe startup diagnostics in %LOCALAPPDATA%\AlfredData\logs\desktop.log
+//!   (ports, PIDs, stages, HTTP status categories — never tokens/secrets)
 
+use std::fs::OpenOptions;
 use std::io::{Read, Write};
 use std::net::{TcpListener, TcpStream};
+use std::path::PathBuf;
 use std::sync::Mutex;
 use std::time::{Duration, Instant, SystemTime, UNIX_EPOCH};
 
@@ -36,6 +40,33 @@ struct BackendInfo {
     port: u16,
     token: String,
 }
+
+// ── Safe startup logging (no secrets) ──────────────────────────────
+
+fn log_path() -> PathBuf {
+    std::env::var_os("LOCALAPPDATA")
+        .map(PathBuf::from)
+        .unwrap_or_else(|| PathBuf::from("."))
+        .join("AlfredData")
+        .join("logs")
+        .join("desktop.log")
+}
+
+fn startup_log(entry: &str) {
+    let path = log_path();
+    if let Some(parent) = path.parent() {
+        let _ = std::fs::create_dir_all(parent);
+    }
+    if let Ok(mut f) = OpenOptions::new().create(true).append(true).open(&path) {
+        let ts = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_secs();
+        let _ = writeln!(f, "{ts} {entry}");
+    }
+}
+
+// ── Port + token selection ─────────────────────────────────────────
 
 fn pick_free_port() -> Option<u16> {
     TcpListener::bind("127.0.0.1:0")
@@ -62,9 +93,12 @@ fn generate_token() -> String {
     format!("{:016x}{:016x}", a, h2.finish())
 }
 
+// ── Sidecar lifecycle ──────────────────────────────────────────────
+
 fn spawn_backend(app: &AppHandle, state: &BackendState) -> Result<(), String> {
     let port = pick_free_port().ok_or("no free loopback port")?;
     let token = generate_token();
+    startup_log(&format!("spawn port={port}"));
 
     let mut cmd = app
         .shell()
@@ -80,8 +114,10 @@ fn spawn_backend(app: &AppHandle, state: &BackendState) -> Result<(), String> {
         cmd = cmd.env("ALFRED_DATABASE_PATH", db_path);
     }
     let (mut rx, child) = cmd.spawn().map_err(|e| e.to_string())?;
+    startup_log(&format!("spawned child_pid={}", child.pid()));
 
-    // Drain sidecar output; log to the Tauri log (debug builds) only.
+    // Drain sidecar output; keep last lines for diagnostics; log exits.
+    let child_pid = child.pid();
     tauri::async_runtime::spawn(async move {
         while let Some(event) = rx.recv().await {
             match event {
@@ -91,7 +127,15 @@ fn spawn_backend(app: &AppHandle, state: &BackendState) -> Result<(), String> {
                 CommandEvent::Stderr(line) => {
                     log::debug!("backend(err): {}", String::from_utf8_lossy(&line))
                 }
-                CommandEvent::Error(e) => log::warn!("backend process error: {e}"),
+                CommandEvent::Error(e) => {
+                    startup_log(&format!("child_error pid={child_pid} error={e}"));
+                }
+                CommandEvent::Terminated(payload) => {
+                    startup_log(&format!(
+                        "child_exited pid={child_pid} code={:?}",
+                        payload.code
+                    ));
+                }
                 _ => {}
             }
         }
@@ -99,6 +143,10 @@ fn spawn_backend(app: &AppHandle, state: &BackendState) -> Result<(), String> {
 
     let mut guard = state.0.lock().unwrap();
     if let Some(prev) = guard.take() {
+        startup_log(&format!(
+            "replacing previous child pid={}",
+            prev.child.pid()
+        ));
         let _ = prev.child.kill();
     }
     *guard = Some(BackendRuntime { child, port, token });
@@ -114,7 +162,7 @@ fn http_request(port: u16, method: &str, path: &str, token: &str) -> bool {
         Ok(s) => s,
         Err(_) => return false,
     };
-    let _ = stream.set_read_timeout(Some(Duration::from_millis(1200)));
+    let _ = stream.set_read_timeout(Some(Duration::from_millis(1500)));
     let req = format!(
         "{method} {path} HTTP/1.1\r\nHost: 127.0.0.1\r\nX-Alfred-Token: {token}\r\nConnection: close\r\n\r\n"
     );
@@ -130,7 +178,50 @@ fn http_request(port: u16, method: &str, path: &str, token: &str) -> bool {
             Err(_) => break,
         }
     }
-    String::from_utf8_lossy(&buf[..got]).contains("200")
+    let response = String::from_utf8_lossy(&buf[..got]);
+    response.contains("200")
+}
+
+fn probe_status(port: u16, token: &str) -> String {
+    let addr = match format!("127.0.0.1:{port}").parse() {
+        Ok(a) => a,
+        Err(_) => return "conn".to_string(),
+    };
+    let mut stream = match TcpStream::connect_timeout(&addr, Duration::from_millis(900)) {
+        Ok(s) => s,
+        Err(_) => return "conn".to_string(),
+    };
+    let _ = stream.set_read_timeout(Some(Duration::from_millis(1500)));
+    let req = format!(
+        "GET /health HTTP/1.1\r\nHost: 127.0.0.1\r\nX-Alfred-Token: {token}\r\nConnection: close\r\n\r\n"
+    );
+    if stream.write_all(req.as_bytes()).is_err() {
+        return "conn".to_string();
+    }
+    let mut buf = [0u8; 1024];
+    let mut got = 0;
+    while got < buf.len() {
+        match stream.read(&mut buf[got..]) {
+            Ok(0) => break,
+            Ok(n) => got += n,
+            Err(_) => break,
+        }
+    }
+    let response = String::from_utf8_lossy(&buf[..got]);
+    response
+        .lines()
+        .next()
+        .and_then(|l| l.split_whitespace().nth(1))
+        .unwrap_or("timeout")
+        .to_string()
+}
+
+fn backend_alive(state: &BackendState) -> bool {
+    let guard = state.0.lock().unwrap();
+    match guard.as_ref() {
+        Some(rt) => http_request(rt.port, "GET", "/health", &rt.token),
+        None => false,
+    }
 }
 
 /// Poll health until ready or the timeout elapses, then reveal the window.
@@ -138,13 +229,20 @@ fn wait_and_reveal(app: AppHandle, port: u16, token: String) {
     std::thread::spawn(move || {
         let deadline = Instant::now() + HEALTH_TIMEOUT;
         let mut ready = false;
+        let mut last_status = String::new();
         while Instant::now() < deadline {
             if http_request(port, "GET", "/health", &token) {
                 ready = true;
                 break;
             }
+            let status = probe_status(port, &token);
+            if status != last_status {
+                startup_log(&format!("probe port={port} status={status}"));
+                last_status = status;
+            }
             std::thread::sleep(HEALTH_INTERVAL);
         }
+        startup_log(&format!("readiness port={port} ready={ready}"));
         let _ = app.emit("backend-ready", ready);
         if let Some(window) = app.get_webview_window("main") {
             let _ = window.show();
@@ -160,8 +258,11 @@ fn shutdown_backend(state: &BackendState) {
         let _ = http_request(rt.port, "POST", "/api/shutdown", &rt.token);
         std::thread::sleep(Duration::from_millis(600));
         let _ = rt.child.kill();
+        startup_log(&format!("shutdown port={}", rt.port));
     }
 }
+
+// ── Frontend commands ──────────────────────────────────────────────
 
 #[tauri::command]
 fn backend_info(state: State<BackendState>) -> Result<BackendInfo, String> {
@@ -177,6 +278,26 @@ fn backend_info(state: State<BackendState>) -> Result<BackendInfo, String> {
 
 #[tauri::command]
 fn retry_backend(app: AppHandle, state: State<BackendState>) -> Result<(), String> {
+    // If the current backend is already healthy, do NOT kill it — just
+    // re-run the readiness reveal. Killing a healthy-but-late backend and
+    // respawning made every Retry repeat the slow cold-start cycle.
+    if backend_alive(&state) {
+        startup_log("retry: backend already healthy, re-revealing");
+        let (port, token) = {
+            let guard = state.0.lock().unwrap();
+            let rt = guard.as_ref().ok_or("backend not started")?;
+            (rt.port, rt.token.clone())
+        };
+        let _ = app.emit("backend-ready", true);
+        if let Some(window) = app.get_webview_window("main") {
+            let _ = window.show();
+            let _ = window.set_focus();
+        }
+        wait_and_reveal(app, port, token);
+        return Ok(());
+    }
+
+    startup_log("retry: respawning backend");
     {
         let mut guard = state.0.lock().unwrap();
         if let Some(rt) = guard.take() {
@@ -194,6 +315,10 @@ fn retry_backend(app: AppHandle, state: State<BackendState>) -> Result<(), Strin
 }
 
 fn main() {
+    startup_log(&format!(
+        "desktop start version={}",
+        env!("CARGO_PKG_VERSION")
+    ));
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
