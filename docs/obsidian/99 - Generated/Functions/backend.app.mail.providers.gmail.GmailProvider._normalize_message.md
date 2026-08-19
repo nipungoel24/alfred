@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider._normalize_message
 source: backend/app/mail/providers/gmail.py
-line: 463
+line: 467
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_normalize_message` in `backend/app/mail/providers
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:463`
+`backend/app/mail/providers/gmail.py:467`
 
 ## Signature
 

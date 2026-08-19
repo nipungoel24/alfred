@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.health
 source: backend/app/main.py
-line: 491
+line: 527
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `health` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:491`
+`backend/app/main.py:527`
 
 ## Signature
 

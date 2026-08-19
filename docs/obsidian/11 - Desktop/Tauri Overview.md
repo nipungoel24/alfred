@@ -11,9 +11,10 @@ tags:
 
 Tauri 2 shell: `desktop/src-tauri/`.
 
-- `src/main.rs` — builder + shell plugin + sidecar spawn in `setup`; child handle managed by Tauri (killed on exit).
-- `tauri.conf.json` — dev URL `http://localhost:5173`, bundled `frontend/dist`, CSP (connect-src limited to localhost:8765/5173), window 1280×850 (min 900×650), NSIS bundle.
-- `capabilities/default.json` — `core:default` + `shell:allow-spawn` only.
+- `src/main.rs` — the full native lifecycle ([[Desktop Architecture]]): sidecar ownership, readiness gate, single instance, graceful shutdown, `backend_info`/`retry_backend` commands.
+- `tauri.conf.json` — dev/build commands (`npm --prefix ../frontend`), `frontendDist: ../../frontend/dist`, CSP, hidden-until-ready window, NSIS `currentUser` bundle.
+- `capabilities/default.json` — `core:default` only ([[Native Security]]).
+- `icons/` — generated placeholder mark (`tools/generate_icons.py`); replace with the approved brand asset when available.
 
 ## Related
 

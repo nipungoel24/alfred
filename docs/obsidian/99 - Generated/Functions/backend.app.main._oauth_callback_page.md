@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._oauth_callback_page
 source: backend/app/main.py
-line: 539
+line: 575
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_oauth_callback_page` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:539`
+`backend/app/main.py:575`
 
 ## Signature
 

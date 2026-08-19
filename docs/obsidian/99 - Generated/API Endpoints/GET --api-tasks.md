@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.get_tasks
 source: backend/app/main.py
-line: 919
+line: 955
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,4 +23,4 @@ Active projection: derived tasks whose source email is excluded are
 
 ## Location
 
-`backend/app/main.py:919`
+`backend/app/main.py:955`

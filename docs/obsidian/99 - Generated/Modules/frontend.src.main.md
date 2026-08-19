@@ -23,5 +23,7 @@ tags: [module, frontend]
 - `react-dom/client` â† createRoot
 - `@tanstack/react-query` â† QueryClient, QueryClientProvider
 - `./theme/ThemeProvider` â† ThemeProvider
+- `./layout/StartupGate` â† StartupGate
+- `./api/client` â† initApi
 - `./App` â† App
 - `./styles.css` â† 

@@ -21,3 +21,4 @@ tags: [module, frontend]
 
 - `react` â† useEffect, useState, useRef
 - `@tanstack/react-query` â† useQueryClient
+- `../../api/client` â† sseUrl

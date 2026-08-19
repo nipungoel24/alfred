@@ -24,6 +24,7 @@ tags: [module, backend]
 - `Path` ← `pathlib.Path`
 - `lru_cache` ← `functools.lru_cache`
 - `os` ← `os`
+- `sys` ← `sys`
 
 ## Classes
 
@@ -31,4 +32,7 @@ tags: [module, backend]
 
 ## Functions
 
+- [[backend.app.config._default_database_path|_default_database_path]]
+- [[backend.app.config._load_dotenv_file|_load_dotenv_file]]
+- [[backend.app.config._load_environment|_load_environment]]
 - [[backend.app.config.get_settings|get_settings]]

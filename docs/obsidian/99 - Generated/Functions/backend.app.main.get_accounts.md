@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.get_accounts
 source: backend/app/main.py
-line: 509
+line: 545
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `get_accounts` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:509`
+`backend/app/main.py:545`
 
 ## Signature
 

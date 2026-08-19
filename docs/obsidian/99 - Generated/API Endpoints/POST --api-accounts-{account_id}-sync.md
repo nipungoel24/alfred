@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.sync_account
 source: backend/app/main.py
-line: 611
+line: 647
 status: active
 tags: [backend, function, critical-path, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Purpose inferred from usage: `sync_account` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:611`
+`backend/app/main.py:647`
 
 ## Parameters
 

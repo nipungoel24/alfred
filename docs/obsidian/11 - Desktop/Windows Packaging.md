@@ -8,19 +8,22 @@ tags:
 
 # Windows Packaging
 
-Bundle configuration as it exists today.
+Bundle configuration and verified release facts (v0.1.0).
 
-- Target: **NSIS** installer (`.exe`), per `tauri.conf.json`.
+- Target: **NSIS**, `installMode: currentUser` → `%LOCALAPPDATA%\Alfred`, no elevation, Start Menu shortcut + HKCU uninstall registration ([[ADR-017 - Per-User Installer]]).
 - Frontend: `npm run build` → `frontend/dist` embedded; dev mode points at Vite.
-- Sidecar: `binaries/alfred-backend` (PyInstaller single-file) included via `externalBin`.
-- Window: 1280×850 default, 900×650 minimum.
-- Identifier: `com.alfred.local`, product name "Alfred".
+- Sidecar: `binaries/alfred-backend` (single-file, config embedded — [[Sidecar Architecture]]).
+- Icons: generated placeholder set in `desktop/src-tauri/icons/` (`tools/generate_icons.py`) until the approved brand asset replaces it.
+- Window: 1280×850 default, 900×650 minimum, hidden until backend readiness.
 
-## Status
+## Verified artifacts
 
-Config + binary build exist; a full packaged-bundle QA pass is outstanding ([[Project Status]]). Steps to produce the installer live in [[Building Backend Sidecar]] and [[Release Checklist]].
+- Installer: `desktop/src-tauri/target/release/bundle/nsis/Alfred_0.1.0_x64-setup.exe`
+- Installed-app checks passed: launch, sidecar auto-start, real AppData, Gmail sync (0 duplicates), Ollama, close/reopen, single instance, uninstall preserving the SQLite DB.
+- **Signing: UNSIGNED DEVELOPMENT RELEASE** — no Authenticode certificate configured; SmartScreen will warn. Real signing is a release-blocking item for distribution.
 
 ## Related
 
 - [[Sidecar Architecture]]
 - [[Tauri Overview]]
+- [[Release Checklist]]

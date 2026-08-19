@@ -8,34 +8,41 @@ tags:
 
 # Project Status
 
-Evidence-based status of the Alfred system. Classifications: **implemented** (code exists), **verified** (automated tests), **real-world verified** (exercised against the real Gmail mailbox), **native-tested** (inside the packaged desktop shell), **planned** (not built).
+Evidence-based status of the Alfred system. Classifications: **implemented** (code exists), **verified** (automated tests), **real-world verified** (exercised against the real Gmail mailbox), **native-tested** (inside the real Tauri window/sidecar), **installed-app tested** (from the NSIS-installed app), **packaged** (installer artifact exists).
 
-## Implemented + verified
+## Implemented + verified + real-world verified
 
-- Gmail OAuth (PKCE, offline access) — [[Gmail OAuth Flow]]; mock-tested in [[backend.tests.test_gmail_mock]], real-world verified.
-- Gmail sync (initial, incremental historyId, pagination) — [[Gmail Incremental Sync Flow]]; real-world verified (no mailbox reset).
-- Mailbox model: labels → mailbox state → categories → pipeline eligibility — [[backend.app.mail.eligibility.MailEligibilityPolicy]]; corpus-tested in [[backend.tests.test_eligibility]].
-- All Mail (inbox + archived + sent; spam/trash/draft excluded) with backend-owned progressive backfill — [[All Mail Backfill Flow]]; tested in [[backend.tests.test_allmail]] and [[backend.tests.test_backfill_jobs]]; real-world verified including restart-resume.
-- Local analysis queue with durable jobs, priorities, retries — [[Background Analysis Job Flow]].
-- Structured AI analysis (qwen3:4b via Ollama) — [[Email Analysis Flow]]; golden-corpus tested.
-- Task derivation v2 with fingerprints + safe migration — [[Task Derivation Flow]], [[ADR-009 - Versioned Task Derivation]]; tested in [[backend.tests.test_task_derivation]] and [[backend.tests.test_task_migration]].
-- Briefing + draft generation — [[Briefing Generation Flow]], [[Draft Generation Flow]].
-- SSE progress + React Query frontend — [[SSE Progress Flow]], [[ADR-011 - SSE Progress]].
-- Light/dark theme system, Mattered-style mail workspace, premium ambient UI — [[Design System]], [[Frontend Overview]]; tested in the Vitest suite.
-- DPAPI token storage on Windows — [[DPAPI]], [[Token Storage]].
+- Gmail OAuth (PKCE, offline) — [[Gmail OAuth Flow]]; mock-tested, real-world verified.
+- Gmail sync (initial, incremental historyId, pagination) — [[Gmail Incremental Sync Flow]]; real-world verified, duplicates=0 through the packaged sidecar.
+- Mailbox model + eligibility policy — corpus-tested ([[backend.tests.test_eligibility]]).
+- All Mail + backend-owned backfill — tested + real-world restart-resume verified ([[All Mail Backfill Flow]]).
+- Analysis queue, structured AI (qwen3:4b), task derivation v2, briefing/drafts — tested; golden corpus; real Ollama runs (including through the packaged sidecar).
+- SSE progress — repaired in this pass (status endpoints previously referenced a removed queue object) and covered by tests.
+- Light/dark premium UI — Vitest suite.
+- Desktop session auth + dynamic port + graceful shutdown + single instance — [[ADR-015 - Desktop Session Authentication]], [[ADR-016 - Tauri-Owned Sidecar Lifecycle]]; backend-tested + live-verified.
 
-## Partially verified
+## Native-tested + installed-app tested (this pass)
 
-- Desktop packaging: Tauri shell + sidecar spawn implemented in `desktop/src-tauri/src/main.rs`; the sidecar binary has been built (`alfred-backend-x86_64-pc-windows-msvc.spec`, `desktop/src-tauri/binaries/alfred-backend.exe`), but the packaged NSIS bundle has **not** been end-to-end verified in this repository's history — treat as unproven packaging.
-- Full-mailbox backfill at scale: verified on the connected mailbox (~116 messages); enormous-mailbox behavior (thousands of messages) not exercised.
+- Toolchain: rustc 1.90 / MSVC 14.44 / WebView2 151.
+- `cargo fmt --check` / `cargo check` / `cargo clippy`: clean.
+- Native window: opens, sidecar auto-starts on a dynamic port, health gate reveals the UI, close → 0 orphan processes, port released.
+- Single instance: second launch focuses the first window; no second sidecar/DB writer.
+- Force-kill recovery: app survives backend death; relaunch restores everything (149 emails / 87 analyses / 21 tasks / 88 succeeded jobs intact, no duplicates).
+- Installed app: launched from Start Menu install (`%LOCALAPPDATA%\Alfred`), real AppData loaded, real Gmail incremental sync (28 messages, 0 duplicates), Ollama analysis + briefing 200 through the installed binary.
+- Installer: NSIS `Alfred_0.1.0_x64-setup.exe` (41.7 MB), silent install verified, uninstall registration + Start Menu verified, uninstall preserves the SQLite database.
+
+## Packaged but unsigned
+
+- **Signing: UNSIGNED DEVELOPMENT RELEASE** — no Authenticode certificate; SmartScreen will warn. Blocking item for public distribution.
+- Brand icon is a generated placeholder (`tools/generate_icons.py`) pending the approved Alfred mark.
+
+## Partially verified / outstanding
+
+- Fresh Google OAuth from the installed app: the existing account works (DPAPI decrypt + refresh + sync verified); a brand-new authorization flow has NOT been re-exercised end-to-end from the native window in this pass — do not claim it fixed until a fresh flow completes ([[Gmail OAuth Flow]]).
+- Ollama outage UX inside the native window: implemented (StartupGate/offline states) and covered by frontend tests; not manually re-observed in the native webview.
 - 1920×1080 / 1280×720 visual QA of the latest visual pass: pending human review.
-
-## Planned / out of scope (Round 1)
-
-- Sending replies, draft editing, multiple providers (IMAP/Outlook), cloud AI, calendar — deliberately excluded; see [[Round 1 Scope]].
-- Native Tauri QA pass — explicitly deferred; see [[Desktop Architecture]].
 
 ## Known constraints
 
-- Ollama must be running locally for analysis/briefing; unavailability is degraded gracefully ([[AI Failure Handling]]).
-- Legacy prototype code (`src/`, `config/`, `run_app.py` — Streamlit + Groq + LangGraph) remains in the tree but is not part of Alfred; see [[Engineering Journal]] (Engineering Journal).
+- Ollama remains a required external prerequisite ([[Round 1 Scope]]).
+- Legacy prototype code (`src/`, `config/`, `run_app.py`) remains in-tree as history, not runtime.

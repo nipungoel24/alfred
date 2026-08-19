@@ -24,7 +24,7 @@ Function declared in `frontend/src/api/client.ts`.
 ## Signature
 
 ```ts
-export async function api<T>(path:string, init?:RequestInit):Promise<T>
+export async function api<T>(path: string, init?: RequestInit): Promise<T>
 ```
 
 ## Related

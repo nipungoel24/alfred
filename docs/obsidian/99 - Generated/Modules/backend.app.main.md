@@ -118,6 +118,8 @@ tags: [module, backend]
 - [[backend.app.main.ollama_timeout_handler|ollama_timeout_handler]]
 - [[backend.app.main.ollama_unavailable_handler|ollama_unavailable_handler]]
 - [[backend.app.main.pause_backfill|pause_backfill]]
+- [[backend.app.main.runtime_token_middleware|runtime_token_middleware]]
+- [[backend.app.main.shutdown_backend|shutdown_backend]]
 - [[backend.app.main.sync_account|sync_account]]
 - [[backend.app.main.toggle_task|toggle_task]]
 

@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.get_user_info
 source: backend/app/mail/providers/gmail.py
-line: 64
+line: 68
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `get_user_info` in `backend/app/mail/providers/gmai
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:64`
+`backend/app/mail/providers/gmail.py:68`
 
 ## Signature
 

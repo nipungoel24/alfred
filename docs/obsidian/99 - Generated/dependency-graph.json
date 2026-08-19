@@ -31,6 +31,11 @@
       "source": null
     },
     {
+      "id": "asyncio.get_running_loop",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "asyncio.run",
       "type": "external",
       "source": null
@@ -148,6 +153,21 @@
     {
       "id": "backend.app.config.Settings",
       "type": "class",
+      "source": "backend/app/config.py"
+    },
+    {
+      "id": "backend.app.config._default_database_path",
+      "type": "function",
+      "source": "backend/app/config.py"
+    },
+    {
+      "id": "backend.app.config._load_dotenv_file",
+      "type": "function",
+      "source": "backend/app/config.py"
+    },
+    {
+      "id": "backend.app.config._load_environment",
+      "type": "function",
       "source": "backend/app/config.py"
     },
     {
@@ -961,6 +981,16 @@
       "source": "backend/app/main.py"
     },
     {
+      "id": "backend.app.main.runtime_token_middleware",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.shutdown_backend",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
       "id": "backend.app.main.sync_account",
       "type": "function",
       "source": "backend/app/main.py"
@@ -1304,6 +1334,36 @@
       "id": "backend.tests.test_core.test_normalizer_treats_html_as_safe_text",
       "type": "test",
       "source": "backend/tests/test_core.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.authed_app",
+      "type": "function",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.test_api_requires_token",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.test_health_requires_token_when_enabled",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.test_no_token_means_no_auth",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.test_query_token_form_for_sse",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
     },
     {
       "id": "backend.tests.test_eligibility._email",
@@ -1721,7 +1781,47 @@
       "source": null
     },
     {
+      "id": "desktop.src-tauri.src.main.backend_info",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.generate_token",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.http_request",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.main",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.pick_free_port",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.retry_backend",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.shutdown_backend",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.spawn_backend",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.wait_and_reveal",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1756,7 +1856,32 @@
       "source": "frontend/src/App.tsx"
     },
     {
+      "id": "frontend.src.api.client.BackendRuntimeInfo",
+      "type": "types",
+      "source": "frontend/src/api/client.ts"
+    },
+    {
       "id": "frontend.src.api.client.api",
+      "type": "functions",
+      "source": "frontend/src/api/client.ts"
+    },
+    {
+      "id": "frontend.src.api.client.apiBase",
+      "type": "functions",
+      "source": "frontend/src/api/client.ts"
+    },
+    {
+      "id": "frontend.src.api.client.initApi",
+      "type": "functions",
+      "source": "frontend/src/api/client.ts"
+    },
+    {
+      "id": "frontend.src.api.client.isTauri",
+      "type": "functions",
+      "source": "frontend/src/api/client.ts"
+    },
+    {
+      "id": "frontend.src.api.client.sseUrl",
       "type": "functions",
       "source": "frontend/src/api/client.ts"
     },
@@ -1989,6 +2114,21 @@
       "id": "frontend.src.layout.IconRail.RailItem",
       "type": "types",
       "source": "frontend/src/layout/IconRail.tsx"
+    },
+    {
+      "id": "frontend.src.layout.StartupGate.GateState",
+      "type": "types",
+      "source": "frontend/src/layout/StartupGate.tsx"
+    },
+    {
+      "id": "frontend.src.layout.StartupGate.StartupGate",
+      "type": "react_components",
+      "source": "frontend/src/layout/StartupGate.tsx"
+    },
+    {
+      "id": "frontend.src.layout.StartupGate.test.renderGate",
+      "type": "functions",
+      "source": "frontend/src/layout/StartupGate.test.tsx"
     },
     {
       "id": "frontend.src.layout.WorkspaceHeader.WorkspaceHeader",
@@ -2246,6 +2386,16 @@
       "source": null
     },
     {
+      "id": "os.environ.setdefault",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "os.getenv",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "os.path.exists",
       "type": "external",
       "source": null
@@ -2455,6 +2605,26 @@
     {
       "from": "backend.app.ai.service._prepare_body",
       "to": "re.sub",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.config._default_database_path",
+      "to": "os.getenv",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.config._default_database_path",
+      "to": "pathlib.Path",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.config._load_dotenv_file",
+      "to": "os.environ.setdefault",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.config._load_environment",
+      "to": "pathlib.Path",
       "relation": "calls-inferred"
     },
     {
@@ -3258,6 +3428,16 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.main.runtime_token_middleware",
+      "to": "fastapi.responses.JSONResponse",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.shutdown_backend",
+      "to": "asyncio.get_running_loop",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.main.sync_account",
       "to": "backend.app.db.secure_store.decrypt_token",
       "relation": "calls"
@@ -3901,6 +4081,31 @@
       "from": "backend.tests.test_core.test_normalizer_treats_html_as_safe_text",
       "to": "backend.app.mail.normalizer.normalized_email",
       "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_api_requires_token",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_health_requires_token_when_enabled",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_no_token_means_no_auth",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_query_token_form_for_sse",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
     },
     {
       "from": "backend.tests.test_eligibility._email",

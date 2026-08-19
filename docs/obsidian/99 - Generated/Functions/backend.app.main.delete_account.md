@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.delete_account
 source: backend/app/main.py
-line: 601
+line: 637
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `delete_account` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:601`
+`backend/app/main.py:637`
 
 ## Signature
 

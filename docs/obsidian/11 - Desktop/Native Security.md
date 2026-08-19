@@ -9,11 +9,12 @@ tags:
 
 # Native Security
 
-The desktop-specific parts of the trust boundary.
+The desktop-specific parts of the trust boundary, as implemented in v0.1.0.
 
-- **CSP** — `default-src 'self'; connect-src 'self' http://127.0.0.1:8765 http://localhost:5173; style-src 'self' 'unsafe-inline'` — the webview can only talk to the local backend, never arbitrary hosts.
-- **Capabilities** — exactly `core:default` + `shell:allow-spawn`; no fs/network/clipboard capabilities granted to the webview. The only spawn is Tauri's own sidecar launch.
-- **Sidecar process** — a native child at the same trust level as the app; its own hardening is loopback binding + DPAPI + SQLite ([[Local API Security]], [[DPAPI]]).
+- **CSP** — `default-src 'self'; connect-src 'self' http://127.0.0.1:* http://localhost:5173 ipc: http://ipc.localhost; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'` — the webview can only reach loopback (any port, since the backend port is dynamic) and the dev origin.
+- **Capabilities** — `core:default` ONLY. No shell, no filesystem, no process-spawn permissions for the webview. Sidecar spawning happens in Rust; React cannot spawn processes ([[ADR-016 - Tauri-Owned Sidecar Lifecycle]]).
+- **Session auth** — per-launch token + dynamic port ([[ADR-015 - Desktop Session Authentication]]).
+- **Sidecar process** — loopback bind, DPAPI token storage, SQLite in user AppData ([[DPAPI]], [[Local API Security]]).
 
 ## Related
 

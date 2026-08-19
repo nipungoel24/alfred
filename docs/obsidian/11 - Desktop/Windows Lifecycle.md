@@ -10,15 +10,15 @@ tags:
 
 The desktop process tree over time.
 
-1. User launches the Alfred executable → Tauri main process starts.
-2. `setup` spawns the sidecar ([[Sidecar Architecture]]) and creates the window (dev URL or bundled dist).
-3. Webview loads the frontend; pre-paint theme script applies; queries hit `127.0.0.1:8765`.
-4. Backend runs its own lifecycle inside the child process ([[Application Startup Flow]]).
-5. On window close/app quit → Tauri kills the managed sidecar child; SQLite closes through the backend's lifespan ([[Application Shutdown Flow]]).
-
-Crash cases: if the sidecar dies unexpectedly, Tauri does not auto-restart it in the current implementation — the webview surfaces connection errors and the app can be relaunched.
+1. User launches Alfred → Tauri main process; single-instance plugin makes any second launch focus the first window and exit.
+2. `setup` picks a free loopback port + generates the runtime token, spawns the sidecar ([[Sidecar Architecture]]), and polls `/health` for ≤45s.
+3. Ready → window shows; frontend bootstrap (`backend_info`) points the API client at the dynamic port with the token.
+4. Backend runs its own lifecycle inside the child ([[Application Startup Flow]]).
+5. Close → `ExitRequested` handler POSTs `/api/shutdown` (graceful worker stop + SQLite close), then kills the child; Tauri exits. No orphan processes, port released.
+6. Force-kill of the backend leaves the app window alive; relaunching the app restarts the sidecar and startup healing requeues any stale `running` jobs ([[Application Shutdown Flow]]).
 
 ## Related
 
 - [[Tauri Overview]]
-- [[Runtime Lifecycle]]
+- [[Desktop Architecture]]
+- [[ADR-016 - Tauri-Owned Sidecar Lifecycle]]

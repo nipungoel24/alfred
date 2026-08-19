@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.fetch_backfill_estimate
 source: backend/app/mail/providers/gmail.py
-line: 206
+line: 210
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Cheap one-shot resultSizeEstimate for the backfill query.
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:206`
+`backend/app/mail/providers/gmail.py:210`
 
 ## Signature
 

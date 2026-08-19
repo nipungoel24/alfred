@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.backfill_messages
 source: backend/app/mail/providers/gmail.py
-line: 117
+line: 121
 status: active
 tags: [gmail, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Progressive All Mail backfill — ONE bounded page per call.
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:117`
+`backend/app/mail/providers/gmail.py:121`
 
 ## Signature
 
