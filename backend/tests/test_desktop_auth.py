@@ -61,6 +61,19 @@ def test_shutdown_endpoint_is_token_protected(authed_app):
     assert client.post("/api/shutdown").status_code == 401
 
 
+def test_oauth_callback_is_exempt_from_token(authed_app):
+    """The system browser's OAuth redirect carries no session token — its
+    security is the one-time PKCE state. The middleware must not 401 it."""
+    app, _ = authed_app
+    client = TestClient(app)
+    # Unknown state → the handler itself must answer (styled failure page),
+    # NOT the token middleware.
+    r = client.get("/api/accounts/gmail/callback", params={"code": "x", "state": "bogus"})
+    assert r.status_code == 400
+    assert "text/html" in r.headers.get("content-type", "")
+    assert "UNAUTHORIZED" not in r.text
+
+
 def test_no_token_means_no_auth(tmp_path, monkeypatch):
     """Dev mode: without ALFRED_RUNTIME_TOKEN the API stays open."""
     monkeypatch.setenv("ALFRED_DATABASE_PATH", str(tmp_path / "dev.db"))

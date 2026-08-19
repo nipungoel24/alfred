@@ -460,11 +460,20 @@ app.add_middleware(
 # When ALFRED_RUNTIME_TOKEN is set (Tauri production mode), every request
 # must present it via X-Alfred-Token header or ?token= query (the query
 # form exists only because EventSource cannot send custom headers).
+# Exemptions:
+# - /api/accounts/gmail/callback: the system browser's OAuth redirect
+#   carries no token BY DESIGN — its security is the one-time PKCE state.
+#   (Non-exempted: everything else under /api/*, plus /health.)
+UNAUTHENTICATED_PATHS = {"/api/accounts/gmail/callback"}
+
+
 @app.middleware('http')
 async def runtime_token_middleware(request: Request, call_next):
     token = settings.runtime_token
     if token:
         path = request.url.path
+        if path in UNAUTHENTICATED_PATHS:
+            return await call_next(request)
         if not path.startswith('/api/') and path != '/health':
             return await call_next(request)
         provided = request.headers.get('x-alfred-token') or request.query_params.get('token')

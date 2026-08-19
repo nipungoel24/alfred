@@ -66,15 +66,20 @@ fn spawn_backend(app: &AppHandle, state: &BackendState) -> Result<(), String> {
     let port = pick_free_port().ok_or("no free loopback port")?;
     let token = generate_token();
 
-    let (mut rx, child) = app
+    let mut cmd = app
         .shell()
         .sidecar("alfred-backend")
-        .map_err(|e| e.to_string())?
+        .map_err(|e| e.to_string())?;
+    cmd = cmd
         .env("ALFRED_HOST", "127.0.0.1")
         .env("ALFRED_PORT", port.to_string())
-        .env("ALFRED_RUNTIME_TOKEN", &token)
-        .spawn()
-        .map_err(|e| e.to_string())?;
+        .env("ALFRED_RUNTIME_TOKEN", &token);
+    // Supported test/alternate data root: pass through when the shell's
+    // own environment defines it (used for isolated fresh-profile QA).
+    if let Ok(db_path) = std::env::var("ALFRED_DATABASE_PATH") {
+        cmd = cmd.env("ALFRED_DATABASE_PATH", db_path);
+    }
+    let (mut rx, child) = cmd.spawn().map_err(|e| e.to_string())?;
 
     // Drain sidecar output; log to the Tauri log (debug builds) only.
     tauri::async_runtime::spawn(async move {
