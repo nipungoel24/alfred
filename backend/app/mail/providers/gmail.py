@@ -39,11 +39,14 @@ class GmailProvider(MailProvider):
         data = {
             "code": code,
             "client_id": self.client_id,
-            "client_secret": self.client_secret,
             "redirect_uri": redirect_uri,
             "grant_type": "authorization_code",
             "code_verifier": code_verifier
         }
+        # Google "Desktop app" OAuth clients (the recommended type for
+        # installed apps) do not issue a client secret; omit it then.
+        if self.client_secret:
+            data["client_secret"] = self.client_secret
         async with httpx.AsyncClient() as client:
             r = await client.post(self.token_url, data=data)
             r.raise_for_status()
@@ -53,9 +56,10 @@ class GmailProvider(MailProvider):
         data = {
             "refresh_token": refresh_token,
             "client_id": self.client_id,
-            "client_secret": self.client_secret,
             "grant_type": "refresh_token"
         }
+        if self.client_secret:
+            data["client_secret"] = self.client_secret
         async with httpx.AsyncClient() as client:
             r = await client.post(self.token_url, data=data)
             r.raise_for_status()

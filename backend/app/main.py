@@ -456,6 +456,42 @@ app.add_middleware(
 )
 
 
+# ── Desktop session authentication ──────────────────────────────────
+# When ALFRED_RUNTIME_TOKEN is set (Tauri production mode), every request
+# must present it via X-Alfred-Token header or ?token= query (the query
+# form exists only because EventSource cannot send custom headers).
+@app.middleware('http')
+async def runtime_token_middleware(request: Request, call_next):
+    token = settings.runtime_token
+    if token:
+        path = request.url.path
+        if not path.startswith('/api/') and path != '/health':
+            return await call_next(request)
+        provided = request.headers.get('x-alfred-token') or request.query_params.get('token')
+        if provided != token:
+            return JSONResponse(status_code=401, content={
+                'error': {'code': 'UNAUTHORIZED', 'message': 'Missing or invalid session token.', 'details': {}}
+            })
+    return await call_next(request)
+
+
+@app.post('/api/shutdown')
+async def shutdown_backend(request: Request):
+    """Graceful in-process shutdown requested by the desktop shell.
+
+    Stops both workers, closes SQLite, then exits the process. Intended
+    only for the Tauri-owned sidecar (dev servers can keep Ctrl+C).
+    """
+    global _worker_running, _backfill_running
+    _worker_running = False
+    _backfill_running = False
+    repo.close()
+    import os as _os
+    # Give uvicorn a beat to flush the response, then exit cleanly.
+    asyncio.get_running_loop().call_later(0.3, lambda: _os._exit(0))
+    return {"status": "shutting_down"}
+
+
 # ── Error handlers ──
 @app.exception_handler(OllamaUnavailable)
 async def ollama_unavailable_handler(_, e):
@@ -725,14 +761,14 @@ async def analysis_progress():
     async def event_stream():
         try:
             # Send initial status
-            yield f"data: {json.dumps({'type': 'status', 'pending': analysis_queue.qsize()})}\n\n"
+            yield f"data: {json.dumps({'type': 'status', 'pending': repo.pending_job_count('analyze_email')})}\n\n"
             while True:
                 try:
                     event = await asyncio.wait_for(q.get(), timeout=15.0)
                     yield f"data: {json.dumps(event)}\n\n"
                 except asyncio.TimeoutError:
                     # Send keepalive
-                    yield f"data: {json.dumps({'type': 'heartbeat', 'pending': analysis_queue.qsize()})}\n\n"
+                    yield f"data: {json.dumps({'type': 'heartbeat', 'pending': repo.pending_job_count('analyze_email')})}\n\n"
         except asyncio.CancelledError:
             pass
         finally:
@@ -742,9 +778,9 @@ async def analysis_progress():
 
 @app.get('/api/analysis/status')
 def analysis_status():
-    """Get current analysis queue status."""
+    """Get current analysis queue status (jobs-table derived)."""
     return {
-        "pending": analysis_queue.qsize(),
+        "pending": repo.pending_job_count('analyze_email'),
         "worker_running": _worker_running,
     }
 
