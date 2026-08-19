@@ -1,1 +1,8 @@
-{"identifier":"default","description":"Alfred desktop capability","windows":["main"],"permissions":["core:default","shell:allow-spawn"]}
+{
+  "identifier": "default",
+  "description": "Alfred desktop capability (least privilege: webview gets core window/app basics only; sidecar spawn is Rust-side, not webview-reachable)",
+  "windows": ["main"],
+  "permissions": [
+    "core:default"
+  ]
+}

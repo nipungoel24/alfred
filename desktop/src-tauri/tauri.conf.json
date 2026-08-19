@@ -1,1 +1,45 @@
-{"productName":"Alfred","version":"0.1.0","identifier":"com.alfred.local","build":{"beforeDevCommand":"npm --prefix ../../frontend run dev","beforeBuildCommand":"npm --prefix ../../frontend run build","devUrl":"http://localhost:5173","frontendDist":"../../frontend/dist"},"app":{"windows":[{"title":"Alfred","width":1280,"height":850,"minWidth":900,"minHeight":650}],"security":{"csp":"default-src 'self'; connect-src 'self' http://127.0.0.1:8765 http://localhost:5173; style-src 'self' 'unsafe-inline'"}},"bundle":{"active":true,"targets":"nsis","externalBin":["binaries/alfred-backend"]}}
+{
+  "productName": "Alfred",
+  "version": "0.1.0",
+  "identifier": "com.alfred.local",
+  "build": {
+    "beforeDevCommand": "npm --prefix ../frontend run dev",
+    "beforeBuildCommand": "npm --prefix ../frontend run build",
+    "devUrl": "http://localhost:5173",
+    "frontendDist": "../../frontend/dist"
+  },
+  "app": {
+    "windows": [
+      {
+        "title": "Alfred",
+        "label": "main",
+        "width": 1280,
+        "height": 850,
+        "minWidth": 900,
+        "minHeight": 650,
+        "visible": false,
+        "center": true
+      }
+    ],
+    "security": {
+      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:* http://localhost:5173 ipc: http://ipc.localhost; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'"
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": "nsis",
+    "icon": [
+      "icons/32x32.png",
+      "icons/64x64.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.ico"
+    ],
+    "windows": {
+      "nsis": {
+        "installMode": "currentUser"
+      }
+    },
+    "externalBin": ["binaries/alfred-backend"]
+  }
+}
