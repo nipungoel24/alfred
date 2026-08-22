@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.analysis_status
 source: backend/app/main.py
-line: 798
+line: 802
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Get current analysis queue status (jobs-table derived).
 
 ## Location
 
-`backend/app/main.py:798`
+`backend/app/main.py:802`
 
 ## Signature
 

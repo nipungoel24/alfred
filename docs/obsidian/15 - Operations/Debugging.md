@@ -18,10 +18,12 @@ Read the diagnostics FIRST — the failure UI shows a code and the log path:
 - **BACKEND_TIMEOUT** — the shell probed /health for 45s without a 200. Check `backend.log` for a crash category, or whether the port in `desktop.log` was bound.
 - **BACKEND_UNAUTHORIZED** — the webview's token didn't match the sidecar's. Indicates a stale client bootstrap; Retry re-resolves the endpoint.
 - **No backend spawn at all** — `desktop.log` `spawned child_pid` missing → sidecar resolution failed (see [[Sidecar Architecture]]).
+- **Start Menu target mismatch** — inspect `Alfred.lnk` before launching. Target must be `%LOCALAPPDATA%\Alfred\alfred-desktop.exe`; a stale absolute target to another Windows profile prevents human launches before backend startup begins.
+- **Shortcut repair blocked** — if installer/COM updates touch but do not change the `.lnk`, inspect ACL/owner. The sandbox/service identity may only have read/execute while the real user owns the shortcut.
 
 ## "AI Offline" chip / analysis stuck
 
-1. `GET /health` → `ai: unavailable` means Ollama isn't reachable.
+1. `GET /health` → backend `status: ok` with `ai: unavailable` means the shell can open while Ollama isn't reachable.
 2. Check Ollama: `ollama serve` running? `ollama list` contains `qwen3:4b`?
 3. Check jobs: `jobs` table — `retryable_failed` rows with `error_code` tell you why ([[AI Failure Handling]]).
 

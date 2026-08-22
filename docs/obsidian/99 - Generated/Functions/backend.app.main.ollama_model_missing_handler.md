@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.ollama_model_missing_handler
 source: backend/app/main.py
-line: 536
+line: 541
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `ollama_model_missing_handler` in `backend/app/main
 
 ## Location
 
-`backend/app/main.py:536`
+`backend/app/main.py:541`
 
 ## Signature
 

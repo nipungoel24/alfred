@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._ensure_backfill_job
 source: backend/app/main.py
-line: 178
+line: 179
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Start/resume the durable backfill job for an account (idempotent).
 
 ## Location
 
-`backend/app/main.py:178`
+`backend/app/main.py:179`
 
 ## Signature
 

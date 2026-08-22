@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._mark_backfill_failure
 source: backend/app/main.py
-line: 171
+line: 172
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_mark_backfill_failure` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:171`
+`backend/app/main.py:172`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._backfill_estimate_once
 source: backend/app/main.py
-line: 357
+line: 358
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ One-shot resultSizeEstimate for accounts whose backfill is already
 
 ## Location
 
-`backend/app/main.py:357`
+`backend/app/main.py:358`
 
 ## Signature
 

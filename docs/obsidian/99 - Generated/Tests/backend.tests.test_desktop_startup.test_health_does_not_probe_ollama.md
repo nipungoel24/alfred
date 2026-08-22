@@ -4,34 +4,35 @@ generated: true
 language: python
 layer: test
 module: backend.tests.test_desktop_startup
-qualified_name: backend.tests.test_desktop_startup.test_oauth_callback_exempt_under_token
+qualified_name: backend.tests.test_desktop_startup.test_health_does_not_probe_ollama
 source: backend/tests/test_desktop_startup.py
-line: 79
+line: 61
 status: active
 tags: [test, function, test]
 ---
 
-# test_oauth_callback_exempt_under_token
+# test_health_does_not_probe_ollama
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 
 ## Purpose
 
-Purpose inferred from usage: `test_oauth_callback_exempt_under_token` in `backend/tests/test_desktop_startup.py`.
+Backend readiness is not AI readiness.
 
 ## Location
 
-`backend/tests/test_desktop_startup.py:79`
+`backend/tests/test_desktop_startup.py:61`
 
 ## Signature
 
 ```python
-(startup_app)
+(startup_app, monkeypatch)
 ```
 
 ## Parameters
 
 - `startup_app`
+- `monkeypatch`
 
 ## Calls
 
@@ -39,4 +40,4 @@ Purpose inferred from usage: `test_oauth_callback_exempt_under_token` in `backen
 
 ## Side Effects
 
-- network (HTTP); handles credentials/tokens — see [[Token Security]]
+- network (HTTP)

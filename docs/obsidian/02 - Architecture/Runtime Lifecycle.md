@@ -15,8 +15,9 @@ Everything that happens between process start and clean shutdown, and why nothin
 
 ```mermaid
 flowchart TD
-    S[uvicorn / sidecar spawn] --> P[ai.preload - non fatal]
-    P --> R[rebuild tasks if derivation version changed]
+    S[uvicorn / sidecar spawn] --> H[/health available]
+    H --> P[background: ai.preload - non fatal]
+    H --> R[background: rebuild tasks if derivation version changed]
     R --> J[reset stuck running jobs]
     J --> B[resume backfill jobs for running accounts]
     B --> W1[start analysis worker]
@@ -25,7 +26,8 @@ flowchart TD
     O1 --> O2[one-shot: backfill estimate]
 ```
 
-- Preload failure is ignored — first inference is just slower.
+- `/health` reports backend process/API readiness after bind and does not probe Ollama. AI readiness is reported separately (`ai: initializing|ready|unavailable`).
+- Preload failure is ignored — first inference is just slower or the UI shows Local AI unavailable.
 - Task rebuild uses [[backend.app.services.task_derivation.rebuild_tasks_from_analyses|rebuild_tasks_from_analyses]] (cheap, no LLM).
 - Stuck `running` jobs → `queued`; retryable jobs reset ([[Background Analysis Job Flow]]).
 - Backfill resume is driven by the typed `backfill_state` in the [[accounts]] sync cursor ([[All Mail Backfill Flow]]).

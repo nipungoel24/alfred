@@ -1386,6 +1386,16 @@
       "source": "backend/tests/test_desktop_startup.py"
     },
     {
+      "id": "backend.tests.test_desktop_startup.test_health_does_not_probe_ollama",
+      "type": "test",
+      "source": "backend/tests/test_desktop_startup.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_startup.test_health_does_not_probe_ollama.broken_ai_health",
+      "type": "function",
+      "source": "backend/tests/test_desktop_startup.py"
+    },
+    {
       "id": "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup",
       "type": "test",
       "source": "backend/tests/test_desktop_startup.py"
@@ -4174,6 +4184,11 @@
     },
     {
       "from": "backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_startup.test_health_does_not_probe_ollama",
       "to": "fastapi.testclient.TestClient",
       "relation": "calls-inferred"
     },

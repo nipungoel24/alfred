@@ -28,9 +28,13 @@ Evidence-based status of the Alfred system. Classifications: **implemented** (co
 - Ollama outage/recovery verified with normal data (cached UI served, scoped 503, auto-recovery).
 - Installer installed/uninstalled repeatedly; uninstall preserves the SQLite DB.
 
-## Startup incident (fixed + re-verified)
+## Startup incident (fixed build ready for human confirmation)
 
-A release-candidate field failure ("couldn't start its local service") was root-caused to a three-part startup defect and fixed; **5/5 consecutive clean Start Menu launches succeed in 2.7–4.6s** with authenticated health, distinct dynamic ports, and zero orphans. See [[ADR-018 - Health-Before-Heavy-Startup]] and [[Debugging]].
+A release-candidate field failure ("couldn't start its local service") was root-caused to backend readiness being coupled to Ollama startup, plus stale production bootstrap and retry behavior. The fix decouples `/health` from local AI preload and prevents packaged frontend fallback to dev defaults.
+
+Follow-up installed-state testing also found a stale Start Menu/Desktop shortcut target pointing at another Windows profile. The installer now includes a shortcut-repair hook; in Codex automation, the existing `.lnk` ACL required an explicit elevated shortcut rewrite before Start Menu acceptance could proceed.
+
+Current automated evidence: **5/5 consecutive clean launches from the actual Start Menu shortcut reached readiness in 2.66–4.58s**, with distinct dynamic ports and zero orphans; **Ollama unavailable** also reached readiness in 3.33s. Final status still requires the human to launch Alfred once from Start Menu and confirm the Inbox loads. See [[ADR-018 - Health-Before-Heavy-Startup]], [[Windows Packaging]], and [[Debugging]].
 
 ## Packaged but unsigned
 

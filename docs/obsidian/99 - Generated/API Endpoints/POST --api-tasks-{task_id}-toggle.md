@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.toggle_task
 source: backend/app/main.py
-line: 979
+line: 983
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Purpose inferred from usage: `toggle_task` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:979`
+`backend/app/main.py:983`
 
 ## Parameters
 

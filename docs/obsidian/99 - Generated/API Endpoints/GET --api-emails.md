@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.get_emails
 source: backend/app/main.py
-line: 816
+line: 820
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Purpose inferred from usage: `get_emails` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:816`
+`backend/app/main.py:820`
 
 ## Parameters
 

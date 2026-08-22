@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._backfill_worker
 source: backend/app/main.py
-line: 73
+line: 74
 status: active
 tags: [backend, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Durable worker for the progressive All Mail backfill.
 
 ## Location
 
-`backend/app/main.py:73`
+`backend/app/main.py:74`
 
 ## Signature
 

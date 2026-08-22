@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._analysis_worker
 source: backend/app/main.py
-line: 190
+line: 191
 status: active
 tags: [backend, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Background worker that processes analysis jobs from SQLite.
 
 ## Location
 
-`backend/app/main.py:190`
+`backend/app/main.py:191`
 
 ## Signature
 

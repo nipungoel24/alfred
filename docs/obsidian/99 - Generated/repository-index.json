@@ -264,6 +264,7 @@
     "backend.tests.test_core.email",
     "backend.tests.test_desktop_auth.authed_app",
     "backend.tests.test_desktop_startup.startup_app",
+    "backend.tests.test_desktop_startup.test_health_does_not_probe_ollama.broken_ai_health",
     "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup.slow_preload",
     "backend.tests.test_eligibility._email",
     "backend.tests.test_eligibility.repo",
@@ -336,7 +337,7 @@
   "languages": {
     "python": 32,
     "rust": 1,
-    "typescript": 32
+    "typescript": 33
   },
   "methods": [
     "backend.app.ai.ollama_client.InferenceMetrics.__init__",
@@ -530,6 +531,7 @@
     "backend.tests.test_core.email",
     "backend.tests.test_desktop_auth.authed_app",
     "backend.tests.test_desktop_startup.startup_app",
+    "backend.tests.test_desktop_startup.test_health_does_not_probe_ollama.broken_ai_health",
     "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup.slow_preload",
     "backend.tests.test_eligibility._email",
     "backend.tests.test_eligibility.repo",
@@ -577,6 +579,7 @@
     "desktop.src-tauri.src.main",
     "frontend.src.App",
     "frontend.src.api.client",
+    "frontend.src.api.client.test",
     "frontend.src.api.emails",
     "frontend.src.components.ui.AnalysisProgress",
     "frontend.src.features.accounts.AccountsPage",
@@ -674,6 +677,7 @@
     "backend.tests.test_desktop_auth.test_oauth_callback_is_exempt_from_token",
     "backend.tests.test_desktop_auth.test_query_token_form_for_sse",
     "backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected",
+    "backend.tests.test_desktop_startup.test_health_does_not_probe_ollama",
     "backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup",
     "backend.tests.test_desktop_startup.test_oauth_callback_exempt_under_token",
     "backend.tests.test_eligibility.test_active_tasks_exclude_spam_sourced",
@@ -749,6 +753,8 @@
     "tests.test_utils.TestUtilityFunctions.test_get_email_preview",
     "tests.test_utils.TestUtilityFunctions.test_get_priority_color",
     "tests.test_utils.TestUtilityFunctions.test_get_sender_initials",
+    "frontend.src.api.client.test.does not fall back to the development port in packaged Tauri mode",
+    "frontend.src.api.client.test.uses the native backend endpoint when Tauri provides one",
     "frontend.src.layout.StartupGate.test.keeps waiting beyond 20s while the backend warms up",
     "frontend.src.layout.StartupGate.test.labels an authenticated-health rejection distinctly",
     "frontend.src.layout.StartupGate.test.retries after failure and recovers",

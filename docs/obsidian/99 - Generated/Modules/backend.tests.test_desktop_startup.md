@@ -28,9 +28,11 @@ tags: [module, backend]
 ## Functions
 
 - [[backend.tests.test_desktop_startup.startup_app|startup_app]]
+- [[backend.tests.test_desktop_startup.test_health_does_not_probe_ollama.broken_ai_health|broken_ai_health]]
 - [[backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup.slow_preload|slow_preload]]
 
 ## Tests
 
+- [[backend.tests.test_desktop_startup.test_health_does_not_probe_ollama|test_health_does_not_probe_ollama]]
 - [[backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup|test_health_serves_without_waiting_for_slow_startup]]
 - [[backend.tests.test_desktop_startup.test_oauth_callback_exempt_under_token|test_oauth_callback_exempt_under_token]]
