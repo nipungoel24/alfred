@@ -335,7 +335,7 @@
     "frontend.src.theme.ThemeProvider.useTheme"
   ],
   "languages": {
-    "python": 32,
+    "python": 33,
     "rust": 1,
     "typescript": 33
   },
@@ -576,6 +576,7 @@
     "backend.tests.test_ollama_mock",
     "backend.tests.test_task_derivation",
     "backend.tests.test_task_migration",
+    "backend.tests.test_windows_deployment_contract",
     "desktop.src-tauri.src.main",
     "frontend.src.App",
     "frontend.src.api.client",
@@ -744,6 +745,13 @@
     "backend.tests.test_task_derivation.test_is_noise_filtering",
     "backend.tests.test_task_migration.test_migration_idempotency_and_preservation",
     "backend.tests.test_task_migration.test_migration_rollback",
+    "backend.tests.test_windows_deployment_contract.test_build_identity_is_logged",
+    "backend.tests.test_windows_deployment_contract.test_frontend_packaged_tauri_does_not_fall_back_to_dev_port",
+    "backend.tests.test_windows_deployment_contract.test_no_custom_nsis_shortcut_repair_hook",
+    "backend.tests.test_windows_deployment_contract.test_no_prebuilt_shortcuts_are_bundled",
+    "backend.tests.test_windows_deployment_contract.test_no_runtime_sensitive_user_paths_in_release_sources",
+    "backend.tests.test_windows_deployment_contract.test_sidecar_resolution_uses_tauri_external_bin_not_cwd",
+    "backend.tests.test_windows_deployment_contract.test_tauri_uses_standard_per_user_nsis_and_external_sidecar",
     "tests.test_utils.TestConfiguration.test_email_categories_exist",
     "tests.test_utils.TestConfiguration.test_priority_levels_exist",
     "tests.test_utils.TestConfiguration.test_priority_levels_order",

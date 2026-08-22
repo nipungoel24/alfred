@@ -20,7 +20,7 @@ The desktop process tree over time.
 ## Installed shortcut contract
 
 - Current-user installs target `%LOCALAPPDATA%\Alfred\alfred-desktop.exe`.
-- The NSIS installer includes a postinstall shortcut repair hook (`desktop/src-tauri/nsis-hooks.nsh`) so updates recreate Start Menu/Desktop shortcuts instead of preserving stale absolute targets.
+- The standard Tauri NSIS installer creates shortcuts from `$INSTDIR` at install time. Custom hooks must not derive shortcut targets from build-user or agent environment variables.
 - A stale `.lnk` pointing at another profile is a launch-path failure before Tauri can spawn the sidecar; validate the shortcut target before investigating backend readiness.
 
 ## Related

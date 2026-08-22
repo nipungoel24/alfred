@@ -322,8 +322,9 @@ fn main() {
         .map(|p| p.display().to_string())
         .unwrap_or_else(|_| "unknown".to_string());
     startup_log(&format!(
-        "desktop start version={} pid={} exe={} cwd={}",
+        "desktop start version={} build={} pid={} exe={} cwd={}",
         env!("CARGO_PKG_VERSION"),
+        env!("ALFRED_GIT_COMMIT"),
         std::process::id(),
         exe,
         cwd

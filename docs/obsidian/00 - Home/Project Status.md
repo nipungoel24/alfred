@@ -32,9 +32,9 @@ Evidence-based status of the Alfred system. Classifications: **implemented** (co
 
 A release-candidate field failure ("couldn't start its local service") was root-caused to backend readiness being coupled to Ollama startup, plus stale production bootstrap and retry behavior. The fix decouples `/health` from local AI preload and prevents packaged frontend fallback to dev defaults.
 
-Follow-up installed-state testing also found a stale Start Menu/Desktop shortcut target pointing at another Windows profile. The installer now includes a shortcut-repair hook; in Codex automation, the existing `.lnk` ACL required an explicit elevated shortcut rewrite before Start Menu acceptance could proceed.
+Follow-up installed-state testing also found a stale Start Menu/Desktop shortcut target pointing at another Windows profile. The hook-based repair attempt was removed because it read installer-process environment paths and could leak an agent/sandbox profile into shortcuts. Alfred now relies on standard Tauri NSIS `$INSTDIR` shortcut creation and a human-run read-only verifier.
 
-Current automated evidence: **5/5 consecutive clean launches from the actual Start Menu shortcut reached readiness in 2.66–4.58s**, with distinct dynamic ports and zero orphans; **Ollama unavailable** also reached readiness in 3.33s. Final status still requires the human to launch Alfred once from Start Menu and confirm the Inbox loads. See [[ADR-018 - Health-Before-Heavy-Startup]], [[Windows Packaging]], and [[Debugging]].
+Current automated evidence is limited to build/source/artifact validation. Final installed-app status requires the human to install the immutable NSIS artifact manually, run the read-only verifier, launch Alfred from Start Menu, and confirm the Inbox loads. See [[ADR-018 - Health-Before-Heavy-Startup]], [[Windows Packaging]], [[Windows Deployment Standard]], and [[Debugging]].
 
 ## Packaged but unsigned
 
