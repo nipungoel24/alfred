@@ -315,9 +315,18 @@ fn retry_backend(app: AppHandle, state: State<BackendState>) -> Result<(), Strin
 }
 
 fn main() {
+    let exe = std::env::current_exe()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|_| "unknown".to_string());
+    let cwd = std::env::current_dir()
+        .map(|p| p.display().to_string())
+        .unwrap_or_else(|_| "unknown".to_string());
     startup_log(&format!(
-        "desktop start version={}",
-        env!("CARGO_PKG_VERSION")
+        "desktop start version={} pid={} exe={} cwd={}",
+        env!("CARGO_PKG_VERSION"),
+        std::process::id(),
+        exe,
+        cwd
     ));
     tauri::Builder::default()
         .plugin(tauri_plugin_shell::init())

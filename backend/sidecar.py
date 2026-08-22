@@ -44,14 +44,14 @@ def _setup_file_logging():
 
 import uvicorn
 from backend.app.config import get_settings
-from backend.app.main import app
 
 settings = get_settings()
 log_dir = _setup_file_logging()
 
 startup = logging.getLogger("alfred.startup")
 startup.info(
-    "sidecar_start port=%s db_path=%s frozen=%s config_present=%s token_set=%s",
+    "sidecar_start pid=%s exe=%s cwd=%s port=%s db_path=%s frozen=%s config_present=%s token_set=%s",
+    os.getpid(), sys.executable, os.getcwd(),
     settings.port, settings.database_path, getattr(sys, "frozen", False),
     bool(settings.gmail_client_id and settings.gmail_client_id != "PLACEHOLDER_CLIENT_ID"),
     bool(settings.runtime_token),
@@ -59,9 +59,14 @@ startup.info(
 if log_dir:
     startup.info("log_dir=%s", log_dir)
 
+startup.info("app_import_begin")
+from backend.app.main import app
+startup.info("app_import_complete")
+
 config = uvicorn.Config(app, host="127.0.0.1", port=settings.port, log_level="info")
 server = uvicorn.Server(config)
 try:
+    startup.info("uvicorn_run_begin host=127.0.0.1 port=%s", settings.port)
     server.run()
 except Exception as exc:  # noqa: BLE001 — crash diagnostics, never silent
     logging.getLogger("alfred.startup").exception(

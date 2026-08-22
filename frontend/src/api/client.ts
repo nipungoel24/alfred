@@ -29,9 +29,9 @@ export async function initApi(retries = 20, intervalMs = 400): Promise<void> {
         await new Promise(r => setTimeout(r, intervalMs));
       }
     }
-    // Bounded fallback: retries exhausted. Keep dev defaults so the
-    // StartupGate can show a diagnosable error instead of hanging forever.
-    BASE = import.meta.env.VITE_ALFRED_API_URL ?? 'http://127.0.0.1:8765';
+    // In packaged Tauri, never silently fall back to a development port:
+    // that can mask a failed native bootstrap or talk to the wrong process.
+    BASE = 'http://127.0.0.1:0';
     TOKEN = null;
     return;
   }

@@ -56,6 +56,7 @@ def _broadcast_progress(event: dict):
 _worker_task: asyncio.Task | None = None
 _worker_running = False
 WORKER_CONCURRENCY = 1
+_ai_status = "starting"
 
 # ── Progressive All Mail backfill (backend-owned) ──
 BACKFILL_JOB_TYPE = 'backfill_gmail'
@@ -396,9 +397,13 @@ async def _startup_background():
     /health with a bounded timeout, so health MUST respond immediately
     after the socket binds.
     """
+    global _ai_status
+    _ai_status = "initializing"
     try:
         await ai.preload()
+        _ai_status = "ready"
     except Exception:
+        _ai_status = "unavailable"
         pass  # Non-fatal: first inference will be slower
 
     # Rebuild tasks from cached analyses if needed (migration v1→v2)
@@ -543,11 +548,10 @@ async def ollama_model_missing_handler(_, e):
 # ── Health & Config ──
 @app.get('/health')
 async def health():
-    try:
-        await ai.health()
-        return {'status': 'ok', 'ai': 'ready'}
-    except (OllamaUnavailable, OllamaTimeout):
-        return {'status': 'ok', 'ai': 'unavailable'}
+    # Readiness for the desktop shell means the local API is alive,
+    # authenticated, and backed by SQLite. Ollama can be cold or offline
+    # without making the installed app unusable.
+    return {'status': 'ok', 'ai': _ai_status}
 
 @app.get('/api/config')
 def config():

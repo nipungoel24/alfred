@@ -58,6 +58,24 @@ def test_health_serves_without_waiting_for_slow_startup(startup_app, monkeypatch
         assert release.is_set()
 
 
+def test_health_does_not_probe_ollama(startup_app, monkeypatch):
+    """Backend readiness is not AI readiness.
+
+    The installed desktop must open even when Ollama is cold or unavailable.
+    """
+    main = startup_app
+
+    async def broken_ai_health():
+        raise AssertionError("/health must not call Ollama")
+
+    monkeypatch.setattr(main.ai, "health", broken_ai_health)
+
+    with TestClient(main.app) as client:
+        r = client.get("/health", headers={"X-Alfred-Token": "startup-test-token"})
+        assert r.status_code == 200
+        assert r.json()["status"] == "ok"
+
+
 def test_oauth_callback_exempt_under_token(startup_app):
     main = startup_app
     with TestClient(main.app) as client:
