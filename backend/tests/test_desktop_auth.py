@@ -90,3 +90,77 @@ def test_no_token_means_no_auth(tmp_path, monkeypatch):
         monkeypatch.delenv("ALFRED_DATABASE_PATH")
         importlib.reload(config_mod)
         importlib.reload(main_mod)
+
+
+def test_cors_preflight_passes_without_token(authed_app):
+    """Browsers never attach the session token to CORS preflights.
+
+    Regression: the packaged Windows WebView (origin http://tauri.localhost)
+    sends OPTIONS preflights for every fetch carrying X-Alfred-Token. The
+    token middleware must not 401 them or the frontend gets zero data.
+    """
+    app, _ = authed_app
+    client = TestClient(app)
+    r = client.options(
+        "/api/emails/counts",
+        headers={
+            "Origin": "http://tauri.localhost",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "x-alfred-token",
+        },
+    )
+    assert r.status_code == 200
+    assert r.headers.get("access-control-allow-origin") == "http://tauri.localhost"
+    assert "x-alfred-token" in r.headers.get("access-control-allow-headers", "")
+
+
+def test_windows_tauri_origin_gets_cors_headers(authed_app):
+    """Actual requests from the packaged Windows WebView must carry the
+    ACAO header or the browser drops the response silently."""
+    app, _ = authed_app
+    client = TestClient(app)
+    r = client.get(
+        "/api/emails/counts",
+        headers={"Origin": "http://tauri.localhost", "X-Alfred-Token": "test-secret-token-123"},
+    )
+    assert r.status_code == 200
+    assert r.headers.get("access-control-allow-origin") == "http://tauri.localhost"
+
+
+def test_unix_tauri_origin_still_supported(authed_app):
+    app, _ = authed_app
+    client = TestClient(app)
+    r = client.get(
+        "/api/emails/counts",
+        headers={"Origin": "tauri://localhost", "X-Alfred-Token": "test-secret-token-123"},
+    )
+    assert r.status_code == 200
+    assert r.headers.get("access-control-allow-origin") == "tauri://localhost"
+
+
+def test_unknown_origin_gets_no_cors_headers(authed_app):
+    """CORS stays restrictive: unlisted origins must not receive ACAO."""
+    app, _ = authed_app
+    client = TestClient(app)
+    r = client.get(
+        "/api/emails/counts",
+        headers={"Origin": "http://evil.example.com", "X-Alfred-Token": "test-secret-token-123"},
+    )
+    assert r.status_code == 200
+    assert r.headers.get("access-control-allow-origin") is None
+
+
+def test_preflight_exemption_does_not_open_actual_requests(authed_app):
+    """Passing OPTIONS through must not weaken token enforcement on GET."""
+    app, _ = authed_app
+    client = TestClient(app)
+    preflight = client.options(
+        "/api/emails/counts",
+        headers={
+            "Origin": "http://tauri.localhost",
+            "Access-Control-Request-Method": "GET",
+            "Access-Control-Request-Headers": "x-alfred-token",
+        },
+    )
+    assert preflight.status_code == 200
+    assert client.get("/api/emails/counts").status_code == 401

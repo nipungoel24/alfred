@@ -401,10 +401,17 @@ async def _startup_background():
     _ai_status = "initializing"
     try:
         await ai.preload()
+    except Exception:
+        pass  # Non-fatal: first inference will just be slower
+
+    # Verify Ollama is actually reachable after preload attempt.
+    # preload_model swallows errors silently; a direct health check
+    # tells us the truth about whether the AI backend is usable.
+    try:
+        await ollama_client.health()
         _ai_status = "ready"
     except Exception:
         _ai_status = "unavailable"
-        pass  # Non-fatal: first inference will be slower
 
     # Rebuild tasks from cached analyses if needed (migration v1→v2)
     try:
@@ -464,7 +471,16 @@ async def lifespan(app: FastAPI):
 app = FastAPI(title='Alfred local API', lifespan=lifespan)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['http://localhost:5173', 'http://127.0.0.1:5173', 'tauri://localhost'],
+    # Dev (vite) origins plus the packaged Tauri origins:
+    # - tauri://localhost (Linux/macOS asset protocol)
+    # - http(s)://tauri.localhost (Windows WebView2 asset protocol)
+    allow_origins=[
+        'http://localhost:5173',
+        'http://127.0.0.1:5173',
+        'tauri://localhost',
+        'http://tauri.localhost',
+        'https://tauri.localhost',
+    ],
     allow_methods=['*'],
     allow_headers=['*']
 )
@@ -475,6 +491,8 @@ app.add_middleware(
 # must present it via X-Alfred-Token header or ?token= query (the query
 # form exists only because EventSource cannot send custom headers).
 # Exemptions:
+# - CORS preflights (OPTIONS): browsers never attach the session token to
+#   preflight requests; CORSMiddleware answers them instead.
 # - /api/accounts/gmail/callback: the system browser's OAuth redirect
 #   carries no token BY DESIGN — its security is the one-time PKCE state.
 #   (Non-exempted: everything else under /api/*, plus /health.)
@@ -486,6 +504,8 @@ async def runtime_token_middleware(request: Request, call_next):
     token = settings.runtime_token
     if token:
         path = request.url.path
+        if request.method == 'OPTIONS':
+            return await call_next(request)
         if path in UNAUTHENTICATED_PATHS:
             return await call_next(request)
         if not path.startswith('/api/') and path != '/health':
@@ -551,7 +571,17 @@ async def health():
     # Readiness for the desktop shell means the local API is alive,
     # authenticated, and backed by SQLite. Ollama can be cold or offline
     # without making the installed app unusable.
-    return {'status': 'ok', 'ai': _ai_status}
+    db_ok = False
+    try:
+        repo.con.execute('SELECT 1')
+        db_ok = True
+    except Exception:
+        pass
+    return {
+        'status': 'ok' if db_ok else 'degraded',
+        'database': 'ready' if db_ok else 'unavailable',
+        'ai': _ai_status,
+    }
 
 @app.get('/api/config')
 def config():
