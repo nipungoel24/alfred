@@ -63,11 +63,13 @@ export function IconRail({ page, onNavigate, aiReady, gmailConnected }: IconRail
           <RailButton key={item.page} item={item} active={page === item.page} onClick={() => onNavigate(item.page)} />
         ))}
       </nav>
-      <div className="rail-status" aria-label="Connection status">
+      <div className="rail-status" role="group" aria-label="Connection status">
         <span
           className={`rail-status-item ${aiReady ? 'ok' : 'down'}`}
           data-label={aiReady ? 'Alfred AI ready' : 'Alfred AI offline'}
           title={aiReady ? 'Local AI · qwen3:4b' : 'Local AI unavailable'}
+          role="img"
+          aria-label={aiReady ? 'Alfred AI ready' : 'Alfred AI offline'}
         >
           <Cpu size={16} strokeWidth={1.75} aria-hidden="true" />
         </span>
@@ -75,6 +77,8 @@ export function IconRail({ page, onNavigate, aiReady, gmailConnected }: IconRail
           className={`rail-status-item ${gmailConnected ? 'ok' : 'down'}`}
           data-label={gmailConnected ? 'Gmail connected' : 'Gmail disconnected'}
           title={gmailConnected ? 'Gmail connected' : 'Gmail disconnected'}
+          role="img"
+          aria-label={gmailConnected ? 'Gmail connected' : 'Gmail disconnected'}
         >
           <Mail size={16} strokeWidth={1.75} aria-hidden="true" />
         </span>
