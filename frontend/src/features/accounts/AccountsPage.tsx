@@ -1,6 +1,7 @@
 import { useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { accounts as fetchAccounts, connectGmail, syncAccount, deleteAccount } from '../../api/emails';
+import { apiBase } from '../../api/client';
 import { Mail, RefreshCw, Unplug, UserCircle } from 'lucide-react';
 
 export function AccountsPage() {
@@ -74,7 +75,7 @@ export function AccountsPage() {
               type="button"
               className="btn btn-primary"
               style={{ marginTop: 'var(--space-3)' }}
-              onClick={() => connectMutation.mutate('http://127.0.0.1:8765/api/accounts/gmail/callback')}
+              onClick={() => connectMutation.mutate(`${apiBase()}/api/accounts/gmail/callback`)}
               disabled={connectMutation.isPending}
             >
               <Mail size={14} aria-hidden="true" />
