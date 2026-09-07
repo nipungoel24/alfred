@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.backend_info
 source: desktop/src-tauri/src/main.rs
-line: 268
+line: 446
 status: active
 tags: [backend, function]
 ---
@@ -21,17 +21,20 @@ Purpose inferred from usage: `backend_info` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:268`
+`desktop/src-tauri/src/main.rs:446`
 
 ## Signature
 
 ```rust
-fn backend_info(state: State<BackendState>) -> Result<BackendInfo, String>
+fn backend_info(
+    supervisor: State<'_, Arc<tokio::sync::Mutex<BackendSupervisor>>>,
+) -> Result<BackendInfo, String>
 ```
 
 ## Parameters
 
-- `state` (`State<BackendState>`)
+- `supervisor` (`State<'_`)
+- `Arc<tokio` (`Mutex<BackendSupervisor>>>`)
 
 ## Returns
 

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.generate_token
 source: desktop/src-tauri/src/main.rs
-line: 78
+line: 223
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `generate_token` in `desktop/src-tauri/src/main.rs`
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:78`
+`desktop/src-tauri/src/main.rs:223`
 
 ## Signature
 

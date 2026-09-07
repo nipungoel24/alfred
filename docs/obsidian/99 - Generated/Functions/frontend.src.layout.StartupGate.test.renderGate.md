@@ -24,7 +24,7 @@ Function declared in `frontend/src/layout/StartupGate.test.tsx`.
 ## Signature
 
 ```ts
-function renderGate()
+function renderGate(initPromise?: Promise<void>)
 ```
 
 ## Related

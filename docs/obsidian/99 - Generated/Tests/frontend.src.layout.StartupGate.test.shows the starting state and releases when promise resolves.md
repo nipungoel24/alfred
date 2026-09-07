@@ -3,13 +3,13 @@ type: test
 generated: true
 language: typescript
 layer: frontend
-qualified_name: frontend.src.layout.StartupGate.test.shows the failure state after the 45s budget with a diagnostic code
+qualified_name: frontend.src.layout.StartupGate.test.shows the starting state and releases when promise resolves
 source: frontend/src/layout/StartupGate.test.tsx
 status: active
 tags: [test, frontend]
 ---
 
-# shows the failure state after the 45s budget with a diagnostic code
+# shows the starting state and releases when promise resolves
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 

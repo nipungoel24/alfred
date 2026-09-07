@@ -1356,6 +1356,11 @@
       "source": "backend/tests/test_desktop_auth.py"
     },
     {
+      "id": "backend.tests.test_desktop_auth.test_cors_preflight_passes_without_token",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
       "id": "backend.tests.test_desktop_auth.test_health_requires_token_when_enabled",
       "type": "test",
       "source": "backend/tests/test_desktop_auth.py"
@@ -1371,12 +1376,32 @@
       "source": "backend/tests/test_desktop_auth.py"
     },
     {
+      "id": "backend.tests.test_desktop_auth.test_preflight_exemption_does_not_open_actual_requests",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
       "id": "backend.tests.test_desktop_auth.test_query_token_form_for_sse",
       "type": "test",
       "source": "backend/tests/test_desktop_auth.py"
     },
     {
       "id": "backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.test_unix_tauri_origin_still_supported",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.test_unknown_origin_gets_no_cors_headers",
+      "type": "test",
+      "source": "backend/tests/test_desktop_auth.py"
+    },
+    {
+      "id": "backend.tests.test_desktop_auth.test_windows_tauri_origin_gets_cors_headers",
       "type": "test",
       "source": "backend/tests/test_desktop_auth.py"
     },
@@ -1861,12 +1886,17 @@
       "source": null
     },
     {
-      "id": "desktop.src-tauri.src.main.backend_alive",
+      "id": "desktop.src-tauri.src.main.await_backend_ready",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
       "id": "desktop.src-tauri.src.main.backend_info",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.current_state",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1881,12 +1911,22 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.kill_orphaned_backends",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.log_path",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
       "id": "desktop.src-tauri.src.main.main",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.new",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1901,17 +1941,17 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.retry_backend",
+      "id": "desktop.src-tauri.src.main.restart_backend",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.shutdown_backend",
+      "id": "desktop.src-tauri.src.main.shutdown",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.spawn_backend",
+      "id": "desktop.src-tauri.src.main.spawn_and_watch",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1921,7 +1961,47 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.wait_and_reveal",
+      "id": "desktop.src-tauri.src.main.test_backend_before_frontend",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.test_backend_process_exit",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.test_delayed_webview",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.test_frontend_before_backend",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.test_multiple_subscribers",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.test_ollama_slow",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.test_ollama_unavailable",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.test_slow_backend_startup",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.test_unauthorized_health",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1977,6 +2057,11 @@
     },
     {
       "id": "frontend.src.api.client.isTauri",
+      "type": "functions",
+      "source": "frontend/src/api/client.ts"
+    },
+    {
+      "id": "frontend.src.api.client.setApiCredentials",
       "type": "functions",
       "source": "frontend/src/api/client.ts"
     },
@@ -2151,6 +2236,11 @@
       "source": "frontend/src/features/accounts/AccountsPage.tsx"
     },
     {
+      "id": "frontend.src.features.accounts.AccountsPage.test.renderPage",
+      "type": "functions",
+      "source": "frontend/src/features/accounts/AccountsPage.test.tsx"
+    },
+    {
       "id": "frontend.src.features.deadlines.DeadlinesPage.DeadlinesPage",
       "type": "react_components",
       "source": "frontend/src/features/deadlines/DeadlinesPage.tsx"
@@ -2169,6 +2259,11 @@
       "id": "frontend.src.features.overview.OverviewPage.OverviewPageProps",
       "type": "types",
       "source": "frontend/src/features/overview/OverviewPage.tsx"
+    },
+    {
+      "id": "frontend.src.features.overview.OverviewPage.test.renderPage",
+      "type": "functions",
+      "source": "frontend/src/features/overview/OverviewPage.test.tsx"
     },
     {
       "id": "frontend.src.features.settings.SettingsPage.SettingsPage",
@@ -2226,11 +2321,6 @@
       "source": "frontend/src/layout/StartupGate.tsx"
     },
     {
-      "id": "frontend.src.layout.StartupGate.test.flushTimers",
-      "type": "functions",
-      "source": "frontend/src/layout/StartupGate.test.tsx"
-    },
-    {
       "id": "frontend.src.layout.StartupGate.test.renderGate",
       "type": "functions",
       "source": "frontend/src/layout/StartupGate.test.tsx"
@@ -2249,6 +2339,11 @@
       "id": "frontend.src.layout.WorkspaceHeader.test.renderHeader",
       "type": "functions",
       "source": "frontend/src/layout/WorkspaceHeader.test.tsx"
+    },
+    {
+      "id": "frontend.src.lib.utils.cn",
+      "type": "functions",
+      "source": "frontend/src/lib/utils.ts"
     },
     {
       "id": "frontend.src.mail.CategoryTabs.CategoryTabs",
@@ -4233,6 +4328,11 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_desktop_auth.test_cors_preflight_passes_without_token",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.tests.test_desktop_auth.test_health_requires_token_when_enabled",
       "to": "fastapi.testclient.TestClient",
       "relation": "calls-inferred"
@@ -4248,12 +4348,32 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_desktop_auth.test_preflight_exemption_does_not_open_actual_requests",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.tests.test_desktop_auth.test_query_token_form_for_sse",
       "to": "fastapi.testclient.TestClient",
       "relation": "calls-inferred"
     },
     {
       "from": "backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_unix_tauri_origin_still_supported",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_unknown_origin_gets_no_cors_headers",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_desktop_auth.test_windows_tauri_origin_gets_cors_headers",
       "to": "fastapi.testclient.TestClient",
       "relation": "calls-inferred"
     },

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.pick_free_port
 source: desktop/src-tauri/src/main.rs
-line: 71
+line: 217
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `pick_free_port` in `desktop/src-tauri/src/main.rs`
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:71`
+`desktop/src-tauri/src/main.rs:217`
 
 ## Signature
 

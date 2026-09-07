@@ -3,13 +3,13 @@ type: test
 generated: true
 language: typescript
 layer: frontend
-qualified_name: frontend.src.layout.StartupGate.test.retries after failure and recovers
+qualified_name: frontend.src.layout.StartupGate.test.shows failure for health timeout
 source: frontend/src/layout/StartupGate.test.tsx
 status: active
 tags: [test, frontend]
 ---
 
-# retries after failure and recovers
+# shows failure for health timeout
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 

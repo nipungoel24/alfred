@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.get_email_counts
 source: backend/app/main.py
-line: 814
+line: 844
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Live category + mailbox-state counts (DB-derived, never hardcoded).
 
 ## Location
 
-`backend/app/main.py:814`
+`backend/app/main.py:844`
 
 ## Signature
 

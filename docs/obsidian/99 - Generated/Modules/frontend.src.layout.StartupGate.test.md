@@ -20,6 +20,6 @@ tags: [module, frontend]
 ## Imports
 
 - `vitest` â† describe, it, expect, vi, beforeEach, afterEach
-- `@testing-library/react` â† render, screen, fireEvent, act
+- `@testing-library/react` â† render, screen, act
 - `@tanstack/react-query` â† QueryClient, QueryClientProvider
 - `./StartupGate` â† StartupGate

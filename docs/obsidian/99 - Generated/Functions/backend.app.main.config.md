@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.config
 source: backend/app/main.py
-line: 557
+line: 587
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `config` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:557`
+`backend/app/main.py:587`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.ollama_unavailable_handler
 source: backend/app/main.py
-line: 520
+line: 540
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `ollama_unavailable_handler` in `backend/app/main.p
 
 ## Location
 
-`backend/app/main.py:520`
+`backend/app/main.py:540`
 
 ## Signature
 

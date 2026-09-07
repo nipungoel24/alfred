@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.pause_backfill
 source: backend/app/main.py
-line: 755
+line: 785
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Pause the durable backfill. Progress and cursor are preserved.
 
 ## Location
 
-`backend/app/main.py:755`
+`backend/app/main.py:785`
 
 ## Parameters
 

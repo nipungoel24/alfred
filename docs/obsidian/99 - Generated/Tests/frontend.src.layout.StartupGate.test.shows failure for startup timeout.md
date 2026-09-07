@@ -3,13 +3,13 @@ type: test
 generated: true
 language: typescript
 layer: frontend
-qualified_name: frontend.src.layout.StartupGate.test.labels an authenticated-health rejection distinctly
+qualified_name: frontend.src.layout.StartupGate.test.shows failure for startup timeout
 source: frontend/src/layout/StartupGate.test.tsx
 status: active
 tags: [test, frontend]
 ---
 
-# labels an authenticated-health rejection distinctly
+# shows failure for startup timeout
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 

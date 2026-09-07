@@ -4,38 +4,38 @@ generated: true
 language: rust
 layer: backend
 module: desktop.src-tauri.src.main
-qualified_name: desktop.src-tauri.src.main.backend_alive
+qualified_name: desktop.src-tauri.src.main.current_state
 source: desktop/src-tauri/src/main.rs
-line: 219
+line: 71
 status: active
 tags: [backend, function]
 ---
 
-# backend_alive
+# current_state
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 
 ## Purpose
 
-Purpose inferred from usage: `backend_alive` in `desktop/src-tauri/src/main.rs`.
+Purpose inferred from usage: `current_state` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:219`
+`desktop/src-tauri/src/main.rs:71`
 
 ## Signature
 
 ```rust
-fn backend_alive(state: &BackendState) -> bool
+fn current_state(&self) -> BackendRuntimeState
 ```
 
 ## Parameters
 
-- `state` (`&BackendState`)
+- `&self`
 
 ## Returns
 
-`bool`
+`BackendRuntimeState`
 
 ## Side Effects
 

@@ -33,8 +33,13 @@ tags: [module, backend]
 ## Tests
 
 - [[backend.tests.test_desktop_auth.test_api_requires_token|test_api_requires_token]]
+- [[backend.tests.test_desktop_auth.test_cors_preflight_passes_without_token|test_cors_preflight_passes_without_token]]
 - [[backend.tests.test_desktop_auth.test_health_requires_token_when_enabled|test_health_requires_token_when_enabled]]
 - [[backend.tests.test_desktop_auth.test_no_token_means_no_auth|test_no_token_means_no_auth]]
 - [[backend.tests.test_desktop_auth.test_oauth_callback_is_exempt_from_token|test_oauth_callback_is_exempt_from_token]]
+- [[backend.tests.test_desktop_auth.test_preflight_exemption_does_not_open_actual_requests|test_preflight_exemption_does_not_open_actual_requests]]
 - [[backend.tests.test_desktop_auth.test_query_token_form_for_sse|test_query_token_form_for_sse]]
 - [[backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected|test_shutdown_endpoint_is_token_protected]]
+- [[backend.tests.test_desktop_auth.test_unix_tauri_origin_still_supported|test_unix_tauri_origin_still_supported]]
+- [[backend.tests.test_desktop_auth.test_unknown_origin_gets_no_cors_headers|test_unknown_origin_gets_no_cors_headers]]
+- [[backend.tests.test_desktop_auth.test_windows_tauri_origin_gets_cors_headers|test_windows_tauri_origin_gets_cors_headers]]

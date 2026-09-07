@@ -4,36 +4,30 @@ generated: true
 language: rust
 layer: backend
 module: desktop.src-tauri.src.main
-qualified_name: desktop.src-tauri.src.main.wait_and_reveal
+qualified_name: desktop.src-tauri.src.main.test_multiple_subscribers
 source: desktop/src-tauri/src/main.rs
-line: 228
+line: 783
 status: active
 tags: [backend, function]
 ---
 
-# wait_and_reveal
+# test_multiple_subscribers
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 
 ## Purpose
 
-Purpose inferred from usage: `wait_and_reveal` in `desktop/src-tauri/src/main.rs`.
+Purpose inferred from usage: `test_multiple_subscribers` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:228`
+`desktop/src-tauri/src/main.rs:783`
 
 ## Signature
 
 ```rust
-fn wait_and_reveal(app: AppHandle, port: u16, token: String)
+fn test_multiple_subscribers()
 ```
-
-## Parameters
-
-- `app` (`AppHandle`)
-- `port` (`u16`)
-- `token` (`String`)
 
 ## Side Effects
 

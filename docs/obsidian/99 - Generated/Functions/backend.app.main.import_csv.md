@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.import_csv
 source: backend/app/main.py
-line: 865
+line: 895
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `import_csv` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:865`
+`backend/app/main.py:895`
 
 ## Signature
 

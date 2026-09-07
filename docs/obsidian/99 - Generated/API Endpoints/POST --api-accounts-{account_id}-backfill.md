@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.backfill_account
 source: backend/app/main.py
-line: 731
+line: 761
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Start/resume the durable All Mail backfill (backend-owned).
 
 ## Location
 
-`backend/app/main.py:731`
+`backend/app/main.py:761`
 
 ## Parameters
 

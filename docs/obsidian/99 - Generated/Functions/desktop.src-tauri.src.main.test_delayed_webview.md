@@ -4,39 +4,30 @@ generated: true
 language: rust
 layer: backend
 module: desktop.src-tauri.src.main
-qualified_name: desktop.src-tauri.src.main.spawn_backend
+qualified_name: desktop.src-tauri.src.main.test_delayed_webview
 source: desktop/src-tauri/src/main.rs
-line: 98
+line: 602
 status: active
 tags: [backend, function]
 ---
 
-# spawn_backend
+# test_delayed_webview
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 
 ## Purpose
 
-Purpose inferred from usage: `spawn_backend` in `desktop/src-tauri/src/main.rs`.
+Purpose inferred from usage: `test_delayed_webview` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:98`
+`desktop/src-tauri/src/main.rs:602`
 
 ## Signature
 
 ```rust
-fn spawn_backend(app: &AppHandle, state: &BackendState) -> Result<(), String>
+fn test_delayed_webview()
 ```
-
-## Parameters
-
-- `app` (`&AppHandle`)
-- `state` (`&BackendState`)
-
-## Returns
-
-`Result<(), String>`
 
 ## Side Effects
 

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.log_path
 source: desktop/src-tauri/src/main.rs
-line: 46
+line: 192
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `log_path` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:46`
+`desktop/src-tauri/src/main.rs:192`
 
 ## Signature
 

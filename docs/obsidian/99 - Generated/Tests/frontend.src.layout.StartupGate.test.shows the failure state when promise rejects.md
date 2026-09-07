@@ -3,13 +3,13 @@ type: test
 generated: true
 language: typescript
 layer: frontend
-qualified_name: frontend.src.layout.StartupGate.test.shows the starting state and releases when healthy
+qualified_name: frontend.src.layout.StartupGate.test.shows the failure state when promise rejects
 source: frontend/src/layout/StartupGate.test.tsx
 status: active
 tags: [test, frontend]
 ---
 
-# shows the starting state and releases when healthy
+# shows the failure state when promise rejects
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 

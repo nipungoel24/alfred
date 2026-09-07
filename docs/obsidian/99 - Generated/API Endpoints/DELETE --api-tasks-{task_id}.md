@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.delete_task
 source: backend/app/main.py
-line: 992
+line: 1022
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Purpose inferred from usage: `delete_task` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:992`
+`backend/app/main.py:1022`
 
 ## Parameters
 

@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.analyze_all
 source: backend/app/main.py
-line: 908
+line: 938
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Enqueue all eligible unanalyzed emails for background analysis.
 
 ## Location
 
-`backend/app/main.py:908`
+`backend/app/main.py:938`
 
 ## Signature
 

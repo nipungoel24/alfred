@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.connect_gmail
 source: backend/app/main.py
-line: 582
+line: 612
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `connect_gmail` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:582`
+`backend/app/main.py:612`
 
 ## Signature
 

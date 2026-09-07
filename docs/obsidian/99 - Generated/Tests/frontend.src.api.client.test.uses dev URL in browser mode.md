@@ -3,13 +3,13 @@ type: test
 generated: true
 language: typescript
 layer: frontend
-qualified_name: frontend.src.api.client.test.does not fall back to the development port in packaged Tauri mode
+qualified_name: frontend.src.api.client.test.uses dev URL in browser mode
 source: frontend/src/api/client.test.ts
 status: active
 tags: [test, frontend]
 ---
 
-# does not fall back to the development port in packaged Tauri mode
+# uses dev URL in browser mode
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 

@@ -3,13 +3,13 @@ type: test
 generated: true
 language: typescript
 layer: frontend
-qualified_name: frontend.src.api.client.test.uses the native backend endpoint when Tauri provides one
+qualified_name: frontend.src.api.client.test.throws when await_backend_ready fails
 source: frontend/src/api/client.test.ts
 status: active
 tags: [test, frontend]
 ---
 
-# uses the native backend endpoint when Tauri provides one
+# throws when await_backend_ready fails
 
 > Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
 
