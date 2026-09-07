@@ -95,6 +95,7 @@ dependencies = [
  "tauri-cli",
  "tauri-plugin-shell",
  "tauri-plugin-single-instance",
+ "tokio",
 ]
 
 [[package]]
