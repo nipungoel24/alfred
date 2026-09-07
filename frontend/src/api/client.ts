@@ -7,32 +7,29 @@ function isTauri(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 }
 
+/** Set backend credentials directly (used by retry handler). */
+export function setApiCredentials(port: number, token: string) {
+  BASE = `http://127.0.0.1:${port}`;
+  TOKEN = token;
+}
+
 /**
- * Resolve the backend endpoint at startup.
- * - Under Tauri: asks the shell for the dynamic loopback port + the
- *   per-launch runtime token (backend_info command). The webview can load
- *   BEFORE the shell finishes spawning the sidecar, so the lookup is
- *   retried for a bounded window instead of permanently falling back.
- * - In dev: uses VITE_ALFRED_API_URL; no token (the backend only enforces
- *   a token when ALFRED_RUNTIME_TOKEN is set).
+ * Initialize the API client.
+ *
+ * Packaged Tauri: calls `await_backend_ready` once — a durable Rust-owned
+ * command that blocks until the BackendSupervisor confirms the sidecar is
+ * healthy (FastAPI listening, runtime auth active, SQLite usable) or fails
+ * with a structured error. No retry loops, no event dependencies, no
+ * fallback to dev port.
+ *
+ * Browser dev: uses VITE_ALFRED_API_URL directly.
  */
-export async function initApi(retries = 20, intervalMs = 400): Promise<void> {
+export async function initApi(): Promise<void> {
   if (isTauri()) {
     const { invoke } = await import('@tauri-apps/api/core');
-    for (let attempt = 0; attempt < retries; attempt++) {
-      try {
-        const info = await invoke<BackendRuntimeInfo>('backend_info');
-        BASE = `http://127.0.0.1:${info.port}`;
-        TOKEN = info.token;
-        return;
-      } catch {
-        await new Promise(r => setTimeout(r, intervalMs));
-      }
-    }
-    // In packaged Tauri, never silently fall back to a development port:
-    // that can mask a failed native bootstrap or talk to the wrong process.
-    BASE = 'http://127.0.0.1:0';
-    TOKEN = null;
+    const info = await invoke<BackendRuntimeInfo>('await_backend_ready');
+    BASE = `http://127.0.0.1:${info.port}`;
+    TOKEN = info.token;
     return;
   }
   BASE = import.meta.env.VITE_ALFRED_API_URL ?? 'http://127.0.0.1:8765';

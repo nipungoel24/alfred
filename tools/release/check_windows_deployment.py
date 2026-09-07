@@ -82,15 +82,17 @@ def test_tauri_uses_standard_per_user_nsis_and_external_sidecar() -> None:
 
 def test_frontend_packaged_tauri_does_not_fall_back_to_dev_port() -> None:
     client = _read(ROOT / "frontend/src/api/client.ts")
-    tauri_branch = client.split("if (isTauri())", 1)[1].split("TOKEN = null;", 1)[0]
-    assert "http://127.0.0.1:0" in tauri_branch
+    tauri_branch = client.split("if (isTauri())", 1)[1].split("BASE = import.meta", 1)[0]
     assert "http://127.0.0.1:8765" not in tauri_branch
+    assert "await_backend_ready" in tauri_branch
 
 
 def test_sidecar_resolution_uses_tauri_external_bin_not_cwd() -> None:
     main = _read(ROOT / "desktop/src-tauri/src/main.rs")
     assert '.sidecar("alfred-backend")' in main
-    assert "current_dir" not in main.split("fn spawn_backend", 1)[1].split("fn http_request", 1)[0]
+    # Check that the sidecar spawn function doesn't use current_dir
+    spawn_section = main.split("fn spawn_and_watch", 1)[1].split("fn http_request", 1)[0] if "fn spawn_and_watch" in main else main.split("fn spawn_backend", 1)[1].split("fn http_request", 1)[0]
+    assert "current_dir" not in spawn_section
 
 
 def test_build_identity_is_logged() -> None:

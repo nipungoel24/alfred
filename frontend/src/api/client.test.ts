@@ -13,23 +13,30 @@ describe('api client bootstrap', () => {
     delete (window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__;
   });
 
-  it('does not fall back to the development port in packaged Tauri mode', async () => {
-    (window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__ = {};
-    invoke.mockRejectedValue(new Error('backend not started'));
-
-    const { apiBase, initApi } = await import('./client');
-    await initApi(1, 0);
-
-    expect(apiBase()).toBe('http://127.0.0.1:0');
-  });
-
-  it('uses the native backend endpoint when Tauri provides one', async () => {
+  it('calls await_backend_ready in packaged Tauri mode', async () => {
     (window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__ = {};
     invoke.mockResolvedValue({ port: 49152, token: 'runtime-token' });
 
     const { apiBase, initApi } = await import('./client');
-    await initApi(1, 0);
+    await initApi();
 
     expect(apiBase()).toBe('http://127.0.0.1:49152');
+    expect(invoke).toHaveBeenCalledWith('await_backend_ready');
+  });
+
+  it('throws when await_backend_ready fails', async () => {
+    (window as unknown as { __TAURI_INTERNALS__?: unknown }).__TAURI_INTERNALS__ = {};
+    invoke.mockRejectedValue(new Error('sidecar exited'));
+
+    const { initApi } = await import('./client');
+    await expect(initApi()).rejects.toThrow('sidecar exited');
+  });
+
+  it('uses dev URL in browser mode', async () => {
+    const { apiBase, initApi } = await import('./client');
+    await initApi();
+
+    expect(apiBase()).toContain('127.0.0.1');
+    expect(invoke).not.toHaveBeenCalled();
   });
 });
