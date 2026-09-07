@@ -3,6 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Paperclip, MailOpen, Archive, ArchiveRestore, Copy, Check, PanelRight } from 'lucide-react';
 import { emailDetails } from '../api/emails';
 import type { Email } from '../api/emails';
+import { LinkifiedBody } from './LinkifiedBody';
 
 interface MessageReaderProps {
   emailId: string | null;
@@ -138,7 +139,7 @@ export function MessageReader({
                 <span className="reader-date">{formatTimeLong(email.received_at)}</span>
               </div>
 
-              <div className="reader-body">{email.body}</div>
+              <LinkifiedBody text={email.body} className="reader-body" />
 
               {hasAttachments(email) && (
                 <div className="attachment-row" title="Attachment metadata from Gmail">

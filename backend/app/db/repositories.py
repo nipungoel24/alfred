@@ -11,7 +11,7 @@ Responsibilities:
 from datetime import datetime, timezone
 import json
 from .database import connect, transaction
-from ..schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task
+from ..schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task, SearchFilters
 from ..mail.eligibility import (
     MailEligibilityPolicy, gmail_category_from_labels,
     mailbox_state_from_labels,
@@ -306,14 +306,11 @@ class Repository:
         return [Email.model_validate_json(r['payload']) for r in rows]
 
     def delete_email(self, email_id: str):
+        """Delete an email and rebuild FTS5 index."""
         self.con.execute('DELETE FROM emails WHERE id=?', (email_id,))
-        try:
-            self.con.execute(
-                'DELETE FROM emails_fts WHERE rowid NOT IN (SELECT rowid FROM emails)'
-            )
-        except Exception:
-            pass
         self.con.execute('DELETE FROM tasks WHERE source_email_id=?', (email_id,))
+        # Rebuild FTS5 to remove orphaned entries
+        self.rebuild_fts()
         self.con.commit()
 
     def search_emails(self, query: str, limit=100) -> list[Email]:
@@ -321,11 +318,13 @@ class Repository:
 
         Global search covers the FULL synchronized mailbox: active inbox,
         archived received, and sent messages. Spam/trash/draft rows never
-        surface through search.
+        surface through search. Uses BM25 ranking for better relevance.
         """
         try:
+            # Use BM25 ranking for better relevance
             rows = self.con.execute(
-                "SELECT e.payload FROM emails_fts f JOIN emails e ON f.rowid = e.rowid "
+                "SELECT e.payload, bm25(emails_fts) as rank FROM emails_fts f "
+                "JOIN emails e ON f.rowid = e.rowid "
                 "WHERE emails_fts MATCH ? "
                 "AND e.mailbox_state IN ('active_inbox','archived','sent') "
                 "ORDER BY rank LIMIT ?",
@@ -343,6 +342,76 @@ class Repository:
             ).fetchall()
             return [Email.model_validate_json(r['payload']) for r in rows]
 
+    def search_emails_structured(self, filters: SearchFilters, limit=100) -> list[Email]:
+        """Structured search with filters applied at the database level.
+
+        Filters are applied BEFORE LIMIT/OFFSET for correct results.
+        Uses BM25 ranking when FTS5 is available.
+        """
+        conditions = ["e.mailbox_state IN ('active_inbox','archived','sent')"]
+        params: list = []
+        
+        # Apply sender filter
+        if filters.sender:
+            conditions.append("e.sender_col LIKE ?")
+            params.append(f"%{filters.sender}%")
+        
+        # Apply subject filter
+        if filters.subject:
+            conditions.append("e.subject_col LIKE ?")
+            params.append(f"%{filters.subject}%")
+        
+        # Apply date filters
+        if filters.after:
+            conditions.append("e.received_at_col >= ?")
+            params.append(filters.after)
+        if filters.before:
+            conditions.append("e.received_at_col <= ?")
+            params.append(filters.before)
+        
+        # Apply category filter
+        if filters.category:
+            conditions.append("e.gmail_category = ?")
+            params.append(filters.category)
+        
+        # Apply mailbox state filter
+        if filters.mailbox_state:
+            conditions.append("e.mailbox_state = ?")
+            params.append(filters.mailbox_state)
+        
+        # Build WHERE clause
+        where_clause = " AND ".join(conditions)
+        
+        # Build FTS5 MATCH clause for free text
+        fts_match = None
+        if filters.free_text:
+            fts_match = " ".join(filters.free_text)
+        
+        try:
+            if fts_match:
+                # Use FTS5 with BM25 ranking
+                rows = self.con.execute(
+                    f"SELECT e.payload, bm25(emails_fts) as rank FROM emails_fts f "
+                    f"JOIN emails e ON f.rowid = e.rowid "
+                    f"WHERE emails_fts MATCH ? "
+                    f"AND {where_clause} "
+                    f"ORDER BY rank LIMIT ?",
+                    (fts_match, *params, limit)
+                ).fetchall()
+            else:
+                # No free text, just apply filters
+                rows = self.con.execute(
+                    f"SELECT e.payload FROM emails e "
+                    f"WHERE {where_clause} "
+                    f"ORDER BY e.received_at_col DESC LIMIT ?",
+                    (*params, limit)
+                ).fetchall()
+            
+            return [Email.model_validate_json(r['payload']) for r in rows]
+        except Exception:
+            # Fallback to simple search
+            return self.search_emails(query=' '.join(filters.free_text), limit=limit)
+
     def emails_by_thread(self, thread_id: str) -> list[Email]:
         """Fetch emails in a thread, ordered chronologically."""
         rows = self.con.execute(
@@ -352,17 +421,80 @@ class Repository:
         return [Email.model_validate_json(r['payload']) for r in rows]
 
     def _update_fts_one(self, email_id: str, email: Email):
-        """Keep the FTS5 index in sync for a single upsert."""
+        """Keep the FTS5 index in sync for a single upsert.
+
+        Uses contentless FTS5 (content='') for storage efficiency.
+        DELETE operations are handled by rebuild_fts() which removes
+        orphaned entries periodically.
+        """
         try:
+            # Get the rowid for this email
+            row = self.con.execute(
+                "SELECT rowid FROM emails WHERE id=?", (email_id,)
+            ).fetchone()
+            if not row:
+                return
+            rowid = row[0]
+
+            # For contentless FTS5, we can't DELETE individual entries.
+            # Instead, we just INSERT the new entry. Orphaned entries
+            # will be cleaned up by rebuild_fts().
+            # First check if entry already exists
+            existing = self.con.execute(
+                "SELECT rowid FROM emails_fts WHERE rowid=?",
+                (rowid,)
+            ).fetchone()
+            if existing:
+                # Can't update contentless FTS5 in place, skip
+                # The rebuild will handle this
+                return
+            
+            # Insert new FTS entry
             self.con.execute(
-                "DELETE FROM emails_fts WHERE rowid = (SELECT rowid FROM emails WHERE id=?)",
-                (email_id,)
+                "INSERT INTO emails_fts(rowid, subject, sender, body) VALUES (?, ?, ?, ?)",
+                (rowid, email.subject, email.sender, email.body[:5000] if email.body else '')
             )
-            self.con.execute(
-                "INSERT INTO emails_fts(rowid, subject, sender, body) "
-                "SELECT rowid, ?, ?, ? FROM emails WHERE id=?",
-                (email.subject, email.sender, email.body[:5000], email_id)
-            )
+        except Exception:
+            pass  # FTS5 not available
+
+    def rebuild_fts(self):
+        """Rebuild the FTS5 index from the emails table.
+
+        For contentless FTS5, we need to drop and recreate the table
+        to remove orphaned entries and ensure the index is in sync.
+        Should be called periodically or after bulk DELETE operations.
+        """
+        try:
+            # Get all rowids and content from emails table
+            emails = self.con.execute(
+                "SELECT rowid, subject_col, sender_col, payload FROM emails"
+            ).fetchall()
+            
+            # Drop and recreate FTS5 table
+            self.con.execute("DROP TABLE IF EXISTS emails_fts")
+            self.con.execute("""
+                CREATE VIRTUAL TABLE emails_fts USING fts5(
+                    subject,
+                    sender,
+                    body,
+                    content='',
+                    tokenize='unicode61'
+                )
+            """)
+            
+            # Re-insert all emails into FTS5
+            for rowid, subject, sender, payload in emails:
+                try:
+                    # Extract body from payload (truncated to 5000 chars)
+                    import json
+                    data = json.loads(payload)
+                    body = data.get('body', '')[:5000] if data.get('body') else ''
+                    self.con.execute(
+                        "INSERT INTO emails_fts(rowid, subject, sender, body) VALUES (?, ?, ?, ?)",
+                        (rowid, subject, sender, body)
+                    )
+                except Exception:
+                    continue
         except Exception:
             pass  # FTS5 not available
 

@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <defs>
+    <!-- Violet/purple Alfred palette gradient -->
+    <linearGradient id="bg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7C3AED"/>
+      <stop offset="50%" stop-color="#6D28D9"/>
+      <stop offset="100%" stop-color="#5B21B6"/>
+    </linearGradient>
+    <!-- Subtle inner glow -->
+    <linearGradient id="glow" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="rgba(255,255,255,0.15)"/>
+      <stop offset="42%" stop-color="rgba(255,255,255,0)"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Rounded square background -->
+  <rect x="0" y="0" width="512" height="512" rx="96" ry="96" fill="url(#bg)"/>
+  <rect x="0" y="0" width="512" height="96" rx="96" ry="96" fill="url(#glow)"/>
+  
+  <!-- Letter A - white, bold, geometric -->
+  <path d="M 155 380 L 256 140 L 357 380 L 310 380 L 285 320 L 227 320 L 202 380 Z M 240 285 L 256 230 L 272 285 Z" 
+        fill="white" 
+        fill-rule="evenodd"/>
+  
+  <!-- Envelope fold - integrated into the A's crossbar -->
+  <rect x="215" y="295" width="82" height="8" rx="4" fill="white" opacity="0.9"/>
+  
+  <!-- Envelope flap - subtle V shape below crossbar -->
+  <path d="M 215 303 L 256 325 L 297 303" 
+        stroke="white" 
+        stroke-width="5" 
+        stroke-linecap="round" 
+        stroke-linejoin="round"
+        fill="none"
+        opacity="0.7"/>
+  
+  <!-- Envelope bottom edges -->
+  <path d="M 215 303 L 215 345" 
+        stroke="white" 
+        stroke-width="5" 
+        stroke-linecap="round"
+        fill="none"
+        opacity="0.5"/>
+  <path d="M 297 303 L 297 345" 
+        stroke="white" 
+        stroke-width="5" 
+        stroke-linecap="round"
+        fill="none"
+        opacity="0.5"/>
+</svg>

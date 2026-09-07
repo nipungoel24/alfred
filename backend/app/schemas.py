@@ -32,6 +32,21 @@ class InboxBriefing(BaseModel):
     top_attention_items: list[BriefingItem] = Field(default_factory=list); deadlines: list[BriefingItem] = Field(default_factory=list); important_updates: list[str] = Field(default_factory=list); can_wait_or_review_later: list[str] = Field(default_factory=list)
 class ErrorDetail(BaseModel): code: str; message: str; details: dict[str, Any] = {}
 
+
+class SearchFilters(BaseModel):
+    """Structured search filters parsed from the frontend."""
+    free_text: list[str] = Field(default_factory=list)
+    sender: str | None = None
+    subject: str | None = None
+    has_attachment: bool | None = None
+    is_unread: bool | None = None
+    is_important: bool | None = None
+    after: str | None = None
+    before: str | None = None
+    category: str | None = None
+    mailbox_state: str | None = None
+
+
 class EmailAccount(BaseModel):
     id: str
     provider: str

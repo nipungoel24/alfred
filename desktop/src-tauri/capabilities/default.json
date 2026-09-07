@@ -3,6 +3,7 @@
   "description": "Alfred desktop capability (least privilege: webview gets core window/app basics only; sidecar spawn is Rust-side, not webview-reachable)",
   "windows": ["main"],
   "permissions": [
-    "core:default"
+    "core:default",
+    "opener:default"
   ]
 }

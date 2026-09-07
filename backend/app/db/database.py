@@ -113,7 +113,8 @@ CREATE INDEX IF NOT EXISTS idx_jobs_status_priority ON jobs(status, priority DES
 CREATE INDEX IF NOT EXISTS idx_jobs_status_notbefore ON jobs(status, not_before);
 """
 
-# FTS5 virtual table for full-text search
+# FTS5 virtual table for full-text search — contentless for storage efficiency.
+# DELETE operations are handled by rebuilding the index periodically.
 FTS_SCHEMA = """
 CREATE VIRTUAL TABLE IF NOT EXISTS emails_fts USING fts5(
     subject,

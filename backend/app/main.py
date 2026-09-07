@@ -330,27 +330,39 @@ async def _label_backfill():
 
     Uses format=METADATA only — no body transfers. Runs once per startup,
     opportunistically, without blocking the API.
+
+    Groups messages by account_id to use the correct token for each account.
     """
     try:
-        pending = repo.emails_missing_labels()
-        if not pending:
-            return
         gmail_accounts = [a for a in repo.accounts()
                           if a.provider == 'gmail' and a.connection_status == 'connected']
         if not gmail_accounts:
             return
-        account = gmail_accounts[0]
-        creds = repo.credentials(account.id)
-        if not creds:
-            return
-        access_token = decrypt_token(creds['encrypted_access_token'])
-        refreshed = 0
-        for msg_id in pending:
-            labels = await gmail_provider.refresh_message_labels(access_token, msg_id)
-            if labels is not None and repo.update_email_labels(msg_id, labels):
-                refreshed += 1
-        if refreshed:
-            print(f"[Alfred] Backfilled Gmail labels for {refreshed} cached messages")
+
+        # Build account lookup by id
+        account_map = {a.id: a for a in gmail_accounts}
+        
+        total_refreshed = 0
+        for account in gmail_accounts:
+            # Get pending messages for this specific account
+            pending = repo.emails_missing_labels(account_id=account.id)
+            if not pending:
+                continue
+            
+            creds = repo.credentials(account.id)
+            if not creds:
+                continue
+            
+            access_token = decrypt_token(creds['encrypted_access_token'])
+            refreshed = 0
+            for msg_id in pending:
+                labels = await gmail_provider.refresh_message_labels(access_token, msg_id)
+                if labels is not None and repo.update_email_labels(msg_id, labels):
+                    refreshed += 1
+            total_refreshed += refreshed
+        
+        if total_refreshed:
+            print(f"[Alfred] Backfilled Gmail labels for {total_refreshed} cached messages")
     except Exception:
         pass
 

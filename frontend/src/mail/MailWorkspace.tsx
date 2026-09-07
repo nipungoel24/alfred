@@ -1,6 +1,8 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { ReactNode } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
+import { Group, Panel, Separator } from 'react-resizable-panels';
+import type { GroupImperativeHandle } from 'react-resizable-panels';
 import { RefreshCw, Star, MessageSquareReply, Archive, Search, X, Pause, Play } from 'lucide-react';
 import {
   emails as fetchEmails, emailCounts, accounts as fetchAccounts,
@@ -15,7 +17,14 @@ import { IntelligencePanel } from '../intelligence/IntelligencePanel';
 import type { RowFilter } from './MessageRow';
 
 const LATER_KEY = 'alfred-later-ids';
+const LAYOUT_KEY = 'alfred-pane-layout';
 const ACCOUNTS_REFRESH_MS = 15_000;
+
+const DEFAULT_LAYOUT: Record<string, number> = {
+  mail: 30,
+  reader: 45,
+  intel: 25,
+};
 
 function readLaterIds(): Set<string> {
   try {
@@ -34,6 +43,26 @@ function persistLaterIds(ids: Set<string>): void {
   }
 }
 
+function readSavedLayout(): Record<string, number> | null {
+  try {
+    const raw = localStorage.getItem(LAYOUT_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as Record<string, number>;
+    if (typeof parsed.mail !== 'number' || typeof parsed.reader !== 'number') return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
+function persistLayout(layout: Record<string, number>): void {
+  try {
+    localStorage.setItem(LAYOUT_KEY, JSON.stringify(layout));
+  } catch {
+    /* storage unavailable */
+  }
+}
+
 interface MailWorkspaceProps {
   searchQuery: string;
   onClearSearch: () => void;
@@ -43,6 +72,7 @@ interface MailWorkspaceProps {
 
 export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequestSync }: MailWorkspaceProps) {
   const queryClient = useQueryClient();
+  const groupRef = useRef<GroupImperativeHandle>(null);
   const [view, setView] = useState<MailScope>('inbox');
   const [kind, setKind] = useState<MailKind | null>(null);
   const [category, setCategory] = useState<MailCategory>('primary');
@@ -51,6 +81,7 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [intelVisible, setIntelVisible] = useState(true);
   const [laterIds, setLaterIds] = useState<Set<string>>(readLaterIds);
+  const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
 
   const globalSearchActive = searchQuery.trim().length > 0;
   const scope: MailScope = globalSearchActive ? 'all' : view;
@@ -62,7 +93,6 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
     staleTime: 15_000,
   });
 
-  // Passive observation of backend-owned backfill state.
   const { data: accountsList = [] } = useQuery({
     queryKey: ['accounts'],
     queryFn: fetchAccounts,
@@ -74,7 +104,7 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
   const backfill = gmailAccount?.backfill;
 
   const { data: emailsList = [], isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['emails', { view, kind, category, filter, globalSearchActive, searchQuery, viewFilter }],
+    queryKey: ['emails', { view, kind, category, filter, globalSearchActive, searchQuery, viewFilter, selectedAccountId }],
     queryFn: () => fetchEmails({
       category: globalSearchActive || view === 'all' ? null : category,
       scope,
@@ -82,13 +112,12 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
       priority: filter === 'important' && !globalSearchActive ? 'high' : undefined,
       needsReply: filter === 'reply' && !globalSearchActive ? true : undefined,
       query: activeQuery || undefined,
+      accountId: selectedAccountId || undefined,
       limit: 500,
     }),
     staleTime: 15_000,
   });
 
-  // Backfill controls: start/resume + pause. The loop itself lives in the
-  // backend worker; these only flip the typed state and arm the job.
   const backfillMutation = useMutation({
     mutationFn: (id: string) => backfillAccount(id),
     onSuccess: () => {
@@ -128,143 +157,212 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
     });
   }, []);
 
+  const handleToggleIntel = useCallback(() => {
+    setIntelVisible(v => {
+      const next = !v;
+      const group = groupRef.current;
+      if (group) {
+        const current = group.getLayout();
+        group.setLayout({
+          ...current,
+          intel: next ? (readSavedLayout()?.intel ?? DEFAULT_LAYOUT.intel) : 0,
+        });
+      }
+      return next;
+    });
+  }, []);
+
+  const handleLayoutChanged = useCallback((layout: Record<string, number>) => {
+    persistLayout(layout);
+    if (layout.intel > 0) {
+      setIntelVisible(true);
+    }
+  }, []);
+
   useEffect(() => {
     const t = setInterval(() => void refetchCounts(), 60_000);
     return () => clearInterval(t);
   }, [refetchCounts]);
 
+  // Restore saved layout on mount
+  useEffect(() => {
+    const saved = readSavedLayout();
+    if (saved && groupRef.current) {
+      groupRef.current.setLayout(saved);
+      if (saved.intel === 0) setIntelVisible(false);
+    }
+  }, []);
+
   const paneCount = view === 'inbox' ? counts?.active_inbox ?? 0 : counts?.all_mail ?? 0;
   const paneTitle = globalSearchActive ? 'Search results' : view === 'inbox' ? 'Inbox' : 'All Mail';
 
+  const defaultLayout = readSavedLayout() ?? DEFAULT_LAYOUT;
+
   return (
     <div className="mail-workspace">
-      {/* ── Mail pane ── */}
-      <div className="mail-pane">
-        <div className="mail-pane-head">
-          <div className="mail-pane-title">
-            <span className="title">{paneTitle}</span>
-            <span className="count">{paneCount} messages</span>
-          </div>
+      <Group
+        groupRef={groupRef}
+        orientation="horizontal"
+        defaultLayout={defaultLayout}
+        onLayoutChanged={handleLayoutChanged}
+        style={{ height: '100%' }}
+      >
+        {/* ── Mail pane ── */}
+        <Panel id="mail" minSize={20} maxSize={45} defaultSize={defaultLayout.mail}>
+          <div className="mail-pane">
+            <div className="mail-pane-head">
+              <div className="mail-pane-title">
+                <span className="title">{paneTitle}</span>
+                <span className="count">{paneCount} messages</span>
+              </div>
 
-          {!globalSearchActive && (
-            <div className="mail-view-switch" role="tablist" aria-label="Mailbox scope">
-              <ViewButton label="Inbox" active={view === 'inbox'} onClick={() => { setView('inbox'); setFilter('all'); }} />
-              <ViewButton label="All Mail" active={view === 'all'} onClick={() => { setView('all'); setFilter('all'); }} />
+              {accountsList.length > 1 && !globalSearchActive && (
+                <div className="account-filter">
+                  <select
+                    value={selectedAccountId || ''}
+                    onChange={e => setSelectedAccountId(e.target.value || null)}
+                    aria-label="Filter by account"
+                    className="account-select"
+                  >
+                    <option value="">All accounts</option>
+                    {accountsList.map(acc => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.display_name || acc.email_address}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
+
+              {!globalSearchActive && (
+                <div className="mail-view-switch" role="tablist" aria-label="Mailbox scope">
+                  <ViewButton label="Inbox" active={view === 'inbox'} onClick={() => { setView('inbox'); setFilter('all'); }} />
+                  <ViewButton label="All Mail" active={view === 'all'} onClick={() => { setView('all'); setFilter('all'); }} />
+                </div>
+              )}
+
+              {globalSearchActive && (
+                <div className="search-scope-banner">
+                  <span>Searching all local mail</span>
+                  <button type="button" className="icon-btn" onClick={onClearSearch} aria-label="Clear search">
+                    <X size={14} aria-hidden="true" />
+                  </button>
+                </div>
+              )}
+
+              {!globalSearchActive && view === 'inbox' && (
+                <CategoryTabs
+                  categories={CATEGORY_ORDER}
+                  active={category}
+                  counts={counts}
+                  onChange={c => setCategory(c)}
+                />
+              )}
+
+              {!globalSearchActive && view === 'all' && (
+                <div className="allmail-kind-switch" role="tablist" aria-label="All Mail filter">
+                  <KindButton label="All" active={kind === null} onClick={() => setKind(null)} />
+                  <KindButton label="Received" active={kind === 'received'} onClick={() => setKind('received')} />
+                  <KindButton label="Sent" active={kind === 'sent'} onClick={() => setKind('sent')} />
+                  <KindButton label="Archived" active={kind === 'archived'} onClick={() => setKind('archived')} />
+                </div>
+              )}
+
+              <BackfillStatusLine
+                backfill={backfill}
+                onResume={() => gmailAccount && backfillMutation.mutate(gmailAccount.id)}
+                onPause={() => gmailAccount && pauseMutation.mutate(gmailAccount.id)}
+                busy={backfillMutation.isPending || pauseMutation.isPending}
+              />
             </div>
-          )}
 
-          {globalSearchActive && (
-            <div className="search-scope-banner">
-              <span>Searching all local mail</span>
-              <button type="button" className="icon-btn" onClick={onClearSearch} aria-label="Clear search">
-                <X size={14} aria-hidden="true" />
+            <div className="mail-pane-toolbar" role="toolbar" aria-label="Mail filters">
+              {!globalSearchActive && view === 'inbox' && (
+                <>
+                  <FilterButton label="All" active={filter === 'all'} onClick={() => setFilter('all')} />
+                  <FilterButton label="Important" icon={<Star />} active={filter === 'important'} onClick={() => setFilter('important')} />
+                  <FilterButton label="Reply" icon={<MessageSquareReply />} active={filter === 'reply'} onClick={() => setFilter('reply')} />
+                  <FilterButton label="Later" icon={<Archive />} active={filter === 'later'} onClick={() => setFilter('later')} />
+                  <span className="spacer" />
+                </>
+              )}
+
+              {!globalSearchActive && (
+                <div className="pane-filter">
+                  <Search size={12} aria-hidden="true" />
+                  <input
+                    type="search"
+                    placeholder={`Filter ${paneTitle.toLowerCase()}`}
+                    value={viewFilter}
+                    onChange={e => setViewFilter(e.target.value)}
+                    aria-label={`Filter ${paneTitle}`}
+                  />
+                  {viewFilter && (
+                    <button type="button" className="pane-filter-clear" onClick={() => setViewFilter('')} aria-label="Clear filter">
+                      <X size={11} aria-hidden="true" />
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {isFetching && !globalSearchActive && (
+                <RefreshCw size={12} className="btn-spinner" style={{ color: 'var(--text-muted)' }} aria-label="Refreshing" />
+              )}
+              <button
+                type="button"
+                className="filter-icon-btn"
+                onClick={() => {
+                  onRequestSync();
+                  void refetch();
+                }}
+                disabled={syncState.syncing}
+                aria-label="Sync Gmail"
+                title={syncState.lastSyncAt ? `Last sync: ${new Date(syncState.lastSyncAt).toLocaleString()}` : 'Sync Gmail'}
+              >
+                {syncState.syncing
+                  ? <span className="btn-spinner" aria-hidden="true" />
+                  : <RefreshCw size={13} aria-hidden="true" />}
+                Sync
               </button>
             </div>
-          )}
 
-          {!globalSearchActive && view === 'inbox' && (
-            <CategoryTabs
-              categories={CATEGORY_ORDER}
-              active={category}
-              counts={counts}
-              onChange={c => setCategory(c)}
+            <MessageList
+              emails={displayedEmails}
+              category={category}
+              selectedId={selectedId}
+              isLoading={isLoading}
+              onSelect={id => setSelectedId(prev => (prev === id ? prev : id))}
+              onToggleLater={toggleLater}
+              laterIds={laterIds}
+            />
+          </div>
+        </Panel>
+
+        <Separator className="pane-separator" />
+
+        {/* ── Reader pane ── */}
+        <Panel id="reader" minSize={30} defaultSize={defaultLayout.reader}>
+          <MessageReader
+            emailId={selectedId}
+            intelVisible={intelVisible}
+            onToggleIntel={handleToggleIntel}
+            laterIds={laterIds}
+            onToggleLater={toggleLater}
+          />
+        </Panel>
+
+        <Separator className="pane-separator" />
+
+        {/* ── Alfred intelligence pane ── */}
+        <Panel id="intel" minSize={0} maxSize={40} defaultSize={defaultLayout.intel} collapsedSize={0} collapsible>
+          {selectedEmail && (
+            <IntelligencePanel
+              email={selectedEmail}
+              onClose={handleToggleIntel}
             />
           )}
-
-          {!globalSearchActive && view === 'all' && (
-            <div className="allmail-kind-switch" role="tablist" aria-label="All Mail filter">
-              <KindButton label="All" active={kind === null} onClick={() => setKind(null)} />
-              <KindButton label="Received" active={kind === 'received'} onClick={() => setKind('received')} />
-              <KindButton label="Sent" active={kind === 'sent'} onClick={() => setKind('sent')} />
-              <KindButton label="Archived" active={kind === 'archived'} onClick={() => setKind('archived')} />
-            </div>
-          )}
-
-          <BackfillStatusLine
-            backfill={backfill}
-            onResume={() => gmailAccount && backfillMutation.mutate(gmailAccount.id)}
-            onPause={() => gmailAccount && pauseMutation.mutate(gmailAccount.id)}
-            busy={backfillMutation.isPending || pauseMutation.isPending}
-          />
-        </div>
-
-        <div className="mail-pane-toolbar" role="toolbar" aria-label="Mail filters">
-          {!globalSearchActive && view === 'inbox' && (
-            <>
-              <FilterButton label="All" active={filter === 'all'} onClick={() => setFilter('all')} />
-              <FilterButton label="Important" icon={<Star />} active={filter === 'important'} onClick={() => setFilter('important')} />
-              <FilterButton label="Reply" icon={<MessageSquareReply />} active={filter === 'reply'} onClick={() => setFilter('reply')} />
-              <FilterButton label="Later" icon={<Archive />} active={filter === 'later'} onClick={() => setFilter('later')} />
-              <span className="spacer" />
-            </>
-          )}
-
-          {!globalSearchActive && (
-            <div className="pane-filter">
-              <Search size={12} aria-hidden="true" />
-              <input
-                type="search"
-                placeholder={`Filter ${paneTitle.toLowerCase()}`}
-                value={viewFilter}
-                onChange={e => setViewFilter(e.target.value)}
-                aria-label={`Filter ${paneTitle}`}
-              />
-              {viewFilter && (
-                <button type="button" className="pane-filter-clear" onClick={() => setViewFilter('')} aria-label="Clear filter">
-                  <X size={11} aria-hidden="true" />
-                </button>
-              )}
-            </div>
-          )}
-
-          {isFetching && !globalSearchActive && (
-            <RefreshCw size={12} className="btn-spinner" style={{ color: 'var(--text-muted)' }} aria-label="Refreshing" />
-          )}
-          <button
-            type="button"
-            className="filter-icon-btn"
-            onClick={() => {
-              onRequestSync();
-              void refetch();
-            }}
-            disabled={syncState.syncing}
-            aria-label="Sync Gmail"
-            title={syncState.lastSyncAt ? `Last sync: ${new Date(syncState.lastSyncAt).toLocaleString()}` : 'Sync Gmail'}
-          >
-            {syncState.syncing
-              ? <span className="btn-spinner" aria-hidden="true" />
-              : <RefreshCw size={13} aria-hidden="true" />}
-            Sync
-          </button>
-        </div>
-
-        <MessageList
-          emails={displayedEmails}
-          category={category}
-          selectedId={selectedId}
-          isLoading={isLoading}
-          onSelect={id => setSelectedId(prev => (prev === id ? prev : id))}
-          onToggleLater={toggleLater}
-          laterIds={laterIds}
-        />
-      </div>
-
-      {/* ── Reader pane ── */}
-      <MessageReader
-        emailId={selectedId}
-        intelVisible={intelVisible}
-        onToggleIntel={() => setIntelVisible(v => !v)}
-        laterIds={laterIds}
-        onToggleLater={toggleLater}
-      />
-
-      {/* ── Alfred intelligence pane ── */}
-      {intelVisible && selectedEmail && (
-        <IntelligencePanel
-          email={selectedEmail}
-          onClose={() => setIntelVisible(false)}
-        />
-      )}
+        </Panel>
+      </Group>
     </div>
   );
 }
