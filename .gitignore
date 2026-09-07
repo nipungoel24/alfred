@@ -14,6 +14,7 @@ venv/
 *.sqlite
 *.sqlite3
 .pytest-tmp/
+.pytest-tmp-*/
 node_modules/
 frontend/dist/
 frontend/*.tsbuildinfo
@@ -26,3 +27,6 @@ docs/obsidian/.obsidian/workspace-mobile.json
 build/
 dist/
 scratch_test.sqlite3
+.preview-data/
+Alfred.docx
+test_output.txt
