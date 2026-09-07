@@ -1,69 +1,41 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { useQueryClient } from '@tanstack/react-query';
+import { useEffect, useState } from 'react';
 import { Sparkles, RefreshCw, FileText } from 'lucide-react';
-import { health } from '../api/emails';
-import { initApi } from '../api/client';
 
 type GateState = 'starting' | 'error' | 'ready';
 
-/** Aligned with the desktop shell's own readiness budget (45s). */
-const POLL_MS = 800;
-const MAX_FAILED_POLLS = Math.ceil(45_000 / POLL_MS);
-
 /**
  * Blocks the workspace until the local backend answers health.
- * Under Tauri, Retry re-resolves the runtime endpoint (which the shell
- * may have (re)spawned) and then re-polls — never killing a healthy
- * backend, never requiring a full app restart.
+ *
+ * Under Tauri, `initApi()` calls the durable `await_backend_ready` Rust
+ * command which blocks until the BackendSupervisor confirms the sidecar
+ * is healthy or fails. No polling, no events, no retry loops.
  */
-export function StartupGate({ children }: { children: React.ReactNode }) {
-  const queryClient = useQueryClient();
+export function StartupGate({
+  initPromise,
+  children,
+}: {
+  initPromise: Promise<void>;
+  children: React.ReactNode;
+}) {
   const [state, setState] = useState<GateState>('starting');
-  const [lastError, setLastError] = useState<string>('BACKEND_STARTING');
-  const failedPolls = useRef<number>(0);
+  const [errorMsg, setErrorMsg] = useState<string>('');
 
   useEffect(() => {
-    if (state !== 'starting') return;
-    const timer = setInterval(() => {
-      void queryClient
-        .fetchQuery({
-          queryKey: ['health', 'gate'],
-          queryFn: health,
-          retry: false,
-          staleTime: 0,
-        })
-        .then(() => {
-          failedPolls.current = 0;
-          setState('ready');
-        })
-        .catch((err: unknown) => {
-          const msg = err instanceof Error ? err.message : '';
-          if (/401|session token/i.test(msg)) setLastError('BACKEND_UNAUTHORIZED');
-          failedPolls.current += 1;
-          if (failedPolls.current >= MAX_FAILED_POLLS) {
-            setLastError(prev =>
-              prev === 'BACKEND_UNAUTHORIZED' ? prev : 'BACKEND_TIMEOUT');
-            setState('error');
-          }
-        });
-    }, POLL_MS);
-    return () => clearInterval(timer);
-  }, [state, queryClient]);
-
-  const retry = useCallback(async () => {
-    failedPolls.current = 0;
-    setLastError('BACKEND_STARTING');
-    if ('__TAURI_INTERNALS__' in window) {
-      try {
-        const { invoke } = await import('@tauri-apps/api/core');
-        await invoke('retry_backend');
-      } catch {
-        /* shell will log; fall through to re-init + refetch */
-      }
-    }
-    await initApi(20, 400);
-    setState('starting');
-  }, []);
+    let cancelled = false;
+    initPromise
+      .then(() => {
+        if (!cancelled) setState('ready');
+      })
+      .catch((err: unknown) => {
+        if (cancelled) return;
+        const msg = err instanceof Error ? err.message : String(err);
+        setErrorMsg(msg);
+        setState('error');
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [initPromise]);
 
   if (state === 'ready') return <>{children}</>;
 
@@ -86,13 +58,36 @@ export function StartupGate({ children }: { children: React.ReactNode }) {
               The local backend didn't become ready. Your data is untouched — retry to try again.
             </p>
             <p className="startup-diagnostic">
-              Diagnostic code: <span className="startup-code">{lastError}</span>
+              Diagnostic code: <span className="startup-code">{errorMsg}</span>
             </p>
             <p className="startup-logs">
               <FileText size={12} aria-hidden="true" />
               Logs: %LOCALAPPDATA%\AlfredData\logs
             </p>
-            <button type="button" className="btn btn-primary" onClick={retry}>
+            <button
+              type="button"
+              className="btn btn-primary"
+              onClick={() => {
+                setState('starting');
+                setErrorMsg('');
+                // Retry: re-invoke await_backend_ready
+                void (async () => {
+                  try {
+                    const { invoke } = await import('@tauri-apps/api/core');
+                    await invoke('restart_backend');
+                    const { invoke: invoke2 } = await import('@tauri-apps/api/core');
+                    const info = await invoke2<{ port: number; token: string }>('await_backend_ready');
+                    const { setApiCredentials } = await import('../api/client');
+                    setApiCredentials(info.port, info.token);
+                    setState('ready');
+                  } catch (err: unknown) {
+                    const msg = err instanceof Error ? err.message : String(err);
+                    setErrorMsg(msg);
+                    setState('error');
+                  }
+                })();
+              }}
+            >
               <RefreshCw size={14} aria-hidden="true" />
               Retry
             </button>

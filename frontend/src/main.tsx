@@ -17,14 +17,15 @@ const queryClient = new QueryClient({
   },
 });
 
-// Resolve backend port/token BEFORE first paint (Tauri bootstrap).
-await initApi();
+// Start backend resolution immediately (before React renders).
+// Under Tauri this calls the durable `await_backend_ready` command.
+const initPromise = initApi();
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
-        <StartupGate>
+        <StartupGate initPromise={initPromise}>
           <App />
         </StartupGate>
       </QueryClientProvider>
