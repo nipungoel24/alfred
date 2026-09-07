@@ -1,3 +1,45 @@
+@import "tailwindcss";
+
+/* ── shadcn/ui CSS variables (dark theme, zinc base) ── */
+@theme inline {
+  --color-background: var(--bg-app);
+  --color-foreground: var(--text-primary);
+  --color-card: var(--bg-elevated);
+  --color-card-foreground: var(--text-primary);
+  --color-popover: var(--bg-elevated);
+  --color-popover-foreground: var(--text-primary);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--text-inverse);
+  --color-secondary: var(--bg-sunken);
+  --color-secondary-foreground: var(--text-primary);
+  --color-muted: var(--bg-sunken);
+  --color-muted-foreground: var(--text-muted);
+  --color-accent: var(--bg-sunken);
+  --color-accent-foreground: var(--text-primary);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--text-inverse);
+  --color-border: var(--border-subtle);
+  --color-input: var(--border-subtle);
+  --color-ring: var(--border-focus);
+  --color-chart-1: var(--accent);
+  --color-chart-2: var(--success);
+  --color-chart-3: var(--info);
+  --color-chart-4: var(--warning);
+  --color-chart-5: var(--danger);
+  --color-sidebar: var(--glass-rail);
+  --color-sidebar-foreground: var(--text-primary);
+  --color-sidebar-primary: var(--accent-text);
+  --color-sidebar-primary-foreground: var(--text-inverse);
+  --color-sidebar-accent: var(--bg-row-active);
+  --color-sidebar-accent-foreground: var(--text-primary);
+  --color-sidebar-border: var(--border-subtle);
+  --color-sidebar-ring: var(--border-focus);
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 10px;
+  --radius-xl: 14px;
+}
+
 @import './styles/tokens.css';
 @import './styles/themes.css';
 @import './styles/motion.css';
