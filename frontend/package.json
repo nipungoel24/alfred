@@ -17,7 +17,7 @@
     "@vitejs/plugin-react": "latest",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "linkify-it": "^4.0.1",
+    "linkify-it": "^5.0.2",
     "lucide-react": "^1.41.0",
     "react": "latest",
     "react-dom": "latest",

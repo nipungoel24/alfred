@@ -113,14 +113,16 @@ CREATE INDEX IF NOT EXISTS idx_jobs_status_priority ON jobs(status, priority DES
 CREATE INDEX IF NOT EXISTS idx_jobs_status_notbefore ON jobs(status, not_before);
 """
 
-# FTS5 virtual table for full-text search — contentless for storage efficiency.
-# DELETE operations are handled by rebuilding the index periodically.
+# FTS5 virtual table for full-text search — contentless-delete=1 allows
+# individual row deletions while keeping the storage-efficient contentless
+# design. Requires SQLite >= 3.43.0 (shipped with Python 3.12+).
 FTS_SCHEMA = """
 CREATE VIRTUAL TABLE IF NOT EXISTS emails_fts USING fts5(
     subject,
     sender,
     body,
     content='',
+    contentless_delete=1,
     tokenize='unicode61'
 );
 """
@@ -248,6 +250,58 @@ def _migrate(connection: sqlite3.Connection):
             print(f"[Alfred] Repaired label_ids in {patched} cached email payloads")
     except Exception:
         pass
+    connection.commit()
+
+    # Item 4: Migrate raw Gmail IDs to account-prefixed scoped IDs.
+    # Before this migration, emails.id stored the raw Gmail message ID.
+    # Now _normalize_message() generates "gmail_{account_id}_{raw_msg_id}".
+    # This migration is idempotent: already-scoped IDs are skipped.
+    try:
+        import json as _json
+        import re
+        _scoped_re = re.compile(r'^gmail_[^_]+_.+')
+        rows = cursor.execute(
+            "SELECT id, account_id, payload FROM emails WHERE id NOT LIKE 'gmail_%' OR id NOT LIKE 'gmail_%_%'"
+        ).fetchall()
+        migrated = 0
+        for r in rows:
+            raw_id = r["id"]
+            account_id = r["account_id"]
+            if not account_id or _scoped_re.match(raw_id):
+                continue  # Already scoped or missing account
+            scoped_id = f"gmail_{account_id}_{raw_id}"
+            # Check for collision (unlikely but safe)
+            exists = cursor.execute("SELECT 1 FROM emails WHERE id=?", (scoped_id,)).fetchone()
+            if exists:
+                continue  # Scoped version already exists, skip
+            # Update email_analysis FK
+            cursor.execute(
+                "UPDATE email_analysis SET email_id=? WHERE email_id=?",
+                (scoped_id, raw_id)
+            )
+            # Update tasks FK
+            cursor.execute(
+                "UPDATE tasks SET source_email_id=? WHERE source_email_id=?",
+                (scoped_id, raw_id)
+            )
+            # Update jobs FK (target_id references email_id)
+            cursor.execute(
+                "UPDATE jobs SET target_id=? WHERE target_id=? AND job_type IN ('analyze','backfill')",
+                (scoped_id, raw_id)
+            )
+            # Update the emails table itself
+            cursor.execute("UPDATE emails SET id=? WHERE id=?", (scoped_id, raw_id))
+            migrated += 1
+        if migrated:
+            print(f"[Alfred] Migrated {migrated} email IDs to account-prefixed format")
+            # Rebuild FTS after ID migration
+            try:
+                cursor.execute("DROP TABLE IF EXISTS emails_fts")
+                cursor.executescript(FTS_SCHEMA)
+            except Exception:
+                pass
+    except Exception:
+        pass  # Non-fatal: new emails use scoped IDs automatically
     connection.commit()
 
     # tasks table migrations

@@ -1,5 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { parseSearchQuery, buildSearchQueryString, getSearchFilterChips } from './searchParser';
+import { isAllowedExternalUrl } from '../lib/urlSecurity';
 
 describe('searchParser', () => {
   describe('parseSearchQuery', () => {
@@ -118,39 +119,45 @@ describe('searchParser', () => {
     });
   });
 
-  describe('URL protocol safety', () => {
-    const ALLOWED_SCHEMES = new Set(['https:', 'http:', 'mailto:', 'tel:']);
-
+  describe('URL protocol safety (production validator)', () => {
     it('allows https URLs', () => {
-      expect(ALLOWED_SCHEMES.has('https:')).toBe(true);
+      expect(isAllowedExternalUrl('https://example.com')).toBe(true);
     });
 
     it('allows http URLs', () => {
-      expect(ALLOWED_SCHEMES.has('http:')).toBe(true);
+      expect(isAllowedExternalUrl('http://example.com')).toBe(true);
     });
 
     it('allows mailto URLs', () => {
-      expect(ALLOWED_SCHEMES.has('mailto:')).toBe(true);
+      expect(isAllowedExternalUrl('mailto:user@example.com')).toBe(true);
     });
 
     it('allows tel URLs', () => {
-      expect(ALLOWED_SCHEMES.has('tel:')).toBe(true);
+      expect(isAllowedExternalUrl('tel:+1234567890')).toBe(true);
     });
 
     it('rejects javascript URLs', () => {
-      expect(ALLOWED_SCHEMES.has('javascript:')).toBe(false);
+      expect(isAllowedExternalUrl('javascript:alert(1)')).toBe(false);
     });
 
     it('rejects data URLs', () => {
-      expect(ALLOWED_SCHEMES.has('data:')).toBe(false);
+      expect(isAllowedExternalUrl('data:text/html,<h1>hi</h1>')).toBe(false);
     });
 
     it('rejects file URLs', () => {
-      expect(ALLOWED_SCHEMES.has('file:')).toBe(false);
+      expect(isAllowedExternalUrl('file:///etc/passwd')).toBe(false);
     });
 
     it('rejects ftp URLs', () => {
-      expect(ALLOWED_SCHEMES.has('ftp:')).toBe(false);
+      expect(isAllowedExternalUrl('ftp://example.com')).toBe(false);
+    });
+
+    it('rejects custom scheme', () => {
+      expect(isAllowedExternalUrl('myapp://deep/link')).toBe(false);
+    });
+
+    it('rejects relative URLs', () => {
+      expect(isAllowedExternalUrl('/relative/path')).toBe(false);
     });
   });
 });

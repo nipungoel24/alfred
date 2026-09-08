@@ -43,5 +43,33 @@ img.resize((256, 256), Image.LANCZOS).save(ICONS / "128x128@2x.png")
 img.resize((128, 128), Image.LANCZOS).save(ICONS / "128x128.png")
 img.resize((64, 64), Image.LANCZOS).save(ICONS / "64x64.png")
 img.resize((32, 32), Image.LANCZOS).save(ICONS / "32x32.png")
-img.save(ICONS / "icon.ico", sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)])
+
+# ICO generation: build manually for deterministic multi-size output.
+# PIL ICO writer can produce identical blobs; this approach ensures
+# each regeneration produces a valid ICO with all required sizes.
+import struct
+sizes = [(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (128, 128), (256, 256)]
+pngs = []
+for sz in sizes:
+    resized = img.resize(sz, Image.LANCZOS)
+    import io
+    buf = io.BytesIO()
+    resized.save(buf, format='PNG', optimize=False)
+    pngs.append((sz[0], buf.getvalue()))
+
+header = struct.pack('<HHH', 0, 1, len(pngs))
+data_offset = 6 + len(pngs) * 16
+entries = b''
+all_data = b''
+for w, png_data in pngs:
+    h = w
+    # ICO uses 0 to represent 256
+    ico_w = w if w < 256 else 0
+    ico_h = w if w < 256 else 0
+    entry = struct.pack('<BBBBHHII', ico_w, ico_h, 0, 0, 1, 32, len(png_data), data_offset)
+    entries += entry
+    all_data += png_data
+    data_offset += len(png_data)
+
+(ICONS / "icon.ico").write_bytes(header + entries + all_data)
 print("generated:", sorted(p.name for p in ICONS.iterdir()))

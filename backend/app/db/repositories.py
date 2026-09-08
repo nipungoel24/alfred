@@ -324,11 +324,16 @@ class Repository:
         return [Email.model_validate_json(r['payload']) for r in rows]
 
     def delete_email(self, email_id: str):
-        """Delete an email and rebuild FTS5 index."""
+        """Delete an email and its FTS entry."""
+        # Delete from FTS first (contentless_delete=1 supports per-row DELETE)
+        row = self.con.execute("SELECT rowid FROM emails WHERE id=?", (email_id,)).fetchone()
+        if row:
+            try:
+                self.con.execute("DELETE FROM emails_fts WHERE rowid=?", (row[0],))
+            except Exception:
+                pass  # FTS5 not available
         self.con.execute('DELETE FROM emails WHERE id=?', (email_id,))
         self.con.execute('DELETE FROM tasks WHERE source_email_id=?', (email_id,))
-        # Rebuild FTS5 to remove orphaned entries
-        self.rebuild_fts()
         self.con.commit()
 
     def search_emails(self, query: str, limit=100) -> list[Email]:
@@ -447,11 +452,12 @@ class Repository:
     def _update_fts_one(self, email_id: str, email: Email):
         """Keep the FTS5 index in sync for a single upsert.
 
-        Uses contentless FTS5 (content='') for storage efficiency.
-        Contentless FTS5 cannot DELETE individual entries, so:
+        Uses contentless-delete FTS5 (contentless_delete=1) which supports
+        per-row DELETE operations. No full rebuild needed on content changes.
         - New emails: INSERT directly into FTS
-        - Updated emails (content changed): rebuild entire FTS to remove stale tokens
+        - Updated emails (content changed): DELETE old entry + INSERT new
         - Updated emails (no content change): skip (FTS already correct)
+        - Deleted emails: handled by delete_email() which does DELETE directly
         """
         try:
             # Get the rowid for this email
@@ -476,9 +482,12 @@ class Repository:
                 ).fetchone()
                 if old and old[0] == email.subject and old[1] == email.sender:
                     return  # No content change, FTS is current
-                # Content changed: rebuild entire FTS to remove stale tokens
-                # (contentless FTS5 doesn't support per-row DELETE)
-                self.rebuild_fts()
+                # Content changed: delete old entry and insert new one
+                self.con.execute("DELETE FROM emails_fts WHERE rowid=?", (rowid,))
+                self.con.execute(
+                    "INSERT INTO emails_fts(rowid, subject, sender, body) VALUES (?, ?, ?, ?)",
+                    (rowid, email.subject, email.sender, email.body[:5000] if email.body else '')
+                )
                 return
             
             # New email: insert into FTS
