@@ -91,6 +91,7 @@ export default function App() {
         searchValue={searchQuery}
         onSearchChange={handleSearchChange}
         aiReady={aiReady}
+        aiState={health?.ai}
         accountInitial={accountInitial || undefined}
       />
 
@@ -100,12 +101,16 @@ export default function App() {
           <MailWorkspace
             searchQuery={searchQuery}
             onClearSearch={() => setSearchQuery('')}
+            onSearchChange={handleSearchChange}
             syncState={{
               syncing: syncMutation.isPending,
               lastSyncAt: gmailAccount?.last_sync_at ?? null,
             }}
-            onRequestSync={() => {
-              if (gmailAccount) syncMutation.mutate(gmailAccount.id);
+            onRequestSync={(accountId?: string) => {
+              const target = accountId
+                ? accountsList.find(a => a.id === accountId)
+                : gmailAccount;
+              if (target) syncMutation.mutate(target.id);
             }}
           />
         )}

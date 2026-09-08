@@ -21,19 +21,31 @@ describe('searchParser', () => {
       expect(result.subject).toBe('meeting');
     });
 
-    it('parses has:attachment filter', () => {
-      const result = parseSearchQuery('has:attachment');
-      expect(result.hasAttachment).toBe(true);
-    });
-
     it('parses is:unread filter', () => {
       const result = parseSearchQuery('is:unread');
       expect(result.isUnread).toBe(true);
     });
 
+    it('parses is:read filter', () => {
+      const result = parseSearchQuery('is:read');
+      expect(result.isRead).toBe(true);
+    });
+
+    it('parses is:reply filter', () => {
+      const result = parseSearchQuery('is:reply');
+      expect(result.isReply).toBe(true);
+    });
+
     it('parses is:important filter', () => {
       const result = parseSearchQuery('is:important');
       expect(result.isImportant).toBe(true);
+    });
+
+    it('does not advertise unsupported has:attachment operator', () => {
+      // has:attachment is NOT a supported operator (attachments are not
+      // stored locally) — it degrades to free text, never a fake filter.
+      const result = parseSearchQuery('has:attachment');
+      expect(result.freeText).toContain('has:attachment');
     });
 
     it('parses after: date filter', () => {
@@ -90,12 +102,14 @@ describe('searchParser', () => {
 
     it('handles boolean filters', () => {
       const query = buildSearchQueryString({
-        hasAttachment: true,
         isUnread: true,
+        isRead: false,
+        isReply: true,
         freeText: [],
       });
-      expect(query).toContain('has:attachment');
       expect(query).toContain('is:unread');
+      expect(query).toContain('is:reply');
+      expect(query).not.toContain('is:read');
     });
   });
 

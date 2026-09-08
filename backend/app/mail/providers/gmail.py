@@ -5,6 +5,7 @@ from typing import Dict, Any, List
 from .base import MailProvider
 from ...schemas import Email, EmailAccount
 from ...mail.fingerprint import content_fingerprint
+from ...mail.identity import scoped_email_id
 
 class GmailProvider(MailProvider):
     def __init__(self, client_id: str, client_secret: str):
@@ -170,10 +171,11 @@ class GmailProvider(MailProvider):
                 msg_id = msg.get("id")
                 if not msg_id:
                     continue
-                if repo.email_exists(msg_id):
+                scoped_id = scoped_email_id(account.id, msg_id)
+                if repo.email_exists(scoped_id):
                     labels = msg.get("labelIds")
                     if labels:
-                        repo.update_email_labels(msg_id, labels)
+                        repo.update_email_labels(scoped_id, labels)
                         label_updates += 1
                     skipped += 1
                     continue
@@ -257,7 +259,8 @@ class GmailProvider(MailProvider):
             # Helper to fetch and upsert full details for a message ID
             async def import_message_id(msg_id):
                 nonlocal imported, skipped
-                if repo.email(msg_id) is not None:
+                scoped_id = scoped_email_id(account.id, msg_id)
+                if repo.email_exists(scoped_id):
                     skipped += 1
                     return
                 # Fetch full message payload
@@ -272,6 +275,7 @@ class GmailProvider(MailProvider):
             # format=METADATA (no body transfer).
             async def refresh_labels(msg_id) -> bool:
                 nonlocal label_updates
+                scoped_id = scoped_email_id(account.id, msg_id)
                 try:
                     r = await client.get(
                         f"{self.gmail_base_url}/messages/{msg_id}",
@@ -279,7 +283,7 @@ class GmailProvider(MailProvider):
                     )
                     r.raise_for_status()
                     labels = r.json().get("labelIds") or []
-                    if repo.update_email_labels(msg_id, labels):
+                    if repo.update_email_labels(scoped_id, labels):
                         label_updates += 1
                     return True
                 except Exception:
@@ -297,10 +301,11 @@ class GmailProvider(MailProvider):
                 
                 messages_list = res_json.get("messages", [])
                 for msg in messages_list:
-                    if repo.email_exists(msg["id"]):
+                    scoped_id = scoped_email_id(account.id, msg['id'])
+                    if repo.email_exists(scoped_id):
                         labels = msg.get("labelIds")
                         if labels:
-                            repo.update_email_labels(msg["id"], labels)
+                            repo.update_email_labels(scoped_id, labels)
                             label_updates += 1
                         skipped += 1
                         continue
@@ -360,10 +365,11 @@ class GmailProvider(MailProvider):
                 
                 messages_list = res_json.get("messages", [])
                 for msg in messages_list:
-                    if repo.email_exists(msg["id"]):
+                    scoped_id = scoped_email_id(account.id, msg['id'])
+                    if repo.email_exists(scoped_id):
                         labels = msg.get("labelIds")
                         if labels:
-                            repo.update_email_labels(msg["id"], labels)
+                            repo.update_email_labels(scoped_id, labels)
                             label_updates += 1
                         skipped += 1
                         continue
@@ -421,9 +427,10 @@ class GmailProvider(MailProvider):
 
                 for msg in new_messages:
                     msg_id = msg["id"]
+                    scoped_id = scoped_email_id(account.id, msg_id)
                     handled_ids.add(msg_id)
                     labels = set(msg.get("labelIds") or [])
-                    if repo.email_exists(msg_id):
+                    if repo.email_exists(scoped_id):
                         # Cached: refresh full label set via metadata
                         await refresh_labels(msg_id)
                         continue
@@ -438,15 +445,19 @@ class GmailProvider(MailProvider):
                     # else: spam/trash/archived arrivals are intentionally skipped
 
                 for changed_id in label_changed_ids:
-                    if changed_id in handled_ids or not repo.email_exists(changed_id):
+                    if changed_id in handled_ids:
+                        continue
+                    scoped_id = scoped_email_id(account.id, changed_id)
+                    if not repo.email_exists(scoped_id):
                         continue
                     await refresh_labels(changed_id)
 
                 # Permanently-deleted messages: retain source row for
                 # history/thread integrity but exclude from Alfred entirely.
                 for msg_id in deleted_ids:
-                    if repo.email_exists(msg_id):
-                        repo.mark_email_excluded(msg_id)
+                    scoped_id = scoped_email_id(account.id, msg_id)
+                    if repo.email_exists(scoped_id):
+                        repo.mark_email_excluded(scoped_id)
 
                 # Get latest historyId from profile
                 r_profile = await client.get(f"https://gmail.googleapis.com/gmail/v1/users/me/profile", headers=headers)
@@ -502,8 +513,13 @@ class GmailProvider(MailProvider):
             "snippet": snippet[:500],
         }
 
+        # Account-prefixed ID: prevents collision when two Gmail accounts
+        # each have a message with the same provider message ID.
+        raw_msg_id = detail.get("id", "")
+        scoped_id = scoped_email_id(account_id, raw_msg_id) if account_id else raw_msg_id
+
         return Email(
-            id=detail.get("id"),
+            id=scoped_id,
             thread_id=detail.get("threadId"),
             account_id=account_id,
             sender=sender_email,

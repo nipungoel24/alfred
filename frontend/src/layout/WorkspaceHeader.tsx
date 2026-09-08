@@ -1,17 +1,28 @@
 import { useEffect, useRef } from 'react';
 import { Search } from 'lucide-react';
 
+const AI_LABELS: Record<string, { label: string; online: boolean; hint: string }> = {
+  ready: { label: 'AI Ready', online: true, hint: 'Local AI · qwen3:4b' },
+  initializing: { label: 'AI Starting', online: false, hint: 'Local AI starting…' },
+  ollama_not_running: { label: 'AI Offline', online: false, hint: 'Ollama isn\'t running — Alfred retries automatically' },
+  model_missing: { label: 'Model Missing', online: false, hint: 'qwen3:4b needs to be installed' },
+  temporarily_unavailable: { label: 'AI Busy', online: false, hint: 'Local AI temporarily unavailable — retrying' },
+  recovering: { label: 'AI Recovering', online: false, hint: 'Local AI recovering…' },
+  error: { label: 'AI Error', online: false, hint: 'Local AI error — open Settings for details' },
+};
+
 interface WorkspaceHeaderProps {
   title: string;
   subtitle?: string;
   searchValue: string;
   onSearchChange: (value: string) => void;
   aiReady: boolean;
+  aiState?: string;
   accountInitial?: string;
 }
 
 export function WorkspaceHeader({
-  title, subtitle, searchValue, onSearchChange, aiReady, accountInitial,
+  title, subtitle, searchValue, onSearchChange, aiReady, aiState, accountInitial,
 }: WorkspaceHeaderProps) {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -30,6 +41,10 @@ export function WorkspaceHeader({
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
   }, []);
+
+  const ai = AI_LABELS[aiState ?? ''] ?? (aiReady
+    ? AI_LABELS.ready
+    : AI_LABELS.ollama_not_running);
 
   return (
     <header className="workspace-header">
@@ -55,10 +70,10 @@ export function WorkspaceHeader({
       <div className="header-actions">
         <span
           className="status-chip"
-          title={aiReady ? 'Local AI · qwen3:4b' : 'Local AI unavailable — start Ollama to resume analysis'}
+          title={ai.hint}
         >
-          <span className={`status-dot ${aiReady ? 'online' : 'offline'}`} />
-          {aiReady ? 'AI Ready' : 'AI Offline'}
+          <span className={`status-dot ${ai.online ? 'online' : 'offline'}`} />
+          {ai.label}
         </span>
         {accountInitial && (
           <span className="avatar-chip" title="Connected account">

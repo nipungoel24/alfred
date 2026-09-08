@@ -7,6 +7,11 @@ function isTauri(): boolean {
   return typeof window !== 'undefined' && '__TAURI_INTERNALS__' in window;
 }
 
+/** True when running inside the packaged Tauri WebView. */
+export function isTauriRuntime(): boolean {
+  return isTauri();
+}
+
 /** Set backend credentials directly (used by retry handler). */
 export function setApiCredentials(port: number, token: string) {
   BASE = `http://127.0.0.1:${port}`;

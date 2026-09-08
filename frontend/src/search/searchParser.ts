@@ -4,26 +4,26 @@
  * Parses search queries into structured filters that can be sent to the backend.
  * Backend validates and constructs safe FTS/SQL — never concatenates raw user text.
  * 
- * Syntax:
- * - Free text: "hello world" (searches subject, sender, body)
+ * Syntax (only operators the backend truly supports):
+ * - Free text: "hello world" (FTS5 + BM25 over subject, sender, body)
  * - from:alice@example.com (filter by sender)
  * - subject:meeting (filter by subject)
- * - has:attachment (filter by attachments)
- * - is:unread (filter by unread)
- * - is:important (filter by important)
- * - after:2024-01-01 (filter by date)
- * - before:2024-12-31 (filter by date)
- * - category:primary (filter by category)
- * - in:inbox (filter by mailbox state)
+ * - is:unread / is:read (label-based read state)
+ * - is:important (Gmail IMPORTANT label)
+ * - is:reply (analysis says a reply is needed)
+ * - after:2024-01-01 / before:2024-12-31 (received date)
+ * - category:primary (Gmail category tab)
+ * - in:inbox / in:all / in:archived / in:sent (mailbox state)
  */
 
 export interface SearchFilters {
   freeText: string[];
   from?: string;
   subject?: string;
-  hasAttachment?: boolean;
   isUnread?: boolean;
+  isRead?: boolean;
   isImportant?: boolean;
+  isReply?: boolean;
   after?: string;
   before?: string;
   category?: string;
@@ -57,18 +57,18 @@ export function parseSearchQuery(query: string): SearchFilters {
         filters.subject = value;
         remaining = remaining.replace(fullMatch, '');
         break;
-      case 'has':
-        if (value.toLowerCase() === 'attachment') {
-          filters.hasAttachment = true;
-          remaining = remaining.replace(fullMatch, '');
-        }
-        break;
       case 'is':
         if (value.toLowerCase() === 'unread') {
           filters.isUnread = true;
           remaining = remaining.replace(fullMatch, '');
+        } else if (value.toLowerCase() === 'read') {
+          filters.isRead = true;
+          remaining = remaining.replace(fullMatch, '');
         } else if (value.toLowerCase() === 'important') {
           filters.isImportant = true;
+          remaining = remaining.replace(fullMatch, '');
+        } else if (value.toLowerCase() === 'reply') {
+          filters.isReply = true;
           remaining = remaining.replace(fullMatch, '');
         }
         break;
@@ -114,9 +114,10 @@ export function buildSearchQueryString(filters: SearchFilters): string {
 
   if (filters.from) parts.push(`from:${filters.from}`);
   if (filters.subject) parts.push(`subject:${filters.subject}`);
-  if (filters.hasAttachment) parts.push('has:attachment');
   if (filters.isUnread) parts.push('is:unread');
+  if (filters.isRead) parts.push('is:read');
   if (filters.isImportant) parts.push('is:important');
+  if (filters.isReply) parts.push('is:reply');
   if (filters.after) parts.push(`after:${filters.after}`);
   if (filters.before) parts.push(`before:${filters.before}`);
   if (filters.category) parts.push(`category:${filters.category}`);
@@ -134,9 +135,10 @@ export function getSearchFilterChips(filters: SearchFilters): Array<{ key: strin
 
   if (filters.from) chips.push({ key: 'from', label: 'From', value: filters.from });
   if (filters.subject) chips.push({ key: 'subject', label: 'Subject', value: filters.subject });
-  if (filters.hasAttachment) chips.push({ key: 'has', label: 'Has', value: 'Attachment' });
-  if (filters.isUnread) chips.push({ key: 'is', label: 'Is', value: 'Unread' });
-  if (filters.isImportant) chips.push({ key: 'is', label: 'Is', value: 'Important' });
+  if (filters.isUnread) chips.push({ key: 'isUnread', label: 'Is', value: 'Unread' });
+  if (filters.isRead) chips.push({ key: 'isRead', label: 'Is', value: 'Read' });
+  if (filters.isImportant) chips.push({ key: 'isImportant', label: 'Is', value: 'Important' });
+  if (filters.isReply) chips.push({ key: 'isReply', label: 'Is', value: 'Needs reply' });
   if (filters.after) chips.push({ key: 'after', label: 'After', value: filters.after });
   if (filters.before) chips.push({ key: 'before', label: 'Before', value: filters.before });
   if (filters.category) chips.push({ key: 'category', label: 'Category', value: filters.category });

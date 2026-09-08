@@ -144,3 +144,68 @@ def test_structured_search_limit(tmp_path: Path):
     filters = SearchFilters(sender='alice')
     results = repo.search_emails_structured(filters, limit=5)
     assert len(results) == 5
+
+
+def test_filter_before_limit(tmp_path: Path):
+    """Priority and needs_reply filters must be applied BEFORE LIMIT/OFFSET.
+
+    If we fetch 200 emails and then filter in Python, we might get 0 results
+    even though there are matching emails beyond the 200 window. The SQL must
+    filter first, then paginate.
+    """
+    repo = Repository(tmp_path / 'test.sqlite3')
+
+    # Create 10 emails, only 1 has high priority
+    for i in range(10):
+        e = make_email(id=f'e{i}', subject=f'Email {i}',
+                       received_at=f'2024-01-{10+i:02d}T10:00:00')
+        repo.upsert_email(e, 'fp')
+
+    # Manually set analysis with different priorities
+    from backend.app.schemas import EmailAnalysis, Priority, Category
+    for i in range(10):
+        analysis = EmailAnalysis(
+            short_summary=f'Summary {i}',
+            category=Category.work,
+            priority=Priority.high if i == 5 else Priority.low,
+            priority_score=90 if i == 5 else 10,
+            reason_for_priority='Test',
+            needs_reply=(i == 3),
+        )
+        repo.save_analysis(f'e{i}', 'fp', 'test-model', analysis)
+
+    # Filter for high priority with limit=3 — should find the 1 high-priority email
+    # even though it's email #6 (index 5) in the list
+    filtered = repo.emails_filtered(priority='high', limit=3)
+    assert len(filtered) == 1
+    assert filtered[0].id == 'e5'
+
+    # Filter for needs_reply with limit=2 — should find the 1 needs-reply email
+    filtered = repo.emails_filtered(needs_reply=True, limit=2)
+    assert len(filtered) == 1
+    assert filtered[0].id == 'e3'
+
+
+def test_account_scoped_structured_search(tmp_path: Path):
+    """Structured search must respect account_id filter."""
+    repo = Repository(tmp_path / 'test.sqlite3')
+
+    emails = [
+        make_email(id='e1', sender='alice@example.com', subject='Account A email'),
+        make_email(id='e2', sender='alice@example.com', subject='Account B email'),
+    ]
+    emails[0].account_id = 'acct_a'
+    emails[1].account_id = 'acct_b'
+    for e in emails:
+        repo.upsert_email(e, 'fp')
+
+    # Search scoped to account_a
+    filters = SearchFilters(sender='alice')
+    results = repo.search_emails_structured(filters, account_id='acct_a')
+    assert len(results) == 1
+    assert results[0].account_id == 'acct_a'
+
+    # Search scoped to account_b
+    results = repo.search_emails_structured(filters, account_id='acct_b')
+    assert len(results) == 1
+    assert results[0].account_id == 'acct_b'

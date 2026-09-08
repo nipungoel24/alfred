@@ -126,15 +126,44 @@ export const emails = (options: {
   return api<Email[]>(`/api/emails${queryStr}`);
 };
 
-export const emailCounts = () => api<EmailCounts>('/api/emails/counts');
+export const emailCounts = (accountId?: string) => {
+  const params = accountId ? `?account_id=${encodeURIComponent(accountId)}` : '';
+  return api<EmailCounts>(`/api/emails/counts${params}`);
+};
 
 export const emailDetails = (id: string) => api<Email>(`/api/emails/${id}`);
 export const analyze = (id: string) => api<{ analysis: Analysis; cached: boolean }>(`/api/emails/${id}/analyze`, { method: 'POST' });
 export const draft = (id: string) => api<{ draft: string }>(`/api/emails/${id}/draft`, { method: 'POST' });
 export const briefing = () => api<Briefing>('/api/briefing');
 export const regenerateBriefing = () => api<Briefing>('/api/briefing/generate', { method: 'POST' });
-export type Health = { status: 'ok' | 'error'; ai?: 'ready' | 'unavailable' };
+export type Health = { status: 'ok' | 'error'; ai?: string; build?: string | null };
 export const health = () => api<Health>('/health');
+
+// AI state machine (backend.app.ai.supervisor states)
+export type AIState =
+  | 'initializing'
+  | 'ready'
+  | 'ollama_not_running'
+  | 'model_missing'
+  | 'temporarily_unavailable'
+  | 'recovering'
+  | 'error';
+
+export type AnalysisStatus = {
+  state: AIState;
+  model: string;
+  model_installed: boolean | null;
+  ollama_installed: boolean;
+  ollama_running: boolean;
+  last_error: string | null;
+  detail: string | null;
+  pending: number;
+  worker_running: boolean;
+  queue_paused: boolean;
+};
+
+export const analysisStatus = () => api<AnalysisStatus>('/api/analysis/status');
+export const analysisRetry = () => api<AnalysisStatus>('/api/analysis/retry', { method: 'POST' });
 
 // Account management
 export const accounts = () => api<EmailAccount[]>('/api/accounts');
@@ -148,3 +177,34 @@ export const deleteAccount = (id: string) => api<{ status: string }>(`/api/accou
 export const tasks = () => api<Task[]>('/api/tasks');
 export const toggleTask = (id: string) => api<Task>(`/api/tasks/${id}/toggle`, { method: 'POST' });
 export const deleteTask = (id: string) => api<{ status: string }>(`/api/tasks/${id}`, { method: 'DELETE' });
+
+// Structured search — mirrors backend.app.schemas.SearchFilters.
+export type SearchFilters = {
+  free_text: string[];
+  sender?: string;
+  subject?: string;
+  is_unread?: boolean;
+  is_read?: boolean;
+  is_important?: boolean;
+  needs_reply?: boolean;
+  after?: string;
+  before?: string;
+  category?: string;
+  mailbox_state?: string;
+};
+
+export const searchEmailsStructured = (filters: SearchFilters, options: {
+  accountId?: string;
+  limit?: number;
+  offset?: number;
+} = {}) => {
+  const params: string[] = [];
+  if (options.accountId) params.push(`account_id=${encodeURIComponent(options.accountId)}`);
+  if (options.limit !== undefined) params.push(`limit=${options.limit}`);
+  if (options.offset !== undefined) params.push(`offset=${options.offset}`);
+  const queryStr = params.length ? `?${params.join('&')}` : '';
+  return api<Email[]>(`/api/emails/search${queryStr}`, {
+    method: 'POST',
+    body: JSON.stringify(filters),
+  });
+};

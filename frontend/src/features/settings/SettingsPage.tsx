@@ -1,10 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
-import { Cpu, Database, Palette, ShieldCheck } from 'lucide-react';
+import { Cpu, Database, Palette, ShieldCheck, Info } from 'lucide-react';
 import { ThemeToggle } from '../../theme/ThemeToggle';
-import { health as fetchHealth } from '../../api/emails';
+import { health as fetchHealth, analysisStatus } from '../../api/emails';
+
+const AI_LABELS: Record<string, string> = {
+  ready: 'Ready',
+  initializing: 'Starting',
+  ollama_not_running: "Ollama isn't running",
+  model_missing: 'Model missing',
+  temporarily_unavailable: 'Temporarily unavailable',
+  recovering: 'Recovering',
+  error: 'Error',
+};
 
 export function SettingsPage() {
   const { data: health } = useQuery({ queryKey: ['health'], queryFn: fetchHealth, retry: 0 });
+  const { data: aiStatus } = useQuery({ queryKey: ['analysisStatus'], queryFn: analysisStatus, retry: 0 });
+  const frontendBuild = typeof __ALFRED_BUILD__ !== 'undefined' ? __ALFRED_BUILD__ : 'unknown';
 
   return (
     <div className="page-scroll">
@@ -39,9 +51,25 @@ export function SettingsPage() {
           <div className="settings-row">
             <span className="settings-label">Status</span>
             <span className="settings-value" style={{ color: health?.ai === 'ready' ? 'var(--success)' : 'var(--warning)' }}>
-              {health?.ai === 'ready' ? 'Ready' : 'Unavailable'}
+              {AI_LABELS[health?.ai ?? ''] ?? 'Starting'}
             </span>
           </div>
+          {aiStatus && (
+            <>
+              <div className="settings-row">
+                <span className="settings-label">Model installed</span>
+                <span className="settings-value">{aiStatus.model_installed === null ? '—' : aiStatus.model_installed ? 'Yes' : 'No'}</span>
+              </div>
+              <div className="settings-row">
+                <span className="settings-label">Ollama installed</span>
+                <span className="settings-value">{aiStatus.ollama_installed ? 'Yes' : 'No'}</span>
+              </div>
+              <div className="settings-row">
+                <span className="settings-label">Queue</span>
+                <span className="settings-value">{aiStatus.pending} pending{aiStatus.queue_paused ? ' (paused)' : ''}</span>
+              </div>
+            </>
+          )}
         </div>
 
         <div className="settings-group reveal" style={{ ['--stagger' as string]: 3 }}>
@@ -69,6 +97,20 @@ export function SettingsPage() {
             <span className="settings-value" style={{ color: 'var(--success)' }}>
               All processing stays local
             </span>
+          </div>
+        </div>
+
+        <div className="settings-group reveal" style={{ ['--stagger' as string]: 5 }}>
+          <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-3)' }}>
+            <Info size={12} aria-hidden="true" /> About
+          </div>
+          <div className="settings-row">
+            <span className="settings-label">Frontend build</span>
+            <span className="settings-value settings-mono">{frontendBuild}</span>
+          </div>
+          <div className="settings-row">
+            <span className="settings-label">Backend build</span>
+            <span className="settings-value settings-mono">{health?.build ?? '—'}</span>
           </div>
         </div>
       </div>

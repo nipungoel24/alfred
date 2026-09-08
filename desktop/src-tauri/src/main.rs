@@ -87,6 +87,7 @@ impl BackendSupervisor {
         cmd = cmd
             .env("ALFRED_HOST", "127.0.0.1")
             .env("ALFRED_PORT", port.to_string())
+            .env("ALFRED_BACKEND_BUILD", env!("ALFRED_GIT_COMMIT"))
             .env("ALFRED_RUNTIME_TOKEN", &token);
         if let Ok(db_path) = std::env::var("ALFRED_DATABASE_PATH") {
             cmd = cmd.env("ALFRED_DATABASE_PATH", db_path);

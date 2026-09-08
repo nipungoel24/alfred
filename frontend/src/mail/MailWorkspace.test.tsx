@@ -88,6 +88,7 @@ vi.mock('../api/emails', async (importOriginal) => {
       excluded: 0,
       categories: { primary: 1, promotions: 1, social: 0, updates: 0, forums: 0 },
     })),
+    searchEmailsStructured: vi.fn(() => Promise.resolve([archivedEmail])),
     emailDetails: vi.fn((id: string) => Promise.resolve(
       id === 'p1' ? primaryEmail : id === 'pr1' ? promoEmail
         : id === 'a1' ? archivedEmail : sentEmail)),
@@ -124,6 +125,7 @@ function renderWorkspace() {
       <MailWorkspace
         searchQuery=""
         onClearSearch={() => {}}
+        onSearchChange={() => {}}
         syncState={{ syncing: false, lastSyncAt: null }}
         onRequestSync={() => {}}
       />
@@ -278,6 +280,7 @@ describe('MailWorkspace', () => {
         <MailWorkspace
           searchQuery="archived"
           onClearSearch={() => {}}
+          onSearchChange={() => {}}
           syncState={{ syncing: false, lastSyncAt: null }}
           onRequestSync={() => {}}
         />
@@ -290,6 +293,56 @@ describe('MailWorkspace', () => {
     // view switch + category tabs hidden during global search
     expect(screen.queryByRole('tab', { name: 'Inbox' })).not.toBeInTheDocument();
     expect(screen.queryByRole('tab', { name: /Promotions/ })).not.toBeInTheDocument();
+  });
+
+  it('uses the structured search endpoint when the query has operators', async () => {
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MailWorkspace
+          searchQuery="from:alice is:unread"
+          onClearSearch={() => {}}
+          onSearchChange={() => {}}
+          syncState={{ syncing: false, lastSyncAt: null }}
+          onRequestSync={() => {}}
+        />
+      </QueryClientProvider>
+    );
+    const { searchEmailsStructured } = await import('../api/emails');
+    await waitFor(() => {
+      expect(vi.mocked(searchEmailsStructured)).toHaveBeenCalled();
+    });
+    const filters = vi.mocked(searchEmailsStructured).mock.calls[0][0];
+    expect(filters.sender).toBe('alice');
+    expect(filters.is_unread).toBe(true);
+    // Chips surface the active filters and can be removed
+    expect(screen.getByRole('button', { name: /Remove From filter/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Remove Is filter/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Clear all' })).toBeInTheDocument();
+  });
+
+  it('keeps plain free-text searches on the standard list endpoint', async () => {
+    const api = await import('../api/emails');
+    vi.mocked(api.searchEmailsStructured).mockClear();
+    vi.mocked(api.emails).mockClear();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MailWorkspace
+          searchQuery="planning notes"
+          onClearSearch={() => {}}
+          onSearchChange={() => {}}
+          syncState={{ syncing: false, lastSyncAt: null }}
+          onRequestSync={() => {}}
+        />
+      </QueryClientProvider>
+    );
+    await waitFor(() => {
+      expect(vi.mocked(api.emails)).toHaveBeenCalled();
+    });
+    expect(vi.mocked(api.searchEmailsStructured)).not.toHaveBeenCalled();
+    expect(vi.mocked(api.emails).mock.calls.at(-1)?.[0]?.query).toBe('planning notes');
+    expect(vi.mocked(api.emails).mock.calls.at(-1)?.[0]?.scope).toBe('all');
   });
 
   it('selecting a message renders the reader and Alfred intelligence panel', async () => {

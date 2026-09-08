@@ -69,6 +69,9 @@ class Settings(BaseModel):
     database_path: Path = Field(default_factory=lambda: Path(os.getenv("ALFRED_DATABASE_PATH", _default_database_path())))
     gmail_client_id: str = Field(default_factory=lambda: os.getenv("GMAIL_CLIENT_ID", "PLACEHOLDER_CLIENT_ID"))
     gmail_client_secret: str = Field(default_factory=lambda: os.getenv("GMAIL_CLIENT_SECRET", ""))
+    # Build identity: passed by the Tauri shell (its own compile-time git
+    # commit) when spawning the sidecar — proves which build is running.
+    backend_build: str | None = Field(default_factory=lambda: os.getenv("ALFRED_BACKEND_BUILD") or None)
     # Desktop session auth: when set, every request must carry this token.
     # Generated per launch by the Tauri shell; never persisted.
     runtime_token: str | None = Field(default_factory=lambda: os.getenv("ALFRED_RUNTIME_TOKEN") or None)

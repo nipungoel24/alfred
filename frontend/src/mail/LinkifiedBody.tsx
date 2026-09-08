@@ -3,6 +3,7 @@ import type { ReactNode } from 'react';
 import LinkifyIt from 'linkify-it';
 import type { Match } from 'linkify-it';
 import { isAllowedExternalUrl } from '../lib/urlSecurity';
+import { isTauriRuntime } from '../api/client';
 
 const linkify = new LinkifyIt();
 
@@ -67,11 +68,16 @@ export function LinkifiedBody({ text, className }: LinkifiedBodyProps) {
 }
 
 async function openExternalLink(url: string): Promise<void> {
-  try {
+  if (!isAllowedExternalUrl(url)) {
+    return; // rejected schemes never open
+  }
+  if (isTauriRuntime()) {
+    // Packaged app: the system opener (never shell execution). A
+    // rejected opener permission stays rejected — no fallback.
     const { openUrl } = await import('@tauri-apps/plugin-opener');
     await openUrl(url);
-  } catch {
-    // Fallback for browser environment
-    window.open(url, '_blank', 'noopener,noreferrer');
+    return;
   }
+  // Browser development only.
+  window.open(url, '_blank', 'noopener,noreferrer');
 }

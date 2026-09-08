@@ -18,6 +18,7 @@ from .db.repositories import Repository
 from .db.secure_store import encrypt_token, decrypt_token
 from .mail.normalizer import normalized_email
 from .mail.fingerprint import content_fingerprint
+from .mail.identity import provider_message_id as provider_id_from_local
 from .mail.briefing_fingerprint import briefing_fingerprint, BRIEFING_SCHEMA_VERSION
 from .mail.providers.gmail import GmailProvider
 from .mail.eligibility import MailEligibilityPolicy, GmailCategory, BackfillState
@@ -26,8 +27,9 @@ from .mail.backfill import (
 )
 from .ai.ollama_client import OllamaClient, OllamaUnavailable, OllamaTimeout, OllamaInvalidResponse, OllamaModelMissing
 from .ai.service import AIService
+from .ai.supervisor import AISupervisor, AIState
 from .services.task_derivation import derive_tasks, rebuild_tasks_from_analyses, DERIVATION_VERSION
-from .schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task
+from .schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task, SearchFilters
 
 settings = get_settings()
 logger = logging.getLogger("alfred.oauth")
@@ -36,6 +38,7 @@ logger = logging.getLogger("alfred.oauth")
 repo = Repository(settings.database_path)
 ollama_client = OllamaClient(settings.ollama_base_url)
 ai = AIService(ollama_client, settings.ollama_model)
+ai_supervisor = AISupervisor(ollama_client, settings.ollama_model)
 gmail_provider = GmailProvider(settings.gmail_client_id, settings.gmail_client_secret)
 
 OAUTH_STATES = {}  # state -> {"verifier": verifier, "redirect_uri": redirect_uri}
@@ -56,7 +59,6 @@ def _broadcast_progress(event: dict):
 _worker_task: asyncio.Task | None = None
 _worker_running = False
 WORKER_CONCURRENCY = 1
-_ai_status = "starting"
 
 # ── Progressive All Mail backfill (backend-owned) ──
 BACKFILL_JOB_TYPE = 'backfill_gmail'
@@ -189,24 +191,38 @@ def _ensure_backfill_job(account_id: str):
 
 
 async def _analysis_worker():
-    """Background worker that processes analysis jobs from SQLite."""
+    """Background worker that processes analysis jobs from SQLite.
+
+    Pause discipline: when the AI backend is unhealthy the queue does
+    NOT churn. Jobs are retained (re-queued with a bounded not_before
+    backoff) and consumption resumes automatically once the supervisor
+    restores READY via health polling + synthetic smoke test.
+    """
     global _worker_running
     _worker_running = True
-    consecutive_failures = 0
-    max_consecutive_failures = 5
 
     while _worker_running:
+        # Queue pause: keep queued work, poll health on bounded backoff.
+        if ai_supervisor.queue_paused():
+            payload = await ai_supervisor.wait_and_recheck()
+            _broadcast_progress({
+                "type": "ai_state",
+                "state": payload["state"],
+                "pending": repo.pending_job_count('analyze_email'),
+            })
+            continue
+
         job = repo.next_job('analyze_email')
         if not job:
             await asyncio.sleep(1.0)
             continue
-            
+
         job_id = job['id']
         email_id = job['target_id']
-        
+
         # Mark as running
         repo.update_job_status(job_id, 'running')
-        
+
         e = repo.email(email_id)
         if not e:
             repo.update_job_status(job_id, 'failed', error_message='Email not found')
@@ -234,7 +250,6 @@ async def _analysis_worker():
                 "type": "analysis_complete", "email_id": e.id, "cached": True,
                 "pending": repo.pending_job_count('analyze_email')
             })
-            consecutive_failures = 0
             continue
 
         try:
@@ -252,35 +267,32 @@ async def _analysis_worker():
 
             # Derive tasks from analysis
             _derive_and_save_tasks(e, analysis)
-            
+
             repo.update_job_status(job_id, 'succeeded')
+            ai_supervisor.reset_backoff()
 
             _broadcast_progress({
                 "type": "analysis_complete", "email_id": e.id, "cached": False,
                 "pending": repo.pending_job_count('analyze_email'),
                 "total_ms": round(metrics.total_ms, 1),
             })
-            consecutive_failures = 0
 
-        except (OllamaUnavailable, OllamaTimeout) as ex:
-            consecutive_failures += 1
-            repo.update_job_status(job_id, 'retryable_failed', error_code=type(ex).__name__, error_message=str(ex))
+        except (OllamaUnavailable, OllamaTimeout, OllamaModelMissing) as ex:
+            # AI outage: classify, keep the job queued with a bounded
+            # backoff, and let the supervisor pause consumption until
+            # health is restored. No job is marked failed for this.
+            await ai_supervisor.on_analysis_failure(ex)
+            delay = ai_supervisor.next_backoff_seconds()
+            next_run = (datetime.now(timezone.utc) + timedelta(seconds=delay)).isoformat()
+            repo.requeue_job(job_id, not_before=next_run)
             _broadcast_progress({
-                "type": "analysis_error", "email_id": e.id,
-                "error": type(ex).__name__,
+                "type": "ai_state",
+                "state": ai_supervisor.state,
+                "email_id": e.id,
                 "pending": repo.pending_job_count('analyze_email'),
             })
-            if consecutive_failures >= max_consecutive_failures:
-                _broadcast_progress({
-                    "type": "worker_paused",
-                    "reason": f"Ollama unavailable after {max_consecutive_failures} consecutive failures",
-                    "pending": repo.pending_job_count('analyze_email'),
-                })
-                # Wait before retrying
-                await asyncio.sleep(30)
-                consecutive_failures = 0
 
-        except (OllamaInvalidResponse, OllamaModelMissing) as ex:
+        except (OllamaInvalidResponse,) as ex:
             repo.update_job_status(job_id, 'failed', error_code=type(ex).__name__, error_message=str(ex))
             _broadcast_progress({
                 "type": "analysis_error", "email_id": e.id,
@@ -355,9 +367,14 @@ async def _label_backfill():
             
             access_token = decrypt_token(creds['encrypted_access_token'])
             refreshed = 0
-            for msg_id in pending:
-                labels = await gmail_provider.refresh_message_labels(access_token, msg_id)
-                if labels is not None and repo.update_email_labels(msg_id, labels):
+            for local_id in pending:
+                # Gmail API needs the provider-side message id; the repo
+                # works with the account-scoped local id. Never mixed.
+                raw_id = provider_id_from_local(local_id)
+                if not raw_id:
+                    continue
+                labels = await gmail_provider.refresh_message_labels(access_token, raw_id)
+                if labels is not None and repo.update_email_labels(local_id, labels):
                     refreshed += 1
             total_refreshed += refreshed
         
@@ -408,22 +425,24 @@ async def _startup_background():
     requests while the lifespan is pending. The desktop shell polls
     /health with a bounded timeout, so health MUST respond immediately
     after the socket binds.
+
+    AI readiness is owned by the supervisor: health check → (optional
+    single-instance auto-start) → model presence → synthetic smoke test
+    → READY. The analysis worker pauses until READY and resumes by
+    itself when Ollama comes back — no restart required.
     """
-    global _ai_status
-    _ai_status = "initializing"
+    # Warm the model into memory (non-fatal when Ollama is offline —
+    # the supervisor's health check below is the source of truth).
     try:
         await ai.preload()
     except Exception:
-        pass  # Non-fatal: first inference will just be slower
+        pass
 
-    # Verify Ollama is actually reachable after preload attempt.
-    # preload_model swallows errors silently; a direct health check
-    # tells us the truth about whether the AI backend is usable.
-    try:
-        await ollama_client.health()
-        _ai_status = "ready"
-    except Exception:
-        _ai_status = "unavailable"
+    payload = await ai_supervisor.refresh()
+    _broadcast_progress({
+        "type": "ai_state", "state": payload["state"],
+        "pending": repo.pending_job_count('analyze_email'),
+    })
 
     # Rebuild tasks from cached analyses if needed (migration v1→v2)
     try:
@@ -592,7 +611,8 @@ async def health():
     return {
         'status': 'ok' if db_ok else 'degraded',
         'database': 'ready' if db_ok else 'unavailable',
-        'ai': _ai_status,
+        'ai': ai_supervisor.state,
+        'build': settings.backend_build,
     }
 
 @app.get('/api/config')
@@ -825,7 +845,7 @@ async def analysis_progress():
     async def event_stream():
         try:
             # Send initial status
-            yield f"data: {json.dumps({'type': 'status', 'pending': repo.pending_job_count('analyze_email')})}\n\n"
+            yield f"data: {json.dumps({'type': 'status', 'pending': repo.pending_job_count('analyze_email'), 'ai_state': ai_supervisor.state})}\n\n"
             while True:
                 try:
                     event = await asyncio.wait_for(q.get(), timeout=15.0)
@@ -842,11 +862,33 @@ async def analysis_progress():
 
 @app.get('/api/analysis/status')
 def analysis_status():
-    """Get current analysis queue status (jobs-table derived)."""
-    return {
+    """AI state machine + analysis queue status (observer-facing)."""
+    payload = ai_supervisor.payload()
+    payload.update({
         "pending": repo.pending_job_count('analyze_email'),
         "worker_running": _worker_running,
-    }
+        "queue_paused": ai_supervisor.queue_paused(),
+    })
+    return payload
+
+@app.post('/api/analysis/retry')
+async def analysis_retry():
+    """Manual recovery trigger: reset backoff and re-check AI health now.
+
+    Idempotent and safe — never touches queued jobs or user data.
+    """
+    ai_supervisor.reset_backoff()
+    payload = await ai_supervisor.refresh()
+    _broadcast_progress({
+        "type": "ai_state", "state": payload["state"],
+        "pending": repo.pending_job_count('analyze_email'),
+    })
+    payload.update({
+        "pending": repo.pending_job_count('analyze_email'),
+        "worker_running": _worker_running,
+        "queue_paused": ai_supervisor.queue_paused(),
+    })
+    return payload
 
 
 # ── Emails ──
@@ -873,26 +915,35 @@ def get_emails(q: str | None = None, priority: str | None = None, needs_reply: b
     # DB-driven filtering: scope + eligibility + search context.
     # scope=all = the real All Mail (inbox + archived + sent); kind refines
     # it. Category tabs apply only to the inbox scope.
+    # priority and needs_reply are applied BEFORE LIMIT/OFFSET in SQL.
     result = repo.emails_filtered(
         account_id=account_id, category=category if scope == 'inbox' else None,
         query=q, scope=scope, kind=kind if scope == 'all' else None,
-        include_excluded=False, limit=limit, offset=offset
+        include_excluded=False, limit=limit, offset=offset,
+        priority=priority, needs_reply=needs_reply
     )
 
     # Attach cached analyses
     for e in result:
         e.analysis = repo.cached_analysis(e.id, content_fingerprint(e), settings.ollama_model)
 
-    # Apply semantic filters on top of the already-eligible window.
-    # 'high' means Important: urgent AND high both qualify.
-    if priority:
-        if priority == 'high':
-            result = [e for e in result if e.analysis
-                      and e.analysis.priority.value in ('high', 'urgent')]
-        else:
-            result = [e for e in result if e.analysis and e.analysis.priority.value == priority]
-    if needs_reply is not None:
-        result = [e for e in result if e.analysis and e.analysis.needs_reply == needs_reply]
+    return result
+
+
+@app.post('/api/emails/search')
+def search_emails_structured(filters: SearchFilters, account_id: str | None = None,
+                             limit: int = 200, offset: int = 0):
+    """Structured search with filters applied at the database level.
+
+    Filters are applied BEFORE LIMIT/OFFSET for correct results.
+    Uses BM25 ranking when FTS5 is available.
+    """
+    result = repo.search_emails_structured(
+        filters, account_id=account_id, limit=limit, offset=offset
+    )
+    # Attach cached analyses
+    for e in result:
+        e.analysis = repo.cached_analysis(e.id, content_fingerprint(e), settings.ollama_model)
     return result
 
 @app.get('/api/emails/{email_id}')

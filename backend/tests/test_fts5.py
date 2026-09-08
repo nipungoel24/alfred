@@ -56,29 +56,6 @@ def test_fts_delete_cleans_index(tmp_path: Path):
     assert len(results) == 0
 
 
-def test_fts_update_reindexes(tmp_path: Path):
-    """UPDATE should reindex the FTS5 entry after rebuild."""
-    repo = Repository(tmp_path / 'test.sqlite3')
-    email = make_email(subject='Original Subject')
-    repo.upsert_email(email, 'fp1')
-    
-    # Search for original
-    results = repo.search_emails('Original')
-    assert len(results) == 1
-    
-    # Update email - with contentless FTS5, we need to rebuild
-    updated_email = make_email(id='e1', subject='Updated Subject')
-    repo.upsert_email(updated_email, 'fp2')
-    
-    # Rebuild FTS to reflect changes
-    repo.rebuild_fts()
-    
-    # Search for new content - should find the email
-    results = repo.search_emails('Updated')
-    assert len(results) == 1
-    assert results[0].subject == 'Updated Subject'
-
-
 def test_fts_multiple_emails(tmp_path: Path):
     """FTS5 should handle multiple emails correctly."""
     repo = Repository(tmp_path / 'test.sqlite3')
@@ -221,3 +198,48 @@ def test_fts_rebuild_removes_orphans(tmp_path: Path):
     
     results = repo.search_emails('Hello')
     assert len(results) == 0
+
+
+def test_fts_update_without_manual_repair(tmp_path: Path):
+    """Upserting an email with changed content should automatically reindex FTS.
+
+    The user should NOT need to manually call rebuild_fts() after an upsert.
+    """
+    repo = Repository(tmp_path / 'test.sqlite3')
+    email = make_email(subject='Original Subject', body='Original body')
+    repo.upsert_email(email, 'fp1')
+
+    # Verify original is searchable
+    results = repo.search_emails('Original')
+    assert len(results) == 1
+
+    # Update email with new content — FTS should auto-reindex
+    updated = make_email(id='e1', subject='Updated Subject', body='Updated body')
+    repo.upsert_email(updated, 'fp2')
+
+    # New content should be searchable WITHOUT manual rebuild_fts()
+    results = repo.search_emails('Updated')
+    assert len(results) == 1
+    assert results[0].subject == 'Updated Subject'
+
+    # Old content should NOT be searchable
+    results = repo.search_emails('Original')
+    assert len(results) == 0
+
+
+def test_fts_insert_new_does_not_duplicate(tmp_path: Path):
+    """Inserting a new email should not create duplicate FTS entries."""
+    repo = Repository(tmp_path / 'test.sqlite3')
+    email = make_email()
+    repo.upsert_email(email, 'fp1')
+
+    # Search should return exactly 1 result
+    results = repo.search_emails('Hello')
+    assert len(results) == 1
+
+    # Upsert same email again (no content change)
+    repo.upsert_email(email, 'fp1')
+
+    # Should still be exactly 1 result
+    results = repo.search_emails('Hello')
+    assert len(results) == 1

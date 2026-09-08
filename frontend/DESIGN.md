@@ -346,3 +346,70 @@ Alfred is a **premium dark desktop application** for executive inbox management.
 - 1920×1080
 
 Windows desktop first. NOT phone layouts.
+
+## Accepted Changes — Mail Workspace Productization (2026-09)
+
+### Mail-pane container queries (not window queries)
+
+`.mail-pane` is the CSS inline-size container (`container-type: inline-size;
+container-name: mail-pane`). All mail-pane responsiveness keys off
+`@container mail-pane (...)` so dragging the mail/reader separator changes
+the mail layout — window size alone does not.
+
+- Mail pane ≤ 520px: the filter field drops to its own full-width row
+  (`order: 10; flex-basis: 100%`), the spacer is hidden, the Sync button
+  collapses to icon-only (keeps `aria-label`, `title`, focus ring).
+- Mail pane ≤ 360px: filter buttons compress; labels stay readable
+  (no cryptic abbreviations).
+- Category tabs wrap (`flex-wrap: wrap; overflow: hidden`) — never clipped,
+  never invisible horizontal scroll.
+- Intelligence panel: `react-resizable-panels` Group/Panel/Separator with
+  `minSize`/`maxSize`, `collapsible` + `collapsedSize={0}`; layout persisted
+  to `localStorage` (`alfred-pane-layout`); broken layouts are rejected on
+  read (type check) so a saved layout can never brick the workspace.
+
+### Mail toolbar states
+
+- Wide: `All | Important | Reply | Later … [Filter box growing] [Sync]`
+- Medium: same, Sync becomes icon-only via `.sync-label` hiding.
+- Narrow: search is a full-width second row; primary filters stay visible.
+
+Rules: `min-width: 0` on all flex children, `flex-wrap`, no `overflow-x:
+auto` on toolbars, nothing bleeds into the reader pane.
+
+### AI state machine (user-visible labels)
+
+`initializing → ready | ollama_not_running | model_missing |
+temporarily_unavailable | recovering | error`. Never Python exception names.
+Rail/header chips and Settings show the same labels. The analysis status
+pill is compact (bottom-left, max 560px, not full-width):
+
+- `ready + pending>0`: "Analyzing N messages · Local AI ready" (spinner)
+- offline states: "Local AI offline · N analyses queued" + Retry button
+- `model_missing`: "qwen3:4b needs to be installed · N queued"
+- No spinner when nothing can execute.
+
+### Structured search
+
+`searchParser.parseSearchQuery()` → typed `SearchFilters` → POST
+`/api/emails/search` → parameterized SQL before LIMIT/OFFSET; free text
+over FTS5 + BM25. Only advertised operators: `from: subject: is:unread
+is:read is:important is:reply after: before: category: in:` plus free text.
+`has:attachment` is NOT supported (attachments aren't stored) and degrades
+to free text. Active filters render as removable chips + "Clear all".
+
+### Build identity
+
+- Desktop: compile-time `ALFRED_GIT_COMMIT` (build.rs) → desktop.log
+  `build=` line; passed to the sidecar as `ALFRED_BACKEND_BUILD`.
+- Backend: `/health.build` + Settings → About.
+- Frontend: `__ALFRED_BUILD__` (vite define, git short SHA) → Settings →
+  About. Running-build staleness is checkable in-app.
+
+### External links
+
+`LinkifiedBody` renders plain React text + linkify-it 5.x matches.
+`isAllowedExternalUrl()` allows exactly `https http mailto tel`. In Tauri,
+`@tauri-apps/plugin-opener openUrl()` is the only opener (a rejected
+permission stays rejected — no shell fallback). `window.open` only outside
+Tauri.

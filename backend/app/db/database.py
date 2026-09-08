@@ -1,7 +1,13 @@
 """SQLite schema, connection, and migration helpers for Alfred's local data."""
+import shutil
 import sqlite3
 from pathlib import Path
 from contextlib import contextmanager
+
+# sqlite3.Connection does not allow attribute assignment and is not
+# weak-referenceable; cache the per-connection FTS capability probe here
+# (id-keyed; a redundant probe is harmless and idempotent).
+_fts_delete_cache: dict[int, bool] = {}
 
 SCHEMA = """
 PRAGMA foreign_keys = ON;
@@ -127,6 +133,44 @@ CREATE VIRTUAL TABLE IF NOT EXISTS emails_fts USING fts5(
 );
 """
 
+# Fallback for SQLite builds older than 3.43.0 (no contentless_delete):
+# the index then requires full rebuilds after updates/deletes.
+FTS_SCHEMA_LEGACY = """
+CREATE VIRTUAL TABLE IF NOT EXISTS emails_fts USING fts5(
+    subject,
+    sender,
+    body,
+    content='',
+    tokenize='unicode61'
+);
+"""
+
+
+def fts_delete_supported(connection: sqlite3.Connection) -> bool:
+    """True when the bundled SQLite supports contentless_delete=1.
+
+    The packaged Windows runtime bundles its own SQLite — never assume it
+    matches the developer machine. The probe result is cached per
+    connection (sqlite3.Connection rejects attribute assignment, so the
+    cache lives in a module-level weak map).
+    """
+    cached = _fts_delete_cache.get(id(connection))
+    if cached is not None:
+        return cached
+    supported = True
+    try:
+        # The create itself is the ultimate truth: only claim support if
+        # a probe table with contentless_delete=1 can actually exist.
+        connection.execute(
+            "CREATE VIRTUAL TABLE IF NOT EXISTS emails_fts USING fts5("
+            "subject, sender, body, content='', contentless_delete=1, "
+            "tokenize='unicode61')"
+        )
+    except sqlite3.OperationalError:
+        supported = False
+    _fts_delete_cache[id(connection)] = supported
+    return supported
+
 
 def connect(path: Path) -> sqlite3.Connection:
     """Create an optimized SQLite connection with WAL mode and indexes."""
@@ -150,9 +194,13 @@ def connect(path: Path) -> sqlite3.Connection:
     # Create indexes (idempotent)
     connection.executescript(INDEXES)
 
-    # Create FTS5 table (idempotent)
+    # Create FTS5 table (idempotent). Falls back to the legacy
+    # contentless schema when the runtime SQLite predates 3.43.0.
     try:
-        connection.executescript(FTS_SCHEMA)
+        if fts_delete_supported(connection):
+            connection.executescript(FTS_SCHEMA)
+        else:
+            connection.executescript(FTS_SCHEMA_LEGACY)
     except sqlite3.OperationalError:
         pass  # FTS5 may not be available in all SQLite builds
 
@@ -255,56 +303,131 @@ def _migrate(connection: sqlite3.Connection):
     # Item 4: Migrate raw Gmail IDs to account-prefixed scoped IDs.
     # Before this migration, emails.id stored the raw Gmail message ID.
     # Now _normalize_message() generates "gmail_{account_id}_{raw_msg_id}".
-    # This migration is idempotent: already-scoped IDs are skipped.
+    #
+    # Safety properties (idempotent, lossless):
+    # - a backup copy of the database is made before the first rename
+    # - already-scoped rows are detected by parsing (never by assuming
+    #   raw ids look a certain way), so re-runs never double-prefix
+    # - payload JSON, email_analysis, tasks and jobs are all re-keyed
+    # - the FTS index is rebuilt from the re-keyed rows
     try:
         import json as _json
         import re
-        _scoped_re = re.compile(r'^gmail_[^_]+_.+')
-        rows = cursor.execute(
-            "SELECT id, account_id, payload FROM emails WHERE id NOT LIKE 'gmail_%' OR id NOT LIKE 'gmail_%_%'"
-        ).fetchall()
-        migrated = 0
-        for r in rows:
-            raw_id = r["id"]
-            account_id = r["account_id"]
-            if not account_id or _scoped_re.match(raw_id):
-                continue  # Already scoped or missing account
-            scoped_id = f"gmail_{account_id}_{raw_id}"
-            # Check for collision (unlikely but safe)
-            exists = cursor.execute("SELECT 1 FROM emails WHERE id=?", (scoped_id,)).fetchone()
-            if exists:
-                continue  # Scoped version already exists, skip
-            # Update email_analysis FK
-            cursor.execute(
-                "UPDATE email_analysis SET email_id=? WHERE email_id=?",
-                (scoped_id, raw_id)
-            )
-            # Update tasks FK
-            cursor.execute(
-                "UPDATE tasks SET source_email_id=? WHERE source_email_id=?",
-                (scoped_id, raw_id)
-            )
-            # Update jobs FK (target_id references email_id)
-            cursor.execute(
-                "UPDATE jobs SET target_id=? WHERE target_id=? AND job_type IN ('analyze','backfill')",
-                (scoped_id, raw_id)
-            )
-            # Update the emails table itself
-            cursor.execute("UPDATE emails SET id=? WHERE id=?", (scoped_id, raw_id))
-            migrated += 1
-        if migrated:
-            print(f"[Alfred] Migrated {migrated} email IDs to account-prefixed format")
-            # Rebuild FTS after ID migration
-            try:
-                cursor.execute("DROP TABLE IF EXISTS emails_fts")
-                cursor.executescript(FTS_SCHEMA)
-            except Exception:
-                pass
-    except Exception:
-        pass  # Non-fatal: new emails use scoped IDs automatically
-    connection.commit()
+        from ..mail.identity import parse_email_id, scoped_email_id
 
-    # tasks table migrations
+        rows = cursor.execute(
+            "SELECT id, account_id, payload FROM emails"
+        ).fetchall()
+        to_migrate = []
+        for r in rows:
+            local_id = r["id"]
+            account_id = r["account_id"]
+            if not account_id:
+                continue  # Legacy CSV import — has no provider identity
+            parsed_account, _ = parse_email_id(local_id)
+            if parsed_account == account_id:
+                continue  # Already scoped for this account
+            if parse_email_id(local_id)[0] is not None:
+                continue  # Scoped for another account — leave untouched
+            # Only Gmail-shaped raw ids (hex) are ever re-keyed; anything
+            # else is not a provider message id and must stay untouched.
+            if not re.fullmatch(r"[0-9a-f]{10,}", local_id):
+                continue
+            to_migrate.append((local_id, account_id, r["payload"]))
+
+        if to_migrate:
+            # Re-keying children before the parent violates immediate FK
+            # checks. Run the whole re-key in ONE transaction with
+            # deferred foreign keys: SQLite checks them at COMMIT, by
+            # which point old and new keys are fully consistent.
+            # (defer_foreign_keys is reset by COMMIT and applies only
+            # inside the transaction that follows the BEGIN.)
+            connection.commit()  # close any ambient transaction
+            cursor.execute("BEGIN")
+            cursor.execute("PRAGMA defer_foreign_keys=ON")
+
+            # Backup the database before re-keying user data.
+            db_file = connection.execute("PRAGMA database_list").fetchone()["file"]
+            # db_file is '' for in-memory test databases
+            if db_file:
+                backup_file = Path(db_file).with_suffix(".sqlite3.pre_id_migration.bak")
+                if not backup_file.exists():
+                    try:
+                        shutil.copy2(db_file, backup_file)
+                        print(f"[Alfred] Backed up database before ID migration: {backup_file}")
+                    except Exception:
+                        pass  # Backup is best-effort; never blocks the app
+
+            migrated = 0
+            for local_id, account_id, stored_payload in to_migrate:
+                raw_id = local_id
+                scoped_id = scoped_email_id(account_id, raw_id)
+                # Collision guard: a scoped row must not already exist.
+                exists = cursor.execute(
+                    "SELECT 1 FROM emails WHERE id=?", (scoped_id,)
+                ).fetchone()
+                if exists:
+                    continue
+                # Update email_analysis FK
+                cursor.execute(
+                    "UPDATE email_analysis SET email_id=? WHERE email_id=?",
+                    (scoped_id, raw_id)
+                )
+                # Update tasks FK
+                cursor.execute(
+                    "UPDATE tasks SET source_email_id=? WHERE source_email_id=?",
+                    (scoped_id, raw_id)
+                )
+                # Update jobs: target_id references email ids for analysis
+                # jobs of every type, and analyze job ids carry the email id.
+                cursor.execute(
+                    "UPDATE jobs SET target_id=? WHERE target_id=?",
+                    (scoped_id, raw_id)
+                )
+                cursor.execute(
+                    "UPDATE jobs SET id=? WHERE id=?",
+                    (f"analyze_{scoped_id}", f"analyze_{raw_id}")
+                )
+                # Patch the payload JSON so Email.id reads agree with the
+                # new primary key.
+                try:
+                    payload = _json.loads(stored_payload)
+                    payload["id"] = scoped_id
+                    new_payload = _json.dumps(payload)
+                except Exception:
+                    new_payload = stored_payload
+                # Update the emails table itself
+                cursor.execute(
+                    "UPDATE emails SET id=?, payload=? WHERE id=?",
+                    (scoped_id, new_payload, raw_id)
+                )
+                migrated += 1
+            if migrated:
+                print(f"[Alfred] Migrated {migrated} email IDs to account-prefixed format")
+                # Rebuild FTS from the re-keyed rows (single statements —
+                # executescript would commit the deferred-FK transaction).
+                try:
+                    cursor.execute("DROP TABLE IF EXISTS emails_fts")
+                    cursor.execute(FTS_SCHEMA if fts_delete_supported(connection)
+                                   else FTS_SCHEMA_LEGACY)
+                    cursor.execute(
+                        "INSERT INTO emails_fts(rowid, subject, sender, body) "
+                        "SELECT rowid, "
+                        "COALESCE(subject_col, json_extract(payload, '$.subject'), ''), "
+                        "COALESCE(sender_col, json_extract(payload, '$.sender'), ''), "
+                        "COALESCE(json_extract(payload, '$.body'), '') "
+                        "FROM emails"
+                    )
+                except Exception:
+                    pass
+            connection.commit()
+            cursor.execute("PRAGMA defer_foreign_keys=OFF")
+    except Exception as exc:
+        import logging
+        logging.getLogger("alfred.db").warning(
+            "scoped_id_migration_failed: %s", exc, exc_info=True
+        )  # never silent — migration problems must be visible in logs
+    connection.commit()
     cursor.execute("PRAGMA table_info(tasks)")
     task_cols = {row["name"] for row in cursor.fetchall()}
     for col, col_type in [("derivation_version", "TEXT DEFAULT '1'"),

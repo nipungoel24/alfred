@@ -131,6 +131,19 @@ export function AccountsPage() {
                 </div>
               </div>
             ))}
+
+            {/* Add another Gmail account */}
+            <div style={{ borderTop: '1px solid var(--border-subtle)', paddingTop: 'var(--space-4)' }}>
+              <button
+                type="button"
+                className="btn btn-surface"
+                onClick={() => connectMutation.mutate(`${apiBase()}/api/accounts/gmail/callback`)}
+                disabled={connectMutation.isPending}
+              >
+                <Mail size={14} aria-hidden="true" />
+                {connectMutation.isPending ? 'Connecting…' : 'Add another Gmail account'}
+              </button>
+            </div>
           </div>
         )}
       </div>

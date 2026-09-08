@@ -34,13 +34,18 @@ class ErrorDetail(BaseModel): code: str; message: str; details: dict[str, Any] =
 
 
 class SearchFilters(BaseModel):
-    """Structured search filters parsed from the frontend."""
+    """Structured search filters parsed from the frontend.
+
+    Every field maps to a stored, indexed column or to the persisted
+    analysis payload — no operator is advertised that cannot truly work.
+    """
     free_text: list[str] = Field(default_factory=list)
     sender: str | None = None
     subject: str | None = None
-    has_attachment: bool | None = None
     is_unread: bool | None = None
+    is_read: bool | None = None
     is_important: bool | None = None
+    needs_reply: bool | None = None
     after: str | None = None
     before: str | None = None
     category: str | None = None

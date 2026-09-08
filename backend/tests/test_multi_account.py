@@ -5,9 +5,12 @@ Verifies that:
 - Label backfill uses correct account tokens
 - Account isolation is maintained
 """
+import base64
 from pathlib import Path
-from backend.app.schemas import Email, SearchFilters
+from backend.app.schemas import Email, EmailAnalysis, SearchFilters, Task, Priority, Category
 from backend.app.db.repositories import Repository
+from backend.app.mail.providers.gmail import GmailProvider
+from backend.app.mail.identity import scoped_email_id, provider_message_id
 
 
 def make_email(id: str = 'e1', sender: str = 'alice@example.com', 
@@ -16,6 +19,13 @@ def make_email(id: str = 'e1', sender: str = 'alice@example.com',
     return Email(
         id=id, sender=sender, subject=subject, body=body,
         account_id=account_id
+    )
+
+
+def make_analysis(summary: str, needs_reply: bool) -> EmailAnalysis:
+    return EmailAnalysis(
+        short_summary=summary, category=Category.work, priority=Priority.high,
+        priority_score=70, reason_for_priority="test", needs_reply=needs_reply,
     )
 
 
@@ -189,44 +199,84 @@ def test_account_credentials_isolation(tmp_path: Path):
 def test_same_provider_message_id_collision(tmp_path: Path):
     """Two accounts with the same provider_message_id must coexist.
 
-    Gmail message IDs are account-scoped. Account A and Account B can
-    each have a message with provider_message_id 'same-id'. Both must
-    remain isolated through fetch/update/delete/analysis/search.
+    Exercises the PRODUCTION normalization path: GmailProvider
+    ._normalize_message() + Repository.upsert_email(). No hand-built
+    scoped ids — the canonical identity module does the scoping.
     """
     repo = Repository(tmp_path / 'test.sqlite3')
+    provider = GmailProvider(client_id="test-client", client_secret="")
 
-    # In production, Gmail sync uses account-prefixed IDs to avoid collision.
-    # Simulate this: two accounts with the same raw Gmail message ID get
-    # different database IDs via the "gmail_{account_id}_{msg_id}" pattern.
-    email_a = make_email(id='gmail_account_a_same-id', subject='From Account A',
-                         sender='alice@example.com', account_id='account_a')
-    email_b = make_email(id='gmail_account_b_same-id', subject='From Account B',
-                         sender='bob@example.com', account_id='account_b')
+    RAW_MSG_ID = "1a07b61f84a314c5"  # hex Gmail id, same for both accounts
+
+    def gmail_detail(subject: str, sender: str):
+        return {
+            "id": RAW_MSG_ID,
+            "threadId": "t123",
+            "internalDate": "1754312400000",
+            "labelIds": ["INBOX", "CATEGORY_PRIMARY"],
+            "snippet": "",
+            "payload": {
+                "headers": [
+                    {"name": "From", "value": sender},
+                    {"name": "Subject", "value": subject},
+                    {"name": "To", "value": "me@example.com"},
+                ],
+                "body": {"data": base64.urlsafe_b64encode(b"body").decode()},
+            },
+        }
+
+    email_a = provider._normalize_message(gmail_detail("From Account A", "alice@example.com"), "gmail_a@example.com")
+    email_b = provider._normalize_message(gmail_detail("From Account B", "bob@example.com"), "gmail_b@example.com")
+
+    assert email_a.id != email_b.id
+    assert provider_message_id(email_a.id) == RAW_MSG_ID
+    assert provider_message_id(email_b.id) == RAW_MSG_ID
+    assert scoped_email_id("gmail_a@example.com", RAW_MSG_ID) == email_a.id
 
     repo.upsert_email(email_a, 'fp_a')
     repo.upsert_email(email_b, 'fp_b')
 
-    # Both emails must exist and be isolated
-    assert repo.email_exists('gmail_account_a_same-id')
-    assert repo.email_exists('gmail_account_b_same-id')
+    # Both coexist
+    assert repo.email_exists(email_a.id)
+    assert repo.email_exists(email_b.id)
 
-    # Verify account isolation: fetch by account
-    emails_a = repo.emails(account_id='account_a')
-    emails_b = repo.emails(account_id='account_b')
-    assert len(emails_a) == 1
-    assert len(emails_b) == 1
+    # fetch A != fetch B
+    assert repo.email(email_a.id).subject == "From Account A"
+    assert repo.email(email_b.id).subject == "From Account B"
 
-    # Verify search works across accounts
-    results = repo.search_emails('Account A')
-    assert len(results) == 1
-    assert results[0].account_id == 'account_a'
+    # analyses do not overwrite each other
+    analysis_a = make_analysis(summary="A", needs_reply=True)
+    analysis_b = make_analysis(summary="B", needs_reply=False)
+    repo.save_analysis(email_a.id, 'fp_a', 'test-model', analysis_a)
+    repo.save_analysis(email_b.id, 'fp_b', 'test-model', analysis_b)
+    assert repo.cached_analysis(email_a.id, 'fp_a', 'test-model').short_summary == "A"
+    assert repo.cached_analysis(email_b.id, 'fp_b', 'test-model').short_summary == "B"
 
-    # Verify deletion only affects one account's data
-    repo.delete_email('gmail_account_a_same-id')
-    assert not repo.email_exists('gmail_account_a_same-id')
-    assert repo.email_exists('gmail_account_b_same-id')
-    results = repo.search_emails('Account B')
-    assert len(results) == 1
+    # tasks point to the right source email
+    repo.save_task(Task(id="task-a", source_email_id=email_a.id, title="Task A", status="pending"))
+    repo.save_task(Task(id="task-b", source_email_id=email_b.id, title="Task B", status="pending"))
+    assert repo.tasks_by_email(email_a.id)[0].title == "Task A"
+    assert repo.tasks_by_email(email_b.id)[0].title == "Task B"
+
+    # label update on A does not touch B
+    repo.update_email_labels(email_a.id, ["INBOX", "IMPORTANT"])
+    assert '"IMPORTANT"' in repo.con.execute(
+        "SELECT label_ids_json FROM emails WHERE id=?", (email_a.id,)
+    ).fetchone()[0]
+    assert '"IMPORTANT"' not in repo.con.execute(
+        "SELECT label_ids_json FROM emails WHERE id=?", (email_b.id,)
+    ).fetchone()[0]
+
+    # delete A does not delete B
+    repo.delete_email(email_a.id)
+    assert not repo.email_exists(email_a.id)
+    assert repo.email_exists(email_b.id)
+
+    # search finds each in the correct account scope
+    assert len(repo.search_emails_structured(SearchFilters(), account_id="gmail_a@example.com")) == 0
+    scoped_b = repo.search_emails_structured(SearchFilters(), account_id="gmail_b@example.com")
+    assert len(scoped_b) == 1
+    assert scoped_b[0].id == email_b.id
 
 
 def test_account_prefixed_email_ids(tmp_path: Path):

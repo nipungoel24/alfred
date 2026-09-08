@@ -6,10 +6,11 @@ import type { GroupImperativeHandle } from 'react-resizable-panels';
 import { RefreshCw, Star, MessageSquareReply, Archive, Search, X, Pause, Play } from 'lucide-react';
 import {
   emails as fetchEmails, emailCounts, accounts as fetchAccounts,
-  backfillAccount, pauseBackfill,
+  backfillAccount, pauseBackfill, searchEmailsStructured,
 } from '../api/emails';
-import type { MailCategory, MailKind, MailScope } from '../api/emails';
+import type { MailCategory, MailKind, MailScope, SearchFilters } from '../api/emails';
 import { CATEGORY_ORDER } from '../api/emails';
+import { parseSearchQuery, buildSearchQueryString, getSearchFilterChips } from '../search/searchParser';
 import { CategoryTabs } from './CategoryTabs';
 import { MessageList } from './MessageList';
 import { MessageReader } from './MessageReader';
@@ -66,11 +67,12 @@ function persistLayout(layout: Record<string, number>): void {
 interface MailWorkspaceProps {
   searchQuery: string;
   onClearSearch: () => void;
+  onSearchChange: (value: string) => void;
   syncState: { syncing: boolean; lastSyncAt: string | null };
-  onRequestSync: () => void;
+  onRequestSync: (accountId?: string) => void;
 }
 
-export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequestSync }: MailWorkspaceProps) {
+export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, syncState, onRequestSync }: MailWorkspaceProps) {
   const queryClient = useQueryClient();
   const groupRef = useRef<GroupImperativeHandle>(null);
   const [view, setView] = useState<MailScope>('inbox');
@@ -87,9 +89,48 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
   const scope: MailScope = globalSearchActive ? 'all' : view;
   const activeQuery = globalSearchActive ? searchQuery : viewFilter;
 
+  // Parse structured search filters from the global search query
+  const parsedFilters = useMemo(() => {
+    if (!globalSearchActive) return null;
+    return parseSearchQuery(searchQuery);
+  }, [globalSearchActive, searchQuery]);
+
+  const hasStructuredFilters = useMemo(() => {
+    if (!parsedFilters) return false;
+    return Boolean(
+      parsedFilters.from || parsedFilters.subject || parsedFilters.after ||
+      parsedFilters.before || parsedFilters.category || parsedFilters.in ||
+      parsedFilters.isUnread || parsedFilters.isRead ||
+      parsedFilters.isImportant || parsedFilters.isReply
+    );
+  }, [parsedFilters]);
+
+  const filterChips = useMemo(
+    () => (globalSearchActive && parsedFilters ? getSearchFilterChips(parsedFilters) : []),
+    [globalSearchActive, parsedFilters]
+  );
+
+  const removeChip = useCallback((key: string) => {
+    if (!parsedFilters) return;
+    const next = { ...parsedFilters };
+    switch (key) {
+      case 'from': next.from = undefined; break;
+      case 'subject': next.subject = undefined; break;
+      case 'isUnread': next.isUnread = undefined; break;
+      case 'isRead': next.isRead = undefined; break;
+      case 'isImportant': next.isImportant = undefined; break;
+      case 'isReply': next.isReply = undefined; break;
+      case 'after': next.after = undefined; break;
+      case 'before': next.before = undefined; break;
+      case 'category': next.category = undefined; break;
+      case 'in': next.in = undefined; break;
+    }
+    onSearchChange(buildSearchQueryString(next));
+  }, [parsedFilters, onSearchChange]);
+
   const { data: counts, refetch: refetchCounts } = useQuery({
-    queryKey: ['emailCounts'],
-    queryFn: emailCounts,
+    queryKey: ['emailCounts', selectedAccountId],
+    queryFn: () => emailCounts(selectedAccountId || undefined),
     staleTime: 15_000,
   });
 
@@ -100,21 +141,46 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
     refetchInterval: ACCOUNTS_REFRESH_MS,
   });
 
-  const gmailAccount = accountsList.find(a => a.provider === 'gmail' && a.connection_status === 'connected');
+  const gmailAccount = accountsList.find(
+    a => a.id === selectedAccountId
+  ) ?? accountsList.find(a => a.provider === 'gmail' && a.connection_status === 'connected');
   const backfill = gmailAccount?.backfill;
 
   const { data: emailsList = [], isLoading, isFetching, refetch } = useQuery({
-    queryKey: ['emails', { view, kind, category, filter, globalSearchActive, searchQuery, viewFilter, selectedAccountId }],
-    queryFn: () => fetchEmails({
-      category: globalSearchActive || view === 'all' ? null : category,
-      scope,
-      kind: globalSearchActive ? null : view === 'all' ? kind : null,
-      priority: filter === 'important' && !globalSearchActive ? 'high' : undefined,
-      needsReply: filter === 'reply' && !globalSearchActive ? true : undefined,
-      query: activeQuery || undefined,
-      accountId: selectedAccountId || undefined,
-      limit: 500,
-    }),
+    queryKey: ['emails', { view, kind, category, filter, globalSearchActive, searchQuery, viewFilter, selectedAccountId, hasStructuredFilters }],
+    queryFn: () => {
+      // Use structured search endpoint when query contains filters
+      if (globalSearchActive && hasStructuredFilters && parsedFilters) {
+        const searchFilters: SearchFilters = {
+          free_text: parsedFilters.freeText,
+          sender: parsedFilters.from,
+          subject: parsedFilters.subject,
+          is_unread: parsedFilters.isUnread,
+          is_read: parsedFilters.isRead,
+          is_important: parsedFilters.isImportant,
+          needs_reply: parsedFilters.isReply,
+          after: parsedFilters.after,
+          before: parsedFilters.before,
+          category: parsedFilters.category,
+          mailbox_state: parsedFilters.in,
+        };
+        return searchEmailsStructured(searchFilters, {
+          accountId: selectedAccountId || undefined,
+          limit: 500,
+        });
+      }
+      // Standard email list endpoint
+      return fetchEmails({
+        category: globalSearchActive || view === 'all' ? null : category,
+        scope,
+        kind: globalSearchActive ? null : view === 'all' ? kind : null,
+        priority: filter === 'important' && !globalSearchActive ? 'high' : undefined,
+        needsReply: filter === 'reply' && !globalSearchActive ? true : undefined,
+        query: (!hasStructuredFilters && activeQuery) ? activeQuery : undefined,
+        accountId: selectedAccountId || undefined,
+        limit: 500,
+      });
+    },
     staleTime: 15_000,
   });
 
@@ -216,7 +282,7 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
                 <span className="count">{paneCount} messages</span>
               </div>
 
-              {accountsList.length > 1 && !globalSearchActive && (
+              {accountsList.length > 1 && (
                 <div className="account-filter">
                   <select
                     value={selectedAccountId || ''}
@@ -243,9 +309,35 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
 
               {globalSearchActive && (
                 <div className="search-scope-banner">
-                  <span>Searching all local mail</span>
+                  <span>{selectedAccountId ? 'Searching selected account' : 'Searching all local mail'}</span>
                   <button type="button" className="icon-btn" onClick={onClearSearch} aria-label="Clear search">
                     <X size={14} aria-hidden="true" />
+                  </button>
+                </div>
+              )}
+
+              {globalSearchActive && filterChips.length > 0 && (
+                <div className="search-filter-chips" aria-label="Active search filters">
+                  {filterChips.map(chip => (
+                    <button
+                      key={chip.key}
+                      type="button"
+                      className="search-chip"
+                      onClick={() => removeChip(chip.key)}
+                      aria-label={`Remove ${chip.label} filter: ${chip.value}`}
+                      title={`Remove ${chip.label} filter: ${chip.value}`}
+                    >
+                      <span className="search-chip-label">{chip.label}:</span>
+                      <span className="search-chip-value">{chip.value}</span>
+                      <X size={10} aria-hidden="true" />
+                    </button>
+                  ))}
+                  <button
+                    type="button"
+                    className="search-chip-clear"
+                    onClick={onClearSearch}
+                  >
+                    Clear all
                   </button>
                 </div>
               )}
@@ -310,9 +402,9 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
               )}
               <button
                 type="button"
-                className="filter-icon-btn"
+                className="filter-icon-btn sync-button"
                 onClick={() => {
-                  onRequestSync();
+                  onRequestSync(gmailAccount?.id);
                   void refetch();
                 }}
                 disabled={syncState.syncing}
@@ -322,7 +414,7 @@ export function MailWorkspace({ searchQuery, onClearSearch, syncState, onRequest
                 {syncState.syncing
                   ? <span className="btn-spinner" aria-hidden="true" />
                   : <RefreshCw size={13} aria-hidden="true" />}
-                Sync
+                <span className="sync-label">Sync</span>
               </button>
             </div>
 
