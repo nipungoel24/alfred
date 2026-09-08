@@ -12,8 +12,10 @@ from datetime import datetime, timezone
 import json
 import logging
 from .database import (
-    connect, transaction, fts_delete_supported, FTS_SCHEMA, FTS_SCHEMA_LEGACY,
+    connect, transaction, fts_delete_supported, repopulate_fts_index,
+    FTS_SCHEMA, FTS_SCHEMA_LEGACY,
 )
+from .search_query import compile_fts_match
 from ..schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task, SearchFilters
 from ..mail.eligibility import (
     MailEligibilityPolicy, gmail_category_from_labels,
@@ -46,19 +48,27 @@ class Repository:
         state = mailbox_state_from_labels(labels).value
         category = gmail_category_from_labels(labels).value
         eligibility = MailEligibilityPolicy.pipeline_eligibility(labels).value
+        # provider_message_id backs the (account_id, provider_message_id)
+        # uniqueness invariant. It is written ONLY from the explicit model
+        # field (set by provider normalization) — never guessed — so legacy
+        # rows and CSV imports keep NULL and stay exempt from the partial
+        # unique index. Guessing here could collide with the scoped-ID
+        # migration's renames and break Gmail sync with IntegrityError.
+        provider_msg_id = email.provider_message_id
         self.con.execute(
             'INSERT INTO emails (id, payload, content_hash, imported_at, account_id, thread_id, sender_col, subject_col, received_at_col, '
-            'label_ids_json, mailbox_state, gmail_category, pipeline_eligibility) '
-            'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+            'label_ids_json, mailbox_state, gmail_category, pipeline_eligibility, provider_message_id) '
+            'VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
             'payload=excluded.payload, content_hash=excluded.content_hash, imported_at=excluded.imported_at, '
             'account_id=excluded.account_id, thread_id=excluded.thread_id, '
             'sender_col=excluded.sender_col, subject_col=excluded.subject_col, received_at_col=excluded.received_at_col, '
             'label_ids_json=excluded.label_ids_json, mailbox_state=excluded.mailbox_state, '
-            'gmail_category=excluded.gmail_category, pipeline_eligibility=excluded.pipeline_eligibility',
+            'gmail_category=excluded.gmail_category, pipeline_eligibility=excluded.pipeline_eligibility, '
+            'provider_message_id=excluded.provider_message_id',
             (email.id, email.model_dump_json(), fingerprint,
              datetime.now(timezone.utc).isoformat(), email.account_id, email.thread_id,
              email.sender.lower(), email.subject, email.received_at.isoformat() if email.received_at else None,
-             json.dumps(label_ids), state, category, eligibility)
+             json.dumps(label_ids), state, category, eligibility, provider_msg_id)
         )
         self._update_fts_one(email.id, email)
 
@@ -355,7 +365,11 @@ class Repository:
         Global search covers the FULL synchronized mailbox: active inbox,
         archived received, and sent messages. Spam/trash/draft rows never
         surface through search. Uses BM25 ranking for better relevance.
+        Free text is compiled to literal FTS terms (no operator injection).
         """
+        fts_match = compile_fts_match(query.split())
+        if not fts_match:
+            return self._like_search(query, limit)
         try:
             # Use BM25 ranking for better relevance
             rows = self.con.execute(
@@ -364,19 +378,23 @@ class Repository:
                 "WHERE emails_fts MATCH ? "
                 "AND e.mailbox_state IN ('active_inbox','archived','sent') "
                 "ORDER BY rank LIMIT ?",
-                (query, limit)
+                (fts_match, limit)
             ).fetchall()
             return [Email.model_validate_json(r['payload']) for r in rows]
         except Exception:
             # FTS5 not available, fall back to LIKE search
-            like_q = f"%{query}%"
-            rows = self.con.execute(
-                "SELECT payload FROM emails "
-                "WHERE mailbox_state IN ('active_inbox','archived','sent') "
-                "AND (sender_col LIKE ? OR subject_col LIKE ?) LIMIT ?",
-                (like_q, like_q, limit)
-            ).fetchall()
-            return [Email.model_validate_json(r['payload']) for r in rows]
+            return self._like_search(query, limit)
+
+    def _like_search(self, query: str, limit: int) -> list[Email]:
+        """Substring fallback used when FTS is unavailable or unusable."""
+        like_q = f"%{query}%"
+        rows = self.con.execute(
+            "SELECT payload FROM emails "
+            "WHERE mailbox_state IN ('active_inbox','archived','sent') "
+            "AND (sender_col LIKE ? OR subject_col LIKE ?) LIMIT ?",
+            (like_q, like_q, limit)
+        ).fetchall()
+        return [Email.model_validate_json(r['payload']) for r in rows]
 
     def search_emails_structured(self, filters: SearchFilters, account_id: str | None = None,
                                  limit=100, offset: int = 0) -> list[Email]:
@@ -439,9 +457,9 @@ class Repository:
 
         where_clause = " AND ".join(conditions)
 
-        fts_match = None
-        if filters.free_text:
-            fts_match = " ".join(filters.free_text)
+        # Free text is compiled to literal FTS terms — FTS operators in
+        # user input (OR/NEAR/colons/asterisks/…) can never change meaning.
+        fts_match = compile_fts_match(filters.free_text)
 
         try:
             if fts_match:
@@ -480,12 +498,24 @@ class Repository:
             ).fetchall()
             return [Email.model_validate_json(r['payload']) for r in rows]
 
-    def emails_by_thread(self, thread_id: str) -> list[Email]:
-        """Fetch emails in a thread, ordered chronologically."""
-        rows = self.con.execute(
-            'SELECT payload FROM emails WHERE thread_id=? ORDER BY received_at_col ASC',
-            (thread_id,)
-        ).fetchall()
+    def emails_by_thread(self, thread_id: str, account_id: str | None = None) -> list[Email]:
+        """Fetch emails in a thread, ordered chronologically.
+
+        New rows carry account-scoped thread ids, which are inherently
+        isolated. The account_id filter additionally guards legacy rows
+        (raw provider thread ids) and is REQUIRED by privacy-sensitive
+        callers such as reply drafting: never build AI context without it.
+        """
+        if account_id:
+            rows = self.con.execute(
+                'SELECT payload FROM emails WHERE thread_id=? AND account_id=? ORDER BY received_at_col ASC',
+                (thread_id, account_id)
+            ).fetchall()
+        else:
+            rows = self.con.execute(
+                'SELECT payload FROM emails WHERE thread_id=? ORDER BY received_at_col ASC',
+                (thread_id,)
+            ).fetchall()
         return [Email.model_validate_json(r['payload']) for r in rows]
 
     def _update_fts_one(self, email_id: str, email: Email):
@@ -556,18 +586,11 @@ class Repository:
         try:
             if fts_delete_supported(self.con):
                 self.con.execute("DROP TABLE IF EXISTS emails_fts")
-                self.con.executescript(FTS_SCHEMA)
+                self.con.execute(FTS_SCHEMA)
             else:
                 self.con.execute("DROP TABLE IF EXISTS emails_fts")
-                self.con.executescript(FTS_SCHEMA_LEGACY)
-            self.con.execute(
-                "INSERT INTO emails_fts(rowid, subject, sender, body) "
-                "SELECT rowid, "
-                "COALESCE(subject_col, json_extract(payload, '$.subject'), ''), "
-                "COALESCE(sender_col, json_extract(payload, '$.sender'), ''), "
-                "COALESCE(json_extract(payload, '$.body'), '') "
-                "FROM emails"
-            )
+                self.con.execute(FTS_SCHEMA_LEGACY)
+            repopulate_fts_index(self.con)
             self.con.commit()
         except Exception as exc:
             logger.warning("fts_rebuild_failed: %s", exc)  # never silent
@@ -771,11 +794,18 @@ class Repository:
         rows = self.con.execute(sql, params).fetchall()
         return [self._task_from_row(r) for r in rows]
 
-    def tasks_by_thread(self, thread_id: str) -> list[Task]:
-        """Get tasks linked to a specific thread."""
-        rows = self.con.execute(
-            'SELECT * FROM tasks WHERE source_thread_id=?', (thread_id,)
-        ).fetchall()
+    def tasks_by_thread(self, thread_id: str, account_id: str | None = None) -> list[Task]:
+        """Get tasks linked to a specific thread, optionally account-scoped."""
+        if account_id:
+            rows = self.con.execute(
+                'SELECT t.* FROM tasks t LEFT JOIN emails e ON e.id = t.source_email_id '
+                'WHERE t.source_thread_id=? AND (t.source_email_id IS NULL OR e.account_id=?)',
+                (thread_id, account_id)
+            ).fetchall()
+        else:
+            rows = self.con.execute(
+                'SELECT * FROM tasks WHERE source_thread_id=?', (thread_id,)
+            ).fetchall()
         return [self._task_from_row(r) for r in rows]
 
     def tasks_by_email(self, email_id: str) -> list[Task]:

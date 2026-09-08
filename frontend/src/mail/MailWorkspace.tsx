@@ -11,6 +11,7 @@ import {
 import type { MailCategory, MailKind, MailScope, SearchFilters } from '../api/emails';
 import { CATEGORY_ORDER } from '../api/emails';
 import { parseSearchQuery, buildSearchQueryString, getSearchFilterChips } from '../search/searchParser';
+import { readSavedLayout, persistLayout, DEFAULT_LAYOUT } from './layoutStore';
 import { CategoryTabs } from './CategoryTabs';
 import { MessageList } from './MessageList';
 import { MessageReader } from './MessageReader';
@@ -18,14 +19,7 @@ import { IntelligencePanel } from '../intelligence/IntelligencePanel';
 import type { RowFilter } from './MessageRow';
 
 const LATER_KEY = 'alfred-later-ids';
-const LAYOUT_KEY = 'alfred-pane-layout';
 const ACCOUNTS_REFRESH_MS = 15_000;
-
-const DEFAULT_LAYOUT: Record<string, number> = {
-  mail: 30,
-  reader: 45,
-  intel: 25,
-};
 
 function readLaterIds(): Set<string> {
   try {
@@ -39,26 +33,6 @@ function readLaterIds(): Set<string> {
 function persistLaterIds(ids: Set<string>): void {
   try {
     localStorage.setItem(LATER_KEY, JSON.stringify([...ids]));
-  } catch {
-    /* storage unavailable */
-  }
-}
-
-function readSavedLayout(): Record<string, number> | null {
-  try {
-    const raw = localStorage.getItem(LAYOUT_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw) as Record<string, number>;
-    if (typeof parsed.mail !== 'number' || typeof parsed.reader !== 'number') return null;
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
-function persistLayout(layout: Record<string, number>): void {
-  try {
-    localStorage.setItem(LAYOUT_KEY, JSON.stringify(layout));
   } catch {
     /* storage unavailable */
   }
@@ -141,10 +115,17 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
     refetchInterval: ACCOUNTS_REFRESH_MS,
   });
 
-  const gmailAccount = accountsList.find(
-    a => a.id === selectedAccountId
-  ) ?? accountsList.find(a => a.provider === 'gmail' && a.connection_status === 'connected');
-  const backfill = gmailAccount?.backfill;
+  const gmailAccounts = accountsList.filter(
+    a => a.provider === 'gmail' && a.connection_status === 'connected'
+  );
+  // Selected account drives sync/backfill/counts/search. All-accounts mode
+  // (null) aggregates — never silently the first account.
+  const gmailAccount = selectedAccountId
+    ? gmailAccounts.find(a => a.id === selectedAccountId)
+    : undefined;
+  const backfillAccounts = selectedAccountId
+    ? gmailAccounts.filter(a => a.id === selectedAccountId)
+    : gmailAccounts;
 
   const { data: emailsList = [], isLoading, isFetching, refetch } = useQuery({
     queryKey: ['emails', { view, kind, category, filter, globalSearchActive, searchQuery, viewFilter, selectedAccountId, hasStructuredFilters }],
@@ -239,7 +220,8 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
   }, []);
 
   const handleLayoutChanged = useCallback((layout: Record<string, number>) => {
-    persistLayout(layout);
+    // persistLayout validates — a broken layout is never stored.
+    persistLayout({ mail: layout.mail, reader: layout.reader, intel: layout.intel });
     if (layout.intel > 0) {
       setIntelVisible(true);
     }
@@ -360,10 +342,11 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
                 </div>
               )}
 
-              <BackfillStatusLine
-                backfill={backfill}
-                onResume={() => gmailAccount && backfillMutation.mutate(gmailAccount.id)}
-                onPause={() => gmailAccount && pauseMutation.mutate(gmailAccount.id)}
+              <BackfillStatusList
+                accounts={backfillAccounts}
+                showLabels={backfillAccounts.length > 1}
+                onResume={(id) => backfillMutation.mutate(id)}
+                onPause={(id) => pauseMutation.mutate(id)}
                 busy={backfillMutation.isPending || pauseMutation.isPending}
               />
             </div>
@@ -459,8 +442,33 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
   );
 }
 
-function BackfillStatusLine({ backfill, onResume, onPause, busy }: {
+function BackfillStatusList({ accounts, showLabels, onResume, onPause, busy }: {
+  accounts: import('../api/emails').EmailAccount[];
+  showLabels: boolean;
+  onResume: (id: string) => void;
+  onPause: (id: string) => void;
+  busy: boolean;
+}) {
+  if (accounts.length === 0) return null;
+  return (
+    <>
+      {accounts.map(account => (
+        <BackfillStatusLine
+          key={account.id}
+          backfill={account.backfill}
+          accountLabel={showLabels ? (account.display_name || account.email_address) : undefined}
+          onResume={() => onResume(account.id)}
+          onPause={() => onPause(account.id)}
+          busy={busy}
+        />
+      ))}
+    </>
+  );
+}
+
+function BackfillStatusLine({ backfill, accountLabel, onResume, onPause, busy }: {
   backfill?: import('../api/emails').BackfillStatus;
+  accountLabel?: string;
   onResume: () => void;
   onPause: () => void;
   busy: boolean;
@@ -471,7 +479,8 @@ function BackfillStatusLine({ backfill, onResume, onPause, busy }: {
   if (complete) {
     return (
       <div className="backfill-status complete" role="status">
-        All mail synced
+        {accountLabel && <span className="backfill-account">{accountLabel}</span>}
+        <span>All mail synced</span>
         {imported > 0 && <span className="backfill-detail">{imported} older messages local</span>}
       </div>
     );
@@ -485,6 +494,7 @@ function BackfillStatusLine({ backfill, onResume, onPause, busy }: {
   return (
     <div className="backfill-status" role="status">
       {state === 'running' && <span className="btn-spinner" aria-hidden="true" />}
+      {accountLabel && <span className="backfill-account">{accountLabel}</span>}
       <span>{label}</span>
       {state === 'running' && (
         <span className="backfill-detail">

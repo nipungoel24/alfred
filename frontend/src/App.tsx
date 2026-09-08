@@ -35,7 +35,8 @@ export default function App() {
     retry: 0,
   });
 
-  const gmailAccount = accountsList.find(a => a.provider === 'gmail' && a.connection_status === 'connected');
+  const gmailAccounts = accountsList.filter(a => a.provider === 'gmail' && a.connection_status === 'connected');
+  const gmailAccount = gmailAccounts[0];
   const aiReady = health?.ai === 'ready';
 
   const syncMutation = useMutation({
@@ -107,10 +108,12 @@ export default function App() {
               lastSyncAt: gmailAccount?.last_sync_at ?? null,
             }}
             onRequestSync={(accountId?: string) => {
-              const target = accountId
-                ? accountsList.find(a => a.id === accountId)
-                : gmailAccount;
-              if (target) syncMutation.mutate(target.id);
+              // No account id (All accounts mode) => sync EVERY connected
+              // Gmail account. A specific id syncs only that account.
+              const targets = accountId
+                ? accountsList.filter(a => a.id === accountId)
+                : gmailAccounts;
+              for (const target of targets) syncMutation.mutate(target.id);
             }}
           />
         )}

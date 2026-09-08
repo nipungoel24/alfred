@@ -26,6 +26,11 @@ class Email(BaseModel):
     subject: str; body: str; received_at: datetime | None = None; source_metadata: dict[str, Any] = Field(default_factory=dict)
     label_ids: list[str] = Field(default_factory=list)
     analysis: EmailAnalysis | None = None
+    # Provider-side message id (Gmail hex id). The primary key `id` is the
+    # account-scoped local identity; this field preserves the provider id
+    # for API calls and the (account_id, provider_message_id) uniqueness
+    # invariant. None for legacy CSV imports.
+    provider_message_id: str | None = None
 class BriefingItem(BaseModel): email_id: str; sender: str; subject: str; short_summary: str; priority: Priority; why_it_matters: str; deadline: str | None = None; needs_reply: bool
 class InboxBriefing(BaseModel):
     executive_summary: str; total_emails: int; urgent_count: int; high_priority_count: int; needs_reply_count: int; deadline_count: int

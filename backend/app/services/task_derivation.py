@@ -99,6 +99,28 @@ def task_fingerprint(thread_id: str | None, normalized_action: str) -> str:
     return hashlib.sha256(payload.encode('utf-8')).hexdigest()[:16]
 
 
+def candidate_fingerprints(thread_id: str | None, account_id: str | None,
+                           normalized_action: str) -> list[str]:
+    """All fingerprints under which a task for this action may be stored.
+
+    The thread-identity migration (raw provider thread id -> account-scoped
+    local thread id) changed fingerprints for the same logical action.
+    Callers must treat a task as existing when ANY candidate matches, so a
+    re-derivation after migration never duplicates a pre-migration task.
+    """
+    fps = [task_fingerprint(thread_id, normalized_action)]
+    if thread_id and account_id:
+        try:
+            from ..mail.identity import strip_scope
+            raw_thread = strip_scope(thread_id, account_id)
+            legacy = task_fingerprint(raw_thread, normalized_action)
+            if legacy not in fps:
+                fps.append(legacy)
+        except ValueError:
+            pass  # thread was never scoped — nothing legacy to cover
+    return fps
+
+
 def _assign_confidence(item: ActionItem, analysis: EmailAnalysis) -> str:
     """Assign confidence level to a derived task."""
     # Direct requests with explicit deadlines get high confidence

@@ -705,6 +705,14 @@
 
 .backfill-status.complete { color: var(--text-faint); }
 .backfill-detail { color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.backfill-account {
+  font-weight: 700;
+  color: var(--text-primary);
+  max-width: 160px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 
 .backfill-retry {
   display: inline-flex;

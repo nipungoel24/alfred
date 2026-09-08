@@ -5,7 +5,7 @@ from typing import Dict, Any, List
 from .base import MailProvider
 from ...schemas import Email, EmailAccount
 from ...mail.fingerprint import content_fingerprint
-from ...mail.identity import scoped_email_id
+from ...mail.identity import scoped_email_id, scoped_thread_id
 
 class GmailProvider(MailProvider):
     def __init__(self, client_id: str, client_secret: str):
@@ -27,7 +27,11 @@ class GmailProvider(MailProvider):
             "response_type": "code",
             "scope": " ".join(scopes),
             "access_type": "offline",
-            "prompt": "consent",
+            # select_account: adding another Gmail account must offer the
+            # Google account chooser instead of silently reusing the active
+            # identity. consent: preserves refresh-token issuance for the
+            # offline access Alfred requires. PKCE + state handled by caller.
+            "prompt": "select_account consent",
             "state": state,
             "code_challenge": code_challenge,
             "code_challenge_method": "S256"
@@ -504,13 +508,15 @@ class GmailProvider(MailProvider):
         label_ids = [str(l) for l in detail.get("labelIds", []) or []]
 
         # Lean metadata only — the full raw payload (with base64 bodies) is
-        # never persisted twice.
+        # never persisted twice. The raw thread id is kept here because the
+        # stored thread_id is the account-scoped local identity.
         snippet = detail.get("snippet", "") or ""
         raw_meta = {
             "labelIds": label_ids,
             "internalDate": detail.get("internalDate"),
             "sizeEstimate": detail.get("sizeEstimate"),
             "snippet": snippet[:500],
+            "threadId": detail.get("threadId"),
         }
 
         # Account-prefixed ID: prevents collision when two Gmail accounts
@@ -520,7 +526,8 @@ class GmailProvider(MailProvider):
 
         return Email(
             id=scoped_id,
-            thread_id=detail.get("threadId"),
+            thread_id=scoped_thread_id(account_id, detail.get("threadId")),
+            provider_message_id=raw_msg_id or None,
             account_id=account_id,
             sender=sender_email,
             sender_name=sender_name,

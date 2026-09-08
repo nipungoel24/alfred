@@ -30,6 +30,19 @@ def test_gmail_oauth_url_generation(mock_gmail):
     assert "test_state" in url
     assert "test_challenge" in url
 
+
+def test_gmail_oauth_url_offers_account_chooser(mock_gmail):
+    """Adding another account must offer the Google account chooser while
+    preserving offline access + consent (refresh tokens) + PKCE."""
+    from urllib.parse import urlparse, parse_qs, unquote
+    url = asyncio.run(mock_gmail.get_auth_url("http://localhost/callback", "s", "c"))
+    params = parse_qs(urlparse(url).query)
+    prompt = unquote(params["prompt"][0])
+    assert "select_account" in prompt.split()
+    assert "consent" in prompt.split()
+    assert params["access_type"][0] == "offline"
+    assert params["code_challenge_method"][0] == "S256"
+
 # 2. Token Exchange Mock
 @patch("httpx.AsyncClient.post")
 def test_gmail_token_exchange(mock_post, mock_gmail):
@@ -116,7 +129,10 @@ def test_gmail_sync_initial(mock_get, mock_gmail, temp_repo):
     assert email is not None
     assert email.sender == "billing@saas.com"
     assert email.sender_name == "Billing Department"
-    assert email.thread_id == "gmail_thread_200"
+    # Thread identity is account-scoped (P0-1); raw provider thread kept
+    # in source metadata.
+    assert email.thread_id == "gmail_gmail_user_gmail_thread_200"
+    assert email.source_metadata["gmail_raw"]["threadId"] == "gmail_thread_200"
 
     # Check sync_cursor contents
     updated_account = temp_repo.account("gmail_user")

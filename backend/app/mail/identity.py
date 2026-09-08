@@ -9,8 +9,24 @@ Two distinct concepts:
   so two Gmail accounts that both hold a message with the SAME provider id
   never collide.
 
-All scoped ID construction/parsing MUST go through this module — never
-ad-hoc f-string prefixes in random functions.
+Threads follow the SAME rule: provider thread IDs are NOT globally unique
+(they are only unique inside one Gmail mailbox), so Alfred stores a scoped
+local thread ID "gmail_{account_id}_{provider_thread_id}" and keeps the
+raw provider thread id in source_metadata.gmail_raw.threadId. Draft
+context, task linkage and thread queries always use the scoped form —
+cross-account thread content must never enter an AI prompt (privacy
+boundary).
+
+INVARIANT (pinned by tests):
+- Email.id is always the scoped local id for provider mail.
+- Email.thread_id is always the scoped local thread id for provider mail.
+- (account_id, provider_message_id) is UNIQUE (partial unique index;
+  legacy CSV rows carry NULLs and are exempt).
+- Parsing a scoped id NEVER depends on provider formatting EXCEPT as a
+  legacy fallback: exact-prefix matching against the known account id is
+  authoritative. The trailing-hex regex only interprets ids whose account
+  is unknown (e.g. migration of pre-scoping databases), and Gmail provider
+  ids are hex in practice. See P1-3 notes in database.py.
 """
 
 import re
@@ -50,6 +66,42 @@ def provider_message_id(email_id: str) -> str | None:
 
 
 def is_scoped_for(email_id: str, account_id: str) -> bool:
-    """True when the local id was generated for the given account."""
+    """True when the local id was generated for the given account.
+
+    Authoritative check: exact prefix match against the KNOWN account id.
+    Never depends on provider-id formatting.
+    """
+    if not email_id or not account_id:
+        return False
+    prefix = f"{SCOPE_PREFIX}_{account_id}_"
+    if email_id.startswith(prefix) and len(email_id) > len(prefix):
+        return True
+    # Legacy fallback: regex parse agrees on the account.
     parsed_account, _ = parse_email_id(email_id)
     return parsed_account == account_id
+
+
+def scoped_thread_id(account_id: str, provider_thread_id: str | None) -> str | None:
+    """Build the local scoped identity for a provider thread."""
+    if not provider_thread_id:
+        return None
+    if not account_id:
+        return provider_thread_id
+    return f"{SCOPE_PREFIX}_{account_id}_{provider_thread_id}"
+
+
+def parse_thread_id(thread_id: str | None) -> tuple[str | None, str | None]:
+    """Split a scoped local thread id into (account_id, provider_thread_id)."""
+    return parse_email_id(thread_id or "")
+
+
+def strip_scope(scoped_id: str, account_id: str) -> str:
+    """Remove a known account prefix, returning the provider-side id.
+
+    Raises ValueError when the id is not scoped for that account — callers
+    must never silently send a local id to a provider API.
+    """
+    prefix = f"{SCOPE_PREFIX}_{account_id}_"
+    if scoped_id.startswith(prefix) and len(scoped_id) > len(prefix):
+        return scoped_id[len(prefix):]
+    raise ValueError(f"local id is not scoped for account {account_id!r}")

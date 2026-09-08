@@ -1,5 +1,4 @@
 """SQLite schema, connection, and migration helpers for Alfred's local data."""
-import shutil
 import sqlite3
 from pathlib import Path
 from contextlib import contextmanager
@@ -8,6 +7,23 @@ from contextlib import contextmanager
 # weak-referenceable; cache the per-connection FTS capability probe here
 # (id-keyed; a redundant probe is harmless and idempotent).
 _fts_delete_cache: dict[int, bool] = {}
+
+
+def _sqlite_backup(source: sqlite3.Connection, backup_file: Path):
+    """Write a consistent snapshot of `source` to `backup_file`.
+
+    Uses the SQLite online-backup API, which is safe under WAL mode and
+    includes committed WAL state. Raises on any failure — callers treat a
+    failed backup as an aborted migration, never as a warning to skip.
+    Only sanitized operational details (paths) are logged by callers.
+    """
+    backup_file.parent.mkdir(parents=True, exist_ok=True)
+    target = sqlite3.connect(str(backup_file))
+    try:
+        with target:
+            source.backup(target)
+    finally:
+        target.close()
 
 SCHEMA = """
 PRAGMA foreign_keys = ON;
@@ -24,7 +40,8 @@ CREATE TABLE IF NOT EXISTS emails (
     label_ids_json TEXT,
     mailbox_state TEXT,
     gmail_category TEXT,
-    pipeline_eligibility TEXT
+    pipeline_eligibility TEXT,
+    provider_message_id TEXT
 );
 CREATE TABLE IF NOT EXISTS email_analysis (
     email_id TEXT PRIMARY KEY,
@@ -147,29 +164,106 @@ CREATE VIRTUAL TABLE IF NOT EXISTS emails_fts USING fts5(
 
 
 def fts_delete_supported(connection: sqlite3.Connection) -> bool:
-    """True when the bundled SQLite supports contentless_delete=1.
+    """Does the RUNTIME SQLite support contentless_delete=1?
 
-    The packaged Windows runtime bundles its own SQLite — never assume it
-    matches the developer machine. The probe result is cached per
-    connection (sqlite3.Connection rejects attribute assignment, so the
-    cache lives in a module-level weak map).
+    Probed with an isolated temporary table — never against the real
+    production table name, so an already-existing legacy table can never
+    produce a false positive. The packaged Windows runtime bundles its own
+    SQLite; this is never assumed from the developer machine.
     """
     cached = _fts_delete_cache.get(id(connection))
     if cached is not None:
         return cached
     supported = True
     try:
-        # The create itself is the ultimate truth: only claim support if
-        # a probe table with contentless_delete=1 can actually exist.
+        connection.execute("DROP TABLE IF EXISTS alfred_fts_cap_probe")
         connection.execute(
-            "CREATE VIRTUAL TABLE IF NOT EXISTS emails_fts USING fts5("
+            "CREATE VIRTUAL TABLE alfred_fts_cap_probe USING fts5("
             "subject, sender, body, content='', contentless_delete=1, "
             "tokenize='unicode61')"
         )
+        connection.execute("DROP TABLE alfred_fts_cap_probe")
     except sqlite3.OperationalError:
         supported = False
+        try:
+            connection.execute("DROP TABLE IF EXISTS alfred_fts_cap_probe")
+        except sqlite3.OperationalError:
+            pass
     _fts_delete_cache[id(connection)] = supported
     return supported
+
+
+def fts_table_uses_contentless_delete(connection: sqlite3.Connection) -> bool | None:
+    """What schema does the EXISTING emails_fts table actually use?
+
+    Returns True/False, or None when no emails_fts table exists. Inspects
+    the stored sqlite_master definition — never inferred from the runtime.
+    """
+    row = connection.execute(
+        "SELECT sql FROM sqlite_master WHERE type='table' AND name='emails_fts'"
+    ).fetchone()
+    if not row or not row[0]:
+        return None
+    return "contentless_delete" in row[0]
+
+
+def repopulate_fts_index(connection: sqlite3.Connection):
+    """Re-index every email row into emails_fts (content repair)."""
+    connection.execute(
+        "INSERT INTO emails_fts(rowid, subject, sender, body) "
+        "SELECT rowid, "
+        "COALESCE(subject_col, json_extract(payload, '$.subject'), ''), "
+        "COALESCE(sender_col, json_extract(payload, '$.sender'), ''), "
+        "COALESCE(json_extract(payload, '$.body'), '') "
+        "FROM emails"
+    )
+
+
+def ensure_fts_schema(connection: sqlite3.Connection):
+    """Idempotent FTS schema + content guarantee, run on every connect().
+
+    - No table: create the variant the runtime supports, then index.
+    - Legacy table (no contentless_delete) on a capable runtime: migrate
+      explicitly (drop, recreate, re-index).
+    - Matching schema but empty index with non-empty mailbox: re-index
+      (covers interrupted migrations; contentless tables report COUNT(*)
+      over indexed rows).
+    - Incapable runtime: legacy schema; per-row maintenance falls back to
+      rebuilds in the repository layer.
+    """
+    import logging as _logging
+    logger = _logging.getLogger("alfred.fts")
+    try:
+        capable = fts_delete_supported(connection)
+    except Exception as exc:
+        logger.warning("fts_capability_probe_failed: %s", exc)
+        return
+    existing = fts_table_uses_contentless_delete(connection)
+    try:
+        if existing is None:
+            connection.execute(FTS_SCHEMA if capable else FTS_SCHEMA_LEGACY)
+            repopulate_fts_index(connection)
+            connection.commit()
+        elif capable and not existing:
+            logger.info("fts_schema_upgrade: legacy contentless table found; migrating")
+            connection.execute("DROP TABLE emails_fts")
+            connection.execute(FTS_SCHEMA)
+            repopulate_fts_index(connection)
+            connection.commit()
+            logger.info("fts_schema_upgrade: complete")
+        else:
+            try:
+                fts_rows = connection.execute(
+                    "SELECT COUNT(*) FROM emails_fts").fetchone()[0]
+                mail_rows = connection.execute(
+                    "SELECT COUNT(*) FROM emails").fetchone()[0]
+            except sqlite3.OperationalError:
+                return  # FTS5 unavailable in this build
+            if mail_rows and not fts_rows:
+                repopulate_fts_index(connection)
+                connection.commit()
+    except sqlite3.OperationalError as exc:
+        logger.warning("fts_ensure_failed: %s", exc)
 
 
 def connect(path: Path) -> sqlite3.Connection:
@@ -194,15 +288,24 @@ def connect(path: Path) -> sqlite3.Connection:
     # Create indexes (idempotent)
     connection.executescript(INDEXES)
 
-    # Create FTS5 table (idempotent). Falls back to the legacy
-    # contentless schema when the runtime SQLite predates 3.43.0.
+    # Account-safe provider identity: one provider message belongs to one
+    # account row. Partial index — legacy/CSV rows with NULLs stay exempt.
+    # Created tolerantly: a legacy database with pre-existing duplicates
+    # must never fail to open; the situation is logged instead.
     try:
-        if fts_delete_supported(connection):
-            connection.executescript(FTS_SCHEMA)
-        else:
-            connection.executescript(FTS_SCHEMA_LEGACY)
-    except sqlite3.OperationalError:
-        pass  # FTS5 may not be available in all SQLite builds
+        connection.execute(
+            "CREATE UNIQUE INDEX IF NOT EXISTS idx_emails_account_provider "
+            "ON emails(account_id, provider_message_id) "
+            "WHERE account_id IS NOT NULL AND provider_message_id IS NOT NULL"
+        )
+    except sqlite3.IntegrityError as exc:
+        import logging as _logging
+        _logging.getLogger("alfred.db").warning(
+            "provider_unique_index_skipped: %s", exc)
+
+    # FTS5 schema + content guarantee (idempotent; migrates legacy
+    # contentless tables on capable runtimes, falls back otherwise).
+    ensure_fts_schema(connection)
 
     # Optimize query planner statistics
     connection.execute("PRAGMA optimize")
@@ -224,7 +327,8 @@ def _migrate(connection: sqlite3.Connection):
                           ("label_ids_json", "TEXT"),
                           ("mailbox_state", "TEXT"),
                           ("gmail_category", "TEXT"),
-                          ("pipeline_eligibility", "TEXT")]:
+                          ("pipeline_eligibility", "TEXT"),
+                          ("provider_message_id", "TEXT")]:
         if col not in email_cols:
             cursor.execute(f"ALTER TABLE emails ADD COLUMN {col} {col_type}")
 
@@ -343,20 +447,36 @@ def _migrate(connection: sqlite3.Connection):
             # (defer_foreign_keys is reset by COMMIT and applies only
             # inside the transaction that follows the BEGIN.)
             connection.commit()  # close any ambient transaction
-            cursor.execute("BEGIN")
-            cursor.execute("PRAGMA defer_foreign_keys=ON")
 
-            # Backup the database before re-keying user data.
+            # Consistent pre-migration backup via the SQLite backup API
+            # (WAL-safe snapshot, committed state included). A raw file
+            # copy is NOT safe under WAL mode and is never used here.
+            # Backup failure ABORTS the migration — user data is never
+            # re-keyed without a verified snapshot on disk.
             db_file = connection.execute("PRAGMA database_list").fetchone()["file"]
             # db_file is '' for in-memory test databases
             if db_file:
-                backup_file = Path(db_file).with_suffix(".sqlite3.pre_id_migration.bak")
-                if not backup_file.exists():
+                backup_file = Path(db_file).with_name(
+                    Path(db_file).name + ".pre_id_migration.bak")
+                if (backup_file.exists() and backup_file.is_file()
+                        and backup_file.stat().st_size > 0):
+                    pass  # verified snapshot from the first run — preserved
+                else:
                     try:
-                        shutil.copy2(db_file, backup_file)
+                        _sqlite_backup(connection, backup_file)
                         print(f"[Alfred] Backed up database before ID migration: {backup_file}")
-                    except Exception:
-                        pass  # Backup is best-effort; never blocks the app
+                    except Exception as exc:
+                        import logging as _logging
+                        _logging.getLogger("alfred.db").error(
+                            "id_migration_backup_failed_aborting: %s", exc,
+                            exc_info=True)
+                        connection.commit()
+                        return
+            else:
+                backup_file = None
+
+            cursor.execute("BEGIN")
+            cursor.execute("PRAGMA defer_foreign_keys=ON")
 
             migrated = 0
             for local_id, account_id, stored_payload in to_migrate:
@@ -410,16 +530,11 @@ def _migrate(connection: sqlite3.Connection):
                     cursor.execute("DROP TABLE IF EXISTS emails_fts")
                     cursor.execute(FTS_SCHEMA if fts_delete_supported(connection)
                                    else FTS_SCHEMA_LEGACY)
-                    cursor.execute(
-                        "INSERT INTO emails_fts(rowid, subject, sender, body) "
-                        "SELECT rowid, "
-                        "COALESCE(subject_col, json_extract(payload, '$.subject'), ''), "
-                        "COALESCE(sender_col, json_extract(payload, '$.sender'), ''), "
-                        "COALESCE(json_extract(payload, '$.body'), '') "
-                        "FROM emails"
-                    )
-                except Exception:
-                    pass
+                    repopulate_fts_index(connection)
+                except Exception as exc:
+                    import logging as _logging
+                    _logging.getLogger("alfred.fts").warning(
+                        "fts_rebuild_after_id_migration_failed: %s", exc)
             connection.commit()
             cursor.execute("PRAGMA defer_foreign_keys=OFF")
     except Exception as exc:
@@ -428,6 +543,109 @@ def _migrate(connection: sqlite3.Connection):
             "scoped_id_migration_failed: %s", exc, exc_info=True
         )  # never silent — migration problems must be visible in logs
     connection.commit()
+
+    # P0-1/P1-3: account-safe threads + provider identity backfill.
+    # Runs AFTER the scoped-ID migration so every provider row already has
+    # its final (account_id, scoped id). Idempotent: rows already carrying
+    # scoped thread ids and provider ids are skipped.
+    # - emails.thread_id: raw provider thread id -> scoped local thread id
+    # - emails.provider_message_id: backfilled from the scoped id parse
+    #   (raw rows keep NULL and stay exempt from the unique index)
+    # - tasks.source_thread_id: re-keyed via the linked email's account;
+    #   orphan tasks (email gone) are left untouched, never deleted.
+    try:
+        import logging as _logging
+        from ..mail.identity import (
+            parse_email_id as _parse_id,
+            scoped_thread_id as _scoped_thread,
+        )
+        _log = _logging.getLogger("alfred.db")
+        connection.commit()
+
+        # Pre-scan (read-only): only rows that actually need work. A backup
+        # is taken/stored ONLY when this list is non-empty — an empty
+        # database must never produce (or be blocked by) a snapshot.
+        backfill_work: list[tuple] = []
+        for r in cursor.execute(
+            "SELECT id, account_id, thread_id, provider_message_id FROM emails"
+        ).fetchall():
+            local_id, account_id = r["id"], r["account_id"]
+            if not account_id:
+                continue
+            needs_provider = False
+            if not r["provider_message_id"]:
+                parsed_account, provider = _parse_id(local_id)
+                needs_provider = bool(parsed_account == account_id and provider)
+            needs_thread = False
+            raw_thread = r["thread_id"]
+            if raw_thread and _parse_id(raw_thread)[0] is None:
+                needs_thread = bool(_scoped_thread(account_id, raw_thread))
+            if needs_provider or needs_thread:
+                backfill_work.append((local_id, account_id, raw_thread,
+                                      needs_provider, needs_thread))
+
+        # Same safety gate as the ID migration: no snapshot, no mutation.
+        # (Usually the snapshot already exists from the block above; this
+        # covers databases that only need the thread/provider backfill.)
+        _backfill_aborted = False
+        if backfill_work:
+            _db_file = connection.execute("PRAGMA database_list").fetchone()["file"]
+            if _db_file:
+                _backup_file = Path(_db_file).with_name(
+                    Path(_db_file).name + ".pre_id_migration.bak")
+                if not (_backup_file.exists() and _backup_file.is_file()
+                        and _backup_file.stat().st_size > 0):
+                    try:
+                        _sqlite_backup(connection, _backup_file)
+                        print(f"[Alfred] Backed up database before thread backfill: {_backup_file}")
+                    except Exception as exc:
+                        _logging.getLogger("alfred.db").error(
+                            "thread_backfill_backup_failed_aborting: %s", exc,
+                            exc_info=True)
+                        _backfill_aborted = True
+            cursor.execute("BEGIN")
+            cursor.execute("PRAGMA defer_foreign_keys=ON")
+
+        thread_fixed = 0
+        provider_fixed = 0
+        if not _backfill_aborted:
+            for local_id, account_id, raw_thread, needs_provider, needs_thread in backfill_work:
+                # Provider identity backfill (scoped rows only — never guess).
+                if needs_provider:
+                    _, provider = _parse_id(local_id)
+                    cursor.execute(
+                        "UPDATE emails SET provider_message_id=? WHERE id=?",
+                        (provider, local_id),
+                    )
+                    provider_fixed += 1
+                # Thread re-key (raw provider thread ids only).
+                if needs_thread:
+                    scoped_thread = _scoped_thread(account_id, raw_thread)
+                    cursor.execute(
+                        "UPDATE emails SET thread_id=? WHERE id=?",
+                        (scoped_thread, local_id),
+                    )
+                    cursor.execute(
+                        "UPDATE tasks SET source_thread_id=? "
+                        "WHERE source_email_id=? AND "
+                        "(source_thread_id=? OR source_thread_id IS NULL)",
+                        (scoped_thread, local_id, raw_thread),
+                    )
+                    thread_fixed += 1
+        # Orphan tasks whose source email is gone keep their thread value;
+        # only re-key tasks we can attribute to a known account.
+        if thread_fixed or provider_fixed:
+            print(f"[Alfred] Thread/provider backfill: {thread_fixed} threads scoped, "
+                  f"{provider_fixed} provider ids recorded")
+        connection.commit()
+        cursor.execute("PRAGMA defer_foreign_keys=OFF")
+    except Exception as exc:
+        import logging as _logging2
+        _logging2.getLogger("alfred.db").warning(
+            "thread_provider_backfill_failed: %s", exc, exc_info=True
+        )
+    connection.commit()
+
     cursor.execute("PRAGMA table_info(tasks)")
     task_cols = {row["name"] for row in cursor.fetchall()}
     for col, col_type in [("derivation_version", "TEXT DEFAULT '1'"),

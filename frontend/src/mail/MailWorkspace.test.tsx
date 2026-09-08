@@ -345,6 +345,70 @@ describe('MailWorkspace', () => {
     expect(vi.mocked(api.emails).mock.calls.at(-1)?.[0]?.scope).toBe('all');
   });
 
+  it('sync in All-accounts mode requests a sync-all (undefined account)', async () => {
+    const onRequestSync = vi.fn();
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MailWorkspace
+          searchQuery=""
+          onClearSearch={() => {}}
+          onSearchChange={() => {}}
+          syncState={{ syncing: false, lastSyncAt: null }}
+          onRequestSync={onRequestSync}
+        />
+      </QueryClientProvider>
+    );
+    await waitFor(() => {
+      expect(screen.getByText('Q3 planning needed')).toBeInTheDocument();
+    });
+    fireEvent.click(screen.getByRole('button', { name: 'Sync Gmail' }));
+    expect(onRequestSync).toHaveBeenCalledWith(undefined);
+  });
+
+  it('shows per-account backfill lines in All-accounts mode, one line when scoped', async () => {
+    const api = await import('../api/emails');
+    const twoAccounts = [
+      {
+        id: 'gmail_a', provider: 'gmail', email_address: 'a@gmail.com',
+        display_name: 'A User', connection_status: 'connected',
+        backfill: { state: 'complete', complete: true, estimate: null, imported: 10, pages: 1, remaining_estimate: null, last_page_at: null, last_error: null },
+      },
+      {
+        id: 'gmail_b', provider: 'gmail', email_address: 'b@gmail.com',
+        display_name: 'B User', connection_status: 'connected',
+        backfill: { state: 'running', complete: false, estimate: null, imported: 3, pages: 1, remaining_estimate: 40, last_page_at: null, last_error: null },
+      },
+    ];
+    vi.mocked(api.accounts).mockResolvedValueOnce(twoAccounts as never);
+    const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
+    render(
+      <QueryClientProvider client={queryClient}>
+        <MailWorkspace
+          searchQuery=""
+          onClearSearch={() => {}}
+          onSearchChange={() => {}}
+          syncState={{ syncing: false, lastSyncAt: null }}
+          onRequestSync={() => {}}
+        />
+      </QueryClientProvider>
+    );
+    // Both accounts' backfill states are labelled — not one merged line.
+    await waitFor(() => {
+      const labels = [...document.querySelectorAll('.backfill-account')].map(el => el.textContent);
+      expect(labels).toContain('A User');
+      expect(labels).toContain('B User');
+    });
+    // Scoping to one account shows a single unlabeled line.
+    fireEvent.change(screen.getByRole('combobox', { name: 'Filter by account' }), {
+      target: { value: 'gmail_b' },
+    });
+    await waitFor(() => {
+      expect(document.querySelectorAll('.backfill-account')).toHaveLength(0);
+      expect(screen.getByText('Syncing older mail…')).toBeInTheDocument();
+    });
+  });
+
   it('selecting a message renders the reader and Alfred intelligence panel', async () => {
     renderWorkspace();
     await waitFor(() => {

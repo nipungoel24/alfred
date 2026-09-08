@@ -314,15 +314,25 @@ def _derive_and_save_tasks(email: Email, analysis: EmailAnalysis):
 
     Excluded source mail (spam/trash/archived) never produces new tasks —
     the guard also covers mid-analysis label transitions.
+    Deduplication checks every candidate fingerprint (current scoped-thread
+    form plus the legacy raw-thread form) so post-migration re-derivation
+    cannot duplicate a pre-migration task.
     """
+    from .services.task_derivation import candidate_fingerprints, _normalize_action
     persisted = repo.email_eligibility(email.id)
     if not persisted or persisted['pipeline_eligibility'] == 'excluded':
         return
     tasks = derive_tasks(email, analysis)
     new_tasks = []
     for t in tasks:
-        fp = getattr(t, 'fingerprint', None)
-        if fp and repo.task_exists_by_fingerprint(fp):
+        fps = [getattr(t, 'fingerprint', None)]
+        try:
+            fps.extend(candidate_fingerprints(
+                email.thread_id, email.account_id,
+                _normalize_action(t.title or '')))
+        except Exception:
+            pass
+        if any(fp and repo.task_exists_by_fingerprint(fp) for fp in fps):
             continue
         new_tasks.append(t)
     if new_tasks:
@@ -1021,10 +1031,12 @@ async def draft(email_id: str):
     if not e:
         return JSONResponse(status_code=404, content={'error': {'code': 'EMAIL_NOT_FOUND', 'message': 'Email was not found.', 'details': {}}})
 
-    # Use efficient thread query instead of loading all emails
+    # Thread context is account-scoped (privacy boundary): the account
+    # filter is REQUIRED so another mailbox's thread with a colliding
+    # provider thread id can never enter the AI prompt.
     thread_emails = []
     if e.thread_id:
-        thread_emails = repo.emails_by_thread(e.thread_id)
+        thread_emails = repo.emails_by_thread(e.thread_id, account_id=e.account_id)
 
     draft_reply_text = await ai.draft_reply(e, thread_emails)
     return {'draft': draft_reply_text}

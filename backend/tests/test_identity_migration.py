@@ -10,6 +10,8 @@ import json
 import sqlite3
 from pathlib import Path
 
+import pytest
+
 from backend.app.db.database import connect, SCHEMA, INDEXES, FTS_SCHEMA
 from backend.app.mail.identity import (
     scoped_email_id, parse_email_id, provider_message_id, is_scoped_for,
@@ -158,3 +160,87 @@ def test_migration_is_idempotent(tmp_path: Path):
         (f"gmail_{account_id}_gmail_%",),
     ).fetchone()[0]
     assert double == 0
+
+
+def test_backup_is_readable_snapshot(tmp_path: Path):
+    """The pre-migration backup opens cleanly and holds pre-migration data."""
+    import sqlite3
+
+    db = tmp_path / "snap.sqlite3"
+    account_id = "gmail_alice@example.com"
+    repo = Repository(db)
+    repo.upsert_email_commit(
+        Email(id="1a076e26cf3a3533", account_id=account_id,
+              sender="a@example.com", subject="Hi", body="body"), "fp")
+    repo.close()
+
+    Repository(db).close()  # triggers migration + backup
+    backup = tmp_path / "snap.sqlite3.pre_id_migration.bak"
+    assert backup.exists() and backup.stat().st_size > 0
+
+    bak = sqlite3.connect(backup)
+    try:
+        assert bak.execute("SELECT COUNT(*) FROM emails").fetchone()[0] == 1
+        row = bak.execute("SELECT id, account_id FROM emails").fetchone()
+        assert row[0] == "1a076e26cf3a3533"  # raw pre-migration id
+        assert row[1] == account_id
+        payload = json.loads(bak.execute("SELECT payload FROM emails").fetchone()[0])
+        assert payload["subject"] == "Hi"
+    finally:
+        bak.close()
+
+
+def test_backup_failure_aborts_migration(tmp_path: Path):
+    """When no consistent snapshot can be written, ids stay untouched."""
+    db = tmp_path / "abort.sqlite3"
+    repo = Repository(db)
+    repo.upsert_email_commit(
+        Email(id="1a076e26cf3a3533", account_id="gmail_alice@example.com",
+              sender="a@example.com", subject="Hi", body="body"), "fp")
+    repo.close()
+
+    # Poison the backup path: a directory where the backup file must go.
+    backup = tmp_path / "abort.sqlite3.pre_id_migration.bak"
+    backup.mkdir()
+
+    repo2 = Repository(db)  # migration must abort, not corrupt
+    try:
+        assert repo2.email_exists("1a076e26cf3a3533")
+        assert repo2.email_count() == 1
+    finally:
+        repo2.close()
+        backup.rmdir()
+
+    # With the path clear, the next connect migrates normally.
+    repo3 = Repository(db)
+    assert repo3.email_exists(
+        scoped_email_id("gmail_alice@example.com", "1a076e26cf3a3533"))
+
+
+def test_provider_uniqueness_enforced(tmp_path: Path):
+    """Duplicate (account_id, provider_message_id) rows are rejected."""
+    import sqlite3
+
+    repo = Repository(tmp_path / "test.sqlite3")
+    account = "gmail_alice@example.com"
+    repo.upsert_email_commit(
+        Email(id=scoped_email_id(account, "abc123def45"), account_id=account,
+              provider_message_id="abc123def45",
+              sender="a@example.com", subject="One", body="b"), "fp1")
+    with pytest.raises(sqlite3.IntegrityError):
+        repo.con.execute(
+            "INSERT INTO emails (id, payload, content_hash, imported_at, "
+            "account_id, provider_message_id) VALUES (?,?,?,?,?,?)",
+            ("gmail_other_row", "{}", "fp", "2026-01-01T00:00:00",
+             account, "abc123def45"),
+        )
+
+
+def test_null_provider_rows_exempt_from_uniqueness(tmp_path: Path):
+    """Legacy/CSV rows with NULL provider ids never collide."""
+    repo = Repository(tmp_path / "test.sqlite3")
+    for i in range(3):
+        repo.upsert_email_commit(
+            Email(id=f"csv-{i}", sender="a@example.com",
+                  subject=f"S{i}", body="b"), "fp")
+    assert repo.email_count() == 3
