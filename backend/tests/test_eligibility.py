@@ -190,8 +190,9 @@ def repo(tmp_path):
 
 
 def _email(eid, labels):
+    scoped_id = f"gmail_gmail_user_{eid}"
     return Email(
-        id=eid, account_id="gmail_user", sender="a@b.com",
+        id=scoped_id, account_id="gmail_user", sender="a@b.com",
         subject="s", body="b", label_ids=labels
     )
 
@@ -199,17 +200,17 @@ def _email(eid, labels):
 def test_label_only_history_update_recomputes_state(repo):
     e = _email("m1", [LABEL_INBOX, LABEL_CATEGORY_PERSONAL, LABEL_UNREAD])
     repo.upsert_email(e, "h1")
-    assert repo.email_eligibility("m1")["mailbox_state"] == "active_inbox"
+    assert repo.email_eligibility("gmail_gmail_user_m1")["mailbox_state"] == "active_inbox"
 
     # labelRemoved INBOX → archived → excluded (no body re-fetch, no delete)
-    ok = repo.update_email_labels("m1", [LABEL_UNREAD])
+    ok = repo.update_email_labels("gmail_gmail_user_m1", [LABEL_UNREAD])
     assert ok is True
-    state = repo.email_eligibility("m1")
+    state = repo.email_eligibility("gmail_gmail_user_m1")
     assert state["mailbox_state"] == "archived"
     assert state["pipeline_eligibility"] == "excluded"
     # source row survives
-    assert repo.email("m1") is not None
-    assert repo.email("m1").label_ids == [LABEL_UNREAD]
+    assert repo.email("gmail_gmail_user_m1") is not None
+    assert repo.email("gmail_gmail_user_m1").label_ids == [LABEL_UNREAD]
 
 
 def test_spam_transition_hides_from_projections(repo):
@@ -217,7 +218,7 @@ def test_spam_transition_hides_from_projections(repo):
     repo.upsert_email(e, "h1")
     assert repo.email_counts()["active_inbox"] == 1
 
-    repo.update_email_labels("m1", [LABEL_SPAM])
+    repo.update_email_labels("gmail_gmail_user_m1", [LABEL_SPAM])
     counts = repo.email_counts()
     assert counts["active_inbox"] == 0
     assert counts["excluded"] == 1
@@ -226,10 +227,10 @@ def test_spam_transition_hides_from_projections(repo):
     # inbox filter no longer returns it
     assert repo.emails_filtered() == []
     # but it still exists in the mailbox cache
-    assert repo.email_exists("m1") is True
+    assert repo.email_exists("gmail_gmail_user_m1") is True
 
     # restore
-    repo.update_email_labels("m1", [LABEL_INBOX, LABEL_CATEGORY_PERSONAL])
+    repo.update_email_labels("gmail_gmail_user_m1", [LABEL_INBOX, LABEL_CATEGORY_PERSONAL])
     counts = repo.email_counts()
     assert counts["active_inbox"] == 1
     assert counts["categories"]["primary"] == 1
@@ -260,8 +261,8 @@ def test_category_filter_is_db_driven(repo):
     repo.upsert_email(_email("promo", [LABEL_INBOX, LABEL_CATEGORY_PROMOTIONS]), "2")
     repo.upsert_email(_email("spm", [LABEL_INBOX, LABEL_SPAM]), "3")
 
-    assert [e.id for e in repo.emails_filtered(category="promotions")] == ["promo"]
-    assert [e.id for e in repo.emails_filtered(category="primary")] == ["p1"]
+    assert [e.id for e in repo.emails_filtered(category="promotions")] == ["gmail_gmail_user_promo"]
+    assert [e.id for e in repo.emails_filtered(category="primary")] == ["gmail_gmail_user_p1"]
     # spam never appears in inbox views
     assert len(repo.emails_filtered(category="primary")) == 1
 
@@ -292,24 +293,24 @@ def test_active_tasks_exclude_spam_sourced(repo):
     repo.upsert_email(_email("m1", [LABEL_INBOX, LABEL_CATEGORY_PERSONAL]), "1")
     repo.upsert_email(_email("m2", [LABEL_SPAM]), "2")
 
-    t1 = Task(id="t1", source_email_id="m1", title="Real task", status="pending")
-    t2 = Task(id="t2", source_email_id="m2", title="Spam-derived task", status="pending")
+    t1 = Task(id="gmail_gmail_user_t1", source_email_id="gmail_gmail_user_m1", title="Real task", status="pending")
+    t2 = Task(id="t2", source_email_id="gmail_gmail_user_m2", title="Spam-derived task", status="pending")
     t3 = Task(id="t3", source_email_id=None, title="User task", status="pending")
     repo.save_tasks_batch([t1, t2, t3])
 
     active_ids = {t.id for t in repo.active_tasks()}
-    assert active_ids == {"t1", "t3"}
+    assert active_ids == {"gmail_gmail_user_t1", "t3"}
     # historical rows preserved
-    assert {t.id for t in repo.tasks()} == {"t1", "t2", "t3"}
+    assert {t.id for t in repo.tasks()} == {"gmail_gmail_user_t1", "t2", "t3"}
 
 
 def test_permanent_delete_marks_excluded_not_destroyed(repo):
     e = _email("m1", [LABEL_INBOX, LABEL_CATEGORY_PERSONAL])
     repo.upsert_email(e, "h1")
-    assert repo.mark_email_excluded("m1") is True
-    state = repo.email_eligibility("m1")
+    assert repo.mark_email_excluded("gmail_gmail_user_m1") is True
+    state = repo.email_eligibility("gmail_gmail_user_m1")
     assert state["pipeline_eligibility"] == "excluded"
-    assert repo.email("m1") is not None
+    assert repo.email("gmail_gmail_user_m1") is not None
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -322,14 +323,14 @@ def test_mixed_label_thread_keeps_active_messages_visible(repo):
     repo.upsert_email(_email("old", [LABEL_UNREAD]), "1")
     repo.upsert_email(_email("new", [LABEL_INBOX, LABEL_UNREAD]), "2")
     repo.con.execute(
-        'UPDATE emails SET thread_id="thread_x" WHERE id IN ("old","new")'
+        'UPDATE emails SET thread_id="thread_x" WHERE id IN ("gmail_gmail_user_old","gmail_gmail_user_new")'
     )
     repo.con.commit()
 
     visible = [e.id for e in repo.emails_filtered()]
-    assert visible == ["new"]
+    assert visible == ["gmail_gmail_user_new"]
     # thread integrity preserved for both
-    assert repo.emails_by_thread("thread_x")[0].id == "old"
+    assert repo.emails_by_thread("thread_x")[0].id == "gmail_gmail_user_old"
 
 
 # ═══════════════════════════════════════════════════════════════════
@@ -378,11 +379,11 @@ def test_history_label_changes_refresh_via_metadata(mock_get, repo):
     assert res["imported"] == 0
     assert res["label_updates"] == 1
 
-    state = repo.email_eligibility("m1")
+    state = repo.email_eligibility("gmail_gmail_user_m1")
     assert state["mailbox_state"] == "spam"
     assert state["pipeline_eligibility"] == "excluded"
     # row retained
-    assert repo.email("m1") is not None
+    assert repo.email("gmail_gmail_user_m1") is not None
 
 
 @patch("httpx.AsyncClient.get")
@@ -439,7 +440,7 @@ def test_email_api_excluded_mail_never_listed(repo, tmp_path):
 
         r = client.get("/api/emails")
         assert r.status_code == 200
-        assert [e["id"] for e in r.json()] == ["ok"]
+        assert [e["id"] for e in r.json()] == ["gmail_gmail_user_ok"]
 
         counts = client.get("/api/emails/counts").json()
         assert counts["active_inbox"] == 1
@@ -450,15 +451,15 @@ def test_email_api_excluded_mail_never_listed(repo, tmp_path):
         # All Mail scope surfaces archived but never spam/trash
         r_all = client.get("/api/emails", params={"scope": "all"})
         assert r_all.status_code == 200
-        assert {e["id"] for e in r_all.json()} == {"ok", "a1"}
+        assert {e["id"] for e in r_all.json()} == {"gmail_gmail_user_ok", "gmail_gmail_user_a1"}
 
         # analyze excluded → 409
-        assert client.post("/api/emails/s1/analyze").status_code == 409
+        assert client.post("/api/emails/gmail_gmail_user_s1/analyze").status_code == 409
         # analyze active → 200 (analysis mocked via worker path? No — direct AI)
         # Excluded never enqueues analysis jobs
         from backend.app.main import repo as _repo
         _repo.upsert_email(_email("s2", [LABEL_INBOX, LABEL_SPAM]), "hs2")
         candidates = _repo.eligible_emails_without_analysis("qwen3:4b")
-        assert all(e.id != "s2" for e in candidates)
+        assert all(e.id != "gmail_gmail_user_s2" for e in candidates)
     finally:
         main.repo = original_repo

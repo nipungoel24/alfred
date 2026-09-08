@@ -196,6 +196,8 @@ class Repository:
                         kind: str | None = None,
                         include_excluded: bool = False,
                         query: str | None = None,
+                        priority: str | None = None,
+                        needs_reply: bool | None = None,
                         limit: int = 200, offset: int = 0) -> list[Email]:
         """Fetch emails with typed filters, DB-side (no JS filtering).
 
@@ -239,6 +241,22 @@ class Repository:
             like = f'%{query}%'
             sql += ' AND (subject_col LIKE ? OR sender_col LIKE ?)'
             params.extend([like, like])
+        # Priority and needs_reply filtering: applied BEFORE LIMIT/OFFSET
+        # via the analysis table join (no Python post-filtering of truncated windows).
+        if priority or needs_reply is not None:
+            sql += ' AND id IN (SELECT a.email_id FROM email_analysis a WHERE a.email_id = id'
+            analysis_params: list = []
+            if priority:
+                if priority == 'high':
+                    sql += ' AND json_extract(a.payload, "$.priority") IN ("high","urgent")'
+                else:
+                    sql += ' AND json_extract(a.payload, "$.priority") = ?'
+                    analysis_params.append(priority)
+            if needs_reply is not None:
+                sql += ' AND json_extract(a.payload, "$.needs_reply") = ?'
+                analysis_params.append(1 if needs_reply else 0)
+            sql += ')'
+            params.extend(analysis_params)
         sql += ' ORDER BY received_at_col DESC LIMIT ? OFFSET ?'
         params.extend([limit, offset])
         rows = self.con.execute(sql, params).fetchall()
@@ -342,7 +360,8 @@ class Repository:
             ).fetchall()
             return [Email.model_validate_json(r['payload']) for r in rows]
 
-    def search_emails_structured(self, filters: SearchFilters, limit=100) -> list[Email]:
+    def search_emails_structured(self, filters: SearchFilters, account_id: str | None = None,
+                                 limit=100, offset: int = 0) -> list[Email]:
         """Structured search with filters applied at the database level.
 
         Filters are applied BEFORE LIMIT/OFFSET for correct results.
@@ -350,6 +369,11 @@ class Repository:
         """
         conditions = ["e.mailbox_state IN ('active_inbox','archived','sent')"]
         params: list = []
+        
+        # Apply account filter
+        if account_id:
+            conditions.append("e.account_id = ?")
+            params.append(account_id)
         
         # Apply sender filter
         if filters.sender:
@@ -395,16 +419,16 @@ class Repository:
                     f"JOIN emails e ON f.rowid = e.rowid "
                     f"WHERE emails_fts MATCH ? "
                     f"AND {where_clause} "
-                    f"ORDER BY rank LIMIT ?",
-                    (fts_match, *params, limit)
+                    f"ORDER BY rank LIMIT ? OFFSET ?",
+                    (fts_match, *params, limit, offset)
                 ).fetchall()
             else:
                 # No free text, just apply filters
                 rows = self.con.execute(
                     f"SELECT e.payload FROM emails e "
                     f"WHERE {where_clause} "
-                    f"ORDER BY e.received_at_col DESC LIMIT ?",
-                    (*params, limit)
+                    f"ORDER BY e.received_at_col DESC LIMIT ? OFFSET ?",
+                    (*params, limit, offset)
                 ).fetchall()
             
             return [Email.model_validate_json(r['payload']) for r in rows]
@@ -424,8 +448,10 @@ class Repository:
         """Keep the FTS5 index in sync for a single upsert.
 
         Uses contentless FTS5 (content='') for storage efficiency.
-        DELETE operations are handled by rebuild_fts() which removes
-        orphaned entries periodically.
+        Contentless FTS5 cannot DELETE individual entries, so:
+        - New emails: INSERT directly into FTS
+        - Updated emails (content changed): rebuild entire FTS to remove stale tokens
+        - Updated emails (no content change): skip (FTS already correct)
         """
         try:
             # Get the rowid for this email
@@ -436,20 +462,26 @@ class Repository:
                 return
             rowid = row[0]
 
-            # For contentless FTS5, we can't DELETE individual entries.
-            # Instead, we just INSERT the new entry. Orphaned entries
-            # will be cleaned up by rebuild_fts().
-            # First check if entry already exists
+            # Check if FTS entry already exists for this rowid
             existing = self.con.execute(
                 "SELECT rowid FROM emails_fts WHERE rowid=?",
                 (rowid,)
             ).fetchone()
             if existing:
-                # Can't update contentless FTS5 in place, skip
-                # The rebuild will handle this
+                # Entry exists — check if content actually changed
+                # by comparing subject/sender (cheap proxy for body changes)
+                old = self.con.execute(
+                    "SELECT subject, sender FROM emails_fts WHERE rowid=?",
+                    (rowid,)
+                ).fetchone()
+                if old and old[0] == email.subject and old[1] == email.sender:
+                    return  # No content change, FTS is current
+                # Content changed: rebuild entire FTS to remove stale tokens
+                # (contentless FTS5 doesn't support per-row DELETE)
+                self.rebuild_fts()
                 return
             
-            # Insert new FTS entry
+            # New email: insert into FTS
             self.con.execute(
                 "INSERT INTO emails_fts(rowid, subject, sender, body) VALUES (?, ?, ?, ?)",
                 (rowid, email.subject, email.sender, email.body[:5000] if email.body else '')

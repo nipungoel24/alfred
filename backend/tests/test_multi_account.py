@@ -184,3 +184,117 @@ def test_account_credentials_isolation(tmp_path: Path):
     assert creds2 is not None
     assert creds1['encrypted_access_token'] == 'token_1'
     assert creds2['encrypted_access_token'] == 'token_2'
+
+
+def test_same_provider_message_id_collision(tmp_path: Path):
+    """Two accounts with the same provider_message_id must coexist.
+
+    Gmail message IDs are account-scoped. Account A and Account B can
+    each have a message with provider_message_id 'same-id'. Both must
+    remain isolated through fetch/update/delete/analysis/search.
+    """
+    repo = Repository(tmp_path / 'test.sqlite3')
+
+    # In production, Gmail sync uses account-prefixed IDs to avoid collision.
+    # Simulate this: two accounts with the same raw Gmail message ID get
+    # different database IDs via the "gmail_{account_id}_{msg_id}" pattern.
+    email_a = make_email(id='gmail_account_a_same-id', subject='From Account A',
+                         sender='alice@example.com', account_id='account_a')
+    email_b = make_email(id='gmail_account_b_same-id', subject='From Account B',
+                         sender='bob@example.com', account_id='account_b')
+
+    repo.upsert_email(email_a, 'fp_a')
+    repo.upsert_email(email_b, 'fp_b')
+
+    # Both emails must exist and be isolated
+    assert repo.email_exists('gmail_account_a_same-id')
+    assert repo.email_exists('gmail_account_b_same-id')
+
+    # Verify account isolation: fetch by account
+    emails_a = repo.emails(account_id='account_a')
+    emails_b = repo.emails(account_id='account_b')
+    assert len(emails_a) == 1
+    assert len(emails_b) == 1
+
+    # Verify search works across accounts
+    results = repo.search_emails('Account A')
+    assert len(results) == 1
+    assert results[0].account_id == 'account_a'
+
+    # Verify deletion only affects one account's data
+    repo.delete_email('gmail_account_a_same-id')
+    assert not repo.email_exists('gmail_account_a_same-id')
+    assert repo.email_exists('gmail_account_b_same-id')
+    results = repo.search_emails('Account B')
+    assert len(results) == 1
+
+
+def test_account_prefixed_email_ids(tmp_path: Path):
+    """Gmail sync must use account-prefixed IDs to avoid collision.
+
+    In production, Gmail sync constructs IDs as:
+        f"gmail_{account.email_address}_{msg_id}"
+    This prevents two accounts from colliding on the same Gmail message ID.
+    """
+    repo = Repository(tmp_path / 'test.sqlite3')
+
+    # Simulate account-prefixed IDs from Gmail sync
+    email_a = make_email(id='gmail_user1@gmail.com_msg123',
+                         subject='Important Meeting', account_id='user1@gmail.com')
+    email_b = make_email(id='gmail_user2@gmail.com_msg123',
+                         subject='Lunch Plans', account_id='user2@gmail.com')
+
+    repo.upsert_email(email_a, 'fp_a')
+    repo.upsert_email(email_b, 'fp_b')
+
+    # Both must exist independently
+    assert repo.email_exists('gmail_user1@gmail.com_msg123')
+    assert repo.email_exists('gmail_user2@gmail.com_msg123')
+
+    # Account isolation: each account sees only its own
+    emails_a = repo.emails(account_id='user1@gmail.com')
+    emails_b = repo.emails(account_id='user2@gmail.com')
+    assert len(emails_a) == 1
+    assert len(emails_b) == 1
+    assert emails_a[0].subject == 'Important Meeting'
+    assert emails_b[0].subject == 'Lunch Plans'
+
+    # Delete one — the other must survive
+    repo.delete_email('gmail_user1@gmail.com_msg123')
+    assert not repo.email_exists('gmail_user1@gmail.com_msg123')
+    assert repo.email_exists('gmail_user2@gmail.com_msg123')
+
+    # Search must return only the surviving email (search by subject content, not ID)
+    results = repo.search_emails('Lunch Plans')
+    assert len(results) == 1
+    assert results[0].account_id == 'user2@gmail.com'
+
+
+def test_account_specific_counts(tmp_path: Path):
+    """email_counts must respect account_id filter."""
+    repo = Repository(tmp_path / 'test.sqlite3')
+
+    # Create emails across two accounts with known labels
+    for i, (acct, labels) in enumerate([
+        ('acct_a', ['INBOX', 'CATEGORY_PRIMARY']),
+        ('acct_a', ['INBOX', 'CATEGORY_PROMOTIONS']),
+        ('acct_b', ['INBOX', 'CATEGORY_PRIMARY']),
+    ]):
+        e = make_email(id=f'e{i}', account_id=acct)
+        e.label_ids = labels
+        repo.upsert_email(e, 'fp')
+
+    # Count for account_a only
+    counts_a = repo.email_counts(account_id='acct_a')
+    assert counts_a['active_inbox'] == 2
+    assert counts_a['categories']['primary'] == 1
+    assert counts_a['categories']['promotions'] == 1
+
+    # Count for account_b only
+    counts_b = repo.email_counts(account_id='acct_b')
+    assert counts_b['active_inbox'] == 1
+    assert counts_b['categories']['primary'] == 1
+
+    # Count for all accounts
+    counts_all = repo.email_counts()
+    assert counts_all['active_inbox'] == 3

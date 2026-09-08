@@ -16,7 +16,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
     queryKey: ['emails', { scope: 'overview' }],
     queryFn: () => fetchEmails({ limit: 200 }),
   });
-  const { data: counts } = useQuery({ queryKey: ['emailCounts'], queryFn: emailCounts });
+  const { data: counts } = useQuery({ queryKey: ['emailCounts'], queryFn: () => emailCounts() });
 
   const generateBriefing = useMutation({
     mutationFn: regenerateBriefing,

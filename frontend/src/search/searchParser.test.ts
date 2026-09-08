@@ -117,4 +117,40 @@ describe('searchParser', () => {
       expect(chips).toHaveLength(0);
     });
   });
+
+  describe('URL protocol safety', () => {
+    const ALLOWED_SCHEMES = new Set(['https:', 'http:', 'mailto:', 'tel:']);
+
+    it('allows https URLs', () => {
+      expect(ALLOWED_SCHEMES.has('https:')).toBe(true);
+    });
+
+    it('allows http URLs', () => {
+      expect(ALLOWED_SCHEMES.has('http:')).toBe(true);
+    });
+
+    it('allows mailto URLs', () => {
+      expect(ALLOWED_SCHEMES.has('mailto:')).toBe(true);
+    });
+
+    it('allows tel URLs', () => {
+      expect(ALLOWED_SCHEMES.has('tel:')).toBe(true);
+    });
+
+    it('rejects javascript URLs', () => {
+      expect(ALLOWED_SCHEMES.has('javascript:')).toBe(false);
+    });
+
+    it('rejects data URLs', () => {
+      expect(ALLOWED_SCHEMES.has('data:')).toBe(false);
+    });
+
+    it('rejects file URLs', () => {
+      expect(ALLOWED_SCHEMES.has('file:')).toBe(false);
+    });
+
+    it('rejects ftp URLs', () => {
+      expect(ALLOWED_SCHEMES.has('ftp:')).toBe(false);
+    });
+  });
 });

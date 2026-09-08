@@ -23,7 +23,8 @@ from backend.app.mail.providers.gmail import GmailProvider
 
 
 def _email(eid, labels, sender="a@b.com"):
-    return Email(id=eid, account_id="gmail_user", sender=sender, subject=f"subject {eid}",
+    scoped_id = f"gmail_gmail_user_{eid}"
+    return Email(id=scoped_id, account_id="gmail_user", sender=sender, subject=f"subject {eid}",
                  body="body", label_ids=labels)
 
 
@@ -42,7 +43,7 @@ def test_inbox_scope_shows_active_inbox_only(repo):
     repo.upsert_email(_email("in1", ["INBOX", "UNREAD"]), "1")
     repo.upsert_email(_email("arch1", ["UNREAD"]), "2")
     repo.upsert_email(_email("spam1", ["SPAM"]), "3")
-    assert [e.id for e in repo.emails_filtered(scope="inbox")] == ["in1"]
+    assert [e.id for e in repo.emails_filtered(scope="inbox")] == ["gmail_gmail_user_in1"]
 
 
 def test_all_scope_includes_archived(repo):
@@ -50,7 +51,7 @@ def test_all_scope_includes_archived(repo):
     repo.upsert_email(_email("arch1", ["UNREAD"]), "2")
     repo.upsert_email(_email("arch2", ["CATEGORY_PROMOTIONS"]), "3")
     ids = {e.id for e in repo.emails_filtered(scope="all")}
-    assert ids == {"in1", "arch1", "arch2"}
+    assert ids == {"gmail_gmail_user_in1", "gmail_gmail_user_arch1", "gmail_gmail_user_arch2"}
 
 
 def test_all_scope_excludes_spam_trash_draft_only(repo):
@@ -63,22 +64,22 @@ def test_all_scope_excludes_spam_trash_draft_only(repo):
     repo.upsert_email(_email("trash1", ["TRASH"]), "4")
     repo.upsert_email(_email("draft1", ["DRAFT"]), "5")
     ids = {e.id for e in repo.emails_filtered(scope="all")}
-    assert ids == {"in1", "arch1", "sent1"}
+    assert ids == {"gmail_gmail_user_in1", "gmail_gmail_user_arch1", "gmail_gmail_user_sent1"}
 
 
 def test_all_scope_kind_filters(repo):
     repo.upsert_email(_email("in1", ["INBOX"]), "1")
     repo.upsert_email(_email("arch1", ["UNREAD"]), "2")
     repo.upsert_email(_email("sent1", ["SENT"]), "3")
-    assert {e.id for e in repo.emails_filtered(scope="all", kind="received")} == {"in1", "arch1"}
-    assert {e.id for e in repo.emails_filtered(scope="all", kind="sent")} == {"sent1"}
-    assert {e.id for e in repo.emails_filtered(scope="all", kind="archived")} == {"arch1"}
+    assert {e.id for e in repo.emails_filtered(scope="all", kind="received")} == {"gmail_gmail_user_in1", "gmail_gmail_user_arch1"}
+    assert {e.id for e in repo.emails_filtered(scope="all", kind="sent")} == {"gmail_gmail_user_sent1"}
+    assert {e.id for e in repo.emails_filtered(scope="all", kind="archived")} == {"gmail_gmail_user_arch1"}
 
 
 def test_sent_visible_but_excluded_from_intelligence(repo):
     repo.upsert_email(_email("sent1", ["SENT"]), "1")
     # visible in All Mail
-    assert {e.id for e in repo.emails_filtered(scope="all")} == {"sent1"}
+    assert {e.id for e in repo.emails_filtered(scope="all")} == {"gmail_gmail_user_sent1"}
     # never in inbox scope
     assert repo.emails_filtered(scope="inbox") == []
     # sent never feeds the pipeline
@@ -93,7 +94,7 @@ def test_sent_visible_but_excluded_from_intelligence(repo):
 def test_draft_excluded_from_all_mail_and_search(repo):
     repo.upsert_email(_email("draft1", ["DRAFT"], sender="drafter@x.com"), "1")
     repo.upsert_email(_email("in1", ["INBOX"]), "2")
-    assert {e.id for e in repo.emails_filtered(scope="all")} == {"in1"}
+    assert {e.id for e in repo.emails_filtered(scope="all")} == {"gmail_gmail_user_in1"}
     assert {e.id for e in repo.search_emails("drafter")} == set()
 
 
@@ -103,17 +104,17 @@ def test_category_ignored_in_all_scope(repo):
     repo.upsert_email(_email("inpromo", ["INBOX", "CATEGORY_PROMOTIONS"]), "1")
     repo.upsert_email(_email("archpromo", ["CATEGORY_PROMOTIONS"]), "2")
     ids = {e.id for e in repo.emails_filtered(scope="all", category="promotions")}
-    assert ids == {"inpromo", "archpromo"}
+    assert ids == {"gmail_gmail_user_inpromo", "gmail_gmail_user_archpromo"}
     # Inbox scope still applies the tab
     ids_inbox = {e.id for e in repo.emails_filtered(scope="inbox", category="promotions")}
-    assert ids_inbox == {"inpromo"}
+    assert ids_inbox == {"gmail_gmail_user_inpromo"}
 
 
 def test_search_covers_archived_not_spam(repo):
     repo.upsert_email(_email("arch1", ["UNREAD"], sender="archived@x.com"), "1")
     repo.upsert_email(_email("spam1", ["SPAM"], sender="spammer@x.com"), "2")
     hits = {e.id for e in repo.search_emails("archived")}
-    assert hits == {"arch1"}
+    assert hits == {"gmail_gmail_user_arch1"}
     hits2 = {e.id for e in repo.search_emails("spammer")}
     assert hits2 == set()
 
@@ -150,16 +151,16 @@ def test_archived_excluded_from_intelligence(repo):
     repo.upsert_email(_email("in1", ["INBOX"]), "2")
 
     # visible in All Mail
-    assert {e.id for e in repo.emails_filtered(scope="all")} == {"arch1", "in1"}
+    assert {e.id for e in repo.emails_filtered(scope="all")} == {"gmail_gmail_user_arch1", "gmail_gmail_user_in1"}
     # but not in inbox scope
-    assert [e.id for e in repo.emails_filtered(scope="inbox")] == ["in1"]
+    assert [e.id for e in repo.emails_filtered(scope="inbox")] == ["gmail_gmail_user_in1"]
     # and never briefing-eligible
     assert MailEligibilityPolicy.should_include_in_briefing(["UNREAD"]) is False
     # and never scheduled for analysis
     assert MailEligibilityPolicy.should_schedule_analysis(["UNREAD"]) is False
     # analysis queue candidates remain inbox-only
     candidates = repo.eligible_emails_without_analysis("qwen3:4b")
-    assert {e.id for e in candidates} == {"in1"}
+    assert {e.id for e in candidates} == {"gmail_gmail_user_in1"}
 
 
 def test_archived_tasks_not_in_active_projection(repo):
@@ -167,8 +168,8 @@ def test_archived_tasks_not_in_active_projection(repo):
     repo.upsert_email(_email("arch1", ["UNREAD"]), "1")
     repo.upsert_email(_email("in1", ["INBOX"]), "2")
     repo.save_tasks_batch([
-        Task(id="t_arch", source_email_id="arch1", title="old task", status="pending"),
-        Task(id="t_in", source_email_id="in1", title="current task", status="pending"),
+        Task(id="t_arch", source_email_id="gmail_gmail_user_arch1", title="old task", status="pending"),
+        Task(id="t_in", source_email_id="gmail_gmail_user_in1", title="current task", status="pending"),
     ])
     active_ids = {t.id for t in repo.active_tasks()}
     assert active_ids == {"t_in"}
@@ -272,7 +273,7 @@ def test_backfill_first_page_and_resume(mock_get, repo):
     assert res3["complete"] is True
 
     # all three archived, none in active inbox
-    assert repo.email("arch_1") is not None
+    assert repo.email("gmail_gmail_user_arch_1") is not None
     assert repo.email_counts()["active_inbox"] == 0
     assert repo.email_counts()["all_mail"] == 3
 
@@ -295,7 +296,7 @@ def test_backfill_skips_cached_rows_and_updates_labels(mock_get, repo):
     assert res["imported"] == 0
     assert res["skipped_duplicates"] == 1
     # label set refreshed without a body fetch
-    assert repo.email_eligibility("cached_1")["label_ids"] == ["STARRED"]
+    assert repo.email_eligibility("gmail_gmail_user_cached_1")["label_ids"] == ["STARRED"]
     assert repo.email_counts()["all_mail"] == 1
 
 

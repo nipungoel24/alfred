@@ -112,7 +112,7 @@ def test_gmail_sync_initial(mock_get, mock_gmail, temp_repo):
     assert res["imported"] == 1
 
     # Verify normalization saved email details
-    email = temp_repo.email("gmail_msg_100")
+    email = temp_repo.email("gmail_gmail_user_gmail_msg_100")
     assert email is not None
     assert email.sender == "billing@saas.com"
     assert email.sender_name == "Billing Department"
@@ -142,7 +142,7 @@ def test_gmail_sync_incremental(mock_get, mock_gmail, temp_repo):
 
     # Pre-populate repository with msg_100
     existing_email = Email(
-        id="gmail_msg_100",
+        id="gmail_gmail_user_gmail_msg_100",
         thread_id="gmail_thread_200",
         account_id="gmail_user",
         sender="billing@saas.com",
@@ -214,16 +214,16 @@ def test_gmail_sync_incremental(mock_get, mock_gmail, temp_repo):
     assert res["imported"] == 1
 
     # Verify msg_101 is imported
-    assert temp_repo.email("gmail_msg_101") is not None
+    assert temp_repo.email("gmail_gmail_user_gmail_msg_101") is not None
     # Verify msg_100 is NOT deleted: source row is retained for history
     # integrity and marked excluded instead.
-    retained = temp_repo.email("gmail_msg_100")
+    retained = temp_repo.email("gmail_gmail_user_gmail_msg_100")
     assert retained is not None
 
     from backend.app.db.database import connect
     con = temp_repo.con
     row = con.execute(
-        'SELECT mailbox_state, pipeline_eligibility FROM emails WHERE id="gmail_msg_100"'
+        'SELECT mailbox_state, pipeline_eligibility FROM emails WHERE id="gmail_gmail_user_gmail_msg_100"'
     ).fetchone()
     assert row["mailbox_state"] == "trash"
     assert row["pipeline_eligibility"] == "excluded"
@@ -298,7 +298,7 @@ def test_gmail_sync_history_expired_recovery(mock_get, mock_gmail, temp_repo):
 
     res = asyncio.run(mock_gmail.sync_messages(account, credentials, temp_repo))
     assert res["imported"] == 1
-    assert temp_repo.email("gmail_msg_200") is not None
+    assert temp_repo.email("gmail_gmail_user_gmail_msg_200") is not None
 
     # Check updated cursor has recovered historyId
     updated_account = temp_repo.account("gmail_user")
@@ -360,7 +360,7 @@ def test_gmail_sync_load_older(mock_get, mock_gmail, temp_repo):
 
     res = asyncio.run(mock_gmail.sync_messages(account, credentials, temp_repo, load_older=True))
     assert res["imported"] == 1
-    assert temp_repo.email("gmail_msg_older_1") is not None
+    assert temp_repo.email("gmail_gmail_user_gmail_msg_older_1") is not None
 
     # Check updated sync cursor page token is advanced
     updated_account = temp_repo.account("gmail_user")

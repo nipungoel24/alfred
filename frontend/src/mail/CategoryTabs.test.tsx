@@ -35,4 +35,54 @@ describe('CategoryTabs', () => {
     fireEvent.click(promo);
     expect(onChange).toHaveBeenCalledWith('promotions');
   });
+
+  it('navigates with ArrowRight from first to last tab wrapping', () => {
+    const onChange = vi.fn();
+    render(
+      <CategoryTabs categories={CATEGORY_ORDER} active="primary" counts={counts} onChange={onChange} />
+    );
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'ArrowRight' });
+    expect(onChange).toHaveBeenCalledWith('promotions');
+  });
+
+  it('navigates with ArrowLeft from first tab wrapping to last', () => {
+    const onChange = vi.fn();
+    render(
+      <CategoryTabs categories={CATEGORY_ORDER} active="primary" counts={counts} onChange={onChange} />
+    );
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'ArrowLeft' });
+    expect(onChange).toHaveBeenCalledWith('forums');
+  });
+
+  it('navigates to first tab with Home key', () => {
+    const onChange = vi.fn();
+    render(
+      <CategoryTabs categories={CATEGORY_ORDER} active="social" counts={counts} onChange={onChange} />
+    );
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'Home' });
+    expect(onChange).toHaveBeenCalledWith('primary');
+  });
+
+  it('navigates to last tab with End key', () => {
+    const onChange = vi.fn();
+    render(
+      <CategoryTabs categories={CATEGORY_ORDER} active="primary" counts={counts} onChange={onChange} />
+    );
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'End' });
+    expect(onChange).toHaveBeenCalledWith('forums');
+  });
+
+  it('does not call onChange for unsupported keys', () => {
+    const onChange = vi.fn();
+    render(
+      <CategoryTabs categories={CATEGORY_ORDER} active="primary" counts={counts} onChange={onChange} />
+    );
+    const tablist = screen.getByRole('tablist');
+    fireEvent.keyDown(tablist, { key: 'Enter' });
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });
