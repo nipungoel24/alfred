@@ -600,6 +600,23 @@ def _migrate(connection: sqlite3.Connection):
         _log = _logging.getLogger("alfred.db")
         connection.commit()
 
+        # Emails whose own row is consistent but that own tasks with a
+        # divergent thread (derived from a stale payload before this fix).
+        # tasks.source_thread_id must always equal the email's thread —
+        # any divergence is stale by definition.
+        divergent_email_ids: set[str] = set()
+        try:
+            divergent_email_ids = {
+                r[0] for r in cursor.execute(
+                    "SELECT DISTINCT t.source_email_id FROM tasks t "
+                    "JOIN emails e ON e.id = t.source_email_id "
+                    "WHERE t.source_thread_id IS NOT NULL "
+                    "AND t.source_thread_id != e.thread_id"
+                ).fetchall() if r[0]
+            }
+        except Exception:
+            pass
+
         # Pre-scan (read-only): only rows that actually need work. A backup
         # is taken/stored ONLY when this list is non-empty — an empty
         # database must never produce (or be blocked by) a snapshot.
@@ -636,7 +653,7 @@ def _migrate(connection: sqlite3.Connection):
                 or payload_obj.get("thread_id") != final_thread
                 or payload_obj.get("provider_message_id") != final_provider
             ))
-            if provider or scoped_thread or needs_payload:
+            if provider or scoped_thread or needs_payload or local_id in divergent_email_ids:
                 backfill_work.append((local_id, account_id, raw_thread, provider,
                                       scoped_thread, final_thread, final_provider,
                                       payload_obj))
@@ -683,13 +700,20 @@ def _migrate(connection: sqlite3.Connection):
                     "UPDATE emails SET thread_id=? WHERE id=?",
                     (scoped_thread, local_id),
                 )
-                cursor.execute(
-                    "UPDATE tasks SET source_thread_id=? "
-                    "WHERE source_email_id=? AND "
-                    "(source_thread_id=? OR source_thread_id IS NULL)",
-                    (scoped_thread, local_id, raw_thread),
-                )
                 thread_fixed += 1
+            # Linked tasks follow the email's FINAL thread unconditionally:
+            # any task whose thread disagrees with it is stale (derived from
+            # a pre-patch payload, toggled mid-flight, or left by an
+            # interrupted run). Driven by direct comparison against the final
+            # value — never by guessing which old value a task might hold.
+            # Values already in agreement are untouched; orphan tasks (email
+            # gone) are never touched.
+            if payload_obj is not None or local_id in divergent_email_ids:
+                cursor.execute(
+                    "UPDATE tasks SET source_thread_id=? WHERE source_email_id=? AND "
+                    "(source_thread_id IS NULL OR source_thread_id != ?)",
+                    (final_thread, local_id, final_thread),
+                )
             # Payload consistency: the serialized model agrees with SQL.
             if payload_obj is not None:
                 payload_obj["id"] = local_id
