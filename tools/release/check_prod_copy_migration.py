@@ -1,9 +1,10 @@
 """One-shot verification: new migrations against a COPY of production data.
 
-NEVER run against the user's live database — the copy lives in TMP.
+The copy is taken with SQLite's backup API (WAL-safe, includes committed
+WAL pages) — never a raw file copy. NEVER modifies the live production
+database; the snapshot is read for verification only.
 """
 import os
-import shutil
 import sqlite3
 import sys
 import tempfile
@@ -12,14 +13,16 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 
+from backend.app.db.database import snapshot_database
+
 SRC = Path(os.environ.get("LOCALAPPDATA", "")) / "Alfred" / "alfred.sqlite3"
 
 
 def main() -> int:
     tmp = Path(tempfile.mkdtemp(prefix="alfred_migcheck_"))
     db = tmp / "prod_copy.sqlite3"
-    shutil.copy2(SRC, db)
-    print(f"copied {db} ({db.stat().st_size} bytes)")
+    snapshot_database(SRC, db)
+    print(f"snapshotted {db} ({db.stat().st_size} bytes)")
 
     from backend.app.db.repositories import Repository
     from backend.app.db.database import fts_table_uses_contentless_delete

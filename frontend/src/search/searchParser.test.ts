@@ -68,6 +68,13 @@ describe('searchParser', () => {
       expect(result.in).toBe('inbox');
     });
 
+    it('keeps unknown in: scopes as free text', () => {
+      const result = parseSearchQuery('in:everywhere hello');
+      expect(result.in).toBeUndefined();
+      expect(result.freeText).toContain('in:everywhere');
+      expect(result.freeText).toContain('hello');
+    });
+
     it('parses complex query with multiple filters', () => {
       const result = parseSearchQuery('from:alice subject:meeting is:unread hello');
       expect(result.from).toBe('alice');
@@ -110,6 +117,32 @@ describe('searchParser', () => {
       expect(query).toContain('is:unread');
       expect(query).toContain('is:reply');
       expect(query).not.toContain('is:read');
+    });
+
+    it('quotes structured values containing spaces', () => {
+      const query = buildSearchQueryString({
+        subject: 'quarterly report',
+        isUnread: true,
+        freeText: [],
+      });
+      expect(query).toBe('subject:"quarterly report" is:unread');
+    });
+
+    it('round-trips quoted values with spaces and embedded quotes', () => {
+      const original = 'subject:"quarterly report" is:unread';
+      const parsed = parseSearchQuery(original);
+      expect(parsed.subject).toBe('quarterly report');
+      expect(buildSearchQueryString(parsed)).toBe(original);
+    });
+
+    it('escapes embedded quotes in structured values', () => {
+      const query = buildSearchQueryString({
+        subject: 'say "hi" loudly',
+        freeText: [],
+      });
+      expect(query).toBe('subject:"say \\"hi\\" loudly"');
+      const parsed = parseSearchQuery(query);
+      expect(parsed.subject).toBe('say "hi" loudly');
     });
   });
 

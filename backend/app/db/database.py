@@ -9,6 +9,17 @@ from contextlib import contextmanager
 _fts_delete_cache: dict[int, bool] = {}
 
 
+class MigrationSafetyError(Exception):
+    """Refusing to open the database for normal writes.
+
+    Raised when a data migration cannot create its safety snapshot.
+    Fail-closed: the repository/backend must NOT continue against an
+    unmigrated database where sync could insert scoped duplicates beside
+    legacy raw rows. The message carries only operational details (paths),
+    never email content or credentials.
+    """
+
+
 def _sqlite_backup(source: sqlite3.Connection, backup_file: Path):
     """Write a consistent snapshot of `source` to `backup_file`.
 
@@ -24,6 +35,20 @@ def _sqlite_backup(source: sqlite3.Connection, backup_file: Path):
             source.backup(target)
     finally:
         target.close()
+
+
+def snapshot_database(source_path: Path, dest_path: Path):
+    """WAL-safe snapshot of a database FILE to another path.
+
+    Read-only against the source (the backup API never mutates it), so
+    verification tooling can snapshot a live production database without
+    touching it. Raises on failure.
+    """
+    source = sqlite3.connect(str(source_path))
+    try:
+        _sqlite_backup(source, dest_path)
+    finally:
+        source.close()
 
 SCHEMA = """
 PRAGMA foreign_keys = ON;
@@ -417,7 +442,9 @@ def _migrate(connection: sqlite3.Connection):
     try:
         import json as _json
         import re
-        from ..mail.identity import parse_email_id, scoped_email_id
+        from ..mail.identity import (
+            parse_email_id, scoped_email_id, is_scoped_for,
+        )
 
         rows = cursor.execute(
             "SELECT id, account_id, payload FROM emails"
@@ -428,8 +455,9 @@ def _migrate(connection: sqlite3.Connection):
             account_id = r["account_id"]
             if not account_id:
                 continue  # Legacy CSV import — has no provider identity
-            parsed_account, _ = parse_email_id(local_id)
-            if parsed_account == account_id:
+            # Authoritative check first: exact known-account prefix (never
+            # depends on provider-id formatting).
+            if is_scoped_for(local_id, account_id):
                 continue  # Already scoped for this account
             if parse_email_id(local_id)[0] is not None:
                 continue  # Scoped for another account — leave untouched
@@ -471,7 +499,9 @@ def _migrate(connection: sqlite3.Connection):
                             "id_migration_backup_failed_aborting: %s", exc,
                             exc_info=True)
                         connection.commit()
-                        return
+                        raise MigrationSafetyError(
+                            f"refusing ID migration without a safety snapshot "
+                            f"of {db_file}") from exc
             else:
                 backup_file = None
 
@@ -537,6 +567,9 @@ def _migrate(connection: sqlite3.Connection):
                         "fts_rebuild_after_id_migration_failed: %s", exc)
             connection.commit()
             cursor.execute("PRAGMA defer_foreign_keys=OFF")
+    except MigrationSafetyError:
+        connection.commit()
+        raise  # fail-closed: never swallow the safety gate
     except Exception as exc:
         import logging
         logging.getLogger("alfred.db").warning(
@@ -553,11 +586,16 @@ def _migrate(connection: sqlite3.Connection):
     #   (raw rows keep NULL and stay exempt from the unique index)
     # - tasks.source_thread_id: re-keyed via the linked email's account;
     #   orphan tasks (email gone) are left untouched, never deleted.
+    # - emails.payload: patched so payload.id/thread_id/provider_message_id/
+    #   account_id agree with the SQL columns (source-of-truth invariant —
+    #   Repository.email() deserializes the payload).
     try:
+        import json as _json2
         import logging as _logging
         from ..mail.identity import (
             parse_email_id as _parse_id,
             scoped_thread_id as _scoped_thread,
+            is_scoped_for as _is_scoped_for,
         )
         _log = _logging.getLogger("alfred.db")
         connection.commit()
@@ -567,27 +605,45 @@ def _migrate(connection: sqlite3.Connection):
         # database must never produce (or be blocked by) a snapshot.
         backfill_work: list[tuple] = []
         for r in cursor.execute(
-            "SELECT id, account_id, thread_id, provider_message_id FROM emails"
+            "SELECT id, account_id, thread_id, provider_message_id, payload FROM emails"
         ).fetchall():
             local_id, account_id = r["id"], r["account_id"]
             if not account_id:
                 continue
-            needs_provider = False
+            provider = None
             if not r["provider_message_id"]:
-                parsed_account, provider = _parse_id(local_id)
-                needs_provider = bool(parsed_account == account_id and provider)
-            needs_thread = False
+                parsed_account, parsed_provider = _parse_id(local_id)
+                if parsed_account == account_id and parsed_provider:
+                    provider = parsed_provider
+            final_provider = provider or r["provider_message_id"]
+            scoped_thread = None
             raw_thread = r["thread_id"]
-            if raw_thread and _parse_id(raw_thread)[0] is None:
-                needs_thread = bool(_scoped_thread(account_id, raw_thread))
-            if needs_provider or needs_thread:
-                backfill_work.append((local_id, account_id, raw_thread,
-                                      needs_provider, needs_thread))
+            # Authoritative scoped check: exact known-account prefix. The
+            # regex fallback inside is_scoped_for covers genuinely ambiguous
+            # legacy ids; non-hex already-scoped ids are never re-prefixed.
+            if raw_thread and not _is_scoped_for(raw_thread, account_id):
+                scoped_thread = _scoped_thread(account_id, raw_thread)
+            final_thread = scoped_thread or raw_thread
+            try:
+                payload_obj = _json2.loads(r["payload"])
+                if not isinstance(payload_obj, dict):
+                    payload_obj = None
+            except Exception:
+                payload_obj = None
+            needs_payload = bool(payload_obj is not None and (
+                payload_obj.get("id") != local_id
+                or payload_obj.get("account_id") != account_id
+                or payload_obj.get("thread_id") != final_thread
+                or payload_obj.get("provider_message_id") != final_provider
+            ))
+            if provider or scoped_thread or needs_payload:
+                backfill_work.append((local_id, account_id, raw_thread, provider,
+                                      scoped_thread, final_thread, final_provider,
+                                      payload_obj))
 
         # Same safety gate as the ID migration: no snapshot, no mutation.
         # (Usually the snapshot already exists from the block above; this
         # covers databases that only need the thread/provider backfill.)
-        _backfill_aborted = False
         if backfill_work:
             _db_file = connection.execute("PRAGMA database_list").fetchone()["file"]
             if _db_file:
@@ -602,43 +658,60 @@ def _migrate(connection: sqlite3.Connection):
                         _logging.getLogger("alfred.db").error(
                             "thread_backfill_backup_failed_aborting: %s", exc,
                             exc_info=True)
-                        _backfill_aborted = True
+                        connection.commit()
+                        raise MigrationSafetyError(
+                            f"refusing thread backfill without a safety "
+                            f"snapshot of {_db_file}") from exc
             cursor.execute("BEGIN")
             cursor.execute("PRAGMA defer_foreign_keys=ON")
 
         thread_fixed = 0
         provider_fixed = 0
-        if not _backfill_aborted:
-            for local_id, account_id, raw_thread, needs_provider, needs_thread in backfill_work:
-                # Provider identity backfill (scoped rows only — never guess).
-                if needs_provider:
-                    _, provider = _parse_id(local_id)
-                    cursor.execute(
-                        "UPDATE emails SET provider_message_id=? WHERE id=?",
-                        (provider, local_id),
-                    )
-                    provider_fixed += 1
-                # Thread re-key (raw provider thread ids only).
-                if needs_thread:
-                    scoped_thread = _scoped_thread(account_id, raw_thread)
-                    cursor.execute(
-                        "UPDATE emails SET thread_id=? WHERE id=?",
-                        (scoped_thread, local_id),
-                    )
-                    cursor.execute(
-                        "UPDATE tasks SET source_thread_id=? "
-                        "WHERE source_email_id=? AND "
-                        "(source_thread_id=? OR source_thread_id IS NULL)",
-                        (scoped_thread, local_id, raw_thread),
-                    )
-                    thread_fixed += 1
+        payload_fixed = 0
+        for (local_id, account_id, raw_thread, provider, scoped_thread,
+             final_thread, final_provider, payload_obj) in backfill_work:
+            # Provider identity backfill (scoped rows only — never guess).
+            if provider:
+                cursor.execute(
+                    "UPDATE emails SET provider_message_id=? WHERE id=?",
+                    (provider, local_id),
+                )
+                provider_fixed += 1
+            # Thread re-key (raw provider thread ids only).
+            if scoped_thread:
+                cursor.execute(
+                    "UPDATE emails SET thread_id=? WHERE id=?",
+                    (scoped_thread, local_id),
+                )
+                cursor.execute(
+                    "UPDATE tasks SET source_thread_id=? "
+                    "WHERE source_email_id=? AND "
+                    "(source_thread_id=? OR source_thread_id IS NULL)",
+                    (scoped_thread, local_id, raw_thread),
+                )
+                thread_fixed += 1
+            # Payload consistency: the serialized model agrees with SQL.
+            if payload_obj is not None:
+                payload_obj["id"] = local_id
+                payload_obj["account_id"] = account_id
+                payload_obj["thread_id"] = final_thread
+                payload_obj["provider_message_id"] = final_provider
+                cursor.execute(
+                    "UPDATE emails SET payload=? WHERE id=?",
+                    (_json2.dumps(payload_obj), local_id),
+                )
+                payload_fixed += 1
         # Orphan tasks whose source email is gone keep their thread value;
         # only re-key tasks we can attribute to a known account.
-        if thread_fixed or provider_fixed:
+        if thread_fixed or provider_fixed or payload_fixed:
             print(f"[Alfred] Thread/provider backfill: {thread_fixed} threads scoped, "
-                  f"{provider_fixed} provider ids recorded")
+                  f"{provider_fixed} provider ids recorded, "
+                  f"{payload_fixed} payloads reconciled")
         connection.commit()
         cursor.execute("PRAGMA defer_foreign_keys=OFF")
+    except MigrationSafetyError:
+        connection.commit()
+        raise  # fail-closed: never swallow the safety gate
     except Exception as exc:
         import logging as _logging2
         _logging2.getLogger("alfred.db").warning(

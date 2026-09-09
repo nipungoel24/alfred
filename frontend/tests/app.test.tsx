@@ -212,4 +212,90 @@ describe('Alfred Frontend Application', () => {
 
     expect(await screen.findByText('Payment failed - action required today', {}, { timeout: 8000 })).toBeInTheDocument();
   }, 15000);
+
+  it('sync-all calls sync once per connected account in All-accounts mode', async () => {
+    vi.mocked(api.accounts).mockResolvedValue([
+      { ...mockAccounts[0] },
+      {
+        id: 'gmail_second',
+        provider: 'gmail',
+        email_address: 'second@gmail.com',
+        display_name: 'Second',
+        connection_status: 'connected',
+        last_sync_at: '2026-08-14T09:00:00Z',
+      },
+    ] as never);
+    vi.mocked(api.syncAccount).mockResolvedValue({ imported: 1, skipped_duplicates: 0 } as never);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    );
+
+    await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
+    // Two accounts => the account selector appears; both queries settled.
+    await screen.findByRole('combobox', { name: 'Filter by account' }, { timeout: 8000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Sync Gmail' }));
+    await waitFor(() => {
+      const ids = vi.mocked(api.syncAccount).mock.calls.map(call => call[0]);
+      expect(ids).toContain('gmail_user');
+      expect(ids).toContain('gmail_second');
+    });
+  }, 15000);
+
+  it('disables Sync while a sync is running so clicks cannot stack', async () => {
+    vi.mocked(api.syncAccount).mockImplementation(
+      () => new Promise(() => {}) as never,
+    );
+    render(
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    );
+
+    await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
+    // Accounts must be loaded or the sync targets resolve empty.
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Sync Gmail' }).getAttribute('title')).toMatch(/Last sync/);
+    });
+    const syncButton = screen.getByRole('button', { name: 'Sync Gmail' });
+    fireEvent.click(syncButton);
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: 'Sync Gmail' })).toBeDisabled();
+    });
+    // A second click on the disabled button starts nothing new.
+    fireEvent.click(screen.getByRole('button', { name: 'Sync Gmail' }));
+    expect(vi.mocked(api.syncAccount)).toHaveBeenCalledTimes(1);
+  }, 15000);
+
+  it('shows which account failed without hiding the successful one', async () => {
+    vi.mocked(api.accounts).mockResolvedValue([
+      { ...mockAccounts[0] },
+      {
+        id: 'gmail_second',
+        provider: 'gmail',
+        email_address: 'second@gmail.com',
+        display_name: 'Second',
+        connection_status: 'connected',
+        last_sync_at: '2026-08-14T09:00:00Z',
+      },
+    ] as never);
+    vi.mocked(api.syncAccount).mockImplementation(((id: string) =>
+      id === 'gmail_second'
+        ? Promise.reject(new Error('quota exceeded'))
+        : Promise.resolve({ imported: 2, skipped_duplicates: 0 })) as never);
+    render(
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    );
+
+    await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
+    await screen.findByRole('combobox', { name: 'Filter by account' }, { timeout: 8000 });
+    fireEvent.click(screen.getByRole('button', { name: 'Sync Gmail' }));
+    await screen.findByRole('alert', { timeout: 8000 });
+    expect(screen.getByText(/Sync failed for/)).toBeInTheDocument();
+    // "Second" appears in the account selector AND in the failure line.
+    expect(screen.getAllByText(/Second/).length).toBeGreaterThanOrEqual(2);
+  }, 15000);
 });

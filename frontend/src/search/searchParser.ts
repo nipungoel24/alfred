@@ -30,7 +30,15 @@ export interface SearchFilters {
   in?: string;
 }
 
-const FILTER_REGEX = /(\w+):(?:"([^"]+)"|(\S+))/g;
+const FILTER_REGEX = /(\w+):(?:"((?:[^"\\]|\\.)+)"|(\S+))/g;
+
+// User-facing `in:` scopes. Unknown values stay free text (never sent to
+// the backend, which validates strictly and 422s on anything else).
+const KNOWN_IN_SCOPES = new Set(['inbox', 'all', 'archived', 'sent']);
+
+function unescapeValue(value: string): string {
+  return value.replace(/\\(.)/g, '$1');
+}
 
 export function parseSearchQuery(query: string): SearchFilters {
   const filters: SearchFilters = {
@@ -46,7 +54,7 @@ export function parseSearchQuery(query: string): SearchFilters {
   // Extract structured filters
   while ((match = FILTER_REGEX.exec(query)) !== null) {
     const [fullMatch, key, quotedValue, unquotedValue] = match;
-    const value = quotedValue || unquotedValue;
+    const value = unescapeValue(quotedValue || unquotedValue);
 
     switch (key.toLowerCase()) {
       case 'from':
@@ -91,8 +99,11 @@ export function parseSearchQuery(query: string): SearchFilters {
         remaining = remaining.replace(fullMatch, '');
         break;
       case 'in':
-        filters.in = value;
-        remaining = remaining.replace(fullMatch, '');
+        if (KNOWN_IN_SCOPES.has(value.toLowerCase())) {
+          filters.in = value.toLowerCase();
+          remaining = remaining.replace(fullMatch, '');
+        }
+        // Unknown scope stays free text (backend would 422).
         break;
     }
   }
@@ -109,18 +120,28 @@ function isValidDate(dateStr: string): boolean {
   return !Number.isNaN(date.getTime());
 }
 
+function escapeValue(value: string): string {
+  // Quote structured values containing whitespace or quotes so a rebuild
+  // round-trips: subject:"quarterly report", not subject:quarterly report.
+  // Embedded quotes are backslash-escaped (parse unescapes them).
+  if (/[\s"]/.test(value)) {
+    return `"${value.replace(/\\/g, '\\\\').replace(/"/g, '\\"')}"`;
+  }
+  return value;
+}
+
 export function buildSearchQueryString(filters: SearchFilters): string {
   const parts: string[] = [];
 
-  if (filters.from) parts.push(`from:${filters.from}`);
-  if (filters.subject) parts.push(`subject:${filters.subject}`);
+  if (filters.from) parts.push(`from:${escapeValue(filters.from)}`);
+  if (filters.subject) parts.push(`subject:${escapeValue(filters.subject)}`);
   if (filters.isUnread) parts.push('is:unread');
   if (filters.isRead) parts.push('is:read');
   if (filters.isImportant) parts.push('is:important');
   if (filters.isReply) parts.push('is:reply');
   if (filters.after) parts.push(`after:${filters.after}`);
   if (filters.before) parts.push(`before:${filters.before}`);
-  if (filters.category) parts.push(`category:${filters.category}`);
+  if (filters.category) parts.push(`category:${escapeValue(filters.category)}`);
   if (filters.in) parts.push(`in:${filters.in}`);
 
   if (filters.freeText.length > 0) {

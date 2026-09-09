@@ -191,7 +191,11 @@ def test_backup_is_readable_snapshot(tmp_path: Path):
 
 
 def test_backup_failure_aborts_migration(tmp_path: Path):
-    """When no consistent snapshot can be written, ids stay untouched."""
+    """Fail-closed: no snapshot -> MigrationSafetyError, ids untouched,
+    repository never writable-ready; after the backup problem is removed,
+    retry succeeds and normal operation resumes."""
+    from backend.app.db.database import MigrationSafetyError
+
     db = tmp_path / "abort.sqlite3"
     repo = Repository(db)
     repo.upsert_email_commit(
@@ -203,18 +207,28 @@ def test_backup_failure_aborts_migration(tmp_path: Path):
     backup = tmp_path / "abort.sqlite3.pre_id_migration.bak"
     backup.mkdir()
 
-    repo2 = Repository(db)  # migration must abort, not corrupt
+    with pytest.raises(MigrationSafetyError):
+        Repository(db)
+    # IDs untouched by the aborted run (probed with plain sqlite — the
+    # repository itself refuses to open writable-ready).
+    import sqlite3 as _sqlite3
+    raw = _sqlite3.connect(db)
     try:
-        assert repo2.email_exists("1a076e26cf3a3533")
-        assert repo2.email_count() == 1
+        assert raw.execute("SELECT COUNT(*) FROM emails").fetchone()[0] == 1
+        assert raw.execute(
+            "SELECT id FROM emails").fetchone()[0] == "1a076e26cf3a3533"
     finally:
-        repo2.close()
-        backup.rmdir()
+        raw.close()
+    backup.rmdir()
 
-    # With the path clear, the next connect migrates normally.
+    # With the path clear, retry succeeds and normal operation resumes.
     repo3 = Repository(db)
     assert repo3.email_exists(
         scoped_email_id("gmail_alice@example.com", "1a076e26cf3a3533"))
+    repo3.upsert_email_commit(
+        Email(id="abcdef0123456789", account_id="gmail_alice@example.com",
+              sender="b@example.com", subject="Second", body="b2"), "fp2")
+    assert repo3.email_count() == 2
 
 
 def test_provider_uniqueness_enforced(tmp_path: Path):
@@ -238,9 +252,42 @@ def test_provider_uniqueness_enforced(tmp_path: Path):
 
 def test_null_provider_rows_exempt_from_uniqueness(tmp_path: Path):
     """Legacy/CSV rows with NULL provider ids never collide."""
-    repo = Repository(tmp_path / "test.sqlite3")
+    repo = Repository(tmp_path / 'test.sqlite3')
     for i in range(3):
         repo.upsert_email_commit(
             Email(id=f"csv-{i}", sender="a@example.com",
                   subject=f"S{i}", body="b"), "fp")
     assert repo.email_count() == 3
+
+
+def test_non_hex_scoped_identities_never_double_prefix(tmp_path: Path):
+    """Already-scoped ids with non-hex provider suffixes must survive
+    connect() untouched (exact-prefix rule, no hex assumption)."""
+    from backend.app.mail.identity import is_scoped_for
+
+    db = tmp_path / "nonhex.sqlite3"
+    account = "gmail_alice@example.com"
+    scoped_id = f"gmail_{account}_note-7"
+    scoped_thread = f"gmail_{account}_thread-9"
+    assert is_scoped_for(scoped_id, account)
+    assert is_scoped_for(scoped_thread, account)
+
+    repo = Repository(db)
+    repo.upsert_email_commit(
+        Email(id=scoped_id, account_id=account, thread_id=scoped_thread,
+              provider_message_id="note-7",
+              sender="a@example.com", subject="Note", body="b"), "fp")
+    repo.close()
+
+    repo2 = Repository(db)
+    try:
+        assert repo2.email_exists(scoped_id)
+        assert repo2.email_count() == 1
+        row = repo2.con.execute(
+            "SELECT thread_id, provider_message_id FROM emails WHERE id=?",
+            (scoped_id,)).fetchone()
+        assert row["thread_id"] == scoped_thread
+        assert row["provider_message_id"] == "note-7"
+        assert repo2.email(scoped_id).thread_id == scoped_thread
+    finally:
+        repo2.close()

@@ -126,7 +126,9 @@ function renderWorkspace() {
         searchQuery=""
         onClearSearch={() => {}}
         onSearchChange={() => {}}
-        syncState={{ syncing: false, lastSyncAt: null }}
+        syncState={{ syncing: false, lastSyncByAccount: {} }}
+          syncReport={null}
+          onDismissSyncReport={() => {}}
         onRequestSync={() => {}}
       />
     </QueryClientProvider>
@@ -281,7 +283,9 @@ describe('MailWorkspace', () => {
           searchQuery="archived"
           onClearSearch={() => {}}
           onSearchChange={() => {}}
-          syncState={{ syncing: false, lastSyncAt: null }}
+          syncState={{ syncing: false, lastSyncByAccount: {} }}
+          syncReport={null}
+          onDismissSyncReport={() => {}}
           onRequestSync={() => {}}
         />
       </QueryClientProvider>
@@ -296,6 +300,8 @@ describe('MailWorkspace', () => {
   });
 
   it('uses the structured search endpoint when the query has operators', async () => {
+    const { searchEmailsStructured } = await import('../api/emails');
+    vi.mocked(searchEmailsStructured).mockClear();
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false, staleTime: Infinity } } });
     render(
       <QueryClientProvider client={queryClient}>
@@ -303,12 +309,13 @@ describe('MailWorkspace', () => {
           searchQuery="from:alice is:unread"
           onClearSearch={() => {}}
           onSearchChange={() => {}}
-          syncState={{ syncing: false, lastSyncAt: null }}
+          syncState={{ syncing: false, lastSyncByAccount: {} }}
+          syncReport={null}
+          onDismissSyncReport={() => {}}
           onRequestSync={() => {}}
         />
       </QueryClientProvider>
     );
-    const { searchEmailsStructured } = await import('../api/emails');
     await waitFor(() => {
       expect(vi.mocked(searchEmailsStructured)).toHaveBeenCalled();
     });
@@ -321,7 +328,7 @@ describe('MailWorkspace', () => {
     expect(screen.getByRole('button', { name: 'Clear all' })).toBeInTheDocument();
   });
 
-  it('keeps plain free-text searches on the standard list endpoint', async () => {
+  it('sends plain global free text through the structured FTS endpoint', async () => {
     const api = await import('../api/emails');
     vi.mocked(api.searchEmailsStructured).mockClear();
     vi.mocked(api.emails).mockClear();
@@ -332,17 +339,25 @@ describe('MailWorkspace', () => {
           searchQuery="planning notes"
           onClearSearch={() => {}}
           onSearchChange={() => {}}
-          syncState={{ syncing: false, lastSyncAt: null }}
+          syncState={{ syncing: false, lastSyncByAccount: {} }}
+          syncReport={null}
+          onDismissSyncReport={() => {}}
           onRequestSync={() => {}}
         />
       </QueryClientProvider>
     );
     await waitFor(() => {
-      expect(vi.mocked(api.emails)).toHaveBeenCalled();
+      expect(vi.mocked(api.searchEmailsStructured)).toHaveBeenCalled();
     });
-    expect(vi.mocked(api.searchEmailsStructured)).not.toHaveBeenCalled();
-    expect(vi.mocked(api.emails).mock.calls.at(-1)?.[0]?.query).toBe('planning notes');
-    expect(vi.mocked(api.emails).mock.calls.at(-1)?.[0]?.scope).toBe('all');
+    // Global search must NOT fall back to the LIKE-only list endpoint.
+    expect(vi.mocked(api.emails)).not.toHaveBeenCalled();
+    const [filters, options] = vi.mocked(api.searchEmailsStructured).mock.calls.at(-1)!;
+    expect(filters.free_text).toEqual(['planning', 'notes']);
+    expect(options?.accountId).toBeUndefined();
+    // Structured-endpoint results render in the list.
+    await waitFor(() => {
+      expect(screen.getByText('Archived planning notes')).toBeInTheDocument();
+    });
   });
 
   it('sync in All-accounts mode requests a sync-all (undefined account)', async () => {
@@ -354,7 +369,9 @@ describe('MailWorkspace', () => {
           searchQuery=""
           onClearSearch={() => {}}
           onSearchChange={() => {}}
-          syncState={{ syncing: false, lastSyncAt: null }}
+          syncState={{ syncing: false, lastSyncByAccount: {} }}
+          syncReport={null}
+          onDismissSyncReport={() => {}}
           onRequestSync={onRequestSync}
         />
       </QueryClientProvider>
@@ -388,7 +405,9 @@ describe('MailWorkspace', () => {
           searchQuery=""
           onClearSearch={() => {}}
           onSearchChange={() => {}}
-          syncState={{ syncing: false, lastSyncAt: null }}
+          syncState={{ syncing: false, lastSyncByAccount: {} }}
+          syncReport={null}
+          onDismissSyncReport={() => {}}
           onRequestSync={() => {}}
         />
       </QueryClientProvider>

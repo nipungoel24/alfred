@@ -247,12 +247,24 @@ def rebuild_tasks_from_analyses(repo, model: str):
         tasks = derive_tasks(email, analysis)
         for task in tasks:
             fp = getattr(task, 'fingerprint', None)
+            # A task counts as existing when ANY candidate fingerprint
+            # matches (current scoped-thread form or legacy raw-thread form),
+            # so the thread migration can never duplicate a task here either.
+            try:
+                candidates = candidate_fingerprints(
+                    email.thread_id, email.account_id,
+                    _normalize_action(task.title or ''))
+            except Exception:
+                candidates = [fp] if fp else []
             if fp and fp in global_fingerprints:
                 continue  # Cross-email deduplication
-            if fp:
-                global_fingerprints.add(fp)
+            if any(c in global_fingerprints for c in candidates if c):
+                continue
+            for c in candidates:
+                if c:
+                    global_fingerprints.add(c)
             # Also check if this fingerprint already exists in DB
-            if fp and repo.task_exists_by_fingerprint(fp):
+            if any(c and repo.task_exists_by_fingerprint(c) for c in candidates if c):
                 continue
             all_new_tasks.append(task)
     

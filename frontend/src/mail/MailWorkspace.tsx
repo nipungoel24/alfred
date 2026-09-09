@@ -42,11 +42,13 @@ interface MailWorkspaceProps {
   searchQuery: string;
   onClearSearch: () => void;
   onSearchChange: (value: string) => void;
-  syncState: { syncing: boolean; lastSyncAt: string | null };
+  syncState: { syncing: boolean; lastSyncByAccount: Record<string, string | null> };
+  syncReport: { id: string; ok: boolean; error?: string }[] | null;
+  onDismissSyncReport: () => void;
   onRequestSync: (accountId?: string) => void;
 }
 
-export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, syncState, onRequestSync }: MailWorkspaceProps) {
+export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, syncState, syncReport, onDismissSyncReport, onRequestSync }: MailWorkspaceProps) {
   const queryClient = useQueryClient();
   const groupRef = useRef<GroupImperativeHandle>(null);
   const [view, setView] = useState<MailScope>('inbox');
@@ -130,8 +132,11 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
   const { data: emailsList = [], isLoading, isFetching, refetch } = useQuery({
     queryKey: ['emails', { view, kind, category, filter, globalSearchActive, searchQuery, viewFilter, selectedAccountId, hasStructuredFilters }],
     queryFn: () => {
-      // Use structured search endpoint when query contains filters
-      if (globalSearchActive && hasStructuredFilters && parsedFilters) {
+      // Global search ALWAYS uses the structured endpoint (FTS5/BM25),
+      // even for plain free text: free_text-only filters hit the same
+      // production search path as operator queries. The pane-local
+      // "Filter inbox" field below stays on the contextual list endpoint.
+      if (globalSearchActive && parsedFilters) {
         const searchFilters: SearchFilters = {
           free_text: parsedFilters.freeText,
           sender: parsedFilters.from,
@@ -150,14 +155,14 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
           limit: 500,
         });
       }
-      // Standard email list endpoint
+      // Standard email list endpoint (pane-local filter only)
       return fetchEmails({
-        category: globalSearchActive || view === 'all' ? null : category,
+        category: view === 'all' ? null : category,
         scope,
-        kind: globalSearchActive ? null : view === 'all' ? kind : null,
-        priority: filter === 'important' && !globalSearchActive ? 'high' : undefined,
-        needsReply: filter === 'reply' && !globalSearchActive ? true : undefined,
-        query: (!hasStructuredFilters && activeQuery) ? activeQuery : undefined,
+        kind: view === 'all' ? kind : null,
+        priority: filter === 'important' ? 'high' : undefined,
+        needsReply: filter === 'reply' ? true : undefined,
+        query: activeQuery || undefined,
         accountId: selectedAccountId || undefined,
         limit: 500,
       });
@@ -243,6 +248,14 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
 
   const paneCount = view === 'inbox' ? counts?.active_inbox ?? 0 : counts?.all_mail ?? 0;
   const paneTitle = globalSearchActive ? 'Search results' : view === 'inbox' ? 'Inbox' : 'All Mail';
+
+  // Last-sync refers to the selected account; in All mode the most recent
+  // across connected accounts. Never another account's timestamp.
+  const displayedLastSync = selectedAccountId
+    ? (syncState.lastSyncByAccount[selectedAccountId] ?? null)
+    : Object.values(syncState.lastSyncByAccount).filter(Boolean).sort().at(-1) ?? null;
+
+  const failedSyncs = (syncReport ?? []).filter(r => !r.ok);
 
   const defaultLayout = readSavedLayout() ?? DEFAULT_LAYOUT;
 
@@ -349,6 +362,14 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
                 onPause={(id) => pauseMutation.mutate(id)}
                 busy={backfillMutation.isPending || pauseMutation.isPending}
               />
+
+              {failedSyncs.length > 0 && (
+                <SyncReportLine
+                  failures={failedSyncs}
+                  accounts={accountsList}
+                  onDismiss={onDismissSyncReport}
+                />
+              )}
             </div>
 
             <div className="mail-pane-toolbar" role="toolbar" aria-label="Mail filters">
@@ -392,7 +413,7 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
                 }}
                 disabled={syncState.syncing}
                 aria-label="Sync Gmail"
-                title={syncState.lastSyncAt ? `Last sync: ${new Date(syncState.lastSyncAt).toLocaleString()}` : 'Sync Gmail'}
+                title={displayedLastSync ? `Last sync: ${new Date(displayedLastSync).toLocaleString()}` : 'Sync Gmail'}
               >
                 {syncState.syncing
                   ? <span className="btn-spinner" aria-hidden="true" />
@@ -442,8 +463,7 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
   );
 }
 
-function BackfillStatusList({ accounts, showLabels, onResume, onPause, busy }: {
-  accounts: import('../api/emails').EmailAccount[];
+function BackfillStatusList({ accounts, showLabels, onResume, onPause, busy }: {  accounts: import('../api/emails').EmailAccount[];
   showLabels: boolean;
   onResume: (id: string) => void;
   onPause: (id: string) => void;
@@ -463,6 +483,26 @@ function BackfillStatusList({ accounts, showLabels, onResume, onPause, busy }: {
         />
       ))}
     </>
+  );
+}
+
+function SyncReportLine({ failures, accounts, onDismiss }: {
+  failures: { id: string; ok: boolean; error?: string }[];
+  accounts: import('../api/emails').EmailAccount[];
+  onDismiss: () => void;
+}) {
+  const names = failures.map(f => {
+    const account = accounts.find(a => a.id === f.id);
+    return account?.display_name || account?.email_address || f.id;
+  });
+  const detail = failures.map(f => `${f.id}: ${f.error ?? 'failed'}`).join('; ');
+  return (
+    <div className="sync-report" role="alert" title={detail}>
+      <span>Sync failed for {names.join(', ')}</span>
+      <button type="button" className="icon-btn" onClick={onDismiss} aria-label="Dismiss sync errors">
+        <X size={12} aria-hidden="true" />
+      </button>
+    </div>
   );
 }
 

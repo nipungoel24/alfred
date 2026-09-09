@@ -22,9 +22,16 @@ const PAGE_META: Record<AppPage, { title: string; subtitle?: string }> = {
   settings: { title: 'Settings', subtitle: 'Preferences' },
 };
 
+export interface SyncOutcome {
+  id: string;
+  ok: boolean;
+  error?: string;
+}
+
 export default function App() {
   const [page, setPage] = useState<AppPage>('mail');
   const [searchQuery, setSearchQuery] = useState('');
+  const [syncReport, setSyncReport] = useState<SyncOutcome[] | null>(null);
   const queryClient = useQueryClient();
 
   const { data: accountsList = [] } = useQuery({ queryKey: ['accounts'], queryFn: fetchAccounts });
@@ -39,9 +46,26 @@ export default function App() {
   const gmailAccount = gmailAccounts[0];
   const aiReady = health?.ai === 'ready';
 
+  // Sync-all is ONE logical operation: a single mutation over the target
+  // account ids with aggregate pending state. Parallel per-account syncs
+  // settle independently; failures identify their account without hiding
+  // the accounts that succeeded.
   const syncMutation = useMutation({
-    mutationFn: (id: string) => syncAccount(id, false),
-    onSuccess: () => {
+    mutationFn: async (ids: string[]): Promise<SyncOutcome[]> => {
+      const settled = await Promise.allSettled(ids.map(id => syncAccount(id, false)));
+      return ids.map((id, i) => {
+        const result = settled[i];
+        if (result.status === 'fulfilled') return { id, ok: true };
+        const reason = result.reason;
+        return {
+          id,
+          ok: false,
+          error: reason instanceof Error ? reason.message : 'Sync failed',
+        };
+      });
+    },
+    onSuccess: (outcomes) => {
+      setSyncReport(outcomes.every(o => o.ok) ? null : outcomes);
       void queryClient.invalidateQueries({ queryKey: ['emails'] });
       void queryClient.invalidateQueries({ queryKey: ['emailCounts'] });
       void queryClient.invalidateQueries({ queryKey: ['accounts'] });
@@ -49,6 +73,14 @@ export default function App() {
       void queryClient.invalidateQueries({ queryKey: ['briefing'] });
     },
   });
+
+  const lastSyncByAccount = useMemo(() => {
+    const map: Record<string, string | null> = {};
+    for (const account of accountsList) {
+      map[account.id] = account.last_sync_at ?? null;
+    }
+    return map;
+  }, [accountsList]);
 
   const handleNavigate = useCallback((next: AppPage) => {
     setPage(next);
@@ -105,15 +137,22 @@ export default function App() {
             onSearchChange={handleSearchChange}
             syncState={{
               syncing: syncMutation.isPending,
-              lastSyncAt: gmailAccount?.last_sync_at ?? null,
+              lastSyncByAccount,
             }}
+            syncReport={syncReport}
+            onDismissSyncReport={() => setSyncReport(null)}
             onRequestSync={(accountId?: string) => {
               // No account id (All accounts mode) => sync EVERY connected
-              // Gmail account. A specific id syncs only that account.
+              // Gmail account in one aggregate operation. A specific id
+              // syncs only that account. The button disables while the
+              // aggregate is pending, so repeat clicks can't stack syncs.
+              if (syncMutation.isPending) return;
               const targets = accountId
                 ? accountsList.filter(a => a.id === accountId)
                 : gmailAccounts;
-              for (const target of targets) syncMutation.mutate(target.id);
+              if (targets.length === 0) return;
+              setSyncReport(null);
+              syncMutation.mutate(targets.map(t => t.id));
             }}
           />
         )}

@@ -112,6 +112,13 @@ class Repository:
         r = self.con.execute('SELECT 1 FROM emails WHERE id=? LIMIT 1', (email_id,)).fetchone()
         return r is not None
 
+    def provider_message_id_for(self, email_id: str) -> str | None:
+        """Persisted provider message id for a local id (None when unknown)."""
+        r = self.con.execute(
+            'SELECT provider_message_id FROM emails WHERE id=?', (email_id,)
+        ).fetchone()
+        return r['provider_message_id'] if r else None
+
     def email_eligibility(self, email_id: str) -> dict | None:
         """Persisted eligibility projection for one message.
 

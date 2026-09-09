@@ -1,7 +1,7 @@
 from datetime import datetime
 from enum import Enum
 from typing import Any
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 
 class Priority(str, Enum): urgent="urgent"; high="high"; medium="medium"; low="low"
 class Category(str, Enum): work="work"; personal="personal"; finance="finance"; travel="travel"; meeting="meeting"; notification="notification"; newsletter="newsletter"; promotion="promotion"; security="security"; other="other"
@@ -38,6 +38,18 @@ class InboxBriefing(BaseModel):
 class ErrorDetail(BaseModel): code: str; message: str; details: dict[str, Any] = {}
 
 
+# User-facing `in:` search scope -> stored mailbox_state.
+# Internal enum names (active_inbox) are never exposed to users.
+IN_SCOPE_TO_MAILBOX_STATE: dict[str, str | None] = {
+    "inbox": "active_inbox",
+    "archived": "archived",
+    "sent": "sent",
+    # "all" means no additional restriction beyond Alfred's normal
+    # searchable states (active_inbox + archived + sent).
+    "all": None,
+}
+
+
 class SearchFilters(BaseModel):
     """Structured search filters parsed from the frontend.
 
@@ -55,6 +67,26 @@ class SearchFilters(BaseModel):
     before: str | None = None
     category: str | None = None
     mailbox_state: str | None = None
+
+    @field_validator("mailbox_state")
+    @classmethod
+    def _resolve_mailbox_state(cls, value: str | None) -> str | None:
+        """Map the user-facing `in:` scope to storage, strictly.
+
+        Accepted: inbox, archived, sent, all (all -> None = no extra
+        restriction). Anything else is a controlled 422 validation error —
+        the frontend parser keeps unknown `in:` values as free text so
+        typos never reach this error path in normal use.
+        """
+        if value is None:
+            return None
+        key = value.strip().lower()
+        if key not in IN_SCOPE_TO_MAILBOX_STATE:
+            raise ValueError(
+                f"Unknown search scope: {value!r}. "
+                f"Use one of: inbox, all, archived, sent."
+            )
+        return IN_SCOPE_TO_MAILBOX_STATE[key]
 
 
 class EmailAccount(BaseModel):

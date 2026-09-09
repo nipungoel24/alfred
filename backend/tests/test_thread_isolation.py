@@ -16,7 +16,9 @@ from fastapi.testclient import TestClient
 from backend.app.schemas import Email
 from backend.app.db.repositories import Repository
 from backend.app.mail.providers.gmail import GmailProvider
-from backend.app.mail.identity import scoped_thread_id, parse_thread_id, strip_scope
+from backend.app.mail.identity import (
+    scoped_email_id, scoped_thread_id, parse_thread_id, strip_scope,
+)
 from backend.app.services.task_derivation import (
     task_fingerprint, candidate_fingerprints, _normalize_action,
 )
@@ -213,3 +215,141 @@ def test_strip_scope_rejects_foreign_ids():
         strip_scope("gmail_gmail_a@example.com_abc123def45", "gmail_b@example.com")
     assert strip_scope(
         "gmail_gmail_a@example.com_abc123def45", "gmail_a@example.com") == "abc123def45"
+
+
+def test_rebuild_after_thread_migration_keeps_single_task(tmp_path):
+    """Legacy v2 task (raw-thread fp) -> migrate -> rebuild -> one task."""
+    import sqlite3
+    from backend.app.db.database import SCHEMA, INDEXES
+    from backend.app.schemas import EmailAnalysis, Priority, Category
+    from backend.app.services.task_derivation import rebuild_tasks_from_analyses
+
+    db = tmp_path / "legacy_tasks.db"
+    con = sqlite3.connect(db)
+    con.executescript(SCHEMA)
+    con.executescript(INDEXES)
+
+    account = "gmail_a@example.com"
+    email = Email(
+        id="1a076e26cf3a3533", account_id=account, thread_id=PROVIDER_THREAD,
+        sender="boss@work.com", subject="Q3 planning needed",
+        body="Please send the Q3 plan by Friday.",
+        label_ids=["INBOX"],
+        source_metadata={"gmail_raw": {"labelIds": ["INBOX"], "threadId": PROVIDER_THREAD}},
+    )
+    con.execute(
+        "INSERT INTO emails (id, payload, content_hash, imported_at, account_id, thread_id) "
+        "VALUES (?,?,?,?,?,?)",
+        ("1a076e26cf3a3533", email.model_dump_json(), "fp",
+         "2026-01-01T00:00:00", account, PROVIDER_THREAD),
+    )
+    analysis = EmailAnalysis(
+        short_summary="Plan request", category=Category.work,
+        priority=Priority.high, priority_score=78,
+        reason_for_priority="Direct request", needs_reply=True,
+        action_items=[{"description": "Send the Q3 plan", "owner": "user", "deadline": "Friday"}],
+        deadlines=[],
+    )
+    con.execute(
+        "INSERT INTO email_analysis (email_id, content_hash, model_name, schema_version, payload, analyzed_at) "
+        "VALUES (?,?,?,?,?,?)",
+        ("1a076e26cf3a3533", "fp", "test-model", "1",
+         analysis.model_dump_json(), "2026-01-01T00:00:00"),
+    )
+    # Legacy v2 task derived pre-migration (raw-thread fingerprint).
+    legacy_fp = task_fingerprint(
+        PROVIDER_THREAD, _normalize_action("Send the Q3 plan"))
+    con.execute(
+        "INSERT INTO tasks (id, source_email_id, source_thread_id, title, status, "
+        "derivation_version, fingerprint) VALUES (?,?,?,?,?,?,?)",
+        (f"task_{legacy_fp}", "1a076e26cf3a3533", PROVIDER_THREAD,
+         "Send the Q3 plan", "pending", "2", legacy_fp),
+    )
+    con.commit()
+    con.close()
+
+    repo = Repository(db)  # migration scopes ids + threads + payloads
+    scoped = scoped_email_id(account, "1a076e26cf3a3533")
+    assert repo.email(scoped).thread_id == scoped_thread_id(account, PROVIDER_THREAD)
+
+    added = rebuild_tasks_from_analyses(repo, "test-model")
+    remaining = repo.tasks_by_email(scoped)
+    assert len(remaining) == 1
+    assert remaining[0].title == "Send the Q3 plan"
+    assert added == 0  # nothing new derived — the legacy task covered it
+
+
+def test_migrated_payload_consistency_and_draft_context(tmp_path, monkeypatch, provider):
+    """Legacy DB -> migrate -> payload/columns agree -> REAL draft endpoint
+    returns same-account thread context (not just fresh normalizations)."""
+    import json as _json
+    import sqlite3
+    import importlib
+
+    db = tmp_path / "legacy_draft.db"
+    con = sqlite3.connect(db)
+    from backend.app.db.database import SCHEMA, INDEXES
+    con.executescript(SCHEMA)
+    con.executescript(INDEXES)
+
+    def legacy_email(raw_id, account, subject, sender="a@example.com"):
+        email = Email(
+            id=raw_id, account_id=account, thread_id=PROVIDER_THREAD,
+            sender=sender, subject=subject, body=f"Body of {subject}",
+            label_ids=["INBOX"],
+            source_metadata={"gmail_raw": {"labelIds": ["INBOX"], "threadId": PROVIDER_THREAD}},
+        )
+        con.execute(
+            "INSERT INTO emails (id, payload, content_hash, imported_at, account_id, thread_id) "
+            "VALUES (?,?,?,?,?,?)",
+            (raw_id, email.model_dump_json(), "fp", "2026-01-01T00:00:00",
+             account, PROVIDER_THREAD),
+        )
+
+    # Account A: two messages sharing one provider thread. Account B: one
+    # message with the SAME provider thread id.
+    legacy_email("1a076e26cf3a3533", "gmail_a@example.com", "A first")
+    legacy_email("1a07b61f84a314c5", "gmail_a@example.com", "A second")
+    legacy_email("1a07c0887249fb9e", "gmail_b@example.com", "B only")
+    con.commit()
+    con.close()
+
+    monkeypatch.setenv("ALFRED_RUNTIME_TOKEN", "test-secret-token-123")
+    monkeypatch.setenv("ALFRED_DATABASE_PATH", str(db))
+    from backend.app import config as config_mod
+    from backend.app import main as main_mod
+    importlib.reload(config_mod)
+    importlib.reload(main_mod)
+    try:
+        repo = main_mod.repo
+        scoped_a1 = scoped_email_id("gmail_a@example.com", "1a076e26cf3a3533")
+        scoped_thread_a = scoped_thread_id("gmail_a@example.com", PROVIDER_THREAD)
+
+        # Payload/column source-of-truth invariant after migration.
+        migrated = repo.email(scoped_a1)
+        assert migrated is not None
+        assert migrated.id == scoped_a1
+        assert migrated.thread_id == scoped_thread_a
+        assert migrated.provider_message_id == "1a076e26cf3a3533"
+        assert migrated.account_id == "gmail_a@example.com"
+
+        captured: dict = {}
+
+        async def fake_draft(email, thread_emails=None):
+            captured["subjects"] = sorted(e.subject for e in (thread_emails or []))
+            return "draft text"
+
+        main_mod.ai.draft_reply = fake_draft  # type: ignore[method-assign]
+        client = TestClient(main_mod.app)
+        r = client.post(
+            f"/api/emails/{scoped_a1}/draft",
+            headers={"X-Alfred-Token": "test-secret-token-123"},
+        )
+        assert r.status_code == 200
+        # Both same-account historical messages, never B's content.
+        assert captured["subjects"] == ["A first", "A second"]
+    finally:
+        monkeypatch.delenv("ALFRED_RUNTIME_TOKEN")
+        monkeypatch.delenv("ALFRED_DATABASE_PATH")
+        importlib.reload(config_mod)
+        importlib.reload(main_mod)

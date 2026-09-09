@@ -18,7 +18,10 @@ from .db.repositories import Repository
 from .db.secure_store import encrypt_token, decrypt_token
 from .mail.normalizer import normalized_email
 from .mail.fingerprint import content_fingerprint
-from .mail.identity import provider_message_id as provider_id_from_local
+from .mail.identity import (
+    provider_message_id as provider_id_from_local,
+    strip_scope as strip_scope_from_local,
+)
 from .mail.briefing_fingerprint import briefing_fingerprint, BRIEFING_SCHEMA_VERSION
 from .mail.providers.gmail import GmailProvider
 from .mail.eligibility import MailEligibilityPolicy, GmailCategory, BackfillState
@@ -380,7 +383,15 @@ async def _label_backfill():
             for local_id in pending:
                 # Gmail API needs the provider-side message id; the repo
                 # works with the account-scoped local id. Never mixed.
-                raw_id = provider_id_from_local(local_id)
+                # Resolution order: exact known-account prefix (authoritative,
+                # format-independent) -> persisted provider column -> legacy
+                # regex parse. Unresolvable ids are skipped, never guessed.
+                raw_id = None
+                try:
+                    raw_id = strip_scope_from_local(local_id, account.id)
+                except ValueError:
+                    raw_id = repo.provider_message_id_for(local_id) or \
+                        provider_id_from_local(local_id)
                 if not raw_id:
                     continue
                 labels = await gmail_provider.refresh_message_labels(access_token, raw_id)

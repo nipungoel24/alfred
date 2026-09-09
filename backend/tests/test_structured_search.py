@@ -1,7 +1,25 @@
 """Tests for structured search functionality."""
+import pytest
+from fastapi.testclient import TestClient
 from pathlib import Path
 from backend.app.schemas import Email, SearchFilters
 from backend.app.db.repositories import Repository
+
+
+@pytest.fixture
+def isolated_app(tmp_path, monkeypatch):
+    monkeypatch.setenv("ALFRED_RUNTIME_TOKEN", "test-secret-token-123")
+    monkeypatch.setenv("ALFRED_DATABASE_PATH", str(tmp_path / "search.db"))
+    import importlib
+    from backend.app import config as config_mod
+    from backend.app import main as main_mod
+    importlib.reload(config_mod)
+    importlib.reload(main_mod)
+    yield main_mod.app, main_mod
+    monkeypatch.delenv("ALFRED_RUNTIME_TOKEN")
+    monkeypatch.delenv("ALFRED_DATABASE_PATH")
+    importlib.reload(config_mod)
+    importlib.reload(main_mod)
 
 
 def make_email(id: str = 'e1', sender: str = 'alice@example.com', 
@@ -209,3 +227,70 @@ def test_account_scoped_structured_search(tmp_path: Path):
     results = repo.search_emails_structured(filters, account_id='acct_b')
     assert len(results) == 1
     assert results[0].account_id == 'acct_b'
+
+
+# ── API integration: the global-search production path ──
+
+def _seed_search_mail(repo: Repository):
+    """One archived, one sent, one inbox mail; body-only marker word."""
+    inbox = make_email(id='in1', sender='boss@work.com', subject='Quarterly planning',
+                       body='Please review the attached plan.')
+    inbox.account_id = 'acct_a'
+    inbox.label_ids = ['INBOX', 'CATEGORY_PRIMARY']
+    archived = make_email(id='ar1', sender='old@project.com', subject='Old notes',
+                          body='The zephyrmarker proposal was approved.')
+    archived.account_id = 'acct_a'
+    archived.label_ids = []
+    sent = make_email(id='se1', sender='me@example.com', subject='Follow up',
+                      body='Sending the contract draft.')
+    sent.account_id = 'acct_a'
+    sent.label_ids = ['SENT']
+    for e in (inbox, archived, sent):
+        repo.upsert_email_commit(e, 'fp')
+
+
+def test_global_free_text_finds_body_only_word(isolated_app):
+    """Normal global search (free_text only) reaches the FTS/BM25 path:
+    a word appearing ONLY in an email body must be found."""
+    app, main_mod = isolated_app
+    _seed_search_mail(main_mod.repo)
+    client = TestClient(app)
+    r = client.post(
+        "/api/emails/search",
+        headers={"X-Alfred-Token": "test-secret-token-123"},
+        json={"free_text": ["zephyrmarker"]},
+    )
+    assert r.status_code == 200
+    ids = [e["id"] for e in r.json()]
+    assert ids == ["ar1"]
+
+
+def test_in_scope_mapping(isolated_app):
+    """Every advertised in: value maps to storage semantics."""
+    app, main_mod = isolated_app
+    _seed_search_mail(main_mod.repo)
+    client = TestClient(app)
+    headers = {"X-Alfred-Token": "test-secret-token-123"}
+
+    def search(state):
+        r = client.post("/api/emails/search", headers=headers,
+                        json={"free_text": [], "mailbox_state": state})
+        assert r.status_code == 200, r.text
+        return {e["id"] for e in r.json()}
+
+    assert search("inbox") == {"in1"}
+    assert search("archived") == {"ar1"}
+    assert search("sent") == {"se1"}
+    assert search("all") == {"in1", "ar1", "se1"}
+
+
+def test_in_scope_unknown_rejected(isolated_app):
+    """Unknown in: values produce a controlled validation error."""
+    app, _ = isolated_app
+    client = TestClient(app)
+    r = client.post(
+        "/api/emails/search",
+        headers={"X-Alfred-Token": "test-secret-token-123"},
+        json={"free_text": [], "mailbox_state": "everywhere"},
+    )
+    assert r.status_code == 422

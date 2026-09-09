@@ -643,6 +643,29 @@
   border-radius: var(--radius-md);
 }
 
+/* Sync report — per-account failure line after sync-all */
+.sync-report {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-2);
+  margin: 0 8px 8px;
+  padding: 5px 9px;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  color: var(--danger, #f28b82);
+  background: color-mix(in srgb, var(--danger, #f28b82) 12%, transparent);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+}
+
+.sync-report > span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 /* Search filter chips — visible, individually removable */
 .search-filter-chips {
   display: flex;
