@@ -32,6 +32,10 @@ export default function App() {
   const [page, setPage] = useState<AppPage>('mail');
   const [searchQuery, setSearchQuery] = useState('');
   const [syncReport, setSyncReport] = useState<SyncOutcome[] | null>(null);
+  // Navigation intent: open an EXACT email in the Mail workspace (from a
+  // task/deadline/overview source preview). No routing framework — the
+  // workspace consumes and clears it.
+  const [openEmailId, setOpenEmailId] = useState<string | null>(null);
   const queryClient = useQueryClient();
 
   const { data: accountsList = [] } = useQuery({ queryKey: ['accounts'], queryFn: fetchAccounts });
@@ -94,6 +98,14 @@ export default function App() {
     if (value.trim().length > 0 && page !== 'mail') setPage('mail');
   }, [page]);
 
+  // "Open in Mail" from any source preview: land on Mail with the exact
+  // message selected — never a bare navigation with nothing selected.
+  const handleOpenEmail = useCallback((emailId: string) => {
+    setSearchQuery('');
+    setOpenEmailId(emailId);
+    setPage('mail');
+  }, []);
+
   const accountInitial = useMemo(
     () => (gmailAccount?.display_name?.[0] ?? gmailAccount?.email_address?.[0] ?? '').toUpperCase(),
     [gmailAccount]
@@ -129,12 +141,14 @@ export default function App() {
       />
 
       <main className="workspace-content">
-        {page === 'overview' && <OverviewPage onNavigate={handleNavigate} />}
+        {page === 'overview' && <OverviewPage onNavigate={handleNavigate} onOpenEmail={handleOpenEmail} />}
         {page === 'mail' && (
           <MailWorkspace
             searchQuery={searchQuery}
             onClearSearch={() => setSearchQuery('')}
             onSearchChange={handleSearchChange}
+            openEmailId={openEmailId}
+            onConsumeOpenEmail={() => setOpenEmailId(null)}
             syncState={{
               syncing: syncMutation.isPending,
               lastSyncByAccount,
@@ -156,8 +170,8 @@ export default function App() {
             }}
           />
         )}
-        {page === 'tasks' && <TasksPage />}
-        {page === 'deadlines' && <DeadlinesPage />}
+        {page === 'tasks' && <TasksPage onOpenInMail={handleOpenEmail} />}
+        {page === 'deadlines' && <DeadlinesPage onOpenInMail={handleOpenEmail} />}
         {page === 'accounts' && <AccountsPage />}
         {page === 'settings' && <SettingsPage />}
       </main>

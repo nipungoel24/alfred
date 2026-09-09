@@ -32,7 +32,7 @@ from .ai.ollama_client import OllamaClient, OllamaUnavailable, OllamaTimeout, Ol
 from .ai.service import AIService
 from .ai.supervisor import AISupervisor, AIState
 from .services.task_derivation import derive_tasks, rebuild_tasks_from_analyses, DERIVATION_VERSION
-from .schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task, SearchFilters
+from .schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task, SearchFilters, TaskPriorityPatch
 
 settings = get_settings()
 logger = logging.getLogger("alfred.oauth")
@@ -1106,8 +1106,32 @@ def toggle_task(task_id: str):
 
 @app.delete('/api/tasks/{task_id}')
 def delete_task(task_id: str):
-    t = repo.task(task_id)
-    if not t:
+    task = repo.task(task_id)
+    if not task:
         raise HTTPException(status_code=404, detail="Task not found")
     repo.delete_task(task_id)
     return {"status": "deleted"}
+
+@app.post('/api/tasks/{task_id}/dismiss')
+def dismiss_task(task_id: str):
+    """Durable "Not a task": hides the task and suppresses re-derivation.
+
+    The row (and its fingerprint) is preserved; the source email and its
+    cached analysis are untouched — only the derived task is rejected.
+    """
+    task = repo.task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    repo.dismiss_task(task_id)
+    return {"status": "dismissed"}
+
+@app.patch('/api/tasks/{task_id}')
+def patch_task(task_id: str, patch: TaskPriorityPatch):
+    """Explicit user priority edit (task only — never rewrites the source
+    email's AI analysis). Records an override so derivation/migration keep
+    the user's choice across restarts."""
+    task = repo.task(task_id)
+    if not task:
+        raise HTTPException(status_code=404, detail="Task not found")
+    repo.set_task_priority(task_id, patch.priority.value)
+    return repo.task(task_id)

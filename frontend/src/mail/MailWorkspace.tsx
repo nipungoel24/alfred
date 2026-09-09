@@ -11,7 +11,7 @@ import {
 import type { MailCategory, MailKind, MailScope, SearchFilters } from '../api/emails';
 import { CATEGORY_ORDER } from '../api/emails';
 import { parseSearchQuery, buildSearchQueryString, getSearchFilterChips } from '../search/searchParser';
-import { readSavedLayout, persistLayout, DEFAULT_LAYOUT } from './layoutStore';
+import { readSavedLayout, persistLayout, DEFAULT_LAYOUT, PANEL_CONSTRAINTS } from './layoutStore';
 import { CategoryTabs } from './CategoryTabs';
 import { MessageList } from './MessageList';
 import { MessageReader } from './MessageReader';
@@ -42,13 +42,15 @@ interface MailWorkspaceProps {
   searchQuery: string;
   onClearSearch: () => void;
   onSearchChange: (value: string) => void;
+  openEmailId: string | null;
+  onConsumeOpenEmail: () => void;
   syncState: { syncing: boolean; lastSyncByAccount: Record<string, string | null> };
   syncReport: { id: string; ok: boolean; error?: string }[] | null;
   onDismissSyncReport: () => void;
   onRequestSync: (accountId?: string) => void;
 }
 
-export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, syncState, syncReport, onDismissSyncReport, onRequestSync }: MailWorkspaceProps) {
+export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, openEmailId, onConsumeOpenEmail, syncState, syncReport, onDismissSyncReport, onRequestSync }: MailWorkspaceProps) {
   const queryClient = useQueryClient();
   const groupRef = useRef<GroupImperativeHandle>(null);
   const [view, setView] = useState<MailScope>('inbox');
@@ -246,6 +248,15 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
     }
   }, []);
 
+  // "Open in Mail" navigation intent: select the exact message, then
+  // consume the intent so it fires once.
+  useEffect(() => {
+    if (openEmailId) {
+      setSelectedId(openEmailId);
+      onConsumeOpenEmail();
+    }
+  }, [openEmailId, onConsumeOpenEmail]);
+
   const paneCount = view === 'inbox' ? counts?.active_inbox ?? 0 : counts?.all_mail ?? 0;
   const paneTitle = globalSearchActive ? 'Search results' : view === 'inbox' ? 'Inbox' : 'All Mail';
 
@@ -266,10 +277,15 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
         orientation="horizontal"
         defaultLayout={defaultLayout}
         onLayoutChanged={handleLayoutChanged}
+        resizeTargetMinimumSize={{ coarse: 20, fine: 12 }}
         style={{ height: '100%' }}
       >
         {/* ── Mail pane ── */}
-        <Panel id="mail" minSize={20} maxSize={45} defaultSize={defaultLayout.mail}>
+        <Panel
+          id="mail"
+          minSize={PANEL_CONSTRAINTS.mail.minSize}
+          maxSize={PANEL_CONSTRAINTS.mail.maxSize}
+        >
           <div className="mail-pane">
             <div className="mail-pane-head">
               <div className="mail-pane-title">
@@ -437,7 +453,7 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
         <Separator className="pane-separator" />
 
         {/* ── Reader pane ── */}
-        <Panel id="reader" minSize={30} defaultSize={defaultLayout.reader}>
+        <Panel id="reader" minSize={PANEL_CONSTRAINTS.reader.minSize}>
           <MessageReader
             emailId={selectedId}
             intelVisible={intelVisible}
@@ -450,7 +466,13 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, sync
         <Separator className="pane-separator" />
 
         {/* ── Alfred intelligence pane ── */}
-        <Panel id="intel" minSize={0} maxSize={40} defaultSize={defaultLayout.intel} collapsedSize={0} collapsible>
+        <Panel
+          id="intel"
+          minSize={PANEL_CONSTRAINTS.intel.minSize}
+          maxSize={PANEL_CONSTRAINTS.intel.maxSize}
+          collapsedSize={PANEL_CONSTRAINTS.intel.collapsedSize}
+          collapsible
+        >
           {selectedEmail && (
             <IntelligencePanel
               email={selectedEmail}

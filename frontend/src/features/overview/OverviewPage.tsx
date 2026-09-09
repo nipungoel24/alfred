@@ -1,16 +1,20 @@
+import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   briefing as fetchBriefing, regenerateBriefing, emails as fetchEmails, emailCounts,
 } from '../../api/emails';
 import { CheckSquare, Clock, Sparkles, ArrowUpRight } from 'lucide-react';
 import type { AppPage } from '../../layout/IconRail';
+import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
 
 interface OverviewPageProps {
   onNavigate: (page: AppPage) => void;
+  onOpenEmail: (emailId: string) => void;
 }
 
-export function OverviewPage({ onNavigate }: OverviewPageProps) {
+export function OverviewPage({ onNavigate, onOpenEmail }: OverviewPageProps) {
   const queryClient = useQueryClient();
+  const [previewEmailId, setPreviewEmailId] = useState<string | null>(null);
   const { data: brief } = useQuery({ queryKey: ['briefing'], queryFn: fetchBriefing });
   const { data: emailsList = [] } = useQuery({
     queryKey: ['emails', { scope: 'overview' }],
@@ -82,7 +86,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
                         key={item.email_id}
                         type="button"
                         className="overview-row"
-                        onClick={() => onNavigate('mail')}
+                        onClick={() => setPreviewEmailId(item.email_id)}
                         aria-label={`${item.sender}: ${item.subject}`}
                       >
                         <span className="overview-row-main">
@@ -143,7 +147,13 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
                 <div className="overview-panel">
                   <div className="overview-rows">
                     {brief.deadlines.slice(0, 6).map((item, idx) => (
-                      <div key={idx} className="overview-row overview-row-static">
+                      <button
+                        key={idx}
+                        type="button"
+                        className="overview-row"
+                        onClick={() => setPreviewEmailId(item.email_id)}
+                        aria-label={`${item.sender}: ${item.subject}`}
+                      >
                         <span className="overview-row-main">
                           <span className="overview-row-title">{item.subject}</span>
                           <span className="overview-row-meta">{item.sender}</span>
@@ -151,7 +161,7 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
                         <span className="overview-row-side">
                           <span className="overview-due">{item.deadline}</span>
                         </span>
-                      </div>
+                      </button>
                     ))}
                   </div>
                 </div>
@@ -164,6 +174,12 @@ export function OverviewPage({ onNavigate }: OverviewPageProps) {
           </aside>
         </div>
       </div>
+
+      <SourceEmailPreview
+        emailId={previewEmailId}
+        onClose={() => setPreviewEmailId(null)}
+        onOpenInMail={onOpenEmail}
+      />
     </div>
   );
 }

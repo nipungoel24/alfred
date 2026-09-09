@@ -6,21 +6,23 @@ const fetchBriefingMock = vi.fn();
 const fetchEmailsMock = vi.fn();
 const fetchCountsMock = vi.fn();
 const regenerateMock = vi.fn();
+const fetchDetailsMock = vi.fn();
 
 vi.mock('../../api/emails', () => ({
   briefing: (...args: unknown[]) => fetchBriefingMock(...args),
   emailCounts: (...args: unknown[]) => fetchCountsMock(...args),
   emails: (...args: unknown[]) => fetchEmailsMock(...args),
   regenerateBriefing: (...args: unknown[]) => regenerateMock(...args),
+  emailDetails: (...args: unknown[]) => fetchDetailsMock(...args),
 }));
 
 import { OverviewPage } from './OverviewPage';
 
-function renderPage(onNavigate?: (page: string) => void) {
+function renderPage(onNavigate?: (page: string) => void, onOpenEmail?: (id: string) => void) {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   return render(
     <QueryClientProvider client={queryClient}>
-      <OverviewPage onNavigate={onNavigate ?? (() => {})} />
+      <OverviewPage onNavigate={onNavigate ?? (() => {})} onOpenEmail={onOpenEmail ?? (() => {})} />
     </QueryClientProvider>
   );
 }
@@ -31,6 +33,7 @@ describe('OverviewPage', () => {
     fetchEmailsMock.mockReset();
     fetchCountsMock.mockReset();
     regenerateMock.mockReset();
+    fetchDetailsMock.mockReset();
   });
 
   it('renders Inbox and All Mail counts from the live counts endpoint', async () => {
@@ -101,5 +104,87 @@ describe('OverviewPage', () => {
     await waitFor(() => expect(screen.getByText('Inbox')).toBeInTheDocument());
     fireEvent.click(screen.getByRole('button', { name: /Inbox/ }));
     expect(onNavigate).toHaveBeenCalledWith('mail');
+  });
+
+  it('opens the exact email preview for a needs-attention item', async () => {
+    const onOpenEmail = vi.fn();
+    fetchCountsMock.mockResolvedValue({ active_inbox: 1, all_mail: 1, excluded: 0, categories: {} as never });
+    fetchEmailsMock.mockResolvedValue([]);
+    fetchBriefingMock.mockResolvedValue({
+      executive_summary: '',
+      total_emails: 1,
+      urgent_count: 1,
+      high_priority_count: 0,
+      needs_reply_count: 1,
+      deadline_count: 0,
+      top_attention_items: [
+        {
+          email_id: 'email_exact_1',
+          sender: 'Boss',
+          subject: 'Q3 planning needed',
+          priority: 'urgent',
+          why_it_matters: 'Direct request',
+          needs_reply: true,
+        },
+      ],
+      deadlines: [],
+      important_updates: [],
+      can_wait_or_review_later: [],
+    });
+
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <OverviewPage onNavigate={() => {}} onOpenEmail={onOpenEmail} />
+      </QueryClientProvider>
+    );
+    fireEvent.click(await screen.findByRole('button', { name: /Boss: Q3 planning needed/ }));
+    // Clicking the derived item previews THAT email (SourceEmailPreview
+    // opens); "Open in Mail" would then navigate with the exact id.
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    expect(onOpenEmail).not.toHaveBeenCalled();
+  });
+
+  it('Open in Mail from the preview navigates with the exact email id', async () => {
+    const onOpenEmail = vi.fn();
+    fetchCountsMock.mockResolvedValue({ active_inbox: 1, all_mail: 1, excluded: 0, categories: {} as never });
+    fetchEmailsMock.mockResolvedValue([]);
+    fetchDetailsMock.mockResolvedValue({
+      id: 'email_exact_1',
+      sender: 'boss@work.com',
+      sender_name: 'Boss',
+      subject: 'Q3 planning needed',
+      body: 'Please send the plan.',
+      received_at: '2026-08-17T09:00:00Z',
+    });
+    fetchBriefingMock.mockResolvedValue({
+      executive_summary: '',
+      total_emails: 1,
+      urgent_count: 1,
+      high_priority_count: 0,
+      needs_reply_count: 1,
+      deadline_count: 0,
+      top_attention_items: [
+        {
+          email_id: 'email_exact_1',
+          sender: 'Boss',
+          subject: 'Q3 planning needed',
+          priority: 'urgent',
+          why_it_matters: 'Direct request',
+          needs_reply: true,
+        },
+      ],
+      deadlines: [],
+      important_updates: [],
+      can_wait_or_review_later: [],
+    });
+
+    render(
+      <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>
+        <OverviewPage onNavigate={() => {}} onOpenEmail={onOpenEmail} />
+      </QueryClientProvider>
+    );
+    fireEvent.click(await screen.findByRole('button', { name: /Boss: Q3 planning needed/ }));
+    fireEvent.click(await screen.findByRole('button', { name: 'Open in Mail' }));
+    expect(onOpenEmail).toHaveBeenCalledWith('email_exact_1');
   });
 });

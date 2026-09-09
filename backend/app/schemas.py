@@ -108,9 +108,18 @@ class Task(BaseModel):
     description: str | None = None
     due_at: str | None = None
     priority: str | None = None
-    status: str # 'pending', 'completed'
+    status: str # 'pending', 'completed', 'dismissed'
     created_at: str | None = None
     derivation_version: str = "1"
     confidence: str = "medium"
     fingerprint: str | None = None
+    # Explicit user-set priority. Derivation and migration must never
+    # overwrite priority while this is set — the user corrected Alfred.
+    priority_override: str | None = None
+
+
+class TaskPriorityPatch(BaseModel):
+    """Validated priority edit for one task (task only — never rewrites
+    the source email's AI analysis)."""
+    priority: Priority
 

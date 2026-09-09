@@ -1,26 +1,47 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import { useRef, useState } from 'react';
-import { tasks as fetchTasks, toggleTask, deleteTask } from '../../api/emails';
-import { Check, Trash2, CheckSquare } from 'lucide-react';
+import {
+  tasks as fetchTasks, toggleTask, dismissTask, patchTaskPriority,
+  TASK_PRIORITIES,
+} from '../../api/emails';
+import type { Task, TaskPriority } from '../../api/emails';
+import { Check, Trash2, CheckSquare, Mail, ChevronDown } from 'lucide-react';
+import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
 
-export function TasksPage() {
+interface TasksPageProps {
+  onOpenInMail?: (emailId: string) => void;
+}
+
+export function TasksPage({ onOpenInMail }: TasksPageProps) {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'pending' | 'completed' | 'all'>('pending');
+  const [previewTask, setPreviewTask] = useState<Task | null>(null);
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['tasks'],
     queryFn: fetchTasks,
   });
 
+  const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tasks'] });
+
   const toggleMutation = useMutation({
     mutationFn: toggleTask,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+    onSuccess: invalidate,
   });
 
-  const deleteMutation = useMutation({
-    mutationFn: deleteTask,
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+  const dismissMutation = useMutation({
+    mutationFn: dismissTask,
+    onSuccess: () => {
+      invalidate();
+      setPreviewTask(null);
+    },
+  });
+
+  const priorityMutation = useMutation({
+    mutationFn: ({ id, priority }: { id: string; priority: TaskPriority }) =>
+      patchTaskPriority(id, priority),
+    onSuccess: invalidate,
   });
 
   const pendingTasks = tasks.filter(t => t.status === 'pending');
@@ -109,15 +130,44 @@ export function TasksPage() {
                       )}
                       <div className="task-meta">
                         {task.due_at && <span style={{ color: 'var(--accent-text)' }}>Due: {task.due_at}</span>}
-                        {task.priority && <span className={`badge badge-${task.priority}`}>{task.priority}</span>}
+                        <label className="priority-edit" title="Task priority (your edit is kept)">
+                          <ChevronDown size={10} aria-hidden="true" />
+                          <select
+                            value={task.priority ?? 'medium'}
+                            onChange={e => priorityMutation.mutate({
+                              id: task.id,
+                              priority: e.target.value as TaskPriority,
+                            })}
+                            disabled={priorityMutation.isPending}
+                            aria-label={`Priority for ${task.title}`}
+                            className="priority-select"
+                          >
+                            {TASK_PRIORITIES.map(p => (
+                              <option key={p} value={p}>{p}</option>
+                            ))}
+                          </select>
+                        </label>
                       </div>
                     </div>
+                    {task.source_email_id && (
+                      <button
+                        type="button"
+                        className="icon-btn"
+                        onClick={() => setPreviewTask(task)}
+                        aria-label={`View source email for ${task.title}`}
+                        title="View email"
+                      >
+                        <Mail size={14} aria-hidden="true" />
+                        <span className="btn-label">View email</span>
+                      </button>
+                    )}
                     <button
                       type="button"
                       className="icon-btn"
-                      onClick={() => deleteMutation.mutate(task.id)}
-                      disabled={deleteMutation.isPending}
-                      aria-label="Delete task"
+                      onClick={() => dismissMutation.mutate(task.id)}
+                      disabled={dismissMutation.isPending}
+                      aria-label={`Not a task: dismiss ${task.title}`}
+                      title="Not a task"
                     >
                       <Trash2 aria-hidden="true" />
                     </button>
@@ -127,6 +177,58 @@ export function TasksPage() {
             })}
           </div>
         </div>
+      )}
+
+      {previewTask?.source_email_id && (
+        <SourceEmailPreview
+          emailId={previewTask.source_email_id}
+          onClose={() => setPreviewTask(null)}
+          onOpenInMail={onOpenInMail}
+          relationship={
+            <div className="source-relation">
+              <div className="source-relation-label">Detected task</div>
+              <div className="source-relation-title">{previewTask.title}</div>
+              <div className="source-relation-row">
+                <span className="field-label">Priority</span>
+                <select
+                  value={previewTask.priority ?? 'medium'}
+                  onChange={e => priorityMutation.mutate({
+                    id: previewTask.id,
+                    priority: e.target.value as TaskPriority,
+                  })}
+                  disabled={priorityMutation.isPending}
+                  aria-label={`Priority for ${previewTask.title}`}
+                  className="priority-select"
+                >
+                  {TASK_PRIORITIES.map(p => (
+                    <option key={p} value={p}>{p}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="source-relation-actions">
+                <button
+                  type="button"
+                  className="source-relation-btn"
+                  onClick={() => toggleMutation.mutate(previewTask.id)}
+                  disabled={toggleMutation.isPending}
+                >
+                  <Check size={12} aria-hidden="true" />
+                  {previewTask.status === 'completed' ? 'Mark incomplete' : 'Mark complete'}
+                </button>
+                <button
+                  type="button"
+                  className="source-relation-btn danger"
+                  onClick={() => dismissMutation.mutate(previewTask.id)}
+                  disabled={dismissMutation.isPending}
+                  title="Durably reject this derived task"
+                >
+                  <Trash2 size={12} aria-hidden="true" />
+                  Not a task
+                </button>
+              </div>
+            </div>
+          }
+        />
       )}
     </div>
   );

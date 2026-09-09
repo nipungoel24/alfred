@@ -89,6 +89,10 @@ export type EmailAccount = {
   backfill?: BackfillStatus
 };
 
+export type TaskPriority = 'urgent' | 'high' | 'medium' | 'low';
+
+export const TASK_PRIORITIES: TaskPriority[] = ['urgent', 'high', 'medium', 'low'];
+
 export type Task = {
   id: string;
   source_email_id?: string | null;
@@ -97,8 +101,9 @@ export type Task = {
   description?: string | null;
   due_at?: string | null;
   priority?: string | null;
-  status: string; // 'pending', 'completed'
-  created_at?: string | null
+  status: string; // 'pending', 'completed', 'dismissed'
+  created_at?: string | null;
+  priority_override?: string | null;
 };
 
 export const emails = (options: {
@@ -177,6 +182,9 @@ export const deleteAccount = (id: string) => api<{ status: string }>(`/api/accou
 export const tasks = () => api<Task[]>('/api/tasks');
 export const toggleTask = (id: string) => api<Task>(`/api/tasks/${id}/toggle`, { method: 'POST' });
 export const deleteTask = (id: string) => api<{ status: string }>(`/api/tasks/${id}`, { method: 'DELETE' });
+export const dismissTask = (id: string) => api<{ status: string }>(`/api/tasks/${id}/dismiss`, { method: 'POST' });
+export const patchTaskPriority = (id: string, priority: TaskPriority) =>
+  api<Task>(`/api/tasks/${id}`, { method: 'PATCH', body: JSON.stringify({ priority }) });
 
 // Structured search — mirrors backend.app.schemas.SearchFilters.
 export type SearchFilters = {

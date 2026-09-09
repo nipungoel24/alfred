@@ -113,7 +113,8 @@ CREATE TABLE IF NOT EXISTS tasks (
     created_at TEXT,
     derivation_version TEXT DEFAULT '1',
     confidence TEXT DEFAULT 'medium',
-    fingerprint TEXT
+    fingerprint TEXT,
+    priority_override TEXT
 );
 CREATE TABLE IF NOT EXISTS jobs (
     id TEXT PRIMARY KEY,
@@ -747,7 +748,8 @@ def _migrate(connection: sqlite3.Connection):
     task_cols = {row["name"] for row in cursor.fetchall()}
     for col, col_type in [("derivation_version", "TEXT DEFAULT '1'"),
                           ("confidence", "TEXT DEFAULT 'medium'"),
-                          ("fingerprint", "TEXT")]:
+                          ("fingerprint", "TEXT"),
+                          ("priority_override", "TEXT")]:
         col_name = col.split()[0]  # Handle "derivation_version TEXT DEFAULT '1'" -> "derivation_version"
         if col_name not in task_cols:
             cursor.execute(f"ALTER TABLE tasks ADD COLUMN {col}")

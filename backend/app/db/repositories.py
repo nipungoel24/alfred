@@ -735,18 +735,20 @@ class Repository:
     def save_task(self, task: Task):
         self.con.execute(
             'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, priority, status, created_at, '
-            'derivation_version, confidence, fingerprint) '
-            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+            'derivation_version, confidence, fingerprint, priority_override) '
+            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
             'title=excluded.title, description=excluded.description, due_at=excluded.due_at, '
             'priority=excluded.priority, status=excluded.status, '
-            'derivation_version=excluded.derivation_version, confidence=excluded.confidence, fingerprint=excluded.fingerprint',
+            'derivation_version=excluded.derivation_version, confidence=excluded.confidence, '
+            'fingerprint=excluded.fingerprint, priority_override=excluded.priority_override',
             (
                 task.id, task.source_email_id, task.source_thread_id, task.title, task.description,
                 task.due_at, task.priority, task.status,
                 task.created_at or datetime.now(timezone.utc).isoformat(),
                 getattr(task, 'derivation_version', '1'),
                 getattr(task, 'confidence', 'medium'),
-                getattr(task, 'fingerprint', None)
+                getattr(task, 'fingerprint', None),
+                getattr(task, 'priority_override', None)
             )
         )
         self.con.commit()
@@ -757,28 +759,35 @@ class Repository:
             for task in tasks_list:
                 self.con.execute(
                     'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, priority, status, created_at, '
-                    'derivation_version, confidence, fingerprint) '
-                    'VALUES (?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+                    'derivation_version, confidence, fingerprint, priority_override) '
+                    'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
                     'title=excluded.title, description=excluded.description, due_at=excluded.due_at, '
                     'priority=excluded.priority, status=excluded.status, '
-                    'derivation_version=excluded.derivation_version, confidence=excluded.confidence, fingerprint=excluded.fingerprint',
+                    'derivation_version=excluded.derivation_version, confidence=excluded.confidence, '
+                    'fingerprint=excluded.fingerprint, priority_override=excluded.priority_override',
                     (
                         task.id, task.source_email_id, task.source_thread_id, task.title, task.description,
                         task.due_at, task.priority, task.status,
                         task.created_at or datetime.now(timezone.utc).isoformat(),
                         getattr(task, 'derivation_version', '2'),
                         getattr(task, 'confidence', 'medium'),
-                        getattr(task, 'fingerprint', None)
+                        getattr(task, 'fingerprint', None),
+                        getattr(task, 'priority_override', None)
                     )
                 )
 
     def tasks(self, status=None):
+        """All tasks, or one status. With no status filter, dismissed tasks
+        (durable user rejections) are hidden by default."""
         if status:
             rows = self.con.execute(
                 'SELECT * FROM tasks WHERE status=? ORDER BY created_at DESC', (status,)
             ).fetchall()
         else:
-            rows = self.con.execute('SELECT * FROM tasks ORDER BY created_at DESC').fetchall()
+            rows = self.con.execute(
+                "SELECT * FROM tasks WHERE status IN ('pending','completed') "
+                'ORDER BY created_at DESC'
+            ).fetchall()
         return [self._task_from_row(r) for r in rows]
 
     def active_tasks(self, status=None) -> list[Task]:
@@ -787,11 +796,13 @@ class Repository:
         Tasks whose source email is no longer pipeline-eligible (spam,
         trash, draft, sent-only, archived) are hidden from the ACTIVE
         projection but their rows are preserved. Tasks without a source
-        email (user-created) always appear.
+        email (user-created) always appear. Durably dismissed tasks never
+        appear here.
         """
         sql = (
             'SELECT t.* FROM tasks t LEFT JOIN emails e ON e.id = t.source_email_id '
-            'WHERE (t.source_email_id IS NULL OR e.mailbox_state = "active_inbox")'
+            'WHERE (t.source_email_id IS NULL OR e.mailbox_state = "active_inbox") '
+            "AND t.status != 'dismissed'"
         )
         params: tuple = ()
         if status:
@@ -835,6 +846,27 @@ class Repository:
         self.con.execute('DELETE FROM tasks WHERE id=?', (task_id,))
         self.con.commit()
 
+    def dismiss_task(self, task_id: str) -> bool:
+        """Durable user rejection ("Not a task").
+
+        The row is preserved with status='dismissed' so its fingerprint
+        keeps suppressing re-derivation across rebuilds and restarts.
+        Returns False when the task does not exist.
+        """
+        cur = self.con.execute(
+            "UPDATE tasks SET status='dismissed' WHERE id=?", (task_id,))
+        self.con.commit()
+        return cur.rowcount > 0
+
+    def set_task_priority(self, task_id: str, priority: str) -> bool:
+        """Explicit user priority edit. Records priority_override so future
+        derivation and migration never overwrite the user's choice."""
+        cur = self.con.execute(
+            'UPDATE tasks SET priority=?, priority_override=? WHERE id=?',
+            (priority, priority, task_id))
+        self.con.commit()
+        return cur.rowcount > 0
+
     def delete_tasks_by_derivation_version(self, version: str):
         """Delete all tasks created by a specific derivation version."""
         self.con.execute('DELETE FROM tasks WHERE derivation_version=?', (version,))
@@ -849,6 +881,7 @@ class Repository:
         task.derivation_version = r['derivation_version']
         task.confidence = r['confidence']
         task.fingerprint = r['fingerprint']
+        task.priority_override = r['priority_override'] if 'priority_override' in r.keys() else None
         return task
 
     # ──────────────────────────────────────────────

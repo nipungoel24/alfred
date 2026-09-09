@@ -126,6 +126,8 @@ function renderWorkspace() {
         searchQuery=""
         onClearSearch={() => {}}
         onSearchChange={() => {}}
+          openEmailId={null}
+          onConsumeOpenEmail={() => {}}
         syncState={{ syncing: false, lastSyncByAccount: {} }}
           syncReport={null}
           onDismissSyncReport={() => {}}
@@ -283,6 +285,8 @@ describe('MailWorkspace', () => {
           searchQuery="archived"
           onClearSearch={() => {}}
           onSearchChange={() => {}}
+          openEmailId={null}
+          onConsumeOpenEmail={() => {}}
           syncState={{ syncing: false, lastSyncByAccount: {} }}
           syncReport={null}
           onDismissSyncReport={() => {}}
@@ -309,6 +313,8 @@ describe('MailWorkspace', () => {
           searchQuery="from:alice is:unread"
           onClearSearch={() => {}}
           onSearchChange={() => {}}
+          openEmailId={null}
+          onConsumeOpenEmail={() => {}}
           syncState={{ syncing: false, lastSyncByAccount: {} }}
           syncReport={null}
           onDismissSyncReport={() => {}}
@@ -339,6 +345,8 @@ describe('MailWorkspace', () => {
           searchQuery="planning notes"
           onClearSearch={() => {}}
           onSearchChange={() => {}}
+          openEmailId={null}
+          onConsumeOpenEmail={() => {}}
           syncState={{ syncing: false, lastSyncByAccount: {} }}
           syncReport={null}
           onDismissSyncReport={() => {}}
@@ -369,6 +377,8 @@ describe('MailWorkspace', () => {
           searchQuery=""
           onClearSearch={() => {}}
           onSearchChange={() => {}}
+          openEmailId={null}
+          onConsumeOpenEmail={() => {}}
           syncState={{ syncing: false, lastSyncByAccount: {} }}
           syncReport={null}
           onDismissSyncReport={() => {}}
@@ -405,6 +415,8 @@ describe('MailWorkspace', () => {
           searchQuery=""
           onClearSearch={() => {}}
           onSearchChange={() => {}}
+          openEmailId={null}
+          onConsumeOpenEmail={() => {}}
           syncState={{ syncing: false, lastSyncByAccount: {} }}
           syncReport={null}
           onDismissSyncReport={() => {}}

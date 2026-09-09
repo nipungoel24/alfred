@@ -1,9 +1,16 @@
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { briefing as fetchBriefing } from '../../api/emails';
-import { Clock } from 'lucide-react';
+import { Clock, Mail } from 'lucide-react';
+import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
 
-export function DeadlinesPage() {
+interface DeadlinesPageProps {
+  onOpenInMail?: (emailId: string) => void;
+}
+
+export function DeadlinesPage({ onOpenInMail }: DeadlinesPageProps) {
   const { data: brief, isLoading } = useQuery({ queryKey: ['briefing'], queryFn: fetchBriefing });
+  const [previewEmailId, setPreviewEmailId] = useState<string | null>(null);
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'hidden' }}>
@@ -43,11 +50,29 @@ export function DeadlinesPage() {
                 <div style={{ fontSize: 'var(--text-xs)', color: 'var(--accent-text)', fontWeight: 700, flexShrink: 0 }}>
                   {item.deadline || ''}
                 </div>
+                {item.email_id && (
+                  <button
+                    type="button"
+                    className="icon-btn"
+                    onClick={() => setPreviewEmailId(item.email_id)}
+                    aria-label={`View source email for ${item.subject}`}
+                    title="View email"
+                  >
+                    <Mail size={14} aria-hidden="true" />
+                    <span className="btn-label">View email</span>
+                  </button>
+                )}
               </div>
             ))}
           </div>
         </div>
       )}
+
+      <SourceEmailPreview
+        emailId={previewEmailId}
+        onClose={() => setPreviewEmailId(null)}
+        onOpenInMail={onOpenInMail}
+      />
     </div>
   );
 }

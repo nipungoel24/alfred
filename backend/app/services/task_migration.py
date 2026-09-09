@@ -54,12 +54,18 @@ class TaskMigrationService:
                     task.id = existing.id
                     task.status = existing.status
                     task.created_at = existing.created_at
+                    # An explicit user priority edit always wins over
+                    # re-derivation — keep both the priority and its marker.
+                    if getattr(existing, 'priority_override', None):
+                        task.priority = existing.priority
+                        task.priority_override = existing.priority_override
                     cur.execute(
                         '''UPDATE tasks SET title=?, description=?, due_at=?, priority=?, status=?, 
-                        derivation_version=?, confidence=?, fingerprint=? WHERE id=?''',
+                        derivation_version=?, confidence=?, fingerprint=?, priority_override=? WHERE id=?''',
                         (task.title, task.description, task.due_at, task.priority, task.status,
-                         getattr(task, 'derivation_version', DERIVATION_VERSION),
-                         getattr(task, 'confidence', 'medium'), fp, task.id)
+                          getattr(task, 'derivation_version', DERIVATION_VERSION),
+                          getattr(task, 'confidence', 'medium'), fp,
+                          getattr(task, 'priority_override', None), task.id)
                     )
                 else:
                     # Insert new

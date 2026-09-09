@@ -1,6 +1,7 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import {
   validateLayout, readSavedLayout, persistLayout, DEFAULT_LAYOUT, LAYOUT_KEY,
+  PANEL_CONSTRAINTS,
 } from './layoutStore';
 
 describe('layoutStore', () => {
@@ -38,6 +39,26 @@ describe('layoutStore', () => {
     expect(validateLayout({ mail: 5, reader: 45, intel: 25 })).toBeNull();
     expect(validateLayout({ mail: 30, reader: 45, intel: 90 })).toBeNull();
     expect(validateLayout({ mail: 90, reader: 5, intel: 5 })).toBeNull();
+  });
+
+  it('uses percentage strings for Panel constraints (v4: numbers are pixels)', () => {
+    expect(PANEL_CONSTRAINTS.mail.minSize).toBe('20%');
+    expect(PANEL_CONSTRAINTS.mail.maxSize).toBe('45%');
+    expect(PANEL_CONSTRAINTS.reader.minSize).toBe('30%');
+    expect(PANEL_CONSTRAINTS.intel.minSize).toBe('0%');
+    expect(PANEL_CONSTRAINTS.intel.maxSize).toBe('40%');
+    expect(PANEL_CONSTRAINTS.intel.collapsedSize).toBe('0%');
+    for (const panel of Object.values(PANEL_CONSTRAINTS)) {
+      for (const value of Object.values(panel)) {
+        expect(typeof value).toBe('string');
+        expect(value.endsWith('%')).toBe(true);
+      }
+    }
+  });
+
+  it('ignores stale v1 layout values stored under the old key', () => {
+    localStorage.setItem('alfred-pane-layout', JSON.stringify({ mail: 20, reader: 30, intel: 0 }));
+    expect(readSavedLayout()).toBeNull();
   });
 
   it('rejects insane totals', () => {

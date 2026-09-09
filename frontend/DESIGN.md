@@ -350,7 +350,6 @@ Windows desktop first. NOT phone layouts.
 ## Accepted Changes — Mail Workspace Productization (2026-09)
 
 ### Mail-pane container queries (not window queries)
-
 `.mail-pane` is the CSS inline-size container (`container-type: inline-size;
 container-name: mail-pane`). All mail-pane responsiveness keys off
 `@container mail-pane (...)` so dragging the mail/reader separator changes
@@ -413,3 +412,29 @@ to free text. Active filters render as removable chips + "Clear all".
 `@tauri-apps/plugin-opener openUrl()` is the only opener (a rejected
 permission stays rejected — no shell fallback). `window.open` only outside
 Tauri.
+
+### Resizable panels (v4 units — regression note)
+
+react-resizable-panels v4 interprets NUMERIC Panel sizes as PIXELS and
+STRING sizes as percentages. Alfred's mail/reader/intel constraints live in
+`layoutStore.PANEL_CONSTRAINTS` as percentage strings (`minSize="20%"`
+etc.); Group layouts stay percentage numbers. Never pass numeric Panel
+sizes. Persisted layouts live under `alfred-pane-layout-v2` and are
+range/total validated — stale keys are ignored. Separators keep a 1px
+visual line with a wider transparent hit area plus
+`resizeTargetMinimumSize`.
+
+### Derived objects (tasks, deadlines, briefing items)
+
+Every derived object links its source email (`source_email_id` /
+`email_id`). The single shared `SourceEmailPreview` dialog (emailDetails +
+LinkifiedBody, never raw HTML) is used by Tasks, Deadlines, and Overview —
+no per-page reader duplicates. "Open in Mail" lifts an `openEmailId`
+intent to App; MailWorkspace selects the exact message.
+
+Task corrections are durable, not cosmetic:
+- "Not a task" sets `status='dismissed'` — hidden by default, fingerprint
+  tombstone suppresses re-derivation across rebuilds/restarts. Source email
+  and cached analysis are untouched.
+- Priority edits (`PATCH /api/tasks/{id}`, validated enum) record
+  `priority_override`, which derivation and migration must respect.
