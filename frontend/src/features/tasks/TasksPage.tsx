@@ -1,11 +1,11 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useVirtualizer } from '@tanstack/react-virtual';
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
   tasks as fetchTasks, toggleTask, dismissTask, patchTaskPriority,
   TASK_PRIORITIES,
 } from '../../api/emails';
-import type { Task, TaskPriority } from '../../api/emails';
+import type { TaskPriority } from '../../api/emails';
 import { Check, Trash2, CheckSquare, Mail, ChevronDown } from 'lucide-react';
 import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
 
@@ -16,12 +16,24 @@ interface TasksPageProps {
 export function TasksPage({ onOpenInMail }: TasksPageProps) {
   const queryClient = useQueryClient();
   const [filter, setFilter] = useState<'pending' | 'completed' | 'all'>('pending');
-  const [previewTask, setPreviewTask] = useState<Task | null>(null);
+  // Live-state architecture: store only the previewed task ID and derive
+  // the task from the latest query data, so priority edits and toggles
+  // reflect immediately without closing the preview.
+  const [previewTaskId, setPreviewTaskId] = useState<string | null>(null);
 
   const { data: tasks = [], isLoading } = useQuery({
     queryKey: ['tasks'],
     queryFn: fetchTasks,
   });
+
+  const previewTask = previewTaskId ? (tasks.find(t => t.id === previewTaskId) ?? null) : null;
+
+  // A dismissed task disappears from the active query — close cleanly.
+  useEffect(() => {
+    if (previewTaskId && !isLoading && !previewTask) {
+      setPreviewTaskId(null);
+    }
+  }, [previewTaskId, previewTask, isLoading]);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tasks'] });
 
@@ -32,10 +44,7 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
 
   const dismissMutation = useMutation({
     mutationFn: dismissTask,
-    onSuccess: () => {
-      invalidate();
-      setPreviewTask(null);
-    },
+    onSuccess: invalidate,
   });
 
   const priorityMutation = useMutation({
@@ -153,7 +162,7 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
                       <button
                         type="button"
                         className="icon-btn"
-                        onClick={() => setPreviewTask(task)}
+                        onClick={() => setPreviewTaskId(task.id)}
                         aria-label={`View source email for ${task.title}`}
                         title="View email"
                       >
@@ -182,7 +191,7 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
       {previewTask?.source_email_id && (
         <SourceEmailPreview
           emailId={previewTask.source_email_id}
-          onClose={() => setPreviewTask(null)}
+          onClose={() => setPreviewTaskId(null)}
           onOpenInMail={onOpenInMail}
           relationship={
             <div className="source-relation">

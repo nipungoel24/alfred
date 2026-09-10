@@ -1,5 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { TasksPage } from './TasksPage';
 
@@ -44,9 +44,29 @@ function renderPage(onOpenInMail: (id: string) => void = () => {}) {
 }
 
 describe('TasksPage', () => {
+  let current: typeof task[];
+
   beforeEach(() => {
     vi.clearAllMocks();
-    tasksMock.mockResolvedValue([task]);
+    current = [{ ...task }];
+    tasksMock.mockImplementation(() => Promise.resolve(current));
+    patchMock.mockImplementation(async (id: string, priority: string) => {
+      current = current.map(t => (t.id === id ? { ...t, priority, priority_override: priority } : t));
+      tasksMock.mockResolvedValue(current);
+      return current.find(t => t.id === id);
+    });
+    toggleMock.mockImplementation(async (id: string) => {
+      current = current.map(t => (t.id === id
+        ? { ...t, status: t.status === 'completed' ? 'pending' : 'completed' }
+        : t));
+      tasksMock.mockResolvedValue(current);
+      return current.find(t => t.id === id);
+    });
+    dismissMock.mockImplementation(async (id: string) => {
+      current = current.filter(t => t.id !== id);
+      tasksMock.mockResolvedValue(current);
+      return { status: 'dismissed' };
+    });
     detailsMock.mockResolvedValue({
       id: 'email_src_1',
       sender: 'boss@work.com',
@@ -66,7 +86,6 @@ describe('TasksPage', () => {
   });
 
   it('Not a task dismisses durably and closes the preview', async () => {
-    dismissMock.mockResolvedValue({ status: 'dismissed' });
     renderPage();
     fireEvent.click(await screen.findByRole('button', { name: /View source email for Send the Q3 plan/ }));
     expect(await screen.findByRole('dialog')).toBeInTheDocument();
@@ -75,10 +94,13 @@ describe('TasksPage', () => {
       expect(dismissMock).toHaveBeenCalled();
     });
     expect(dismissMock.mock.calls[0][0]).toBe('task_1');
+    // Dismissed task leaves the active query -> preview closes cleanly.
+    await waitFor(() => {
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 
   it('priority edit calls the PATCH endpoint and invalidates tasks', async () => {
-    patchMock.mockResolvedValue({ ...task, priority: 'low', priority_override: 'low' });
     renderPage();
     const select = await screen.findByRole('combobox', { name: /Priority for Send the Q3 plan/ });
     fireEvent.change(select, { target: { value: 'low' } });
@@ -87,6 +109,28 @@ describe('TasksPage', () => {
     });
     expect(patchMock.mock.calls[0][0]).toBe('task_1');
     expect(patchMock.mock.calls[0][1]).toBe('low');
+  });
+
+  it('preview reflects the new priority after mutation without reopening', async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: /View source email for Send the Q3 plan/ }));
+    expect(await screen.findByRole('dialog')).toBeInTheDocument();
+    const selects = await screen.findAllByRole('combobox', { name: /Priority for Send the Q3 plan/ });
+    const previewSelect = selects[selects.length - 1] as HTMLSelectElement;
+    fireEvent.change(previewSelect, { target: { value: 'low' } });
+    await waitFor(() => {
+      expect(previewSelect.value).toBe('low');
+    });
+  });
+
+  it('preview completion toggle refreshes the action label', async () => {
+    renderPage();
+    fireEvent.click(await screen.findByRole('button', { name: /View source email for Send the Q3 plan/ }));
+    const dialog = await screen.findByRole('dialog');
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Mark complete' }));
+    await waitFor(() => {
+      expect(within(dialog).getByRole('button', { name: 'Mark incomplete' })).toBeInTheDocument();
+    });
   });
 
   it('Open in Mail from the preview navigates with the exact source id', async () => {

@@ -790,6 +790,18 @@ class Repository:
             ).fetchall()
         return [self._task_from_row(r) for r in rows]
 
+    def tasks_all(self) -> list[Task]:
+        """Every persisted task row in every state, including dismissed.
+
+        Dedicated migration/reconciliation path — the normal active-task
+        API (tasks()/active_tasks()) must keep hiding dismissed tasks.
+        The migration service needs the tombstones so it never re-creates
+        a task the user explicitly rejected.
+        """
+        rows = self.con.execute(
+            'SELECT * FROM tasks ORDER BY created_at DESC').fetchall()
+        return [self._task_from_row(r) for r in rows]
+
     def active_tasks(self, status=None) -> list[Task]:
         """Current-attention task projection.
 

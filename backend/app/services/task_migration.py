@@ -18,7 +18,7 @@ class TaskMigrationService:
         Returns:
             (tasks_before, tasks_after)
         """
-        all_existing_tasks = self.repo.tasks()
+        all_existing_tasks = self.repo.tasks_all()
         tasks_before = len(all_existing_tasks)
         
         # Build lookup maps for reconciliation

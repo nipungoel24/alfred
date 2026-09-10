@@ -1,4 +1,4 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { X, MailOpen } from 'lucide-react';
@@ -38,11 +38,53 @@ export function SourceEmailPreview({ emailId, onClose, relationship, onOpenInMai
     staleTime: 30_000,
   });
 
-  // Escape closes the preview.
+  const dialogRef = useRef<HTMLDivElement>(null);
+  const closeRef = useRef<HTMLButtonElement>(null);
+  const openerRef = useRef<Element | null>(null);
+
+  // Capture the opener, move initial focus into the dialog, and restore
+  // focus to the opener when the preview closes.
+  useEffect(() => {
+    if (!emailId) return;
+    openerRef.current = document.activeElement;
+    const frame = requestAnimationFrame(() => {
+      closeRef.current?.focus();
+    });
+    return () => {
+      cancelAnimationFrame(frame);
+      const opener = openerRef.current as HTMLElement | null;
+      opener?.focus?.();
+    };
+  }, [emailId]);
+
+  // Escape closes; Tab/Shift+Tab cycle inside the modal (focus trap).
   useEffect(() => {
     if (!emailId) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+      if (e.key !== 'Tab') return;
+      const root = dialogRef.current;
+      if (!root) return;
+      const focusables = Array.from(
+        root.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), ' +
+          'select:not([disabled]), textarea:not([disabled]), ' +
+          '[tabindex]:not([tabindex="-1"])'
+        )
+      );
+      if (focusables.length === 0) return;
+      const first = focusables[0];
+      const last = focusables[focusables.length - 1];
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault();
+        last.focus();
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault();
+        first.focus();
+      }
     };
     document.addEventListener('keydown', onKeyDown);
     return () => document.removeEventListener('keydown', onKeyDown);
@@ -53,6 +95,7 @@ export function SourceEmailPreview({ emailId, onClose, relationship, onOpenInMai
   return (
     <div className="source-preview-backdrop" onClick={onClose}>
       <div
+        ref={dialogRef}
         className="source-preview"
         role="dialog"
         aria-modal="true"
@@ -73,6 +116,7 @@ export function SourceEmailPreview({ emailId, onClose, relationship, onOpenInMai
             </button>
           )}
           <button
+            ref={closeRef}
             type="button"
             className="icon-btn"
             onClick={onClose}

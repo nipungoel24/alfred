@@ -195,3 +195,66 @@ def test_migration_service_respects_override(tmp_path):
         assert kept[0].priority_override == "low"
     finally:
         repo2.close()
+
+
+def test_migration_service_never_revives_dismissed(tmp_path):
+    """derive -> dismiss -> TaskMigrationService -> no active task reappears,
+    the tombstone remains, and the fingerprint still suppresses derivation."""
+    from backend.app.services.task_derivation import derive_tasks
+    from backend.app.services.task_migration import TaskMigrationService
+
+    db = tmp_path / "tombstone.db"
+    repo = Repository(db)
+    email = Email(id="e1", sender="boss@work.com",
+                  subject="Q3 planning needed",
+                  body="Please send the Q3 plan by Friday.",
+                  label_ids=["INBOX"])
+    repo.upsert_email_commit(email, "fp")
+    analysis = EmailAnalysis(
+        short_summary="s", category=Category.work, priority=Priority.high,
+        priority_score=78, reason_for_priority="r", needs_reply=True,
+        action_items=[{"description": "Send the Q3 plan", "owner": "user",
+                       "deadline": "Friday"}],
+        deadlines=[],
+    )
+    repo.save_analysis("e1", "fp", "test-model", analysis)
+    for t in derive_tasks(email, analysis):
+        repo.save_task(t)
+    task = repo.tasks_by_email("e1")[0]
+    fingerprint = task.fingerprint
+    assert fingerprint
+
+    repo.dismiss_task(task.id)
+    assert repo.tasks() == []
+    repo.close()
+
+    repo2 = Repository(db)
+    try:
+        TaskMigrationService(repo2).run_migration("test-model")
+        # No active task reappears…
+        assert repo2.tasks() == []
+        assert repo2.active_tasks() == []
+        # …the dismissed tombstone remains…
+        tombstone = repo2.task(task.id)
+        assert tombstone is not None
+        assert tombstone.status == "dismissed"
+        assert tombstone.fingerprint == fingerprint
+        # …and the same fingerprint still suppresses future derivation
+        # (the exact check _derive_and_save_tasks performs).
+        assert repo2.task_exists_by_fingerprint(fingerprint)
+        email2 = repo2.email("e1")
+        analysis2 = repo2.cached_analysis("e1", "fp", "test-model")
+        from backend.app.services.task_derivation import (
+            derive_tasks as _derive_tasks,
+            candidate_fingerprints as _candidates,
+            _normalize_action as _normalize,
+        )
+        newcomers = [
+            t for t in _derive_tasks(email2, analysis2)
+            if not any(repo2.task_exists_by_fingerprint(c)
+                       for c in _candidates(email2.thread_id, email2.account_id,
+                                            _normalize(t.title or "")) if c)
+        ]
+        assert newcomers == []
+    finally:
+        repo2.close()
