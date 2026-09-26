@@ -181,7 +181,7 @@ Documents: `docs/UI-AUDIT.md`, `docs/UI-DESIGN-SPEC.md`, ADR-005 updated to **Ac
 | UI-4 message list | done | unread bar visible at rest, hover transform removed, badge cap |
 | UI-5 reading pane | partial | `sr-only` h1 added to the Mail view; full hierarchy pass is remaining work |
 | UI-6 intelligence | done | every section conditional; real empty states; no invented output |
-| UI-7 states | partial | `States.tsx` primitives created and used by the intelligence panel; **not yet wired into the 4 pages that lack an error branch** |
+| UI-7 states | done | all 4 pages distinguish loading / empty / success / failure; real `refetch()` retry; 33 new tests |
 | UI-8 accounts/settings | not done | remaining |
 | UI-9 responsive | done | 1100px collapse to icon rail implemented; 900px intelligence collapse remaining |
 | UI-10 accessibility | partial | skip link, `sr-only`, h1 on Mail, landmarks, roving tabindex done; focus movement on navigation remaining |
@@ -270,21 +270,69 @@ pre-existing, not caused by these changes.
 
 ---
 
+## UI-7 ERROR vs EMPTY (DONE — commit `ee05864`)
+
+All four pages previously rendered a failed request as a legitimate empty result: a
+`500` from the deadlines endpoint produced "No upcoming deadlines detected", and the
+same for tasks and overview. The interface was therefore lying about why it had nothing
+to show.
+
+| Page | Before | After |
+| --- | --- | --- |
+| Overview | no `isLoading` / `isError`; failures became zero counts and empty panels | briefing/email failure renders a real `ErrorState`; retry refetches both **and** the counts |
+| Tasks | loading only; failure became "No pending tasks" | error branch ahead of loading/empty; filter bar hidden on failure |
+| Deadlines | loading only; failure became "No upcoming deadlines detected" | error branch ahead of loading/empty; filter-specific empty text |
+| Settings | runtime failure silently showed placeholder rows | **scoped** runtime error; Theme/Data/Privacy/About stay available |
+
+**`States.tsx` semantics:** errors get `role="alert"` + `aria-live="assertive"`;
+non-error states get `role="status"` + polite, so an empty state is announced without
+being treated as a failure. Retry exposes a disabled `aria-busy` "Retrying" label.
+
+**Deliberate asymmetry on Overview:** the counts query is *supplementary*. If it fails
+alone the page still renders, because blanking a working briefing to satisfy a badge
+counter would be worse than showing a slightly stale number.
+
+**Raw error text is never shown.** The `StartupGate` leak was the same class of bug, so
+each page's test asserts the transport exception string is absent from the DOM.
+
+**Coverage: 33 new tests** — Deadlines 8, Tasks 9, Overview 9, Settings 7. They assert
+loading is not treated as empty, error is not treated as empty, retry re-queries the
+real dependency (not a mock toggle), persistent failure stays errored, and the retry
+control is keyboard-reachable.
+
+### Three more defects found and fixed here
+1. **`.intel-head .intel-title` (specificity 0,2,0) was silently overriding the new
+   `.intel-title` (0,1,0)**, so the Alfred panel title still rendered as an 11 px
+   uppercase label. The old rule was dead code left by an earlier edit and was removed.
+   The existing test passed because it only checked the accessible name, not the styling
+   — a reminder that a11y assertions do not catch visual regressions.
+2. A duplicated `color` declaration in `.intel-section-label`, left by appending a
+   block without removing the old body.
+3. `font-weight: 650` in `.startup-title` and `.reader-sender`, which violates
+   UI-DESIGN-SPEC §1 ("four weights only"). Both now use `--weight-semibold`.
+
+Three newly added skeleton classes (`skeleton-w-35/30/60`) did not exist in
+`globals.css`; remapped to the existing `40/40/55` tokens rather than adding new ones.
+
+**Verification after the change:** Rust 35, backend 239, tools 9, frontend 222 — **505
+passed, 0 failed**. `cargo fmt`, `clippy`, `tsc`, ESLint, production build (0 source
+maps) and the release secret scan all clean. Knowledge graph `--check` reports current.
+
+---
+
 ## REMAINING WORK
 
 **UI (this phase):**
-1. Wire `ErrorState` into Overview, Tasks, Deadlines, Settings — four pages still
-   conflate "request failed" with "empty" (UI-7). **Highest-value remaining item.**
-2. Reading-pane hierarchy pass (UI-5): subject/sender/recipients/date/actions/body order
+1. Reading-pane hierarchy pass (UI-5): subject/sender/recipients/date/actions/body order
    and the 68ch measure.
-3. Accounts + Settings onto the shared primitives (UI-8): four buttons with no
+2. Accounts + Settings onto the shared primitives (UI-8): four buttons with no
    `aria-label`, and a duplicated AI-label map.
-4. Focus movement on page change and message selection (UI-10).
-5. Replace the 31 inline `style` objects with tokens.
-6. 900px intelligence-pane collapse (UI-9).
-7. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
-8. Real brand asset set — still placeholders (F8).
-9. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
+3. Focus movement on page change and message selection (UI-10).
+4. Replace the 31 inline `style` objects with tokens.
+5. 900px intelligence-pane collapse (UI-9).
+6. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
+7. Real brand asset set — still placeholders (F8).
+8. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
 
 **Not started (later phases):** first-run model setup (Phase 2), website (Phase 6),
 installer signing and CI (Phases 5, 7).
@@ -301,15 +349,21 @@ attached and a `tasklist` check after quit.
 **Gate 0: PASS** (unchanged).
 
 **Phase 1: PARTIAL — not declared PASS.** Priorities 1–6 are complete with test
-evidence. UI foundation is substantially complete but items 1–7 above remain. The
-directive states explicitly: do not claim the phase is complete if only the foundation
-is done. Gate 1 cannot be declared PASS until the packaged-app manual launch is observed.
+evidence. UI foundation is substantially complete; UI-7 (error vs empty) is now done and
+items 1–8 above remain. The directive states explicitly: do not claim the phase is
+complete if only the foundation is done. Gate 1 cannot be declared PASS until the
+packaged-app manual launch is observed.
 
 ---
 
 ## NEXT TASK
 
-Wire `ErrorState` from `frontend/src/components/ui/States.tsx` into
-`OverviewPage.tsx`, `TasksPage.tsx`, `DeadlinesPage.tsx` and `SettingsPage.tsx` so a
-failed request is no longer indistinguishable from an empty mailbox, with a test per
-page asserting the error branch renders. Then re-run lint, typecheck, tests and build.
+Reading-pane hierarchy pass (UI-5) on the Mail view: subject, sender, recipients, date,
+actions, then body, and enforce the 68ch measure. Verify at 1440×900 and 1280×800 in
+both themes, and confirm the existing `sr-only` h1 still names the view.
+
+Note for whoever picks this up: **UI-7 still owes a real visual pass.** The four error
+branches are covered by jsdom tests only — nobody has looked at them rendered. Launch
+the app with a backend that fails deliberately (stop `alfred-backend` while the UI is
+open, or point it at a dead port) and check each page in light and dark, plus Tab order
+onto the retry control.
