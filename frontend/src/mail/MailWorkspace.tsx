@@ -326,8 +326,10 @@ export function MailWorkspace({
         >
           <div className="mail-pane">
             <div className="mail-pane-head">
-          {/* The Mail view is the default view and previously had no h1 at all. */}
-          <h2 className="sr-only">Mail</h2>
+              {/* No heading here: WorkspaceHeader already renders this view's
+                  <h1>Mail</h1>. A second "Mail" heading only made a screen
+                  reader announce the same word twice at heading level. The
+                  reader subject is the <h2> beneath it. */}
               <div className="mail-pane-title">
                 <span className="title">{paneTitle}</span>
                 <span className="count">{paneCount} messages</span>
