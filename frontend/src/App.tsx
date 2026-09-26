@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query';
 import { IconRail } from './layout/IconRail';
 import type { AppPage } from './layout/IconRail';
@@ -18,6 +18,8 @@ import {
   type MailFilter,
   type MailScope,
 } from './api/emails';
+import { FocusIntentContext, focusTarget, isAttached } from './lib/focus';
+import type { FocusTarget } from './lib/focus';
 import './styles.css';
 
 const PAGE_META: Record<AppPage, { title: string; subtitle?: string }> = {
@@ -105,6 +107,30 @@ export default function App() {
     return map;
   }, [accountsList]);
 
+  // ── Focus management ────────────────────────────────────────────────────
+  // Intent is recorded by whatever replaces the user's context, and consumed
+  // once. Nothing infers it from a state change, which is what keeps a
+  // background refetch or a plain re-render from ever moving focus.
+  //
+  // Declared before the navigation callbacks below because they capture it.
+  const focusIntent = useRef<FocusTarget | null>(null);
+  const viewHeadingRef = useRef<HTMLHeadingElement | null>(null);
+  const mainRef = useRef<HTMLElement | null>(null);
+  // Bumped on every view-focus request so the effect below runs for a retry
+  // that swaps an error for content, not only for a page change.
+  const [focusVersion, setFocusVersion] = useState(0);
+
+  const requestFocus = useCallback((target: FocusTarget) => {
+    focusIntent.current = target;
+    if (target === 'view') setFocusVersion(v => v + 1);
+  }, []);
+
+  const takeFocusIntent = useCallback((target: FocusTarget) => {
+    if (focusIntent.current !== target) return false;
+    focusIntent.current = null;
+    return true;
+  }, []);
+
   const handleNavigate = useCallback((next: AppPage) => {
     setPage(next);
     if (next !== 'mail') setSearchQuery('');
@@ -119,11 +145,17 @@ export default function App() {
 
   // "Open in Mail" from any source preview: land on Mail with the exact
   // message selected — never a bare navigation with nothing selected.
+  //
+  // This is a deliberate cross-page jump from a button that is about to
+  // unmount, so focus has to be re-homed or it falls to <body>. Typing a
+  // global search also changes page, but it must NOT: the user's focus is in
+  // the search field and taking it away mid-keystroke would be hostile.
   const handleOpenEmail = useCallback((emailId: string) => {
     setSearchQuery('');
     setOpenEmailId(emailId);
     setPage('mail');
-  }, []);
+    requestFocus('reader');
+  }, [requestFocus]);
 
   // Only counts the API actually returns. Alfred shows no count it cannot
   // source from real data.
@@ -133,6 +165,20 @@ export default function App() {
       allMail: counts?.all_mail,
     }),
     [counts]
+  );
+
+  // Navigation triggered from page *content* (an Overview shortcut) rather than
+  // from the rail. The control the user pressed is about to unmount, so focus
+  // has to be re-homed. The rail deliberately does not use this: arrowing the
+  // rail both moves focus and changes page, so moving focus again would pull
+  // the user out of the rail on the first arrow press.
+  const handleNavigateFromContent = useCallback(
+    (next: AppPage) => {
+      if (next === page) return;
+      handleNavigate(next);
+      requestFocus('view');
+    },
+    [page, handleNavigate, requestFocus]
   );
 
   const activeMailView = `${mailScope}:${mailFilter}`;
@@ -153,11 +199,33 @@ export default function App() {
 
   const meta = PAGE_META[page];
 
+  // A navigation or a successful retry that did not ask for focus keeps whatever
+  // the user was on. The heading lives in the header, which is mounted for every
+  // view, so this runs after commit with the target already present.
+  useEffect(() => {
+    if (!takeFocusIntent('view')) return;
+    const heading = viewHeadingRef.current;
+    if (isAttached(heading)) focusTarget(heading);
+  }, [page, focusVersion, takeFocusIntent]);
+
+  const handleSkipToContent = useCallback((event: React.MouseEvent<HTMLAnchorElement>) => {
+    // The href is kept so this works with scripting off and is announced as a
+    // real link. The explicit focus makes the behaviour deterministic instead
+    // of relying on fragment navigation, which jsdom does not perform and which
+    // is uneven across engines.
+    const main = mainRef.current;
+    if (!isAttached(main)) return;
+    event.preventDefault();
+    main.focus();
+    main.scrollIntoView?.({ block: 'start' });
+  }, []);
+
   return (
-    <div className="app-shell">
-      <a className="skip-link" href="#main-content">
-        Skip to content
-      </a>
+    <FocusIntentContext.Provider value={{ requestFocus, takeFocusIntent }}>
+      <div className="app-shell">
+        <a className="skip-link" href="#main-content" onClick={handleSkipToContent}>
+          Skip to content
+        </a>
 
       <IconRail
         page={page}
@@ -172,6 +240,7 @@ export default function App() {
       <WorkspaceHeader
         title={meta.title}
         subtitle={meta.subtitle}
+        headingRef={viewHeadingRef}
         searchValue={searchQuery}
         onSearchChange={handleSearchChange}
         aiReady={aiReady}
@@ -181,8 +250,13 @@ export default function App() {
         syncing={syncAll.isPending}
       />
 
-      <main className="workspace-content" id="main-content" tabIndex={-1}>
-        {page === 'overview' && <OverviewPage onNavigate={handleNavigate} onOpenEmail={handleOpenEmail} />}
+      <main className="workspace-content" id="main-content" tabIndex={-1} ref={mainRef}>
+        {page === 'overview' && (
+          <OverviewPage
+            onNavigate={handleNavigateFromContent}
+            onOpenEmail={handleOpenEmail}
+          />
+        )}
         {page === 'mail' && (
           <MailWorkspace
             searchQuery={searchQuery}
@@ -221,6 +295,7 @@ export default function App() {
       </main>
 
       <AnalysisProgress />
-    </div>
+      </div>
+    </FocusIntentContext.Provider>
   );
 }

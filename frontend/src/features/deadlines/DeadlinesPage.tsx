@@ -4,6 +4,7 @@ import { briefing as fetchBriefing } from '../../api/emails';
 import { Mail } from 'lucide-react';
 import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
 import { EmptyState, ErrorState } from '../../components/ui/States';
+import { useRetryPreservingFocus } from '../../lib/focus';
 
 interface DeadlinesPageProps {
   onOpenInMail?: (emailId: string) => void;
@@ -17,6 +18,9 @@ export function DeadlinesPage({ onOpenInMail }: DeadlinesPageProps) {
     isFetching,
     refetch,
   } = useQuery({ queryKey: ['briefing'], queryFn: fetchBriefing });
+  // A successful retry unmounts the button that had focus, so the view heading
+  // takes it. On a persistent failure the error stays put and focus does not move.
+  const retry = useRetryPreservingFocus(refetch);
   const [previewEmailId, setPreviewEmailId] = useState<string | null>(null);
 
   return (
@@ -36,7 +40,7 @@ export function DeadlinesPage({ onOpenInMail }: DeadlinesPageProps) {
         <ErrorState
           title="Deadlines couldn't load"
           body="Alfred could not read your briefing. This is a connection problem, not an empty result — your deadlines are unaffected."
-          onRetry={() => void refetch()}
+          onRetry={retry}
           retrying={isFetching}
         />
       ) : isLoading ? (

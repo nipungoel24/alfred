@@ -16,6 +16,7 @@ import { CategoryTabs } from './CategoryTabs';
 import { MessageList } from './MessageList';
 import { MessageReader } from './MessageReader';
 import { IntelligencePanel } from '../intelligence/IntelligencePanel';
+import { useFocusIntent } from '../lib/focus';
 import type { RowFilter } from './MessageRow';
 
 const LATER_KEY = 'alfred-later-ids';
@@ -100,6 +101,33 @@ export function MailWorkspace({
   const [intelVisible, setIntelVisible] = useState(true);
   const [laterIds, setLaterIds] = useState<Set<string>>(readLaterIds);
   const [selectedAccountId, setSelectedAccountId] = useState<string | null>(null);
+
+  // ── Focus ───────────────────────────────────────────────────────────────
+  // Keyboard activation of a row, and a cross-page "Open in Mail", both mean
+  // "read this". Focus follows the user into the reader so the message is
+  // announced. Pointer activation does not: the cursor is already where the
+  // user is looking, and yanking focus out from under it is a surprise.
+  const { requestFocus, takeFocusIntent } = useFocusIntent();
+  // The subject is tracked as state, not a bare ref, because the reader mounts
+  // asynchronously: intent is recorded on the keystroke, while the heading only
+  // exists once the message query resolves. An effect keyed on the node itself
+  // focuses when it appears, instead of missing the target and never retrying.
+  const [subjectNode, setSubjectNode] = useState<HTMLHeadingElement | null>(null);
+  const handleSubjectReady = useCallback((node: HTMLHeadingElement | null) => {
+    setSubjectNode(prev => (prev === node ? prev : node));
+  }, []);
+
+  useEffect(() => {
+    // Wait for a usable target *before* consuming the intent. React detaches
+    // the old ref and attaches the new one across two commits when the message
+    // changes, so consuming on the null pass would throw the intent away and
+    // the real heading would never receive focus.
+    if (!subjectNode || !subjectNode.isConnected) return;
+    if (!takeFocusIntent('reader')) return;
+    subjectNode.focus();
+    // A refetch replaces the email object but not which message is shown, so
+    // this must not re-fire on data changes alone.
+  }, [subjectNode, takeFocusIntent]);
 
   const globalSearchActive = searchQuery.trim().length > 0;
   const scope: MailScope = globalSearchActive ? 'all' : view;
@@ -486,6 +514,13 @@ export function MailWorkspace({
               selectedId={selectedId}
               isLoading={isLoading}
               onSelect={id => setSelectedId(prev => (prev === id ? prev : id))}
+              onActivate={id => {
+                // Re-activating the message already shown changes nothing, so
+                // there is no new context to move focus to.
+                if (id === selectedId) return;
+                setSelectedId(id);
+                requestFocus('reader');
+              }}
               onToggleLater={toggleLater}
               laterIds={laterIds}
             />
@@ -502,6 +537,7 @@ export function MailWorkspace({
             onToggleIntel={handleToggleIntel}
             laterIds={laterIds}
             onToggleLater={toggleLater}
+            onSubjectReady={handleSubjectReady}
           />
         </Panel>
 

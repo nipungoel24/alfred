@@ -19,7 +19,7 @@ tags: [module, frontend]
 
 ## Imports
 
-- `react` â† useCallback, useMemo, useState
+- `react` â† useCallback, useEffect, useMemo, useRef, useState
 - `@tanstack/react-query` â† useQuery, useQueryClient, useMutation
 - `./layout/IconRail` â† IconRail
 - `./layout/IconRail` â† AppPage
@@ -32,4 +32,6 @@ tags: [module, frontend]
 - `./features/settings/SettingsPage` â† SettingsPage
 - `./components/ui/AnalysisProgress` â† AnalysisProgress
 - `./api/emails` â† fetchAccounts, fetchEmailCounts, fetchHealth, syncAccount, MailFilter, MailScope
+- `./lib/focus` â† FocusIntentContext, focusTarget, isAttached
+- `./lib/focus` â† FocusTarget
 - `./styles.css` â† 

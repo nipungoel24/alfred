@@ -5,6 +5,7 @@ import { health as fetchHealth, analysisStatus } from '../../api/emails';
 import { ErrorState } from '../../components/ui/States';
 import { SettingsSection, SettingsRow, SettingsValue, StatusIndicator } from '../../components/ui/Settings';
 import { aiStateMeta } from '../../lib/aiState';
+import { useRetryPreservingFocus } from '../../lib/focus';
 
 export function SettingsPage() {
   const healthQuery = useQuery({ queryKey: ['health'], queryFn: fetchHealth, retry: 0 });
@@ -19,9 +20,11 @@ export function SettingsPage() {
   const runtimeRetrying = healthQuery.isFetching || aiStatusQuery.isFetching;
   const runtimePending = healthQuery.isPending || aiStatusQuery.isPending;
 
+  const retryHealth = useRetryPreservingFocus(healthQuery.refetch);
+  const retryAiStatus = useRetryPreservingFocus(aiStatusQuery.refetch);
   const retryRuntime = () => {
-    void healthQuery.refetch();
-    void aiStatusQuery.refetch();
+    retryHealth();
+    retryAiStatus();
   };
 
   const frontendBuild = typeof __ALFRED_BUILD__ !== 'undefined' ? __ALFRED_BUILD__ : 'unknown';

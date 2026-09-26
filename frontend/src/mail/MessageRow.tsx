@@ -17,12 +17,14 @@ interface MessageRowProps {
   category: MailCategory;
   selected: boolean;
   onSelect: (id: string) => void;
+  /** Keyboard activation. Falls back to `onSelect` when not supplied. */
+  onActivate?: (id: string) => void;
   onToggleLater: (id: string) => void;
   laterIds: ReadonlySet<string>;
 }
 
 export const MessageRow = memo(function MessageRow({
-  email, category, selected, onSelect, onToggleLater, laterIds,
+  email, category, selected, onSelect, onActivate, onToggleLater, laterIds,
 }: MessageRowProps) {
   const analysis = email.analysis;
   const unread = email.label_ids?.includes('UNREAD');
@@ -48,7 +50,7 @@ export const MessageRow = memo(function MessageRow({
       onKeyDown={e => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onSelect(email.id);
+          (onActivate ?? onSelect)(email.id);
         }
       }}
     >

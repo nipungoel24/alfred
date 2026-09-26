@@ -9,6 +9,7 @@ import type { TaskPriority } from '../../api/emails';
 import { Check, Trash2, Mail, ChevronDown } from 'lucide-react';
 import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
 import { EmptyState, ErrorState } from '../../components/ui/States';
+import { useRetryPreservingFocus } from '../../lib/focus';
 
 interface TasksPageProps {
   onOpenInMail?: (emailId: string) => void;
@@ -32,6 +33,10 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
     queryKey: ['tasks'],
     queryFn: fetchTasks,
   });
+
+  // A successful retry unmounts the button that had focus, so the view heading
+  // takes it. On a persistent failure the error stays put and focus does not move.
+  const retry = useRetryPreservingFocus(refetch);
 
   const previewTask = previewTaskId ? (tasks.find(t => t.id === previewTaskId) ?? null) : null;
 
@@ -104,7 +109,7 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
         <ErrorState
           title="Tasks couldn't load"
           body="Alfred could not read your tasks. This is a connection problem, not an empty list — any task you have is unaffected."
-          onRetry={() => void refetch()}
+          onRetry={retry}
           retrying={isFetching}
         />
       ) : isLoading ? (

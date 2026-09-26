@@ -27,3 +27,4 @@ tags: [module, frontend]
 - `../../api/client` â† apiBase
 - `../../components/ui/States` â† EmptyState, ErrorState
 - `../../components/ui/Settings` â† StatusIndicator
+- `../../lib/focus` â† useRetryPreservingFocus

@@ -6,6 +6,7 @@ import type { EmailAccount } from '../../api/emails';
 import { apiBase } from '../../api/client';
 import { EmptyState, ErrorState } from '../../components/ui/States';
 import { StatusIndicator } from '../../components/ui/Settings';
+import { useRetryPreservingFocus } from '../../lib/focus';
 
 export function AccountsPage() {
   const queryClient = useQueryClient();
@@ -52,6 +53,7 @@ export function AccountsPage() {
   }, [queryClient]);
 
   const startConnect = () => connectMutation.mutate(`${apiBase()}/api/accounts/gmail/callback`);
+  const retryAccounts = useRetryPreservingFocus(accountsQuery.refetch);
   const connecting = connectMutation.isPending;
 
   return (
@@ -88,7 +90,7 @@ export function AccountsPage() {
           <ErrorState
             title="Couldn't load your accounts"
             body="Alfred could not read the list of connected accounts. Nothing has changed."
-            onRetry={() => void accountsQuery.refetch()}
+            onRetry={retryAccounts}
             retrying={accountsQuery.isFetching}
           />
         ) : accounts.length === 0 ? (

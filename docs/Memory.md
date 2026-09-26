@@ -184,7 +184,7 @@ Documents: `docs/UI-AUDIT.md`, `docs/UI-DESIGN-SPEC.md`, ADR-005 updated to **Ac
 | UI-7 states | done | all 4 pages distinguish loading / empty / success / failure; real `refetch()` retry; 33 new tests |
 | UI-8 accounts/settings | done | real account + runtime states; shared primitives; model read from the supervisor, not hardcoded; 39 new tests |
 | UI-9 responsive | done | 1100px collapse to icon rail implemented; 900px intelligence collapse remaining |
-| UI-10 accessibility | partial | skip link, `sr-only`, h1 on Mail, landmarks, roving tabindex done; focus movement on navigation remaining |
+| UI-10 accessibility | done | roving tabindex in rail and tabs; Ctrl+K/Escape search; skip link; focus follows deliberate navigation, never a background refresh; 37 new focus tests |
 | UI-11 motion | done | orb drift animations deleted; reduced motion intact |
 
 ### Colour decision (ADR-005, Accepted: teal)
@@ -555,32 +555,121 @@ source maps), secret scan and knowledge graph all clean.
 
 ---
 
+## UI-10 FOCUS MOVEMENT (DONE — commit `feat(alfred): complete keyboard focus management`)
+
+Files: new `lib/focus.ts`, `App.tsx`, `WorkspaceHeader.tsx`, `MessageReader.tsx`,
+`MessageList.tsx`, `MessageRow.tsx`, `MailWorkspace.tsx`, and the four pages that
+own a retry. New tests: `layout/focus.test.tsx`, `mail/MailWorkspace.focus.test.tsx`,
+`features/focus.retention.test.tsx`, `features/focus.retry.test.tsx`.
+
+### The rule, made structural rather than remembered
+Focus intent is **recorded by whatever replaces the user's context and consumed
+once**. Nothing infers it from a state change, which is what makes "a background
+refetch never moves focus" true by construction instead of by discipline. Two bugs
+found during the audit came from the obvious alternative — an effect keyed on
+`page` — and both were fixed by recording intent instead.
+
+### Defects found and fixed
+**Message activation never moved focus at all.** Selecting a message updated the
+reader silently; the user's focus stayed wherever it was. The reader subject is now
+focusable (`tabIndex={-1}`, so no new tab stop) and keyboard activation of a row —
+Enter or Space, not a click — moves focus to it, so the message is announced.
+Pointer activation deliberately does not: the cursor is already where the user is
+looking.
+
+**A successful retry stranded focus on `<body>`.** The "Try again" button lives
+*inside* the error block, so a successful retry unmounts the element that had
+focus. `useRetryPreservingFocus` awaits the refetch and re-homes focus to the view
+heading **only when the retry actually worked** — on a persistent failure the
+error and its button are still the right place to be, and a test pins that.
+
+**Escape in the search field dropped focus on the floor.** It called `blur()` and
+stopped, leaving the user on `<body>`. It now records where focus came from before
+`Ctrl+K` and hands it back, guarded on the element still being connected.
+
+**Cross-page "Open in Mail" lost focus entirely.** The Tasks or Deadlines button
+the user pressed unmounts on navigation, so focus fell to `<body>`. It now records
+reader intent.
+
+### Two judgement calls, both deliberate and tested
+**The sidebar does not get focus moved on navigation.** Arrowing the rail both
+moves focus *and* changes the page, so honouring intent there would pull the user
+out of the rail on the first arrow press and break arrow navigation outright. Rail
+activation keeps focus on the item; a test asserts it. **Typing a global search
+does not move focus either**, even though it changes page — the user's focus is in
+the search field and taking it away mid-keystroke would be hostile. That case is
+the reason intent is explicit rather than derived from `page`.
+
+**The skip link now moves focus explicitly.** The `href` is kept so it works with
+scripting off; the explicit focus makes the behaviour deterministic instead of
+depending on fragment navigation, which jsdom does not perform. The target was
+already `tabIndex={-1}`.
+
+### Found, reported, not fixed
+`MessageList` is `role="listbox"` whose rows are `role="button"`: no arrow-key
+handling, no `aria-activedescendant`, and every row is a tab stop, so tabbing
+through a large mailbox is unusable. Spec §11.5 wants options in a single tab
+stop. That is an interaction-model change rather than focus movement, so it is
+recorded as the top remaining item. It is also the honest limitation of the reader
+focus: because the list has no arrow keys, focusing the reader on Enter leaves
+Shift+Tab as the route back, and proper listbox semantics would make that moot.
+
+Five views render **two `h1`s** (their own plus the header's). Focus targets the
+header heading because it is the unambiguous one; the duplication is recorded.
+
+A static guard asserting every `.focus()` sits in an effect or a handler was
+written and **deliberately not shipped** — it flagged the dialog focus trap, which
+is correct code inside a long keydown listener. A guard with false positives
+trains people to ignore it. The `autoFocus` check shipped; the behavioural tests
+are the real evidence.
+
+**37 new focus tests**, all asserting `document.activeElement` rather than
+presence: sidebar single-tab-stop and arrow/Home/End, activation keeping focus,
+keyboard vs pointer activation, second-message activation, intent consumed exactly
+once, a re-render that must not steal focus, re-activating the same message,
+`Ctrl+K`, typing, Escape returning focus, theme control, retry recovery, retry
+failure leaving focus put, and a failing refetch arriving under the user.
+
+**Verification:** Rust 35, backend 239, tools 9, frontend 374 — **657 passed, 0
+failed** (up from 620). `cargo fmt`, `clippy`, `tsc`, ESLint, production build (0
+source maps), secret scan and knowledge graph all clean. Static review confirmed
+no `autoFocus` anywhere, and every `useEffect` has a dependency array.
+
+---
+
 ## REMAINING WORK
 
 **UI (this phase):**
-1. Focus movement on page change and message selection (UI-10).
-2. Replace the remaining inline `style` objects with tokens. The Accounts and
-   Settings pages are now clean; the rest are untouched.
-3. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
-4. Real brand asset set — still placeholders (F8).
-5. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
-6. `.status-dot.online` pulses on a 3.2 s infinite loop. Spec §7 does not list a
+1. **The message list is not keyboard navigable.** `MessageList` is
+   `role="listbox"` but its rows are `role="button"`, there is no arrow-key
+   handling, and every row is its own tab stop. Spec §11.5 wants a listbox of
+   options with a single tab stop. This is an interaction-model change, not focus
+   movement, so it was left alone — but it is why focusing the reader on Enter
+   leaves no arrow-key route to the next message.
+2. Four AI-state vocabularies (rail, intelligence panel, progress bar, and the
+   header's own consumers) still restate the state machine. `src/lib/aiState.ts`
+   is the single source; fold them in.
+3. Three pre-existing off-scale values survive in the intelligence panel
+   (`.intel-kv` and `.intel-item` at `6px 0`, and a `3px` optical nudge on
+   `.intel-item svg`). Deliberately left: correcting them moves pixels in a pane
+   that has never been rendered, so it belongs with the visual pass.
+4. `.section-label` uses `font-size: 10px` and `letter-spacing: 0.09em`; the spec
+   scale is `--text-2xs` (10.5px) and `0.04em` for caps. It is shared with pages
+   outside this phase, so it was not changed here.
+5. `.status-dot.online` pulses on a 3.2 s infinite loop. Spec §7 does not list a
    looping status pulse as animatable, and it never stops. UI-11 decision.
-7. `.badge-reply` is coloured with `--accent-soft` / `--accent-text`. Spec §3.3
+6. `.badge-reply` is coloured with `--accent-soft` / `--accent-text`. Spec §3.3
    reserves accent for selected, focused, unread and primary action — "nothing
    else". A reply-needed badge is arguably none of those. Needs a call.
-8. Four `#f28b82` values survive as `var(--danger, #f28b82)` fallbacks. They never
+7. Four `#f28b82` values survive as `var(--danger, #f28b82)` fallbacks. They never
    paint, so they are harmless, but spec §3 says components never name a raw hex.
-9. Four more AI-state vocabularies (rail, intelligence panel, progress bar, and the
-   header's own consumers) still restate the state machine. `src/lib/aiState.ts` is
-   the single source; fold them in.
-10. Three pre-existing off-scale values survive in the intelligence panel
-    (`.intel-kv` and `.intel-item` at `6px 0`, and a `3px` optical nudge on
-    `.intel-item svg`). Deliberately left: correcting them moves pixels in a pane
-    that has never been rendered, so it belongs with the visual pass.
-11. `.section-label` uses `font-size: 10px` and `letter-spacing: 0.09em`; the spec
-    scale is `--text-2xs` (10.5px) and `0.04em` for caps. It is shared with pages
-    outside this phase, so it was not changed here.
+8. Every non-rail view renders its own `<h1>` while `WorkspaceHeader` also renders
+   one, so those five views have two `h1`s. Focus targets the header heading
+   precisely because it is unambiguous; the duplicate is recorded, not fixed.
+9. Remaining inline `style` objects on pages other than Accounts and Settings.
+10. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
+11. Real brand asset set — still placeholders (F8).
+12. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
 
 **Not started (later phases):** first-run model setup (Phase 2), website (Phase 6),
 installer signing and CI (Phases 5, 7).
@@ -597,37 +686,40 @@ attached and a `tasklist` check after quit.
 **Gate 0: PASS** (unchanged).
 
 **Phase 1: PARTIAL — not declared PASS.** Priorities 1–6 are complete with test
-evidence. UI foundation is substantially complete; UI-7 (error vs empty), UI-5
-(reading pane), the dead-CSS gate and UI-8 (accounts/settings) are done, and items
-1–11 above remain. The directive states explicitly: do not claim the phase is
-complete if only the foundation is done. Gate 1 cannot be declared PASS until the
-packaged-app manual launch is observed.
+evidence, and the UI steps UI-1 through UI-11 are now all done with test evidence.
+What is missing is the one thing no test can supply: someone has to look at the
+running app. Items 1–12 above remain, and Gate 1 cannot be declared PASS until the
+packaged-app manual launch is observed. The directive states explicitly: do not
+claim the phase is complete if only the foundation is done.
 
 ---
 
 ## NEXT TASK
 
-**UI-10: focus movement.** Moving pages moves focus to the new `<h1>`; selecting a
-message moves focus to the reader heading. Accounts and Settings do not introduce
-any dialog, so nothing is deferred there beyond that.
+**Phase 1 visual verification, then UI cleanup.** Every automated gate is now
+closed; what is missing is someone looking at the thing. Five commits' worth of
+change has never been rendered: restored borders and backgrounds from the dead-CSS
+gate, the new reading-pane hierarchy, the productised Accounts and Settings, and
+the focus work.
 
-The cheapest remaining defect detector in the repo is
-`npx vitest run src/styles/styles.test.ts` — run it after any stylesheet edit. It
-caught a lost off-scale check, an escaped-regex bug in its own assertions, and a
-`min-width` omission in this session alone.
+**Manual visual verification NOT PERFORMED.** This environment cannot render Alfred.
 
-**Two things are still owed and are not optional to skip:**
+The pass should cover, at minimum:
 
-- **Manual visual verification NOT PERFORMED.** UI-5, UI-7, the dead-CSS gate and
-  UI-8 have all been verified by jsdom and static stylesheet assertions only. Nobody
-  has looked at the rendered app. This is now three visual changes deep: the
-  intelligence pane, draft panel and startup mark gained borders/backgrounds, the
-  account card lost its avatar tile and gained a fact grid, and Settings swapped a
-  hardcoded model for a real one. Launch the app, open a long email with many
-  recipients, visit Accounts and Settings, resize through 1100px and 900px, and check
-  both themes.
-- **Gate 1 packaged-app verification NOT PERFORMED.** F1 is fixed in code and
-  statically asserted, but "one launch shows the window" has still not been observed
-  on a real install, with `desktop.log` attached and a `tasklist` check after quit.
+1. Launch the app; confirm the window appears (this is also **Gate 1**, still
+   NOT PERFORMED — attach `desktop.log` and a `tasklist` check after quit).
+2. Overview, Mail, Tasks, Deadlines, Accounts, Settings in **both themes**.
+3. The reading pane with a short subject, a very long one, a long sender, many
+   recipients, a long body, and attachments.
+4. Resize through 1280 / 1100 / 1000 / 900 / 800px and look for horizontal
+   overflow, a cramped reader, and the intelligence pane at 900px.
+5. Keyboard only: `Tab` from the top, the skip link, `Ctrl+K` then `Escape`,
+   arrow the sidebar, `Enter` a message and confirm focus lands on the subject,
+   `Shift+Tab` back.
+6. Error and empty states on all four pages, with a deliberately failing backend.
 
-Automated verification status: **PASS** (620 tests, 0 failures).
+Two things to watch that no test can catch: the account card lost its avatar tile
+and gained a fact grid, and Settings swapped a hardcoded model for a real one.
+
+**Gate 1 packaged-app verification: NOT PERFORMED.**
+**Automated verification status: PASS** (657 tests, 0 failures).

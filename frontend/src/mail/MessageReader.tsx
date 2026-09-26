@@ -11,10 +11,16 @@ interface MessageReaderProps {
   onToggleIntel: () => void;
   laterIds: ReadonlySet<string>;
   onToggleLater: (id: string) => void;
+  /**
+   * Hands the subject heading up so a deliberate "open this message" can move
+   * focus to it. The heading is focusable but not tabbable, so this adds no
+   * stop to the tab order.
+   */
+  onSubjectReady?: (node: HTMLHeadingElement | null) => void;
 }
 
 export function MessageReader({
-  emailId, intelVisible, onToggleIntel, laterIds, onToggleLater,
+  emailId, intelVisible, onToggleIntel, laterIds, onToggleLater, onSubjectReady,
 }: MessageReaderProps) {
   const [copied, setCopied] = useState(false);
   const copyTimer = useRef<number | null>(null);
@@ -99,8 +105,11 @@ export function MessageReader({
         <div className="reader-scroll">
           <article className="reader-surface">
             <div className="reader-document">
-              {/* 1 — Subject: the only large type in the pane. */}
-              <h2 className="reader-subject">{email.subject}</h2>
+              {/* 1 — Subject: the only large type in the pane, and the focus
+                  target when a message is opened deliberately. */}
+              <h2 className="reader-subject" tabIndex={-1} ref={onSubjectReady}>
+                {email.subject}
+              </h2>
 
               {/* 2, 3, 4 — Sender, recipients, timestamp. Each is its own
                   labelled field so a long value wraps instead of pushing the

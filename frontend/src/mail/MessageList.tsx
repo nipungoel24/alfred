@@ -9,13 +9,21 @@ interface MessageListProps {
   category: MailCategory;
   selectedId: string | null;
   isLoading: boolean;
+  /** Pointer activation, or any activation that should leave focus alone. */
   onSelect: (id: string) => void;
+  /**
+   * Keyboard activation (Enter/Space on a focused row). Split from `onSelect`
+   * because a keyboard user has asked to *read* this message, so focus belongs
+   * in the reader; a mouse user has not, and moving focus out from under the
+   * cursor would be a surprise.
+   */
+  onActivate?: (id: string) => void;
   onToggleLater: (id: string) => void;
   laterIds: ReadonlySet<string>;
 }
 
 export function MessageList({
-  emails, category, selectedId, isLoading, onSelect, onToggleLater, laterIds,
+  emails, category, selectedId, isLoading, onSelect, onActivate, onToggleLater, laterIds,
 }: MessageListProps) {
   const parentRef = useRef<HTMLDivElement>(null);
 
@@ -74,6 +82,7 @@ export function MessageList({
                 category={category}
                 selected={selectedId === email.id}
                 onSelect={onSelect}
+                onActivate={onActivate ?? onSelect}
                 onToggleLater={onToggleLater}
                 laterIds={laterIds}
               />
