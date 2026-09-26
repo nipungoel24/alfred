@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { Cpu, Database, Palette, ShieldCheck, Info } from 'lucide-react';
 import { ThemeToggle } from '../../theme/ThemeToggle';
 import { health as fetchHealth, analysisStatus } from '../../api/emails';
+import { ErrorState } from '../../components/ui/States';
 
 const AI_LABELS: Record<string, string> = {
   ready: 'Ready',
@@ -14,8 +15,22 @@ const AI_LABELS: Record<string, string> = {
 };
 
 export function SettingsPage() {
-  const { data: health } = useQuery({ queryKey: ['health'], queryFn: fetchHealth, retry: 0 });
-  const { data: aiStatus } = useQuery({ queryKey: ['analysisStatus'], queryFn: analysisStatus, retry: 0 });
+  const healthQuery = useQuery({ queryKey: ['health'], queryFn: fetchHealth, retry: 0 });
+  const aiStatusQuery = useQuery({
+    queryKey: ['analysisStatus'],
+    queryFn: analysisStatus,
+    retry: 0,
+  });
+  const health = healthQuery.data;
+  const aiStatus = aiStatusQuery.data;
+  const runtimeFailed = healthQuery.isError || aiStatusQuery.isError;
+  const runtimeRetrying = healthQuery.isFetching || aiStatusQuery.isFetching;
+
+  const retryRuntime = () => {
+    void healthQuery.refetch();
+    void aiStatusQuery.refetch();
+  };
+
   const frontendBuild = typeof __ALFRED_BUILD__ !== 'undefined' ? __ALFRED_BUILD__ : 'unknown';
 
   return (
@@ -40,34 +55,47 @@ export function SettingsPage() {
           <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-3)' }}>
             <Cpu size={12} aria-hidden="true" /> Local AI
           </div>
-          <div className="settings-row">
-            <span className="settings-label">Model</span>
-            <span className="settings-value">qwen3:4b</span>
-          </div>
-          <div className="settings-row">
-            <span className="settings-label">Runtime</span>
-            <span className="settings-value">Ollama (local)</span>
-          </div>
-          <div className="settings-row">
-            <span className="settings-label">Status</span>
-            <span className="settings-value" style={{ color: health?.ai === 'ready' ? 'var(--success)' : 'var(--warning)' }}>
-              {AI_LABELS[health?.ai ?? ''] ?? 'Starting'}
-            </span>
-          </div>
-          {aiStatus && (
+          {/* Scoped, not page-level: Theme, Data, Privacy and About all work
+              without this query, so a failure here must not hide them. */}
+          {runtimeFailed ? (
+            <ErrorState
+              title="Runtime status unavailable"
+              body="Alfred could not read the local AI runtime. Your settings below are unaffected."
+              onRetry={retryRuntime}
+              retrying={runtimeRetrying}
+            />
+          ) : (
             <>
               <div className="settings-row">
-                <span className="settings-label">Model installed</span>
-                <span className="settings-value">{aiStatus.model_installed === null ? '—' : aiStatus.model_installed ? 'Yes' : 'No'}</span>
+                <span className="settings-label">Model</span>
+                <span className="settings-value">qwen3:4b</span>
               </div>
               <div className="settings-row">
-                <span className="settings-label">Ollama installed</span>
-                <span className="settings-value">{aiStatus.ollama_installed ? 'Yes' : 'No'}</span>
+                <span className="settings-label">Runtime</span>
+                <span className="settings-value">Ollama (local)</span>
               </div>
               <div className="settings-row">
-                <span className="settings-label">Queue</span>
-                <span className="settings-value">{aiStatus.pending} pending{aiStatus.queue_paused ? ' (paused)' : ''}</span>
+                <span className="settings-label">Status</span>
+                <span className="settings-value" style={{ color: health?.ai === 'ready' ? 'var(--success)' : 'var(--warning)' }}>
+                  {AI_LABELS[health?.ai ?? ''] ?? 'Starting'}
+                </span>
               </div>
+              {aiStatus && (
+                <>
+                  <div className="settings-row">
+                    <span className="settings-label">Model installed</span>
+                    <span className="settings-value">{aiStatus.model_installed === null ? 'Unknown' : aiStatus.model_installed ? 'Yes' : 'No'}</span>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-label">Ollama installed</span>
+                    <span className="settings-value">{aiStatus.ollama_installed ? 'Yes' : 'No'}</span>
+                  </div>
+                  <div className="settings-row">
+                    <span className="settings-label">Queue</span>
+                    <span className="settings-value">{aiStatus.pending} pending{aiStatus.queue_paused ? ' (paused)' : ''}</span>
+                  </div>
+                </>
+              )}
             </>
           )}
         </div>

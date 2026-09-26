@@ -1,15 +1,22 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { briefing as fetchBriefing } from '../../api/emails';
-import { Clock, Mail } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
+import { EmptyState, ErrorState } from '../../components/ui/States';
 
 interface DeadlinesPageProps {
   onOpenInMail?: (emailId: string) => void;
 }
 
 export function DeadlinesPage({ onOpenInMail }: DeadlinesPageProps) {
-  const { data: brief, isLoading } = useQuery({ queryKey: ['briefing'], queryFn: fetchBriefing });
+  const {
+    data: brief,
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({ queryKey: ['briefing'], queryFn: fetchBriefing });
   const [previewEmailId, setPreviewEmailId] = useState<string | null>(null);
 
   return (
@@ -17,24 +24,35 @@ export function DeadlinesPage({ onOpenInMail }: DeadlinesPageProps) {
       <div className="page-head">
         <div>
           <h1 className="page-title">Deadlines</h1>
-          <div className="page-subtitle">{brief?.deadlines?.length ?? 0} upcoming</div>
+          <div className="page-subtitle">
+            {isError ? 'Runtime information unavailable' : `${brief?.deadlines?.length ?? 0} upcoming`}
+          </div>
         </div>
       </div>
 
-      {isLoading ? (
+      {/* A failed request must never be reported as "you have no deadlines".
+          That is the one answer a user would act on and be wrong about. */}
+      {isError ? (
+        <ErrorState
+          title="Deadlines couldn't load"
+          body="Alfred could not read your briefing. This is a connection problem, not an empty result — your deadlines are unaffected."
+          onRetry={() => void refetch()}
+          retrying={isFetching}
+        />
+      ) : isLoading ? (
         <div style={{ padding: 'var(--space-4) var(--space-6)' }} aria-busy="true">
           {[...Array(4)].map((_, i) => (
             <div key={i} className="skeleton-row">
-              <div className="skeleton" style={{ width: '55%', height: 13 }} />
-              <div className="skeleton" style={{ width: '35%', height: 11 }} />
+              <div className="skeleton skeleton-line-md skeleton-w-55" />
+              <div className="skeleton skeleton-line-sm skeleton-w-40" />
             </div>
           ))}
         </div>
       ) : !brief?.deadlines?.length ? (
-        <div className="empty-state">
-          <Clock aria-hidden="true" />
-          <p>No upcoming deadlines detected.</p>
-        </div>
+        <EmptyState
+          title="No upcoming deadlines"
+          body="Alfred has not found a dated commitment in your synced mail."
+        />
       ) : (
         <div style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: 'var(--space-4) var(--space-6)' }}>
           <div className="structured-list">

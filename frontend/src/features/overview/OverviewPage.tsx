@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import {
   briefing as fetchBriefing, regenerateBriefing, emails as fetchEmails, emailCounts,
@@ -6,6 +6,7 @@ import {
 import { CheckSquare, Clock, Sparkles, ArrowUpRight } from 'lucide-react';
 import type { AppPage } from '../../layout/IconRail';
 import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
+import { ErrorState } from '../../components/ui/States';
 
 interface OverviewPageProps {
   onNavigate: (page: AppPage) => void;
@@ -15,12 +16,28 @@ interface OverviewPageProps {
 export function OverviewPage({ onNavigate, onOpenEmail }: OverviewPageProps) {
   const queryClient = useQueryClient();
   const [previewEmailId, setPreviewEmailId] = useState<string | null>(null);
-  const { data: brief } = useQuery({ queryKey: ['briefing'], queryFn: fetchBriefing });
-  const { data: emailsList = [] } = useQuery({
+  const briefQuery = useQuery({ queryKey: ['briefing'], queryFn: fetchBriefing });
+  const emailsQuery = useQuery({
     queryKey: ['emails', { scope: 'overview' }],
     queryFn: () => fetchEmails({ limit: 200 }),
   });
-  const { data: counts } = useQuery({ queryKey: ['emailCounts'], queryFn: () => emailCounts() });
+  const countsQuery = useQuery({ queryKey: ['emailCounts'], queryFn: () => emailCounts() });
+
+  const brief = briefQuery.data;
+  const emailsList = emailsQuery.data ?? [];
+  const counts = countsQuery.data;
+
+  // The page cannot render meaningful content without the briefing or the
+  // mail list. `emailCounts` is supplementary — the page already falls back
+  // to the list length — so its failure alone must not blank the page.
+  const hasFatalError = briefQuery.isError || emailsQuery.isError;
+  const isRetrying = briefQuery.isFetching || emailsQuery.isFetching;
+
+  const retryAll = useCallback(() => {
+    void briefQuery.refetch();
+    void emailsQuery.refetch();
+    void countsQuery.refetch();
+  }, [briefQuery.refetch, emailsQuery.refetch, countsQuery.refetch]);
 
   const generateBriefing = useMutation({
     mutationFn: regenerateBriefing,
@@ -46,6 +63,27 @@ export function OverviewPage({ onNavigate, onOpenEmail }: OverviewPageProps) {
         why_it_matters: e.analysis!.reason_for_priority,
         needs_reply: e.analysis!.needs_reply,
       }));
+
+  if (hasFatalError) {
+    return (
+      <div className="page-scroll">
+        <div className="overview-inner">
+          <header>
+            <h1 className="overview-greeting">Overview</h1>
+            <p className="overview-subline">Runtime information unavailable</p>
+          </header>
+          {/* Previously a failed briefing rendered as "0 messages" with empty
+              panels, which reads as a quiet mailbox rather than a fault. */}
+          <ErrorState
+            title="Your briefing couldn't load"
+            body="Alfred could not read your mailbox summary. This is a connection problem — your mail and tasks are unaffected."
+            onRetry={retryAll}
+            retrying={isRetrying}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="page-scroll">

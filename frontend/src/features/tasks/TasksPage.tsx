@@ -6,8 +6,9 @@ import {
   TASK_PRIORITIES,
 } from '../../api/emails';
 import type { TaskPriority } from '../../api/emails';
-import { Check, Trash2, CheckSquare, Mail, ChevronDown } from 'lucide-react';
+import { Check, Trash2, Mail, ChevronDown } from 'lucide-react';
 import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
+import { EmptyState, ErrorState } from '../../components/ui/States';
 
 interface TasksPageProps {
   onOpenInMail?: (emailId: string) => void;
@@ -21,7 +22,13 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
   // reflect immediately without closing the preview.
   const [previewTaskId, setPreviewTaskId] = useState<string | null>(null);
 
-  const { data: tasks = [], isLoading } = useQuery({
+  const {
+    data: tasks = [],
+    isLoading,
+    isError,
+    isFetching,
+    refetch,
+  } = useQuery({
     queryKey: ['tasks'],
     queryFn: fetchTasks,
   });
@@ -30,10 +37,10 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
 
   // A dismissed task disappears from the active query — close cleanly.
   useEffect(() => {
-    if (previewTaskId && !isLoading && !previewTask) {
+    if (previewTaskId && !isLoading && !isFetching && !previewTask) {
       setPreviewTaskId(null);
     }
-  }, [previewTaskId, previewTask, isLoading]);
+  }, [previewTaskId, previewTask, isLoading, isFetching]);
 
   const invalidate = () => queryClient.invalidateQueries({ queryKey: ['tasks'] });
 
@@ -70,8 +77,11 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
       <div className="page-head">
         <div>
           <h1 className="page-title">Tasks</h1>
-          <div className="page-subtitle">{pendingTasks.length} pending · {completedTasks.length} completed</div>
+          <div className="page-subtitle">
+            {isError ? 'Runtime information unavailable' : `${pendingTasks.length} pending · ${completedTasks.length} completed`}
+          </div>
         </div>
+        {!isError && (
         <div style={{ display: 'flex', gap: 2, border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-sm)', background: 'var(--bg-input)' }}>
           {(['pending', 'completed', 'all'] as const).map(f => (
             <button
@@ -85,22 +95,38 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
             </button>
           ))}
         </div>
+        )}
       </div>
 
-      {isLoading ? (
+      {/* "No pending tasks" is a claim about the user's work. Never show it
+          because a request failed. */}
+      {isError ? (
+        <ErrorState
+          title="Tasks couldn't load"
+          body="Alfred could not read your tasks. This is a connection problem, not an empty list — any task you have is unaffected."
+          onRetry={() => void refetch()}
+          retrying={isFetching}
+        />
+      ) : isLoading ? (
         <div style={{ padding: 'var(--space-4) var(--space-6)' }} aria-busy="true">
           {[...Array(5)].map((_, i) => (
             <div key={i} className="skeleton-row">
-              <div className="skeleton" style={{ width: '60%', height: 13 }} />
-              <div className="skeleton" style={{ width: '30%', height: 11 }} />
+              <div className="skeleton skeleton-line-md skeleton-w-55" />
+              <div className="skeleton skeleton-line-sm skeleton-w-40" />
             </div>
           ))}
         </div>
       ) : displayTasks.length === 0 ? (
-        <div className="empty-state">
-          <CheckSquare aria-hidden="true" />
-          <p>{filter === 'pending' ? 'No pending tasks.' : filter === 'completed' ? 'No completed tasks.' : 'No tasks found.'}</p>
-        </div>
+        <EmptyState
+          title={
+            filter === 'pending'
+              ? 'No pending tasks'
+              : filter === 'completed'
+                ? 'No completed tasks'
+                : 'No tasks yet'
+          }
+          body="Alfred derives tasks from your mail. Nothing has been detected for this filter."
+        />
       ) : (
         <div ref={parentRef} style={{ flex: 1, overflowY: 'auto', minHeight: 0, padding: 'var(--space-2) var(--space-6)' }}>
           <div style={{ height: rowVirtualizer.getTotalSize(), width: '100%', position: 'relative' }}>

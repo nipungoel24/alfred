@@ -1228,7 +1228,7 @@
 
 .reader-sender {
   font-size: var(--text-md);
-  font-weight: 650;
+  font-weight: var(--weight-semibold);
 }
 
 .reader-sender-mail {
@@ -1356,23 +1356,6 @@
   flex-shrink: 0;
 }
 
-.intel-head .intel-title {
-  font-size: 11px;
-  font-weight: 800;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--text-secondary);
-  display: flex;
-  align-items: center;
-  gap: 7px;
-}
-
-.intel-head .intel-title svg {
-  width: 14px;
-  height: 14px;
-  color: var(--accent);
-}
-
 .intel-scroll {
   flex: 1;
   overflow-y: auto;
@@ -1403,11 +1386,6 @@
   letter-spacing: var(--tracking-label);
   text-transform: uppercase;
   color: var(--text-muted);
-  color: var(--text-muted);
-  margin-bottom: var(--space-3);
-  display: flex;
-  align-items: center;
-  gap: 6px;
 }
 
 .intel-section-label svg { width: 13px; height: 13px; }
@@ -2224,7 +2202,7 @@ button.overview-row:hover {
 
 .startup-title {
   font-size: var(--text-lg);
-  font-weight: 650;
+  font-weight: var(--weight-semibold);
   letter-spacing: -0.01em;
   color: var(--text-primary);
 }

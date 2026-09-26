@@ -37,7 +37,15 @@ function StateBlock({
   actions?: ReactNode;
 }) {
   return (
-    <div className="state-block" data-tone={tone}>
+    <div
+      className="state-block"
+      data-tone={tone}
+      // An error is an assertive live region: a screen reader must announce
+      // that the page failed, not merely that some text appeared. Empty and
+      // info states are polite, because they are not urgent.
+      role={tone === 'error' ? 'alert' : 'status'}
+      aria-live={tone === 'error' ? 'assertive' : 'polite'}
+    >
       <span className="state-icon">
         <Icon size={18} strokeWidth={1.75} aria-hidden="true" />
       </span>
@@ -92,17 +100,23 @@ export function EmptySearchState({
 /**
  * A request that failed. Always offers a retry, and names the reason in
  * plain language rather than surfacing a raw exception.
+ *
+ * `onRetry` should be the query's own `refetch`, so the button re-runs the
+ * real request rather than doing something decorative.
  */
 export function ErrorState({
   title = "This didn't load",
   body,
   code,
   onRetry,
+  retrying,
 }: {
   title?: string;
   body?: ReactNode;
   code?: string;
   onRetry?: () => void;
+  /** True while the retry request is in flight. */
+  retrying?: boolean;
 }) {
   return (
     <StateBlock
@@ -120,8 +134,14 @@ export function ErrorState({
       code={code}
       actions={
         onRetry ? (
-          <button type="button" className="btn btn-surface btn-sm" onClick={onRetry}>
-            Try again
+          <button
+            type="button"
+            className="btn btn-surface btn-sm"
+            onClick={onRetry}
+            disabled={retrying}
+            aria-busy={retrying}
+          >
+            {retrying ? 'Retrying' : 'Try again'}
           </button>
         ) : undefined
       }
