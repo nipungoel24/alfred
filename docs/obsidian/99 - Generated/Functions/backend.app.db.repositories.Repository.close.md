@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.close
 source: backend/app/db/repositories.py
-line: 25
+line: 30
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Close the database connection.
 
 ## Location
 
-`backend/app/db/repositories.py:25`
+`backend/app/db/repositories.py:30`
 
 ## Signature
 

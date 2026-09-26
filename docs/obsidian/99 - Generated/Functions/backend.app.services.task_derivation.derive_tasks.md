@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_derivation
 qualified_name: backend.app.services.task_derivation.derive_tasks
 source: backend/app/services/task_derivation.py
-line: 119
+line: 141
 status: active
 tags: [backend, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Derive genuine user tasks from an email analysis.
 
 ## Location
 
-`backend/app/services/task_derivation.py:119`
+`backend/app/services/task_derivation.py:141`
 
 ## Signature
 

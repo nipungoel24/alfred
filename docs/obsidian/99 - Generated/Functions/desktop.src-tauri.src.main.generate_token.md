@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.generate_token
 source: desktop/src-tauri/src/main.rs
-line: 223
+line: 938
 status: active
 tags: [backend, function]
 ---
@@ -21,17 +21,17 @@ Purpose inferred from usage: `generate_token` in `desktop/src-tauri/src/main.rs`
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:223`
+`desktop/src-tauri/src/main.rs:938`
 
 ## Signature
 
 ```rust
-fn generate_token() -> String
+fn generate_token() -> Result<String, String>
 ```
 
 ## Returns
 
-`String`
+`Result<String, String>`
 
 ## Side Effects
 

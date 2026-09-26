@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository._update_fts_one
 source: backend/app/db/repositories.py
-line: 354
+line: 528
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Keep the FTS5 index in sync for a single upsert.
 
 ## Location
 
-`backend/app/db/repositories.py:354`
+`backend/app/db/repositories.py:528`
 
 ## Signature
 
@@ -35,9 +35,18 @@ Keep the FTS5 index in sync for a single upsert.
 - `email_id` (`str`)
 - `email` (`Email`)
 
-## Writes
+## Calls
+
+- [[backend.app.db.database.fts_delete_supported|fts_delete_supported]] (calls)
+- `getLogger` (`logging.getLogger`, calls-inferred)
+
+## Reads
 
 - [[table_emails]]
+- [[table_emails_fts]]
+
+## Writes
+
 - [[table_emails_fts]]
 
 ## Side Effects

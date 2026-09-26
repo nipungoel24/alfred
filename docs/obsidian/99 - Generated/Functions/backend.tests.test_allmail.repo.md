@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.repo
 source: backend/tests/test_allmail.py
-line: 31
+line: 32
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `repo` in `backend/tests/test_allmail.py`.
 
 ## Location
 
-`backend/tests/test_allmail.py:31`
+`backend/tests/test_allmail.py:32`
 
 ## Signature
 

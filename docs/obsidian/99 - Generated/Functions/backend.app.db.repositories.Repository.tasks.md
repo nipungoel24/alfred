@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.tasks
 source: backend/app/db/repositories.py
-line: 539
+line: 779
 status: active
 tags: [database, function]
 ---
@@ -17,11 +17,11 @@ tags: [database, function]
 
 ## Purpose
 
-Purpose inferred from usage: `tasks` in `backend/app/db/repositories.py`.
+All tasks, or one status. With no status filter, dismissed tasks
 
 ## Location
 
-`backend/app/db/repositories.py:539`
+`backend/app/db/repositories.py:779`
 
 ## Signature
 

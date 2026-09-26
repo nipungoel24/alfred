@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.email
 source: backend/app/db/repositories.py
-line: 93
+line: 106
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `email` in `backend/app/db/repositories.py`.
 
 ## Location
 
-`backend/app/db/repositories.py:93`
+`backend/app/db/repositories.py:106`
 
 ## Signature
 
@@ -40,7 +40,6 @@ Purpose inferred from usage: `email` in `backend/app/db/repositories.py`.
 
 ## Called By
 
-- [[backend.app.mail.providers.gmail.GmailProvider.sync_messages|sync_messages]]
 - [[backend.tests.test_allmail.test_backfill_first_page_and_resume|test_backfill_first_page_and_resume]]
 - [[backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata|test_history_label_changes_refresh_via_metadata]]
 - [[backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached|test_history_spam_arrival_is_never_cached]]

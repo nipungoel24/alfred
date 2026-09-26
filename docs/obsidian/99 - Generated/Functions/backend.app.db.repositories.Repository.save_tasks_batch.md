@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.save_tasks_batch
 source: backend/app/db/repositories.py
-line: 518
+line: 756
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Save multiple tasks in a single transaction.
 
 ## Location
 
-`backend/app/db/repositories.py:518`
+`backend/app/db/repositories.py:756`
 
 ## Signature
 

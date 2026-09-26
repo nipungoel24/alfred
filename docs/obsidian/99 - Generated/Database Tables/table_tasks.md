@@ -29,6 +29,7 @@ SQLite table `tasks` defined in the Alfred schema.
 - `derivation_version`
 - `confidence`
 - `fingerprint`
+- `priority_override`
 
 ## Ownership
 

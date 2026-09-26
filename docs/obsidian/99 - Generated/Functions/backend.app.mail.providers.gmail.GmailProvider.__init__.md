@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.__init__
 source: backend/app/mail/providers/gmail.py
-line: 10
+line: 11
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/app/mail/providers/gmail.py`
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:10`
+`backend/app/mail/providers/gmail.py:11`
 
 ## Signature
 

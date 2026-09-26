@@ -27,6 +27,11 @@ Ollama request timed out.
 
 - `Exception`
 
+## Called By
+
+- [[backend.tests.test_ai_supervisor.FakeClient.generate|generate]]
+- [[backend.tests.test_ai_supervisor.test_failure_classification|test_failure_classification]]
+
 ## Side Effects
 
 - none statically observed

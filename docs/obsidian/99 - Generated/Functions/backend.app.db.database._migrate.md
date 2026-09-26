@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.database
 qualified_name: backend.app.db.database._migrate
 source: backend/app/db/database.py
-line: 163
+line: 343
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Run incremental schema migrations for legacy databases.
 
 ## Location
 
-`backend/app/db/database.py:163`
+`backend/app/db/database.py:343`
 
 ## Signature
 
@@ -33,13 +33,21 @@ Run incremental schema migrations for legacy databases.
 
 - `connection` (`sqlite3.Connection`)
 
+## Calls
+
+- `Path` (`pathlib.Path`, calls-inferred)
+
 ## Reads
 
 - [[table_emails]]
+- [[table_tasks]]
 
 ## Writes
 
+- [[table_email_analysis]]
 - [[table_emails]]
+- [[table_jobs]]
+- [[table_tasks]]
 
 ## Side Effects
 

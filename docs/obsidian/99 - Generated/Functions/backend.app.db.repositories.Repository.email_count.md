@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.email_count
 source: backend/app/db/repositories.py
-line: 87
+line: 100
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Get total email count, optionally filtered by account.
 
 ## Location
 
-`backend/app/db/repositories.py:87`
+`backend/app/db/repositories.py:100`
 
 ## Signature
 

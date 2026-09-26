@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_mixed_label_thread_keeps_active_messages_visible
 source: backend/tests/test_eligibility.py
-line: 319
+line: 320
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_mixed_label_thread_keeps_active_messages_visi
 
 ## Location
 
-`backend/tests/test_eligibility.py:319`
+`backend/tests/test_eligibility.py:320`
 
 ## Signature
 

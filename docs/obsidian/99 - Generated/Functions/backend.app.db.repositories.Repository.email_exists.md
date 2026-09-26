@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.email_exists
 source: backend/app/db/repositories.py
-line: 97
+line: 110
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Check if email exists without deserializing payload.
 
 ## Location
 
-`backend/app/db/repositories.py:97`
+`backend/app/db/repositories.py:110`
 
 ## Signature
 

@@ -27,6 +27,16 @@ React component declared in `frontend/src/components/ui/AnalysisProgress.tsx`.
 export function AnalysisProgress()
 ```
 
+## React Query usage
+
+- `{
+    queryKey: ['analysisStatus'],
+    queryFn: analysisStatus,
+    refetchInterval: 10_000,
+    staleTime: 5_000,
+  }`
+- `mutate: analysisRetry`
+
 ## Related
 
 - [[frontend.src.components.ui.AnalysisProgress|AnalysisProgress]] (module)

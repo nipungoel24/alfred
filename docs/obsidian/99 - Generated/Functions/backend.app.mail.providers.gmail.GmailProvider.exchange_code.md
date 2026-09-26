@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.exchange_code
 source: backend/app/mail/providers/gmail.py
-line: 38
+line: 43
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `exchange_code` in `backend/app/mail/providers/gmai
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:38`
+`backend/app/mail/providers/gmail.py:43`
 
 ## Signature
 

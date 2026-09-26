@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider._extract_body
 source: backend/app/mail/providers/gmail.py
-line: 537
+line: 560
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_extract_body` in `backend/app/mail/providers/gmai
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:537`
+`backend/app/mail/providers/gmail.py:560`
 
 ## Signature
 

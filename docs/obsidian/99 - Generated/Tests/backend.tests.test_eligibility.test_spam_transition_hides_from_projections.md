@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_spam_transition_hides_from_projections
 source: backend/tests/test_eligibility.py
-line: 215
+line: 216
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_spam_transition_hides_from_projections` in `b
 
 ## Location
 
-`backend/tests/test_eligibility.py:215`
+`backend/tests/test_eligibility.py:216`
 
 ## Signature
 

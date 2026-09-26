@@ -31,5 +31,5 @@ tags: [module, frontend]
 - `./features/accounts/AccountsPage` â† AccountsPage
 - `./features/settings/SettingsPage` â† SettingsPage
 - `./components/ui/AnalysisProgress` â† AnalysisProgress
-- `./api/emails` â† fetchAccounts, fetchHealth, syncAccount
+- `./api/emails` â† fetchAccounts, fetchEmailCounts, fetchHealth, syncAccount, MailFilter, MailScope
 - `./styles.css` â† 

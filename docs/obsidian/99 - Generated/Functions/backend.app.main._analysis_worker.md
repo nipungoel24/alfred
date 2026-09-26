@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._analysis_worker
 source: backend/app/main.py
-line: 191
+line: 202
 status: active
 tags: [backend, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Background worker that processes analysis jobs from SQLite.
 
 ## Location
 
-`backend/app/main.py:191`
+`backend/app/main.py:202`
 
 ## Signature
 
@@ -33,6 +33,8 @@ Background worker that processes analysis jobs from SQLite.
 
 - `sleep` (`asyncio.sleep`, calls-inferred)
 - [[backend.app.mail.fingerprint.content_fingerprint|content_fingerprint]] (calls)
+- `now` (`datetime.datetime.now`, calls-inferred)
+- `timedelta` (`datetime.timedelta`, calls-inferred)
 
 ## Side Effects
 

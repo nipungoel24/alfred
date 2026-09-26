@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.analysis_status
 source: backend/app/main.py
-line: 832
+line: 915
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -15,7 +15,7 @@ tags: [backend, function, endpoint, endpoint]
 
 ## Purpose
 
-Get current analysis queue status (jobs-table derived).
+AI state machine + analysis queue status (observer-facing).
 
 ## Handler
 
@@ -23,4 +23,4 @@ Get current analysis queue status (jobs-table derived).
 
 ## Location
 
-`backend/app/main.py:832`
+`backend/app/main.py:915`

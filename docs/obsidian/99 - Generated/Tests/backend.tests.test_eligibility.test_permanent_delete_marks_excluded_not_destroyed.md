@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_permanent_delete_marks_excluded_not_destroyed
 source: backend/tests/test_eligibility.py
-line: 306
+line: 307
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_permanent_delete_marks_excluded_not_destroyed
 
 ## Location
 
-`backend/tests/test_eligibility.py:306`
+`backend/tests/test_eligibility.py:307`
 
 ## Signature
 

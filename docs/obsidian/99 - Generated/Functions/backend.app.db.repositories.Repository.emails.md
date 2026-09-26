@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.emails
 source: backend/app/db/repositories.py
-line: 73
+line: 86
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Fetch emails ordered by received_at descending.
 
 ## Location
 
-`backend/app/db/repositories.py:73`
+`backend/app/db/repositories.py:86`
 
 ## Signature
 

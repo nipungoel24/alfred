@@ -53,6 +53,7 @@ Purpose inferred from usage: `content_fingerprint` in `backend/app/mail/fingerpr
 - [[backend.app.main.get_email|get_email]]
 - [[backend.app.main.get_emails|get_emails]]
 - [[backend.app.main.import_csv|import_csv]]
+- [[backend.app.main.search_emails_structured|search_emails_structured]]
 - [[backend.app.main.sync_account|sync_account]]
 - [[backend.tests.test_core.test_analysis_cache_invalidates_content_and_model|test_analysis_cache_invalidates_content_and_model]]
 - [[backend.tests.test_core.test_briefing_cache_invalidates_when_analysis_changes|test_briefing_cache_invalidates_when_analysis_changes]]

@@ -24,7 +24,7 @@ Function declared in `frontend/src/api/emails.ts`.
 ## Signature
 
 ```ts
-() => api<EmailCounts>('/api/emails/counts')
+(accountId?: string) =>
 ```
 
 ## Related

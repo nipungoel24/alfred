@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.next_job
 source: backend/app/db/repositories.py
-line: 626
+line: 914
 status: active
 tags: [database, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Get the next queued job by priority, honouring not_before.
 
 ## Location
 
-`backend/app/db/repositories.py:626`
+`backend/app/db/repositories.py:914`
 
 ## Signature
 

@@ -19,6 +19,7 @@ tags: [module, frontend]
 
 ## Imports
 
-- `react` â† useEffect, useState, useRef
-- `@tanstack/react-query` â† useQueryClient
+- `react` â† useEffect, useRef
+- `@tanstack/react-query` â† useQuery, useQueryClient, useMutation
 - `../../api/client` â† sseUrl
+- `../../api/emails` â† analysisStatus, analysisRetry

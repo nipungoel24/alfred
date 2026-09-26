@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_search_within_category_context
 source: backend/tests/test_eligibility.py
-line: 269
+line: 270
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_search_within_category_context` in `backend/t
 
 ## Location
 
-`backend/tests/test_eligibility.py:269`
+`backend/tests/test_eligibility.py:270`
 
 ## Signature
 

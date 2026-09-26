@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_category_ignored_in_all_scope
 source: backend/tests/test_allmail.py
-line: 100
+line: 101
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_category_ignored_in_all_scope` in `backend/te
 
 ## Location
 
-`backend/tests/test_allmail.py:100`
+`backend/tests/test_allmail.py:101`
 
 ## Signature
 

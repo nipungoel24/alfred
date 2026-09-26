@@ -24,7 +24,7 @@ React component declared in `frontend/src/features/deadlines/DeadlinesPage.tsx`.
 ## Signature
 
 ```ts
-export function DeadlinesPage()
+export function DeadlinesPage(
 ```
 
 ## React Query usage

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_gmail_mock
 qualified_name: backend.tests.test_gmail_mock.test_gmail_sync_initial
 source: backend/tests/test_gmail_mock.py
-line: 57
+line: 70
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_gmail_sync_initial` in `backend/tests/test_gm
 
 ## Location
 
-`backend/tests/test_gmail_mock.py:57`
+`backend/tests/test_gmail_mock.py:70`
 
 ## Signature
 

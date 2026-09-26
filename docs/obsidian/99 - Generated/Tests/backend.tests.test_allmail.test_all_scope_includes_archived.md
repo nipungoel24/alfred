@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_all_scope_includes_archived
 source: backend/tests/test_allmail.py
-line: 48
+line: 49
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_all_scope_includes_archived` in `backend/test
 
 ## Location
 
-`backend/tests/test_allmail.py:48`
+`backend/tests/test_allmail.py:49`
 
 ## Signature
 

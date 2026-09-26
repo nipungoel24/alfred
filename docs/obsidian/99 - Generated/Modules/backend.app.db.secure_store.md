@@ -19,12 +19,27 @@ tags: [module, backend]
 
 ## Imports
 
+- `annotations` ← `__future__.annotations`
 - `base64` ← `base64`
+- `binascii` ← `binascii`
+- `logging` ← `logging`
 - `sys` ← `sys`
+
+## Classes
+
+- [[backend.app.db.secure_store.SecureStoreUnavailable|SecureStoreUnavailable]]
 
 ## Functions
 
+- [[backend.app.db.secure_store._looks_like_dpapi|_looks_like_dpapi]]
 - [[backend.app.db.secure_store._win_decrypt|_win_decrypt]]
 - [[backend.app.db.secure_store._win_encrypt|_win_encrypt]]
 - [[backend.app.db.secure_store.decrypt_token|decrypt_token]]
 - [[backend.app.db.secure_store.encrypt_token|encrypt_token]]
+- [[backend.app.db.secure_store.is_available|is_available]]
+- [[backend.app.db.secure_store.status|status]]
+
+## Constants
+
+- `FORMAT_VERSION`
+- `_FORCE_UNAVAILABLE`

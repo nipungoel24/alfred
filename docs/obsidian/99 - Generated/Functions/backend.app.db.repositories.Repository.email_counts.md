@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.email_counts
 source: backend/app/db/repositories.py
-line: 247
+line: 285
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Scope + category counts derived from stored Gmail labels.
 
 ## Location
 
-`backend/app/db/repositories.py:247`
+`backend/app/db/repositories.py:285`
 
 ## Signature
 

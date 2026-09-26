@@ -15,14 +15,11 @@
     "@tauri-apps/api": "^2.11.1",
     "@tauri-apps/plugin-opener": "2.5.5",
     "@vitejs/plugin-react": "latest",
-    "class-variance-authority": "^0.7.1",
-    "clsx": "^2.1.1",
     "linkify-it": "5.0.2",
     "lucide-react": "^1.41.0",
     "react": "latest",
     "react-dom": "latest",
     "react-resizable-panels": "4.12.4",
-    "tailwind-merge": "^3.6.0",
     "typescript": "latest",
     "vite": "latest"
   },
@@ -36,8 +33,6 @@
     "@types/react-dom": "^19.2.4",
     "eslint": "latest",
     "jsdom": "latest",
-    "png-to-ico": "^3.0.2",
-    "sharp": "^0.35.4",
     "tailwindcss": "^4.3.3",
     "typescript-eslint": "^8.67.0",
     "vitest": "latest"

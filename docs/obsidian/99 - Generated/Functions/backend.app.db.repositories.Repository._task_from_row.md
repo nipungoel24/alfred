@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository._task_from_row
 source: backend/app/db/repositories.py
-line: 600
+line: 887
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_task_from_row` in `backend/app/db/repositories.py
 
 ## Location
 
-`backend/app/db/repositories.py:600`
+`backend/app/db/repositories.py:887`
 
 ## Signature
 

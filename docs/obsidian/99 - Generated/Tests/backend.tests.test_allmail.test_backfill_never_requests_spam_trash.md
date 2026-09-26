@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_backfill_never_requests_spam_trash
 source: backend/tests/test_allmail.py
-line: 303
+line: 304
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_backfill_never_requests_spam_trash` in `backe
 
 ## Location
 
-`backend/tests/test_allmail.py:303`
+`backend/tests/test_allmail.py:304`
 
 ## Signature
 

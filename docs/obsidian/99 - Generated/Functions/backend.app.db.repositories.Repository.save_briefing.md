@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.save_briefing
 source: backend/app/db/repositories.py
-line: 418
+line: 654
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `save_briefing` in `backend/app/db/repositories.py`
 
 ## Location
 
-`backend/app/db/repositories.py:418`
+`backend/app/db/repositories.py:654`
 
 ## Signature
 

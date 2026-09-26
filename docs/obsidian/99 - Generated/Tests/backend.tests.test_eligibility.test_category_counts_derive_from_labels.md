@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_category_counts_derive_from_labels
 source: backend/tests/test_eligibility.py
-line: 238
+line: 239
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_category_counts_derive_from_labels` in `backe
 
 ## Location
 
-`backend/tests/test_eligibility.py:238`
+`backend/tests/test_eligibility.py:239`
 
 ## Signature
 

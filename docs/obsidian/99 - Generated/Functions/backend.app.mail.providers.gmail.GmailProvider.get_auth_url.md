@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.get_auth_url
 source: backend/app/mail/providers/gmail.py
-line: 18
+line: 19
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `get_auth_url` in `backend/app/mail/providers/gmail
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:18`
+`backend/app/mail/providers/gmail.py:19`
 
 ## Signature
 

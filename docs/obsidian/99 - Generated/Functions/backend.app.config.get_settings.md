@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.config
 qualified_name: backend.app.config.get_settings
 source: backend/app/config.py
-line: 78
+line: 105
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `get_settings` in `backend/app/config.py`.
 
 ## Location
 
-`backend/app/config.py:78`
+`backend/app/config.py:105`
 
 ## Signature
 

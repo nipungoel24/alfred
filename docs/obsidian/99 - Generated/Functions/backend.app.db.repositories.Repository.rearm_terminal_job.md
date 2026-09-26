@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.rearm_terminal_job
 source: backend/app/db/repositories.py
-line: 665
+line: 953
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Re-arm a job row that finished or paused, when work remains.
 
 ## Location
 
-`backend/app/db/repositories.py:665`
+`backend/app/db/repositories.py:953`
 
 ## Signature
 

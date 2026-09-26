@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.tasks_by_email
 source: backend/app/db/repositories.py
-line: 575
+line: 841
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Get tasks linked to a specific email.
 
 ## Location
 
-`backend/app/db/repositories.py:575`
+`backend/app/db/repositories.py:841`
 
 ## Signature
 

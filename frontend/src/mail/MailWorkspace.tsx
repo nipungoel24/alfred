@@ -48,15 +48,53 @@ interface MailWorkspaceProps {
   syncReport: { id: string; ok: boolean; error?: string }[] | null;
   onDismissSyncReport: () => void;
   onRequestSync: (accountId?: string) => void;
+  /** Mail scope owned by the sidebar. Undefined keeps it local to the pane. */
+  scopeOverride?: MailScope;
+  /** Row filter owned by the sidebar. */
+  filterOverride?: RowFilter;
+  onScopeChange?: (scope: MailScope, filter: RowFilter) => void;
 }
 
-export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, openEmailId, onConsumeOpenEmail, syncState, syncReport, onDismissSyncReport, onRequestSync }: MailWorkspaceProps) {
+export function MailWorkspace({
+  searchQuery,
+  onClearSearch,
+  onSearchChange,
+  openEmailId,
+  onConsumeOpenEmail,
+  syncState,
+  syncReport,
+  onDismissSyncReport,
+  onRequestSync,
+  scopeOverride,
+  filterOverride,
+  onScopeChange,
+}: MailWorkspaceProps) {
   const queryClient = useQueryClient();
   const groupRef = useRef<GroupImperativeHandle>(null);
-  const [view, setView] = useState<MailScope>('inbox');
+  const [viewInternal, setViewInternal] = useState<MailScope>('inbox');
   const [kind, setKind] = useState<MailKind | null>(null);
   const [category, setCategory] = useState<MailCategory>('primary');
-  const [filter, setFilter] = useState<RowFilter>('all');
+  const [filterInternal, setFilterInternal] = useState<RowFilter>('all');
+
+  // The sidebar owns the mail scope and filter. MailWorkspace mirrors the
+  // props so the pane controls still work, and reports changes back up.
+  const view = scopeOverride ?? viewInternal;
+  const setView = useCallback(
+    (next: MailScope) => {
+      setViewInternal(next);
+      setFilterInternal('all');
+      onScopeChange?.(next, 'all');
+    },
+    [onScopeChange]
+  );
+  const filter = filterOverride ?? filterInternal;
+  const setFilter = useCallback(
+    (next: RowFilter) => {
+      setFilterInternal(next);
+      onScopeChange?.(view, next);
+    },
+    [onScopeChange, view]
+  );
   const [viewFilter, setViewFilter] = useState('');
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [intelVisible, setIntelVisible] = useState(true);
@@ -288,6 +326,8 @@ export function MailWorkspace({ searchQuery, onClearSearch, onSearchChange, open
         >
           <div className="mail-pane">
             <div className="mail-pane-head">
+          {/* The Mail view is the default view and previously had no h1 at all. */}
+          <h2 className="sr-only">Mail</h2>
               <div className="mail-pane-title">
                 <span className="title">{paneTitle}</span>
                 <span className="count">{paneCount} messages</span>

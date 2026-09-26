@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.delete_email
 source: backend/app/db/repositories.py
-line: 308
+line: 346
 status: active
 tags: [database, function]
 ---
@@ -17,11 +17,11 @@ tags: [database, function]
 
 ## Purpose
 
-Purpose inferred from usage: `delete_email` in `backend/app/db/repositories.py`.
+Delete an email and its FTS entry.
 
 ## Location
 
-`backend/app/db/repositories.py:308`
+`backend/app/db/repositories.py:346`
 
 ## Signature
 
@@ -33,6 +33,15 @@ Purpose inferred from usage: `delete_email` in `backend/app/db/repositories.py`.
 
 - `self`
 - `email_id` (`str`)
+
+## Calls
+
+- [[backend.app.db.database.fts_delete_supported|fts_delete_supported]] (calls)
+- `getLogger` (`logging.getLogger`, calls-inferred)
+
+## Reads
+
+- [[table_emails]]
 
 ## Writes
 

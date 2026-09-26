@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.retry_job_with_backoff
 source: backend/app/db/repositories.py
-line: 681
+line: 969
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Mark a job retryable_failed with a not_before backoff timestamp.
 
 ## Location
 
-`backend/app/db/repositories.py:681`
+`backend/app/db/repositories.py:969`
 
 ## Signature
 

@@ -31,6 +31,7 @@ SQLite table `emails` defined in the Alfred schema.
 - `mailbox_state`
 - `gmail_category`
 - `pipeline_eligibility`
+- `provider_message_id`
 
 ## Ownership
 

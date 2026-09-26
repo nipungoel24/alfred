@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.tasks_by_thread
 source: backend/app/db/repositories.py
-line: 568
+line: 827
 status: active
 tags: [database, function]
 ---
@@ -17,22 +17,23 @@ tags: [database, function]
 
 ## Purpose
 
-Get tasks linked to a specific thread.
+Get tasks linked to a specific thread, optionally account-scoped.
 
 ## Location
 
-`backend/app/db/repositories.py:568`
+`backend/app/db/repositories.py:827`
 
 ## Signature
 
 ```python
-(self, thread_id: str) -> list[Task]
+(self, thread_id: str, account_id: str | None = None) -> list[Task]
 ```
 
 ## Parameters
 
 - `self`
 - `thread_id` (`str`)
+- `account_id` (`str | None`)
 
 ## Returns
 
@@ -40,6 +41,7 @@ Get tasks linked to a specific thread.
 
 ## Reads
 
+- [[table_emails]]
 - [[table_tasks]]
 
 ## Side Effects

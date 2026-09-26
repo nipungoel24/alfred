@@ -1,6 +1,6 @@
 import { memo } from 'react';
 import { Archive, MessageSquareReply, Star, ArchiveRestore } from 'lucide-react';
-import type { Email, MailCategory } from '../api/emails';
+import type { MailFilter, Email, MailCategory } from '../api/emails';
 
 const CATEGORY_BADGE: Record<MailCategory, string> = {
   primary: 'Primary',
@@ -10,7 +10,7 @@ const CATEGORY_BADGE: Record<MailCategory, string> = {
   forums: 'Forum',
 };
 
-export type RowFilter = 'all' | 'important' | 'reply' | 'later';
+export type RowFilter = MailFilter;
 
 interface MessageRowProps {
   email: Email;

@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.record_inference_metric
 source: backend/app/db/repositories.py
-line: 760
+line: 1048
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `record_inference_metric` in `backend/app/db/reposi
 
 ## Location
 
-`backend/app/db/repositories.py:760`
+`backend/app/db/repositories.py:1048`
 
 ## Signature
 

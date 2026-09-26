@@ -20,6 +20,6 @@ tags: [module, frontend]
 ## Imports
 
 - `@tanstack/react-query` â† useQuery
-- `lucide-react` â† Cpu, Database, Palette, ShieldCheck
+- `lucide-react` â† Cpu, Database, Palette, ShieldCheck, Info
 - `../../theme/ThemeToggle` â† ThemeToggle
-- `../../api/emails` â† fetchHealth
+- `../../api/emails` â† fetchHealth, analysisStatus

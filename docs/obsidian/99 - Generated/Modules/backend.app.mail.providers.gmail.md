@@ -29,6 +29,8 @@ tags: [module, backend]
 - `content_fingerprint` ← `backend.app.mail.fingerprint.content_fingerprint`
 - `datetime` ← `datetime.datetime`
 - `httpx` ← `httpx`
+- `scoped_email_id` ← `backend.app.mail.identity.scoped_email_id`
+- `scoped_thread_id` ← `backend.app.mail.identity.scoped_thread_id`
 - `timedelta` ← `datetime.timedelta`
 - `timezone` ← `datetime.timezone`
 

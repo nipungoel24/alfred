@@ -17,12 +17,12 @@
         "height": 850,
         "minWidth": 900,
         "minHeight": 650,
-        "visible": false,
+        "visible": true,
         "center": true
       }
     ],
     "security": {
-      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:* http://localhost:5173 ipc: http://ipc.localhost; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self'; connect-src 'self' http://127.0.0.1:* ipc: http://ipc.localhost; img-src 'self' data:; font-src 'self' data:; style-src 'self' 'unsafe-inline'"
     }
   },
   "bundle": {

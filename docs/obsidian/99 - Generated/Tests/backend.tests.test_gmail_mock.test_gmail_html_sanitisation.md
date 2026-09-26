@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_gmail_mock
 qualified_name: backend.tests.test_gmail_mock.test_gmail_html_sanitisation
 source: backend/tests/test_gmail_mock.py
-line: 371
+line: 387
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_gmail_html_sanitisation` in `backend/tests/te
 
 ## Location
 
-`backend/tests/test_gmail_mock.py:371`
+`backend/tests/test_gmail_mock.py:387`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.new
 source: desktop/src-tauri/src/main.rs
-line: 62
+line: 251
 status: active
 tags: [backend, function]
 ---
@@ -21,17 +21,18 @@ Purpose inferred from usage: `new` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:62`
+`desktop/src-tauri/src/main.rs:251`
 
 ## Signature
 
 ```rust
-fn new(app: AppHandle) -> Self
+fn new(app: AppHandle, registry: Arc<ShutdownRegistry>) -> Self
 ```
 
 ## Parameters
 
 - `app` (`AppHandle`)
+- `registry` (`Arc<ShutdownRegistry>`)
 
 ## Returns
 

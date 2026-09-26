@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_email_api_excluded_mail_never_listed
 source: backend/tests/test_eligibility.py
-line: 425
+line: 426
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Spam/trash/archived produce zero briefing candidates and zero
 
 ## Location
 
-`backend/tests/test_eligibility.py:425`
+`backend/tests/test_eligibility.py:426`
 
 ## Signature
 

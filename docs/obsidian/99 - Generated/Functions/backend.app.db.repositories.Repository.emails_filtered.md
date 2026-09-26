@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.emails_filtered
 source: backend/app/db/repositories.py
-line: 192
+line: 212
 status: active
 tags: [database, function]
 ---
@@ -21,12 +21,12 @@ Fetch emails with typed filters, DB-side (no JS filtering).
 
 ## Location
 
-`backend/app/db/repositories.py:192`
+`backend/app/db/repositories.py:212`
 
 ## Signature
 
 ```python
-(self, account_id: str | None = None, category: str | None = None, mailbox_state: str | None = None, scope: str = 'inbox', kind: str | None = None, include_excluded: bool = False, query: str | None = None, limit: int = 200, offset: int = 0) -> list[Email]
+(self, account_id: str | None = None, category: str | None = None, mailbox_state: str | None = None, scope: str = 'inbox', kind: str | None = None, include_excluded: bool = False, query: str | None = None, priority: str | None = None, needs_reply: bool | None = None, limit: int = 200, offset: int = 0) -> list[Email]
 ```
 
 ## Parameters
@@ -39,6 +39,8 @@ Fetch emails with typed filters, DB-side (no JS filtering).
 - `kind` (`str | None`)
 - `include_excluded` (`bool`)
 - `query` (`str | None`)
+- `priority` (`str | None`)
+- `needs_reply` (`bool | None`)
 - `limit` (`int`)
 - `offset` (`int`)
 

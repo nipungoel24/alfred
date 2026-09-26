@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.analysis_status
 source: backend/app/main.py
-line: 832
+line: 915
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -17,7 +17,7 @@ tags: [backend, function, endpoint]
 
 ## Purpose
 
-Get current analysis queue status (jobs-table derived).
+AI state machine + analysis queue status (observer-facing).
 
 ## Route
 
@@ -25,7 +25,7 @@ Get current analysis queue status (jobs-table derived).
 
 ## Location
 
-`backend/app/main.py:832`
+`backend/app/main.py:915`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.requeue_job
 source: backend/app/db/repositories.py
-line: 650
+line: 938
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Re-arm a job for its next bounded run (resets attempts/errors).
 
 ## Location
 
-`backend/app/db/repositories.py:650`
+`backend/app/db/repositories.py:938`
 
 ## Signature
 

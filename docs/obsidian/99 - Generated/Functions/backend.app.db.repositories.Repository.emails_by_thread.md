@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.emails_by_thread
 source: backend/app/db/repositories.py
-line: 346
+line: 508
 status: active
 tags: [database, function]
 ---
@@ -21,18 +21,19 @@ Fetch emails in a thread, ordered chronologically.
 
 ## Location
 
-`backend/app/db/repositories.py:346`
+`backend/app/db/repositories.py:508`
 
 ## Signature
 
 ```python
-(self, thread_id: str) -> list[Email]
+(self, thread_id: str, account_id: str | None = None) -> list[Email]
 ```
 
 ## Parameters
 
 - `self`
 - `thread_id` (`str`)
+- `account_id` (`str | None`)
 
 ## Returns
 

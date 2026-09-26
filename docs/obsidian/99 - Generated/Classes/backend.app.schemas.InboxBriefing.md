@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.InboxBriefing
 source: backend/app/schemas.py
-line: 30
+line: 35
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `InboxBriefing` in `backend/app/schemas.py`.
 
 ## Location
 
-`backend/app/schemas.py:30`
+`backend/app/schemas.py:35`
 
 ## Bases
 

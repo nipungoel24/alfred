@@ -36,7 +36,25 @@ export default function App()
     refetchInterval: 30_000,
     retry: 0,
   }`
-- `mutate: (id: string) => syncAccount(id, false)`
+- `{
+    queryKey: ['emailCounts', 'all'],
+    queryFn: () => fetchEmailCounts(),
+    staleTime: 30_000,
+    retry: 0,
+  }`
+- `mutate: async (ids: string[]): Promise<SyncOutcome[]> => {
+      const settled = await Promise.allSettled(ids.map(id => syncAccount(id, false)));
+      return ids.map((id, i) => {
+        const result = settled[i];
+        if (result.status === 'fulfilled') return { id, ok: true };
+        const reason = result.reason;
+        return {
+          id,
+          ok: false,
+          error: reason instanceof Error ? reason.message : 'Sync failed',
+        };
+      });
+    }`
 
 ## Related
 

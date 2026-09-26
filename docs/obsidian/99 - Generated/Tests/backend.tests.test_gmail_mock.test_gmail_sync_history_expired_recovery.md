@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_gmail_mock
 qualified_name: backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery
 source: backend/tests/test_gmail_mock.py
-line: 239
+line: 255
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_gmail_sync_history_expired_recovery` in `back
 
 ## Location
 
-`backend/tests/test_gmail_mock.py:239`
+`backend/tests/test_gmail_mock.py:255`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.delete_account
 source: backend/app/db/repositories.py
-line: 470
+line: 706
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `delete_account` in `backend/app/db/repositories.py
 
 ## Location
 
-`backend/app/db/repositories.py:470`
+`backend/app/db/repositories.py:706`
 
 ## Signature
 

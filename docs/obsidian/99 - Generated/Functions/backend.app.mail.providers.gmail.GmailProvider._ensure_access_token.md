@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider._ensure_access_token
 source: backend/app/mail/providers/gmail.py
-line: 92
+line: 97
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Return a valid access token, refreshing via the refresh token when
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:92`
+`backend/app/mail/providers/gmail.py:97`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_gmail_mock
 qualified_name: backend.tests.test_gmail_mock.test_gmail_token_exchange
 source: backend/tests/test_gmail_mock.py
-line: 35
+line: 48
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_gmail_token_exchange` in `backend/tests/test_
 
 ## Location
 
-`backend/tests/test_gmail_mock.py:35`
+`backend/tests/test_gmail_mock.py:48`
 
 ## Signature
 

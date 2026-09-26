@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.active_tasks
 source: backend/app/db/repositories.py
-line: 548
+line: 805
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Current-attention task projection.
 
 ## Location
 
-`backend/app/db/repositories.py:548`
+`backend/app/db/repositories.py:805`
 
 ## Signature
 

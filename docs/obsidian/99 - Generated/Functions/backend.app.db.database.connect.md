@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.database
 qualified_name: backend.app.db.database.connect
 source: backend/app/db/database.py
-line: 128
+line: 295
 status: active
 tags: [database, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Create an optimized SQLite connection with WAL mode and indexes.
 
 ## Location
 
-`backend/app/db/database.py:128`
+`backend/app/db/database.py:295`
 
 ## Signature
 
@@ -45,6 +45,10 @@ Create an optimized SQLite connection with WAL mode and indexes.
 
 - [[backend.app.db.repositories.Repository.__init__|__init__]]
 
+## Writes
+
+- [[table_emails]]
+
 ## Side Effects
 
-- none statically observed
+- SQLite

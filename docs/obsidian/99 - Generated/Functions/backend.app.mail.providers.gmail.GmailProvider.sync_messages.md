@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.sync_messages
 source: backend/app/mail/providers/gmail.py
-line: 230
+line: 236
 status: active
 tags: [gmail, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `sync_messages` in `backend/app/mail/providers/gmai
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:230`
+`backend/app/mail/providers/gmail.py:236`
 
 ## Signature
 
@@ -43,13 +43,13 @@ Purpose inferred from usage: `sync_messages` in `backend/app/mail/providers/gmai
 
 ## Calls
 
-- [[backend.app.db.repositories.Repository.email|email]] (calls)
 - [[backend.app.db.repositories.Repository.email_exists|email_exists]] (calls)
 - [[backend.app.db.repositories.Repository.mark_email_excluded|mark_email_excluded]] (calls)
 - [[backend.app.db.repositories.Repository.save_account|save_account]] (calls)
 - [[backend.app.db.repositories.Repository.update_email_labels|update_email_labels]] (calls)
 - [[backend.app.db.repositories.Repository.upsert_email|upsert_email]] (calls)
 - [[backend.app.mail.fingerprint.content_fingerprint|content_fingerprint]] (calls)
+- [[backend.app.mail.identity.scoped_email_id|scoped_email_id]] (calls)
 - `now` (`datetime.datetime.now`, calls-inferred)
 - `AsyncClient` (`httpx.AsyncClient`, calls-inferred)
 

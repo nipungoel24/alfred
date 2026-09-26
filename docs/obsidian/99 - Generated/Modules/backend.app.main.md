@@ -20,6 +20,8 @@ tags: [module, backend]
 ## Imports
 
 - `AIService` ← `backend.app.ai.service.AIService`
+- `AIState` ← `backend.app.ai.supervisor.AIState`
+- `AISupervisor` ← `backend.app.ai.supervisor.AISupervisor`
 - `BRIEFING_SCHEMA_VERSION` ← `backend.app.mail.briefing_fingerprint.BRIEFING_SCHEMA_VERSION`
 - `BackfillState` ← `backend.app.mail.eligibility.BackfillState`
 - `CORSMiddleware` ← `fastapi.middleware.cors.CORSMiddleware`
@@ -44,8 +46,11 @@ tags: [module, backend]
 - `Query` ← `fastapi.Query`
 - `Repository` ← `backend.app.db.repositories.Repository`
 - `Request` ← `fastapi.Request`
+- `SearchFilters` ← `backend.app.schemas.SearchFilters`
+- `SecureStoreUnavailable` ← `backend.app.db.secure_store.SecureStoreUnavailable`
 - `StreamingResponse` ← `fastapi.responses.StreamingResponse`
 - `Task` ← `backend.app.schemas.Task`
+- `TaskPriorityPatch` ← `backend.app.schemas.TaskPriorityPatch`
 - `UploadFile` ← `fastapi.UploadFile`
 - `asynccontextmanager` ← `contextlib.asynccontextmanager`
 - `asyncio` ← `asyncio`
@@ -66,11 +71,15 @@ tags: [module, backend]
 - `logging` ← `logging`
 - `normalize_cursor` ← `backend.app.mail.backfill.normalize_cursor`
 - `normalized_email` ← `backend.app.mail.normalizer.normalized_email`
+- `provider_id_from_local` ← `backend.app.mail.identity.provider_message_id`
 - `rebuild_tasks_from_analyses` ← `backend.app.services.task_derivation.rebuild_tasks_from_analyses`
 - `record_failure` ← `backend.app.mail.backfill.record_failure`
 - `secrets` ← `secrets`
+- `secure_store_mod` ← `backend.app.db.secure_store`
+- `secure_store_status` ← `backend.app.db.secure_store.status`
 - `set_state` ← `backend.app.mail.backfill.set_state`
 - `status_payload` ← `backend.app.mail.backfill.status_payload`
+- `strip_scope_from_local` ← `backend.app.mail.identity.strip_scope`
 - `timedelta` ← `datetime.timedelta`
 - `timezone` ← `datetime.timezone`
 - `uuid` ← `uuid`
@@ -92,6 +101,7 @@ tags: [module, backend]
 - [[backend.app.main._startup_background|_startup_background]]
 - [[backend.app.main.analysis_progress|analysis_progress]]
 - [[backend.app.main.analysis_progress.event_stream|event_stream]]
+- [[backend.app.main.analysis_retry|analysis_retry]]
 - [[backend.app.main.analysis_status|analysis_status]]
 - [[backend.app.main.analyze|analyze]]
 - [[backend.app.main.analyze_all|analyze_all]]
@@ -102,6 +112,7 @@ tags: [module, backend]
 - [[backend.app.main.connect_gmail|connect_gmail]]
 - [[backend.app.main.delete_account|delete_account]]
 - [[backend.app.main.delete_task|delete_task]]
+- [[backend.app.main.dismiss_task|dismiss_task]]
 - [[backend.app.main.draft|draft]]
 - [[backend.app.main.generate_briefing|generate_briefing]]
 - [[backend.app.main.generate_pkce_pair|generate_pkce_pair]]
@@ -118,8 +129,10 @@ tags: [module, backend]
 - [[backend.app.main.ollama_model_missing_handler|ollama_model_missing_handler]]
 - [[backend.app.main.ollama_timeout_handler|ollama_timeout_handler]]
 - [[backend.app.main.ollama_unavailable_handler|ollama_unavailable_handler]]
+- [[backend.app.main.patch_task|patch_task]]
 - [[backend.app.main.pause_backfill|pause_backfill]]
 - [[backend.app.main.runtime_token_middleware|runtime_token_middleware]]
+- [[backend.app.main.search_emails_structured|search_emails_structured]]
 - [[backend.app.main.shutdown_backend|shutdown_backend]]
 - [[backend.app.main.sync_account|sync_account]]
 - [[backend.app.main.toggle_task|toggle_task]]

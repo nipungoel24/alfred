@@ -19,6 +19,8 @@ tags: [module, frontend]
 
 ## Imports
 
+- `react` â† useState
 - `@tanstack/react-query` â† useQuery
 - `../../api/emails` â† fetchBriefing
-- `lucide-react` â† Clock
+- `lucide-react` â† Clock, Mail
+- `../../mail/SourceEmailPreview` â† SourceEmailPreview

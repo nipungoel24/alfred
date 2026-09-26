@@ -21,6 +21,8 @@ tags: [module, frontend]
 
 - `@tanstack/react-query` â† useQuery, useMutation, useQueryClient
 - `@tanstack/react-virtual` â† useVirtualizer
-- `react` â† useRef, useState
-- `../../api/emails` â† fetchTasks, toggleTask, deleteTask
-- `lucide-react` â† Check, Trash2, CheckSquare
+- `react` â† useEffect, useRef, useState
+- `../../api/emails` â† fetchTasks, toggleTask, dismissTask, patchTaskPriority, TASK_PRIORITIES
+- `../../api/emails` â† TaskPriority
+- `lucide-react` â† Check, Trash2, CheckSquare, Mail, ChevronDown
+- `../../mail/SourceEmailPreview` â† SourceEmailPreview

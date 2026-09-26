@@ -448,11 +448,11 @@ describe('MailWorkspace', () => {
     fireEvent.click(screen.getByText('Q3 planning needed'));
     await waitFor(() => {
       expect(screen.getByRole('heading', { name: 'Q3 planning needed' })).toBeInTheDocument();
-      expect(screen.getByText('Alfred Intelligence')).toBeInTheDocument();
+      expect(screen.getByRole('complementary', { name: /alfred intelligence/i })).toBeInTheDocument();
     });
     expect(screen.getByText('Plan request')).toBeInTheDocument();
     expect(screen.getByText('Direct request')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: /Generate Draft/ })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Draft a reply/ })).toBeInTheDocument();
   });
 
   it('toggling Later persists across interactions', async () => {
@@ -491,11 +491,11 @@ describe('MailWorkspace', () => {
     // Select an email to show intelligence panel
     fireEvent.click(screen.getByText('Q3 planning needed'));
     await waitFor(() => {
-      expect(screen.getByText('Alfred Intelligence')).toBeInTheDocument();
+      expect(screen.getByRole('complementary', { name: /alfred intelligence/i })).toBeInTheDocument();
     });
 
     // Find and click the close button on the intelligence panel
-    const closeBtn = screen.getByRole('button', { name: 'Close intelligence panel' });
+    const closeBtn = screen.getByRole('button', { name: 'Close Alfred panel' });
     fireEvent.click(closeBtn);
 
     // Intelligence panel should be hidden (collapsed to 0 width)

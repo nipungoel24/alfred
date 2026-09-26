@@ -100,3 +100,157 @@ def test_build_identity_is_logged() -> None:
     main = _read(ROOT / "desktop/src-tauri/src/main.rs")
     assert "ALFRED_GIT_COMMIT" in build_rs
     assert "ALFRED_GIT_COMMIT" in main
+
+
+# ── Credential containment ─────────────────────────────────────────
+#
+# Alfred authenticates as a Google Desktop app client with PKCE, for which
+# Google's documentation lists client_secret as optional. A packaged build
+# must therefore never contain one. These checks are the static half of that
+# rule; tools/release/scan_release_secrets.py is the artifact half.
+
+
+def test_sidecar_builder_never_stages_a_client_secret() -> None:
+    builder = _read(ROOT / "backend/build_sidecar.py")
+    # The key may appear in FORBIDDEN_KEYS, but never in the embeddable list.
+    embeddable = builder.split("EMBEDDABLE_KEYS", 1)[1].split(")", 1)[0]
+    assert "GMAIL_CLIENT_SECRET" not in embeddable
+    assert "GMAIL_CLIENT_ID" in embeddable
+
+
+def test_sidecar_builder_refuses_to_build_with_a_client_secret() -> None:
+    builder = _read(ROOT / "backend/build_sidecar.py")
+    assert "FORBIDDEN_KEYS" in builder
+    assert "GMAIL_CLIENT_SECRET" in builder
+    # It must be a hard failure, not a warning that lets the build proceed.
+    assert "REFUSING" in builder
+
+
+def test_frozen_build_rejects_a_client_secret() -> None:
+    config = _read(ROOT / "backend/app/config.py")
+    assert "_reject_shipped_client_secret" in config
+    # The guard must raise rather than warn.
+    assert "raise RuntimeError" in config
+
+
+def test_release_secret_scanner_exists_and_covers_known_patterns() -> None:
+    scanner_path = ROOT / "tools/release/scan_release_secrets.py"
+    assert scanner_path.exists(), "release artifact secret scan must exist"
+    scanner = _read(scanner_path)
+    for pattern in ("GOCSPX-", "ya29", "AIza", "GMAIL_CLIENT_SECRET", "PRIVATE KEY"):
+        assert pattern in scanner, f"scanner must detect {pattern}"
+
+
+def test_staged_release_config_on_disk_has_no_secret() -> None:
+    """The files the builder stages must not hold a credential right now."""
+    offenders: list[str] = []
+    for relative in (
+        "build/sidecar-config/production.env",
+        "desktop/src-tauri/binaries/production.env",
+    ):
+        path = ROOT / relative
+        if not path.exists():
+            continue
+        for line in _read(path).splitlines():
+            if line.startswith("GMAIL_CLIENT_SECRET="):
+                offenders.append(relative)
+    assert offenders == [], f"client secret present in {offenders}"
+
+
+# ── Startup lifecycle ──────────────────────────────────────────────
+
+
+def test_main_window_is_created_visible() -> None:
+    """A hidden window with no reveal on the cold path means Alfred never
+    appears. The window must be visible at creation, and the reveal helper
+    must exist as the single authoritative path."""
+    config = _read(ROOT / "desktop/src-tauri/tauri.conf.json")
+    assert '"visible": true' in config, "main window must be created visible"
+    main = _read(ROOT / "desktop/src-tauri/src/main.rs")
+    assert "fn reveal_main_window" in main
+
+
+def test_reveal_is_not_confined_to_the_single_instance_callback() -> None:
+    main = _read(ROOT / "desktop/src-tauri/src/main.rs")
+    # The cold launch must reveal from setup and/or RunEvent::Ready, not only
+    # from the second-launch path.
+    assert "reveal_main_window(&handle)" in main
+    assert "tauri::RunEvent::Ready" in main
+
+
+def test_production_csp_has_no_development_origin() -> None:
+    """`devUrl` may name the Vite dev server; the shipped CSP may not.
+
+    Only the `csp` directive is checked. A blanket search for the dev origin
+    would flag the legitimate dev configuration.
+    """
+    config = _read(ROOT / "desktop/src-tauri/tauri.conf.json")
+    csp_line = next(
+        (line for line in config.splitlines() if '"csp"' in line),
+        None,
+    )
+    assert csp_line is not None, "tauri.conf.json must declare a CSP"
+    for origin in ("localhost:5173", "127.0.0.1:5173"):
+        assert origin not in csp_line, f"production CSP must not allow {origin}"
+
+
+def test_session_token_comes_from_the_os_csprng() -> None:
+    main = _read(ROOT / "desktop/src-tauri/src/main.rs")
+    assert "getrandom::getrandom" in main
+    # The old clock+PID derivation must be gone from the function body.
+    # Comments may still name it for historical reasons.
+    body = _strip_rust_comments(main).split("fn generate_token", 1)[1].split("\n}", 1)[0]
+    for banned in ("RandomState", "build_hasher", "SystemTime", "process::id"):
+        assert banned not in body, f"token must not be derived from {banned}"
+
+
+def test_readiness_is_protocol_based_not_a_substring_match() -> None:
+    main = _read(ROOT / "desktop/src-tauri/src/main.rs")
+    assert 'response.contains("200")' not in main
+    # It must parse the status line and require a JSON content type.
+    assert "content_type" in main
+    assert "application/json" in main
+
+
+def _strip_rust_comments(text: str) -> str:
+    """Remove `//` line comments so checks test code, not prose.
+
+    Alfred's source explains the defects it fixed in comments; a naive
+    substring search would then flag the explanation of the bug as the bug.
+    """
+    lines = []
+    for line in text.splitlines():
+        stripped = line.strip()
+        if stripped.startswith("//"):
+            continue
+        lines.append(line.split("//", 1)[0])
+    return "\n".join(lines)
+
+
+def test_exit_does_not_depend_on_winning_a_lock_race() -> None:
+    main = _read(ROOT / "desktop/src-tauri/src/main.rs")
+    assert "registry.terminate()" in main
+    # try_lock must not appear in executable code in the run loop.
+    run_loop = main.split("app.run(", 1)[1]
+    assert "try_lock" not in _strip_rust_comments(run_loop)
+
+
+def test_session_token_is_never_logged() -> None:
+    main = _read(ROOT / "desktop/src-tauri/src/main.rs")
+    # No log statement may interpolate the token variable.
+    for line in _strip_rust_comments(main).splitlines():
+        stripped = line.strip()
+        if stripped.startswith(("log::", "println!")) and "token" in stripped:
+            assert "redact" in stripped, f"token may reach the log: {stripped}"
+
+
+def test_credential_store_is_fail_closed() -> None:
+    store = _read(ROOT / "backend/app/db/secure_store.py")
+    assert "SecureStoreUnavailable" in store
+    # The reversible fallback must be gone from the write path.
+    encrypt_section = store.split("def encrypt_token", 1)[1].split("def decrypt_token", 1)[0]
+    assert "b64encode" not in encrypt_section
+    # ctypes.BYTE was removed in Python 3.12 and silently disabled DPAPI.
+    # Check the struct field, not the history note that mentions it.
+    assert "POINTER(ctypes.BYTE)" not in store
+    assert "POINTER(ctypes.c_ubyte)" in store

@@ -3,6 +3,13 @@ import { api } from './client';
 export type Priority = 'urgent' | 'high' | 'medium' | 'low';
 export type MailCategory = 'primary' | 'promotions' | 'social' | 'updates' | 'forums';
 export type MailScope = 'inbox' | 'all';
+/**
+ * Client-side row filter. This is a presentation concern layered over
+ * the scope, not a server-side query: the backend returns the scope and
+ * the pane narrows it. Kept here so the sidebar, the pane and the row
+ * all speak one type.
+ */
+export type MailFilter = 'all' | 'important' | 'reply' | 'later';
 export type MailKind = 'received' | 'sent' | 'archived';
 
 export const CATEGORY_ORDER: MailCategory[] = ['primary', 'promotions', 'social', 'updates', 'forums'];

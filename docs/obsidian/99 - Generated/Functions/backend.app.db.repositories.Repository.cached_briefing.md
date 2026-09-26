@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.cached_briefing
 source: backend/app/db/repositories.py
-line: 411
+line: 647
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `cached_briefing` in `backend/app/db/repositories.p
 
 ## Location
 
-`backend/app/db/repositories.py:411`
+`backend/app/db/repositories.py:647`
 
 ## Signature
 

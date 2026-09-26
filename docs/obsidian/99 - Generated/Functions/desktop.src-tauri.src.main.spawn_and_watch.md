@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.spawn_and_watch
 source: desktop/src-tauri/src/main.rs
-line: 75
+line: 400
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `spawn_and_watch` in `desktop/src-tauri/src/main.rs
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:75`
+`desktop/src-tauri/src/main.rs:400`
 
 ## Signature
 

@@ -15,7 +15,13 @@ from fastapi.responses import JSONResponse, HTMLResponse, StreamingResponse
 from fastapi.middleware.cors import CORSMiddleware
 from .config import get_settings
 from .db.repositories import Repository
-from .db.secure_store import encrypt_token, decrypt_token
+from .db import secure_store as secure_store_mod
+from .db.secure_store import (
+    SecureStoreUnavailable,
+    encrypt_token,
+    decrypt_token,
+    status as secure_store_status,
+)
 from .mail.normalizer import normalized_email
 from .mail.fingerprint import content_fingerprint
 from .mail.identity import (
@@ -563,7 +569,10 @@ async def runtime_token_middleware(request: Request, call_next):
         if not path.startswith('/api/') and path != '/health':
             return await call_next(request)
         provided = request.headers.get('x-alfred-token') or request.query_params.get('token')
-        if provided != token:
+        # Constant-time comparison. A plain `!=` short-circuits on the first
+        # differing byte, which leaks the length of the matching prefix to any
+        # local process willing to measure.
+        if not provided or not secrets.compare_digest(provided, token):
             return JSONResponse(status_code=401, content={
                 'error': {'code': 'UNAUTHORIZED', 'message': 'Missing or invalid session token.', 'details': {}}
             })
@@ -632,6 +641,9 @@ async def health():
     return {
         'status': 'ok' if db_ok else 'degraded',
         'database': 'ready' if db_ok else 'unavailable',
+        # The shell treats an unavailable credential store as FATAL_ERROR:
+        # Alfred will not hold a Google refresh token it cannot protect.
+        'credential_store': secure_store_status(),
         'ai': ai_supervisor.state,
         'build': settings.backend_build,
     }
@@ -720,6 +732,10 @@ async def gmail_callback(code: str | None = Query(None), state: str | None = Que
 
         account_id = f"gmail_{email_address}"
 
+        # Fail closed: if the credential cannot be protected, the connection
+        # is refused rather than stored in a reversible encoding. This is a
+        # separate stage so the user-facing page can say why.
+        stage = "secure_storage_unavailable"
         enc_access = encrypt_token(access_token)
         enc_refresh = encrypt_token(refresh_token)
         expires_at = (datetime.now(timezone.utc) + timedelta(seconds=expires_in)).isoformat()
@@ -758,8 +774,22 @@ async def sync_account(account_id: str, load_older: bool = Query(False)):
     if not creds:
         raise HTTPException(status_code=400, detail="OAuth credentials missing for this account")
 
-    access_token = decrypt_token(creds["encrypted_access_token"])
-    refresh_token = decrypt_token(creds["encrypted_refresh_token"])
+    # A credential that cannot be decrypted is a hard, explainable failure.
+    # Returning an empty token here would produce a confusing 401 from Google
+    # instead of telling the user their Windows profile changed.
+    try:
+        access_token = decrypt_token(creds["encrypted_access_token"])
+        refresh_token = decrypt_token(creds["encrypted_refresh_token"])
+    except SecureStoreUnavailable as exc:
+        logger.error("credentials_unreadable account=%s", account_id)
+        raise HTTPException(
+            status_code=503,
+            detail=(
+                "This account's saved sign-in could not be decrypted. Alfred "
+                "cannot read credentials protected by a different Windows user "
+                "profile. Disconnect the account and connect it again."
+            ),
+        ) from exc
 
     cred_payload = {
         "access_token": access_token,

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_all_scope_excludes_spam_trash_draft_only
 source: backend/tests/test_allmail.py
-line: 56
+line: 57
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_all_scope_excludes_spam_trash_draft_only` in 
 
 ## Location
 
-`backend/tests/test_allmail.py:56`
+`backend/tests/test_allmail.py:57`
 
 ## Signature
 

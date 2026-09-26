@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.upsert_email
 source: backend/app/db/repositories.py
-line: 35
+line: 40
 status: active
 tags: [database, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Insert or update a single email. Caller manages transaction.
 
 ## Location
 
-`backend/app/db/repositories.py:35`
+`backend/app/db/repositories.py:40`
 
 ## Signature
 

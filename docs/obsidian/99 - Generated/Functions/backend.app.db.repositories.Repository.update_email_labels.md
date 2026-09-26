@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.update_email_labels
 source: backend/app/db/repositories.py
-line: 128
+line: 148
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Recompute mailbox state / category / eligibility for a message.
 
 ## Location
 
-`backend/app/db/repositories.py:128`
+`backend/app/db/repositories.py:148`
 
 ## Signature
 

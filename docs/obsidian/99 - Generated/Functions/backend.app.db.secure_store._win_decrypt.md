@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.secure_store
 qualified_name: backend.app.db.secure_store._win_decrypt
 source: backend/app/db/secure_store.py
-line: 19
+line: 87
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_win_decrypt` in `backend/app/db/secure_store.py`.
 
 ## Location
 
-`backend/app/db/secure_store.py:19`
+`backend/app/db/secure_store.py:87`
 
 ## Signature
 

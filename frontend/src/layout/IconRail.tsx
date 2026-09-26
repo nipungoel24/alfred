@@ -1,104 +1,235 @@
-import { useState } from 'react';
+import { useCallback, useRef } from 'react';
 import {
-  LayoutDashboard, Mail, CheckSquare, Clock, UserCircle, Settings, Cpu,
+  Inbox,
+  Mail,
+  Star,
+  Reply,
+  LayoutDashboard,
+  CheckSquare,
+  CalendarClock,
+  UserCircle,
+  Settings as SettingsIcon,
+  Archive,
+  Cpu,
+  type LucideIcon,
 } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import type { MailFilter, MailScope } from '../api/emails';
 
-export type AppPage = 'overview' | 'mail' | 'tasks' | 'deadlines' | 'accounts' | 'settings';
+export type AppPage =
+  | 'overview'
+  | 'mail'
+  | 'tasks'
+  | 'deadlines'
+  | 'accounts'
+  | 'settings';
 
-// Approved Alfred brand asset (symbol-only mark). If the generated asset
-// has not been copied into frontend/public yet, the rail falls back to a
-// minimal violet block until the file exists.
-const BRAND_ICON_URL = '/alfred-icon.png';
+export type NavCounts = {
+  inbox?: number;
+  allMail?: number;
+};
 
-interface RailItem {
-  page: AppPage;
-  label: string;
-  icon: LucideIcon;
-}
-
-const PRIMARY: RailItem[] = [
-  { page: 'overview', label: 'Overview', icon: LayoutDashboard },
-  { page: 'mail', label: 'Mail', icon: Mail },
-  { page: 'tasks', label: 'Tasks', icon: CheckSquare },
-  { page: 'deadlines', label: 'Deadlines', icon: Clock },
-];
-
-const SECONDARY: RailItem[] = [
-  { page: 'accounts', label: 'Accounts', icon: UserCircle },
-  { page: 'settings', label: 'Settings', icon: Settings },
-];
-
-interface IconRailProps {
+export type IconRailProps = {
   page: AppPage;
   onNavigate: (page: AppPage) => void;
   aiReady: boolean;
   gmailConnected: boolean;
-}
+  accountEmail?: string;
+  /** Only counts the API actually returns. Undefined means "not available". */
+  counts?: NavCounts;
+  /** `${scope}:${filter}` of the active mail view, so the rail can mark it. */
+  activeMailView?: string;
+  onNavigateMail?: (scope: MailScope, filter: MailFilter) => void;
+};
 
-export function IconRail({ page, onNavigate, aiReady, gmailConnected }: IconRailProps) {
-  const [brandFailed, setBrandFailed] = useState(false);
+type NavItem = {
+  key: string;
+  label: string;
+  icon: LucideIcon;
+  /** A page destination, or a mail scope/filter pair. */
+  page?: AppPage;
+  mail?: { scope: MailScope; filter: MailFilter };
+  count?: number;
+};
+
+type NavSection = { title: string; items: NavItem[] };
+
+/**
+ * Primary navigation.
+ *
+ * Every capability the product already has appears here exactly once. The
+ * audit found six of the ten were previously reachable only from inside the
+ * mail pane, which meant they were invisible from every other page; the
+ * rail is now the single surface that owns them.
+ *
+ * The whole rail is one tab stop with arrow-key navigation and a roving
+ * tabindex, so it is reachable without tabbing through six stops.
+ */
+export function IconRail({
+  page,
+  onNavigate,
+  aiReady,
+  gmailConnected,
+  accountEmail,
+  counts,
+  activeMailView,
+  onNavigateMail,
+}: IconRailProps) {
+  const itemRefs = useRef(new Map<string, HTMLButtonElement>());
+
+  const sections: NavSection[] = [
+    {
+      title: 'Mail',
+      items: [
+        { key: 'inbox', label: 'Inbox', icon: Inbox, mail: { scope: 'inbox', filter: 'all' }, count: counts?.inbox },
+        { key: 'all', label: 'All Mail', icon: Mail, mail: { scope: 'all', filter: 'all' }, count: counts?.allMail },
+        { key: 'important', label: 'Important', icon: Star, mail: { scope: 'inbox', filter: 'important' } },
+        { key: 'reply', label: 'Needs Reply', icon: Reply, mail: { scope: 'inbox', filter: 'reply' } },
+        { key: 'later', label: 'Later', icon: Archive, mail: { scope: 'inbox', filter: 'later' } },
+      ],
+    },
+    {
+      title: 'Intelligence',
+      items: [
+        { key: 'overview', label: 'Overview', icon: LayoutDashboard, page: 'overview' },
+        { key: 'tasks', label: 'Tasks', icon: CheckSquare, page: 'tasks' },
+        { key: 'deadlines', label: 'Deadlines', icon: CalendarClock, page: 'deadlines' },
+      ],
+    },
+    {
+      title: 'System',
+      items: [
+        { key: 'accounts', label: 'Accounts', icon: UserCircle, page: 'accounts' },
+        { key: 'settings', label: 'Settings', icon: SettingsIcon, page: 'settings' },
+      ],
+    },
+  ];
+
+  const flat = sections.flatMap((s) => s.items);
+
+  const isActive = (item: NavItem): boolean => {
+    if (item.page) return page === item.page && !(item.page === 'overview' && activeMailView);
+    if (item.mail && activeMailView) {
+      return activeMailView === `${item.mail.scope}:${item.mail.filter}`;
+    }
+    return false;
+  };
+
+  // Exactly one item is always tabbable. If nothing is active (for example a
+  // search is narrowing the list), the first item becomes the entry point —
+  // otherwise the whole sidebar would be unreachable by keyboard.
+  const activeKey = flat.find(isActive)?.key ?? flat[0]?.key;
+
+  const activate = useCallback(
+    (item: NavItem) => {
+      if (item.page) onNavigate(item.page);
+      else if (item.mail) onNavigateMail?.(item.mail.scope, item.mail.filter);
+    },
+    [onNavigate, onNavigateMail],
+  );
+
+  const handleKeyDown = useCallback(
+    (event: React.KeyboardEvent<HTMLElement>) => {
+      const keys = ['ArrowDown', 'ArrowUp', 'Home', 'End'];
+      if (!keys.includes(event.key)) return;
+      event.preventDefault();
+
+      const currentIndex = flat.findIndex(
+        (i) => itemRefs.current.get(i.key) === document.activeElement,
+      );
+      let nextIndex: number;
+      if (event.key === 'Home') nextIndex = 0;
+      else if (event.key === 'End') nextIndex = flat.length - 1;
+      else if (event.key === 'ArrowDown') nextIndex = (currentIndex + 1 + flat.length) % flat.length;
+      else nextIndex = (currentIndex - 1 + flat.length) % flat.length;
+
+      const next = flat[nextIndex];
+      if (!next) return;
+      const node = itemRefs.current.get(next.key);
+      if (node) {
+        node.focus();
+        activate(next);
+      }
+    },
+    [flat, activate],
+  );
 
   return (
-    <aside className="icon-rail" aria-label="Primary navigation">
-      <div className="rail-brand" aria-hidden="true">
-        {!brandFailed && (
-          <img
-            src={BRAND_ICON_URL}
-            alt=""
-            className="rail-brand-icon"
-            onError={() => setBrandFailed(true)}
-          />
-        )}
-        {brandFailed && <span className="rail-brand-fallback">A</span>}
+    <aside className="icon-rail" aria-label="Primary">
+      <div className="rail-brand">
+        <img
+          className="rail-brand-icon"
+          src="/alfred-icon.png"
+          alt=""
+          onError={(e) => {
+            e.currentTarget.style.display = 'none';
+          }}
+        />
+        <span className="rail-brand-name">Alfred</span>
       </div>
-      <nav className="rail-nav" aria-label="Alfred sections">
-        {PRIMARY.map(item => (
-          <RailButton key={item.page} item={item} active={page === item.page} onClick={() => onNavigate(item.page)} />
+
+      <nav className="rail-nav" aria-label="Sections" onKeyDown={handleKeyDown}>
+        {sections.map((section) => (
+          <div className="rail-section" key={section.title}>
+            <h2 className="rail-section-title">{section.title}</h2>
+            <ul className="rail-section-list">
+              {section.items.map((item) => {
+                const active = isActive(item);
+                const Icon = item.icon;
+                return (
+                  <li key={item.key}>
+                    <button
+                      type="button"
+                      ref={(node) => {
+                        if (node) itemRefs.current.set(item.key, node);
+                        else itemRefs.current.delete(item.key);
+                      }}
+                      className="rail-item"
+                      data-active={active || undefined}
+                      aria-current={active ? 'page' : undefined}
+                      tabIndex={item.key === activeKey ? 0 : -1}
+                      onClick={() => activate(item)}
+                    >
+                      <Icon size={16} strokeWidth={1.75} aria-hidden="true" />
+                      <span className="rail-item-label">{item.label}</span>
+                      {typeof item.count === 'number' && (
+                        <span className="rail-item-count">{item.count}</span>
+                      )}
+                    </button>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
         ))}
       </nav>
-      <div className="rail-spacer" />
-      <nav className="rail-nav" aria-label="System sections">
-        {SECONDARY.map(item => (
-          <RailButton key={item.page} item={item} active={page === item.page} onClick={() => onNavigate(item.page)} />
-        ))}
-      </nav>
-      <div className="rail-status" role="group" aria-label="Connection status">
-        <span
-          className={`rail-status-item ${aiReady ? 'ok' : 'down'}`}
-          data-label={aiReady ? 'Alfred AI ready' : 'Alfred AI offline'}
-          title={aiReady ? 'Local AI · qwen3:4b' : 'Local AI unavailable'}
-          role="img"
-          aria-label={aiReady ? 'Alfred AI ready' : 'Alfred AI offline'}
-        >
-          <Cpu size={16} strokeWidth={1.75} aria-hidden="true" />
-        </span>
-        <span
-          className={`rail-status-item ${gmailConnected ? 'ok' : 'down'}`}
-          data-label={gmailConnected ? 'Gmail connected' : 'Gmail disconnected'}
-          title={gmailConnected ? 'Gmail connected' : 'Gmail disconnected'}
-          role="img"
-          aria-label={gmailConnected ? 'Gmail connected' : 'Gmail disconnected'}
-        >
-          <Mail size={16} strokeWidth={1.75} aria-hidden="true" />
-        </span>
+
+      <div className="rail-footer">
+        {accountEmail && (
+          <div className="rail-account" title={accountEmail}>
+            <span className="rail-account-avatar" aria-hidden="true">
+              {accountEmail[0]?.toUpperCase()}
+            </span>
+            <span className="rail-account-email">{accountEmail}</span>
+          </div>
+        )}
+
+        {/* Status is icon + label, never a bare coloured dot. Teal sits close
+            to success-green in hue, so colour alone cannot carry this. */}
+        <ul className="rail-status" aria-label="Service status">
+          <li className="rail-status-item" data-ok={aiReady}>
+            <Cpu size={14} strokeWidth={1.75} aria-hidden="true" />
+            <span className="rail-status-label">
+              {aiReady ? 'Local AI ready' : 'Local AI offline'}
+            </span>
+          </li>
+          <li className="rail-status-item" data-ok={gmailConnected}>
+            <Mail size={14} strokeWidth={1.75} aria-hidden="true" />
+            <span className="rail-status-label">
+              {gmailConnected ? 'Gmail connected' : 'Gmail not connected'}
+            </span>
+          </li>
+        </ul>
       </div>
     </aside>
-  );
-}
-
-function RailButton({ item, active, onClick }: { item: RailItem; active: boolean; onClick: () => void }) {
-  const Icon = item.icon;
-  return (
-    <button
-      type="button"
-      className={`rail-item ${active ? 'active' : ''}`}
-      data-label={item.label}
-      aria-label={item.label}
-      aria-current={active ? 'page' : undefined}
-      onClick={onClick}
-    >
-      <Icon size={18} strokeWidth={2} aria-hidden="true" />
-    </button>
   );
 }

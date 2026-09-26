@@ -41,6 +41,11 @@ Normalize action text for deduplication.
 
 - `sub` (`re.sub`, calls-inferred)
 
+## Called By
+
+- [[backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task|test_rebuild_after_thread_migration_keeps_single_task]]
+- [[backend.tests.test_thread_isolation.test_task_fingerprint_dual_form_dedupe|test_task_fingerprint_dual_form_dedupe]]
+
 ## Side Effects
 
 - none statically observed

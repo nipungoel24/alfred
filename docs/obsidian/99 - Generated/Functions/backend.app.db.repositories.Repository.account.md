@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.account
 source: backend/app/db/repositories.py
-line: 459
+line: 695
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `account` in `backend/app/db/repositories.py`.
 
 ## Location
 
-`backend/app/db/repositories.py:459`
+`backend/app/db/repositories.py:695`
 
 ## Signature
 

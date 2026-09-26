@@ -58,7 +58,31 @@ def _load_environment():
         _load_dotenv_file(env_path)
 
 
+def _reject_shipped_client_secret() -> None:
+    """A frozen Alfred must not be carrying a Google OAuth client secret.
+
+    Alfred authenticates as a Google **Desktop app** client using PKCE, for
+    which Google's documentation lists ``client_secret`` as optional. A
+    packaged build therefore has no legitimate use for one, and shipping it
+    would distribute a credential to every user for no benefit.
+
+    Failing loudly here means a mis-built artifact is caught at first launch
+    rather than discovered later by a user.
+    """
+    if not getattr(sys, "frozen", False):
+        return
+    secret = os.getenv("GMAIL_CLIENT_SECRET", "").strip()
+    if secret:
+        raise RuntimeError(
+            "This packaged build contains GMAIL_CLIENT_SECRET. Alfred uses a "
+            "Google Desktop app client with PKCE and must not ship a client "
+            "secret. Remove it from the build environment and rebuild with "
+            "backend/build_sidecar.py. See docs/decisions/ADR-010."
+        )
+
+
 _load_environment()
+_reject_shipped_client_secret()
 
 
 class Settings(BaseModel):

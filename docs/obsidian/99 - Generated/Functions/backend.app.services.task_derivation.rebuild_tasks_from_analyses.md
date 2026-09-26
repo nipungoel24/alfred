@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_derivation
 qualified_name: backend.app.services.task_derivation.rebuild_tasks_from_analyses
 source: backend/app/services/task_derivation.py
-line: 201
+line: 223
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Rebuild all derived tasks from cached analyses using the current derivation logi
 
 ## Location
 
-`backend/app/services/task_derivation.py:201`
+`backend/app/services/task_derivation.py:223`
 
 ## Signature
 
@@ -44,6 +44,8 @@ Rebuild all derived tasks from cached analyses using the current derivation logi
 ## Called By
 
 - [[backend.app.main._startup_background|_startup_background]]
+- [[backend.tests.test_task_user_corrections.test_derivation_never_overwrites_user_priority|test_derivation_never_overwrites_user_priority]]
+- [[backend.tests.test_task_user_corrections.test_dismiss_hides_and_suppresses_rederivation|test_dismiss_hides_and_suppresses_rederivation]]
 
 ## Reads
 

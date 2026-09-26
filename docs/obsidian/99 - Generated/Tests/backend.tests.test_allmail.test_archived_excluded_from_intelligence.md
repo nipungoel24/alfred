@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_archived_excluded_from_intelligence
 source: backend/tests/test_allmail.py
-line: 148
+line: 149
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_archived_excluded_from_intelligence` in `back
 
 ## Location
 
-`backend/tests/test_allmail.py:148`
+`backend/tests/test_allmail.py:149`
 
 ## Signature
 

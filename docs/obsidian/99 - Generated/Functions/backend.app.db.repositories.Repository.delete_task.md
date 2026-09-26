@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.delete_task
 source: backend/app/db/repositories.py
-line: 591
+line: 857
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `delete_task` in `backend/app/db/repositories.py`.
 
 ## Location
 
-`backend/app/db/repositories.py:591`
+`backend/app/db/repositories.py:857`
 
 ## Signature
 

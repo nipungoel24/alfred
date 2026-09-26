@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.__init__
 source: backend/app/db/repositories.py
-line: 22
+line: 27
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/app/db/repositories.py`.
 
 ## Location
 
-`backend/app/db/repositories.py:22`
+`backend/app/db/repositories.py:27`
 
 ## Signature
 

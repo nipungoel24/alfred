@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.upsert_emails_batch
 source: backend/app/db/repositories.py
-line: 67
+line: 80
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Batch insert/update emails in a single transaction.
 
 ## Location
 
-`backend/app/db/repositories.py:67`
+`backend/app/db/repositories.py:80`
 
 ## Signature
 

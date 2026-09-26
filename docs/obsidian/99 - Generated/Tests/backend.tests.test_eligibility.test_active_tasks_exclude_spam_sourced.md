@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_active_tasks_exclude_spam_sourced
 source: backend/tests/test_eligibility.py
-line: 290
+line: 291
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_active_tasks_exclude_spam_sourced` in `backen
 
 ## Location
 
-`backend/tests/test_eligibility.py:290`
+`backend/tests/test_eligibility.py:291`
 
 ## Signature
 

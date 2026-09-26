@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_history_spam_arrival_is_never_cached
 source: backend/tests/test_eligibility.py
-line: 389
+line: 390
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_history_spam_arrival_is_never_cached` in `bac
 
 ## Location
 
-`backend/tests/test_eligibility.py:389`
+`backend/tests/test_eligibility.py:390`
 
 ## Signature
 

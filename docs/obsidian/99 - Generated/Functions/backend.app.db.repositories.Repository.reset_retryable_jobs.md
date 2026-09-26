@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.reset_retryable_jobs
 source: backend/app/db/repositories.py
-line: 739
+line: 1027
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Reset retryable_failed jobs back to queued if under max_attempts.
 
 ## Location
 
-`backend/app/db/repositories.py:739`
+`backend/app/db/repositories.py:1027`
 
 ## Signature
 

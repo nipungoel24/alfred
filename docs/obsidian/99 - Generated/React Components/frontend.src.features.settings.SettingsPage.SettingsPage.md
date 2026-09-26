@@ -30,6 +30,7 @@ export function SettingsPage()
 ## React Query usage
 
 - `{ queryKey: ['health'], queryFn: fetchHealth, retry: 0 }`
+- `{ queryKey: ['analysisStatus'], queryFn: analysisStatus, retry: 0 }`
 
 ## Related
 

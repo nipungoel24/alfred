@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail._base64
 source: backend/tests/test_allmail.py
-line: 183
+line: 184
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_base64` in `backend/tests/test_allmail.py`.
 
 ## Location
 
-`backend/tests/test_allmail.py:183`
+`backend/tests/test_allmail.py:184`
 
 ## Signature
 

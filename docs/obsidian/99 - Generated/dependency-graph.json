@@ -26,6 +26,11 @@
       "source": null
     },
     {
+      "id": "asyncio.Lock",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "asyncio.Queue",
       "type": "external",
       "source": null
@@ -156,6 +161,86 @@
       "source": "backend/app/ai/service.py"
     },
     {
+      "id": "backend.app.ai.supervisor.AIState",
+      "type": "class",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor",
+      "type": "class",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.__init__",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor._set_state",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor._smoke_test",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor._tags",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor._try_auto_start",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.next_backoff_seconds",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.on_analysis_failure",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.payload",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.queue_paused",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.refresh",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.reset_backoff",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.subscribe",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.wait_and_recheck",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.find_ollama_executable",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
       "id": "backend.app.config.Settings",
       "type": "class",
       "source": "backend/app/config.py"
@@ -176,9 +261,19 @@
       "source": "backend/app/config.py"
     },
     {
+      "id": "backend.app.config._reject_shipped_client_secret",
+      "type": "function",
+      "source": "backend/app/config.py"
+    },
+    {
       "id": "backend.app.config.get_settings",
       "type": "function",
       "source": "backend/app/config.py"
+    },
+    {
+      "id": "backend.app.db.database.MigrationSafetyError",
+      "type": "class",
+      "source": "backend/app/db/database.py"
     },
     {
       "id": "backend.app.db.database._migrate",
@@ -186,7 +281,37 @@
       "source": "backend/app/db/database.py"
     },
     {
+      "id": "backend.app.db.database._sqlite_backup",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
       "id": "backend.app.db.database.connect",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
+      "id": "backend.app.db.database.ensure_fts_schema",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
+      "id": "backend.app.db.database.fts_delete_supported",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
+      "id": "backend.app.db.database.fts_table_uses_contentless_delete",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
+      "id": "backend.app.db.database.repopulate_fts_index",
+      "type": "function",
+      "source": "backend/app/db/database.py"
+    },
+    {
+      "id": "backend.app.db.database.snapshot_database",
       "type": "function",
       "source": "backend/app/db/database.py"
     },
@@ -202,6 +327,11 @@
     },
     {
       "id": "backend.app.db.repositories.Repository.__init__",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository._like_search",
       "type": "function",
       "source": "backend/app/db/repositories.py"
     },
@@ -287,6 +417,11 @@
     },
     {
       "id": "backend.app.db.repositories.Repository.delete_tasks_by_derivation_version",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.dismiss_task",
       "type": "function",
       "source": "backend/app/db/repositories.py"
     },
@@ -391,7 +526,17 @@
       "source": "backend/app/db/repositories.py"
     },
     {
+      "id": "backend.app.db.repositories.Repository.provider_message_id_for",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
       "id": "backend.app.db.repositories.Repository.rearm_terminal_job",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.rebuild_fts",
       "type": "function",
       "source": "backend/app/db/repositories.py"
     },
@@ -451,6 +596,16 @@
       "source": "backend/app/db/repositories.py"
     },
     {
+      "id": "backend.app.db.repositories.Repository.search_emails_structured",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.set_task_priority",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
       "id": "backend.app.db.repositories.Repository.task",
       "type": "function",
       "source": "backend/app/db/repositories.py"
@@ -462,6 +617,11 @@
     },
     {
       "id": "backend.app.db.repositories.Repository.tasks",
+      "type": "function",
+      "source": "backend/app/db/repositories.py"
+    },
+    {
+      "id": "backend.app.db.repositories.Repository.tasks_all",
       "type": "function",
       "source": "backend/app/db/repositories.py"
     },
@@ -501,6 +661,21 @@
       "source": "backend/app/db/repositories.py"
     },
     {
+      "id": "backend.app.db.search_query.compile_fts_match",
+      "type": "function",
+      "source": "backend/app/db/search_query.py"
+    },
+    {
+      "id": "backend.app.db.secure_store.SecureStoreUnavailable",
+      "type": "class",
+      "source": "backend/app/db/secure_store.py"
+    },
+    {
+      "id": "backend.app.db.secure_store._looks_like_dpapi",
+      "type": "function",
+      "source": "backend/app/db/secure_store.py"
+    },
+    {
       "id": "backend.app.db.secure_store._win_decrypt",
       "type": "function",
       "source": "backend/app/db/secure_store.py"
@@ -517,6 +692,16 @@
     },
     {
       "id": "backend.app.db.secure_store.encrypt_token",
+      "type": "function",
+      "source": "backend/app/db/secure_store.py"
+    },
+    {
+      "id": "backend.app.db.secure_store.is_available",
+      "type": "function",
+      "source": "backend/app/db/secure_store.py"
+    },
+    {
+      "id": "backend.app.db.secure_store.status",
       "type": "function",
       "source": "backend/app/db/secure_store.py"
     },
@@ -664,6 +849,41 @@
       "id": "backend.app.mail.fingerprint.content_fingerprint",
       "type": "function",
       "source": "backend/app/mail/fingerprint.py"
+    },
+    {
+      "id": "backend.app.mail.identity.is_scoped_for",
+      "type": "function",
+      "source": "backend/app/mail/identity.py"
+    },
+    {
+      "id": "backend.app.mail.identity.parse_email_id",
+      "type": "function",
+      "source": "backend/app/mail/identity.py"
+    },
+    {
+      "id": "backend.app.mail.identity.parse_thread_id",
+      "type": "function",
+      "source": "backend/app/mail/identity.py"
+    },
+    {
+      "id": "backend.app.mail.identity.provider_message_id",
+      "type": "function",
+      "source": "backend/app/mail/identity.py"
+    },
+    {
+      "id": "backend.app.mail.identity.scoped_email_id",
+      "type": "function",
+      "source": "backend/app/mail/identity.py"
+    },
+    {
+      "id": "backend.app.mail.identity.scoped_thread_id",
+      "type": "function",
+      "source": "backend/app/mail/identity.py"
+    },
+    {
+      "id": "backend.app.mail.identity.strip_scope",
+      "type": "function",
+      "source": "backend/app/mail/identity.py"
     },
     {
       "id": "backend.app.mail.normalizer.normalize_text",
@@ -856,6 +1076,11 @@
       "source": "backend/app/main.py"
     },
     {
+      "id": "backend.app.main.analysis_retry",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
       "id": "backend.app.main.analysis_status",
       "type": "function",
       "source": "backend/app/main.py"
@@ -902,6 +1127,11 @@
     },
     {
       "id": "backend.app.main.delete_task",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.dismiss_task",
       "type": "function",
       "source": "backend/app/main.py"
     },
@@ -986,12 +1216,22 @@
       "source": "backend/app/main.py"
     },
     {
+      "id": "backend.app.main.patch_task",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
       "id": "backend.app.main.pause_backfill",
       "type": "function",
       "source": "backend/app/main.py"
     },
     {
       "id": "backend.app.main.runtime_token_middleware",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.search_emails_structured",
       "type": "function",
       "source": "backend/app/main.py"
     },
@@ -1086,7 +1326,22 @@
       "source": "backend/app/schemas.py"
     },
     {
+      "id": "backend.app.schemas.SearchFilters",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.SearchFilters._resolve_mailbox_state",
+      "type": "function",
+      "source": "backend/app/schemas.py"
+    },
+    {
       "id": "backend.app.schemas.Task",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.TaskPriorityPatch",
       "type": "class",
       "source": "backend/app/schemas.py"
     },
@@ -1107,6 +1362,11 @@
     },
     {
       "id": "backend.app.services.task_derivation._normalize_action",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation.candidate_fingerprints",
       "type": "function",
       "source": "backend/app/services/task_derivation.py"
     },
@@ -1139,6 +1399,86 @@
       "id": "backend.app.services.task_migration.TaskMigrationService.run_migration",
       "type": "function",
       "source": "backend/app/services/task_migration.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.FakeClient",
+      "type": "class",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.FakeClient.__init__",
+      "type": "function",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.FakeClient.generate",
+      "type": "function",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.FakeClient.health",
+      "type": "function",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor._noop_auto_start",
+      "type": "function",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.make_supervisor",
+      "type": "function",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.run",
+      "type": "function",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_backoff_is_bounded",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_failure_classification",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_find_ollama_executable_returns_none_when_absent",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_model_missing_state",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_ollama_not_running_state",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_ready_requires_smoke_test",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_recovery_flow_resumes_queue",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_smoke_prompt_never_contains_user_data",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_ai_supervisor.test_state_change_callbacks",
+      "type": "test",
+      "source": "backend/tests/test_ai_supervisor.py"
     },
     {
       "id": "backend.tests.test_allmail._account",
@@ -1676,6 +2016,126 @@
       "source": "backend/tests/test_extended.py"
     },
     {
+      "id": "backend.tests.test_fts5.make_email",
+      "type": "function",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_body_truncation",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_case_insensitive",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_delete_cleans_index",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_empty_body",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_fallback_to_like",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_insert_and_search",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_insert_new_does_not_duplicate",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_multiple_delete",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_multiple_emails",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_rebuild_removes_orphans",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_search_no_match",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_special_characters",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_update_without_manual_repair",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts5.test_fts_upsert_idempotent",
+      "type": "test",
+      "source": "backend/tests/test_fts5.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.make_email",
+      "type": "function",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.test_capability_probe_is_isolated",
+      "type": "test",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.test_compile_empty",
+      "type": "test",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.test_compile_plain_words",
+      "type": "test",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.test_compile_special_characters_stay_literal",
+      "type": "test",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.test_existing_schema_detection",
+      "type": "test",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.test_legacy_fts_schema_upgrades_through_connect",
+      "type": "test",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.test_old_sqlite_fallback_path",
+      "type": "test",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
+      "id": "backend.tests.test_fts_upgrade.test_special_characters_search_literally",
+      "type": "test",
+      "source": "backend/tests/test_fts_upgrade.py"
+    },
+    {
       "id": "backend.tests.test_gmail_mock.base64_encode_string",
       "type": "function",
       "source": "backend/tests/test_gmail_mock.py"
@@ -1697,6 +2157,11 @@
     },
     {
       "id": "backend.tests.test_gmail_mock.test_gmail_oauth_url_generation",
+      "type": "test",
+      "source": "backend/tests/test_gmail_mock.py"
+    },
+    {
+      "id": "backend.tests.test_gmail_mock.test_gmail_oauth_url_offers_account_chooser",
       "type": "test",
       "source": "backend/tests/test_gmail_mock.py"
     },
@@ -1731,6 +2196,146 @@
       "source": "backend/tests/test_golden_corpus.py"
     },
     {
+      "id": "backend.tests.test_identity_migration._legacy_payload",
+      "type": "function",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_backup_failure_aborts_migration",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_backup_is_readable_snapshot",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_identity_double_prefix_never_scopes_twice",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_identity_legacy_raw_id_not_scoped",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_identity_round_trip",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_identity_underscore_email",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_migration_is_idempotent",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_migration_rekeys_legacy_database",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_non_hex_scoped_identities_never_double_prefix",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_null_provider_rows_exempt_from_uniqueness",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_identity_migration.test_provider_uniqueness_enforced",
+      "type": "test",
+      "source": "backend/tests/test_identity_migration.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.make_analysis",
+      "type": "function",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.make_email",
+      "type": "function",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_account_credentials_isolation",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_account_id_stored_correctly",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_account_prefixed_email_ids",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_account_specific_counts",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_delete_email_by_account",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_emails_missing_labels_by_account",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_label_update_by_account",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_same_provider_message_id_collision",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_same_provider_message_id_collision.gmail_detail",
+      "type": "function",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_multi_account.test_search_respects_account_isolation",
+      "type": "test",
+      "source": "backend/tests/test_multi_account.py"
+    },
+    {
+      "id": "backend.tests.test_oauth_two_accounts._complete_callback",
+      "type": "function",
+      "source": "backend/tests/test_oauth_two_accounts.py"
+    },
+    {
+      "id": "backend.tests.test_oauth_two_accounts.isolated_app",
+      "type": "function",
+      "source": "backend/tests/test_oauth_two_accounts.py"
+    },
+    {
+      "id": "backend.tests.test_oauth_two_accounts.test_reconnect_same_account_is_idempotent",
+      "type": "test",
+      "source": "backend/tests/test_oauth_two_accounts.py"
+    },
+    {
+      "id": "backend.tests.test_oauth_two_accounts.test_second_google_identity_creates_separate_row",
+      "type": "test",
+      "source": "backend/tests/test_oauth_two_accounts.py"
+    },
+    {
       "id": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
       "type": "test",
       "source": "backend/tests/test_ollama_mock.py"
@@ -1749,6 +2354,206 @@
       "id": "backend.tests.test_ollama_mock.test_ollama_client_sends_correct_payload",
       "type": "test",
       "source": "backend/tests/test_ollama_mock.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestFailClosed",
+      "type": "class",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestFailClosed.test_a_corrupt_versioned_blob_raises",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestFailClosed.test_a_dpapi_decrypt_failure_raises_rather_than_returning_empty",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestFailClosed.test_a_dpapi_encrypt_failure_raises_rather_than_downgrading",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestFailClosed.test_a_dpapi_encrypt_failure_raises_rather_than_downgrading.boom",
+      "type": "function",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestFailClosed.test_encrypt_raises_when_the_store_is_unavailable",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestFailClosed.test_no_credential_is_returned_when_storage_fails",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestFailClosed.test_status_reports_unavailable_when_dpapi_is_missing",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestHealthReporting",
+      "type": "class",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestHealthReporting.test_health_reports_a_single_known_state",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestLegacyMigration",
+      "type": "class",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestLegacyMigration.test_a_legacy_value_can_be_re_encrypted",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestLegacyMigration.test_a_versioned_blob_is_not_treated_as_legacy",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestLegacyMigration.test_legacy_base64_value_is_still_readable",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestLegacyMigration.test_legacy_value_is_flagged_as_a_security_event",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestLegacyMigration.test_unreadable_legacy_value_raises",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed",
+      "type": "class",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_availability_probe_succeeds_on_windows",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_ciphertext_does_not_contain_the_plaintext",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_empty_secret_round_trips_to_empty",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_round_trip_returns_the_original_secret",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_stored_blob_carries_the_format_version",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_stored_blob_is_not_reversible_base64",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_two_encryptions_of_the_same_value_differ",
+      "type": "test",
+      "source": "backend/tests/test_secure_store.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search._seed_search_mail",
+      "type": "function",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.isolated_app",
+      "type": "function",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.make_email",
+      "type": "function",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_account_scoped_structured_search",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_filter_before_limit",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_global_free_text_finds_body_only_word",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_in_scope_mapping",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_in_scope_mapping.search",
+      "type": "function",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_in_scope_unknown_rejected",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_structured_search_by_date",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_structured_search_by_sender",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_structured_search_by_subject",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_structured_search_combined_filters",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_structured_search_limit",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_structured_search_no_results",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
+    },
+    {
+      "id": "backend.tests.test_structured_search.test_structured_search_with_free_text",
+      "type": "test",
+      "source": "backend/tests/test_structured_search.py"
     },
     {
       "id": "backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines",
@@ -1806,12 +2611,152 @@
       "source": "backend/tests/test_task_migration.py"
     },
     {
+      "id": "backend.tests.test_task_user_corrections._seed_derived",
+      "type": "function",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.isolated_app",
+      "type": "function",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_derivation_never_overwrites_user_priority",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_dismiss_hides_and_suppresses_rederivation",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_dismiss_unknown_task_404",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_dismissal_survives_reopen",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_migration_service_never_revives_dismissed",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_migration_service_respects_override",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_priority_patch_persists",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_priority_patch_rejects_invalid",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_task_user_corrections.test_priority_patch_unknown_task_404",
+      "type": "test",
+      "source": "backend/tests/test_task_user_corrections.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.gmail_detail",
+      "type": "function",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.isolated_app",
+      "type": "function",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.provider",
+      "type": "function",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_draft_endpoint_isolation",
+      "type": "test",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_draft_endpoint_isolation.fake_draft",
+      "type": "function",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context",
+      "type": "test",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context.legacy_email",
+      "type": "function",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task",
+      "type": "test",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_scoped_thread_identity",
+      "type": "test",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_strip_scope_rejects_foreign_ids",
+      "type": "test",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_task_fingerprint_dual_form_dedupe",
+      "type": "test",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_thread_migration_rekeys_legacy_rows",
+      "type": "test",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
+      "id": "backend.tests.test_thread_isolation.test_thread_query_isolation",
+      "type": "test",
+      "source": "backend/tests/test_thread_isolation.py"
+    },
+    {
       "id": "backend.tests.test_windows_deployment_contract.test_build_identity_is_logged",
       "type": "test",
       "source": "backend/tests/test_windows_deployment_contract.py"
     },
     {
+      "id": "backend.tests.test_windows_deployment_contract.test_credential_store_is_fail_closed",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_exit_does_not_depend_on_winning_a_lock_race",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
       "id": "backend.tests.test_windows_deployment_contract.test_frontend_packaged_tauri_does_not_fall_back_to_dev_port",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_frozen_build_rejects_a_client_secret",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_main_window_is_created_visible",
       "type": "test",
       "source": "backend/tests/test_windows_deployment_contract.py"
     },
@@ -1831,7 +2776,52 @@
       "source": "backend/tests/test_windows_deployment_contract.py"
     },
     {
+      "id": "backend.tests.test_windows_deployment_contract.test_production_csp_has_no_development_origin",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_readiness_is_protocol_based_not_a_substring_match",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_release_secret_scanner_exists_and_covers_known_patterns",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_reveal_is_not_confined_to_the_single_instance_callback",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_session_token_comes_from_the_os_csprng",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_session_token_is_never_logged",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_sidecar_builder_never_stages_a_client_secret",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_sidecar_builder_refuses_to_build_with_a_client_secret",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
       "id": "backend.tests.test_windows_deployment_contract.test_sidecar_resolution_uses_tauri_external_bin_not_cwd",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_staged_release_config_on_disk_has_no_secret",
       "type": "test",
       "source": "backend/tests/test_windows_deployment_contract.py"
     },
@@ -1886,7 +2876,52 @@
       "source": null
     },
     {
+      "id": "desktop.src-tauri.src.main.a_missing_model_degrades_but_does_not_block_the_mailbox",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.ai_ready",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.an_absent_ai_runtime_degrades_but_does_not_block_the_mailbox",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.an_absent_database_is_fatal",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.an_unavailable_credential_store_is_fatal_and_says_so",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.an_unreported_credential_store_is_treated_as_ready",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.as_str",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.assess_readiness",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.await_backend_ready",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.await_backend_ready_returns_immediately_when_already_ready",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1896,7 +2931,77 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.current_state",
+      "id": "desktop.src-tauri.src.main.bare_supervisor",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.clear",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.credential_store_ready",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.database_ready",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.default",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.diagnostic_codes_are_stable_strings",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.enabled",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.every_diagnostic_code_has_distinct_guidance",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.everything_healthy_is_ready",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.fail",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.failure_envelope",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.failure_envelopes_carry_a_code_and_guidance",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.fatal_and_degraded_codes_are_classified_correctly",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.fatal_error_never_allows_the_workspace",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.flush",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1906,12 +3011,67 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.guidance",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.health",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.http_request",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.http_request_raw",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.init_logging",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.is_fatal",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.is_terminal_failure",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.iso8601_millis",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.iso_timestamps_are_well_formed",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.kill_orphaned_backends",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.kill_pid",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.log",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.log_dir",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1926,7 +3086,17 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.model_missing",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.new",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.phase_code",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1936,7 +3106,92 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.probe_status",
+      "id": "desktop.src-tauri.src.main.port",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_health",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_health_accepts_a_well_formed_ok_response",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_health_rejects_a_200_that_merely_contains_200",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_health_rejects_a_200_with_unparsable_json",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_health_rejects_a_non_200_status",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_health_rejects_a_wrong_content_type",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_health_reports_unreachable_when_nothing_listens",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.probe_health_survives_a_cold_backend_that_returns_503_first",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.process_is_alive",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.publish",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.readiness_after_a_generation_survives_a_restart",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.recovery_and_ready_are_both_workspace_showing_states",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.redact",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.redact_preserves_harmless_text",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.redact_removes_a_token_query_parameter",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.redact_removes_an_oauth_code",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.redact_removes_json_shaped_secrets",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1946,7 +3201,27 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.shutdown",
+      "id": "desktop.src-tauri.src.main.reveal_main_window",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.rotate_if_needed",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.set",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.shutdown_delivers_a_graceful_request_before_killing",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.snapshot",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -1956,52 +3231,82 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.startup_log",
+      "id": "desktop.src-tauri.src.main.spawn_with_retry",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_backend_before_frontend",
+      "id": "desktop.src-tauri.src.main.start",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_backend_process_exit",
+      "id": "desktop.src-tauri.src.main.startup_diagnostics",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_delayed_webview",
+      "id": "desktop.src-tauri.src.main.startup_phase",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_frontend_before_backend",
+      "id": "desktop.src-tauri.src.main.startup_phases_serialise_as_documented",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_multiple_subscribers",
+      "id": "desktop.src-tauri.src.main.status_from",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_ollama_slow",
+      "id": "desktop.src-tauri.src.main.stop_child",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_ollama_unavailable",
+      "id": "desktop.src-tauri.src.main.terminate",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_slow_backend_startup",
+      "id": "desktop.src-tauri.src.main.the_process_stays_owned_until_shutdown",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
-      "id": "desktop.src-tauri.src.main.test_unauthorized_health",
+      "id": "desktop.src-tauri.src.main.the_token_is_never_written_to_the_log",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.token_draws_differ_within_a_single_nanosecond_window",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.token_has_no_low_entropy_structure",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.token_is_lowercase_hex_only",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.token_is_the_requested_length",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.tokens_are_unique_across_many_draws",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.transition",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -2029,511 +3334,6 @@
       "id": "fastapi.testclient.TestClient",
       "type": "external",
       "source": null
-    },
-    {
-      "id": "frontend.src.App.App",
-      "type": "react_components",
-      "source": "frontend/src/App.tsx"
-    },
-    {
-      "id": "frontend.src.api.client.BackendRuntimeInfo",
-      "type": "types",
-      "source": "frontend/src/api/client.ts"
-    },
-    {
-      "id": "frontend.src.api.client.api",
-      "type": "functions",
-      "source": "frontend/src/api/client.ts"
-    },
-    {
-      "id": "frontend.src.api.client.apiBase",
-      "type": "functions",
-      "source": "frontend/src/api/client.ts"
-    },
-    {
-      "id": "frontend.src.api.client.initApi",
-      "type": "functions",
-      "source": "frontend/src/api/client.ts"
-    },
-    {
-      "id": "frontend.src.api.client.isTauri",
-      "type": "functions",
-      "source": "frontend/src/api/client.ts"
-    },
-    {
-      "id": "frontend.src.api.client.setApiCredentials",
-      "type": "functions",
-      "source": "frontend/src/api/client.ts"
-    },
-    {
-      "id": "frontend.src.api.client.sseUrl",
-      "type": "functions",
-      "source": "frontend/src/api/client.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.Analysis",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.BackfillStatus",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.Briefing",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.BriefingItem",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.Email",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.EmailAccount",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.EmailCounts",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.Health",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.MailCategory",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.MailKind",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.MailScope",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.Priority",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.Task",
-      "type": "types",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.accounts",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.analyze",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.backfillAccount",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.briefing",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.connectGmail",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.deleteAccount",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.deleteTask",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.draft",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.emailCounts",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.emailDetails",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.emails",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.health",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.pauseBackfill",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.regenerateBriefing",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.syncAccount",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.tasks",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.api.emails.toggleTask",
-      "type": "functions",
-      "source": "frontend/src/api/emails.ts"
-    },
-    {
-      "id": "frontend.src.components.ui.AnalysisProgress.AnalysisProgress",
-      "type": "react_components",
-      "source": "frontend/src/components/ui/AnalysisProgress.tsx"
-    },
-    {
-      "id": "frontend.src.components.ui.AnalysisProgress.ProgressEvent",
-      "type": "types",
-      "source": "frontend/src/components/ui/AnalysisProgress.tsx"
-    },
-    {
-      "id": "frontend.src.features.accounts.AccountsPage.AccountsPage",
-      "type": "react_components",
-      "source": "frontend/src/features/accounts/AccountsPage.tsx"
-    },
-    {
-      "id": "frontend.src.features.accounts.AccountsPage.test.renderPage",
-      "type": "functions",
-      "source": "frontend/src/features/accounts/AccountsPage.test.tsx"
-    },
-    {
-      "id": "frontend.src.features.deadlines.DeadlinesPage.DeadlinesPage",
-      "type": "react_components",
-      "source": "frontend/src/features/deadlines/DeadlinesPage.tsx"
-    },
-    {
-      "id": "frontend.src.features.overview.OverviewPage.Metric",
-      "type": "react_components",
-      "source": "frontend/src/features/overview/OverviewPage.tsx"
-    },
-    {
-      "id": "frontend.src.features.overview.OverviewPage.OverviewPage",
-      "type": "react_components",
-      "source": "frontend/src/features/overview/OverviewPage.tsx"
-    },
-    {
-      "id": "frontend.src.features.overview.OverviewPage.OverviewPageProps",
-      "type": "types",
-      "source": "frontend/src/features/overview/OverviewPage.tsx"
-    },
-    {
-      "id": "frontend.src.features.overview.OverviewPage.test.renderPage",
-      "type": "functions",
-      "source": "frontend/src/features/overview/OverviewPage.test.tsx"
-    },
-    {
-      "id": "frontend.src.features.settings.SettingsPage.SettingsPage",
-      "type": "react_components",
-      "source": "frontend/src/features/settings/SettingsPage.tsx"
-    },
-    {
-      "id": "frontend.src.features.tasks.TasksPage.TasksPage",
-      "type": "react_components",
-      "source": "frontend/src/features/tasks/TasksPage.tsx"
-    },
-    {
-      "id": "frontend.src.intelligence.IntelligencePanel.IntelligencePanel",
-      "type": "react_components",
-      "source": "frontend/src/intelligence/IntelligencePanel.tsx"
-    },
-    {
-      "id": "frontend.src.intelligence.IntelligencePanel.IntelligencePanelProps",
-      "type": "types",
-      "source": "frontend/src/intelligence/IntelligencePanel.tsx"
-    },
-    {
-      "id": "frontend.src.layout.IconRail.AppPage",
-      "type": "types",
-      "source": "frontend/src/layout/IconRail.tsx"
-    },
-    {
-      "id": "frontend.src.layout.IconRail.IconRail",
-      "type": "react_components",
-      "source": "frontend/src/layout/IconRail.tsx"
-    },
-    {
-      "id": "frontend.src.layout.IconRail.IconRailProps",
-      "type": "types",
-      "source": "frontend/src/layout/IconRail.tsx"
-    },
-    {
-      "id": "frontend.src.layout.IconRail.RailButton",
-      "type": "react_components",
-      "source": "frontend/src/layout/IconRail.tsx"
-    },
-    {
-      "id": "frontend.src.layout.IconRail.RailItem",
-      "type": "types",
-      "source": "frontend/src/layout/IconRail.tsx"
-    },
-    {
-      "id": "frontend.src.layout.StartupGate.GateState",
-      "type": "types",
-      "source": "frontend/src/layout/StartupGate.tsx"
-    },
-    {
-      "id": "frontend.src.layout.StartupGate.StartupGate",
-      "type": "react_components",
-      "source": "frontend/src/layout/StartupGate.tsx"
-    },
-    {
-      "id": "frontend.src.layout.StartupGate.test.renderGate",
-      "type": "functions",
-      "source": "frontend/src/layout/StartupGate.test.tsx"
-    },
-    {
-      "id": "frontend.src.layout.WorkspaceHeader.WorkspaceHeader",
-      "type": "react_components",
-      "source": "frontend/src/layout/WorkspaceHeader.tsx"
-    },
-    {
-      "id": "frontend.src.layout.WorkspaceHeader.WorkspaceHeaderProps",
-      "type": "types",
-      "source": "frontend/src/layout/WorkspaceHeader.tsx"
-    },
-    {
-      "id": "frontend.src.layout.WorkspaceHeader.test.renderHeader",
-      "type": "functions",
-      "source": "frontend/src/layout/WorkspaceHeader.test.tsx"
-    },
-    {
-      "id": "frontend.src.lib.utils.cn",
-      "type": "functions",
-      "source": "frontend/src/lib/utils.ts"
-    },
-    {
-      "id": "frontend.src.mail.CategoryTabs.CategoryTabs",
-      "type": "react_components",
-      "source": "frontend/src/mail/CategoryTabs.tsx"
-    },
-    {
-      "id": "frontend.src.mail.CategoryTabs.CategoryTabsProps",
-      "type": "types",
-      "source": "frontend/src/mail/CategoryTabs.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.BackfillStatusLine",
-      "type": "react_components",
-      "source": "frontend/src/mail/MailWorkspace.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.FilterButton",
-      "type": "react_components",
-      "source": "frontend/src/mail/MailWorkspace.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.KindButton",
-      "type": "react_components",
-      "source": "frontend/src/mail/MailWorkspace.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.MailWorkspace",
-      "type": "react_components",
-      "source": "frontend/src/mail/MailWorkspace.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.MailWorkspaceProps",
-      "type": "types",
-      "source": "frontend/src/mail/MailWorkspace.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.ViewButton",
-      "type": "react_components",
-      "source": "frontend/src/mail/MailWorkspace.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.persistLaterIds",
-      "type": "functions",
-      "source": "frontend/src/mail/MailWorkspace.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.readLaterIds",
-      "type": "functions",
-      "source": "frontend/src/mail/MailWorkspace.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MailWorkspace.test.renderWorkspace",
-      "type": "functions",
-      "source": "frontend/src/mail/MailWorkspace.test.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageList.MessageList",
-      "type": "react_components",
-      "source": "frontend/src/mail/MessageList.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageList.MessageListProps",
-      "type": "types",
-      "source": "frontend/src/mail/MessageList.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageReader.MessageReader",
-      "type": "react_components",
-      "source": "frontend/src/mail/MessageReader.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageReader.MessageReaderProps",
-      "type": "types",
-      "source": "frontend/src/mail/MessageReader.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageReader.attachmentLabel",
-      "type": "functions",
-      "source": "frontend/src/mail/MessageReader.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageReader.avatarGradient",
-      "type": "functions",
-      "source": "frontend/src/mail/MessageReader.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageReader.formatTimeLong",
-      "type": "functions",
-      "source": "frontend/src/mail/MessageReader.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageReader.hasAttachments",
-      "type": "functions",
-      "source": "frontend/src/mail/MessageReader.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageReader.initialOf",
-      "type": "functions",
-      "source": "frontend/src/mail/MessageReader.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageRow.MessageRow",
-      "type": "react_components",
-      "source": "frontend/src/mail/MessageRow.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageRow.MessageRowProps",
-      "type": "types",
-      "source": "frontend/src/mail/MessageRow.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageRow.RowFilter",
-      "type": "types",
-      "source": "frontend/src/mail/MessageRow.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageRow.bodySnippet",
-      "type": "functions",
-      "source": "frontend/src/mail/MessageRow.tsx"
-    },
-    {
-      "id": "frontend.src.mail.MessageRow.formatTime",
-      "type": "functions",
-      "source": "frontend/src/mail/MessageRow.tsx"
-    },
-    {
-      "id": "frontend.src.theme.ThemeProvider.ThemeContextValue",
-      "type": "types",
-      "source": "frontend/src/theme/ThemeProvider.tsx"
-    },
-    {
-      "id": "frontend.src.theme.ThemeProvider.ThemeProvider",
-      "type": "react_components",
-      "source": "frontend/src/theme/ThemeProvider.tsx"
-    },
-    {
-      "id": "frontend.src.theme.ThemeProvider.test.Probe",
-      "type": "react_components",
-      "source": "frontend/src/theme/ThemeProvider.test.tsx"
-    },
-    {
-      "id": "frontend.src.theme.ThemeProvider.useTheme",
-      "type": "hooks",
-      "source": "frontend/src/theme/ThemeProvider.tsx"
-    },
-    {
-      "id": "frontend.src.theme.ThemeToggle.ThemeToggle",
-      "type": "react_components",
-      "source": "frontend/src/theme/ThemeToggle.tsx"
-    },
-    {
-      "id": "frontend.src.theme.themeStore.ResolvedTheme",
-      "type": "types",
-      "source": "frontend/src/theme/themeStore.ts"
-    },
-    {
-      "id": "frontend.src.theme.themeStore.ThemePreference",
-      "type": "types",
-      "source": "frontend/src/theme/themeStore.ts"
-    },
-    {
-      "id": "frontend.src.theme.themeStore.applyTheme",
-      "type": "functions",
-      "source": "frontend/src/theme/themeStore.ts"
-    },
-    {
-      "id": "frontend.src.theme.themeStore.readStoredPreference",
-      "type": "functions",
-      "source": "frontend/src/theme/themeStore.ts"
-    },
-    {
-      "id": "frontend.src.theme.themeStore.resolveTheme",
-      "type": "functions",
-      "source": "frontend/src/theme/themeStore.ts"
-    },
-    {
-      "id": "frontend.src.theme.themeStore.storePreference",
-      "type": "functions",
-      "source": "frontend/src/theme/themeStore.ts"
-    },
-    {
-      "id": "frontend.src.theme.themeStore.systemTheme",
-      "type": "functions",
-      "source": "frontend/src/theme/themeStore.ts"
-    },
-    {
-      "id": "frontend.src.theme.themeStore.test.mockSystemTheme",
-      "type": "functions",
-      "source": "frontend/src/theme/themeStore.test.ts"
     },
     {
       "id": "hashlib.sha256",
@@ -2581,7 +3381,17 @@
       "source": null
     },
     {
+      "id": "logging.getLogger",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "os.close",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "os.environ.get",
       "type": "external",
       "source": null
     },
@@ -2597,6 +3407,16 @@
     },
     {
       "id": "os.path.exists",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "os.path.isfile",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "os.path.join",
       "type": "external",
       "source": null
     },
@@ -2626,7 +3446,17 @@
       "source": null
     },
     {
+      "id": "secrets.compare_digest",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "secrets.token_urlsafe",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "shutil.which",
       "type": "external",
       "source": null
     },
@@ -2662,6 +3492,11 @@
     },
     {
       "id": "src.utils.get_sender_initials",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "subprocess.Popen",
       "type": "external",
       "source": null
     },
@@ -2736,7 +3571,27 @@
       "source": null
     },
     {
+      "id": "tools.release.check_windows_deployment.test_credential_store_is_fail_closed",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_exit_does_not_depend_on_winning_a_lock_race",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "tools.release.check_windows_deployment.test_frontend_packaged_tauri_does_not_fall_back_to_dev_port",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_frozen_build_rejects_a_client_secret",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_main_window_is_created_visible",
       "type": "external",
       "source": null
     },
@@ -2756,7 +3611,52 @@
       "source": null
     },
     {
+      "id": "tools.release.check_windows_deployment.test_production_csp_has_no_development_origin",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_readiness_is_protocol_based_not_a_substring_match",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_release_secret_scanner_exists_and_covers_known_patterns",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_reveal_is_not_confined_to_the_single_instance_callback",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_session_token_comes_from_the_os_csprng",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_session_token_is_never_logged",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_sidecar_builder_never_stages_a_client_secret",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_sidecar_builder_refuses_to_build_with_a_client_secret",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "tools.release.check_windows_deployment.test_sidecar_resolution_uses_tauri_external_bin_not_cwd",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_staged_release_config_on_disk_has_no_secret",
       "type": "external",
       "source": null
     },
@@ -2848,6 +3748,46 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.ai.supervisor.AISupervisor.__init__",
+      "to": "asyncio.Lock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor._try_auto_start",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor._try_auto_start",
+      "to": "subprocess.Popen",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor.wait_and_recheck",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.find_ollama_executable",
+      "to": "os.environ.get",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.find_ollama_executable",
+      "to": "os.path.isfile",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.find_ollama_executable",
+      "to": "os.path.join",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.find_ollama_executable",
+      "to": "shutil.which",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.config._default_database_path",
       "to": "os.getenv",
       "relation": "calls-inferred"
@@ -2868,7 +3808,27 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.config._reject_shipped_client_secret",
+      "to": "os.getenv",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.database._migrate",
+      "to": "pathlib.Path",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.database._sqlite_backup",
+      "to": "sqlite3.connect",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.db.database.connect",
+      "to": "sqlite3.connect",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.database.snapshot_database",
       "to": "sqlite3.connect",
       "relation": "calls-inferred"
     },
@@ -2878,9 +3838,24 @@
       "relation": "calls"
     },
     {
+      "from": "backend.app.db.repositories.Repository._like_search",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.db.repositories.Repository._task_from_row",
       "to": "backend.app.schemas.Task",
       "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository._update_fts_one",
+      "to": "backend.app.db.database.fts_delete_supported",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository._update_fts_one",
+      "to": "logging.getLogger",
+      "relation": "calls-inferred"
     },
     {
       "from": "backend.app.db.repositories.Repository.account",
@@ -2910,6 +3885,16 @@
     {
       "from": "backend.app.db.repositories.Repository.cached_briefing",
       "to": "backend.app.schemas.InboxBriefing.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.delete_email",
+      "to": "backend.app.db.database.fts_delete_supported",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.delete_email",
+      "to": "logging.getLogger",
       "relation": "calls-inferred"
     },
     {
@@ -2958,6 +3943,21 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.db.repositories.Repository.rebuild_fts",
+      "to": "backend.app.db.database.fts_delete_supported",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.rebuild_fts",
+      "to": "backend.app.db.database.repopulate_fts_index",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.rebuild_fts",
+      "to": "logging.getLogger",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.db.repositories.Repository.record_inference_metric",
       "to": "datetime.datetime.now",
       "relation": "calls-inferred"
@@ -2999,7 +3999,27 @@
     },
     {
       "from": "backend.app.db.repositories.Repository.search_emails",
+      "to": "backend.app.db.search_query.compile_fts_match",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.search_emails",
       "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.search_emails_structured",
+      "to": "backend.app.db.search_query.compile_fts_match",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.search_emails_structured",
+      "to": "backend.app.schemas.Email.model_validate_json",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.db.repositories.Repository.search_emails_structured",
+      "to": "logging.getLogger",
       "relation": "calls-inferred"
     },
     {
@@ -3088,11 +4108,6 @@
       "relation": "calls-inferred"
     },
     {
-      "from": "backend.app.db.secure_store.encrypt_token",
-      "to": "base64.b64encode",
-      "relation": "calls-inferred"
-    },
-    {
       "from": "backend.app.mail.backfill.dump_cursor",
       "to": "json.dumps",
       "relation": "calls-inferred"
@@ -3174,6 +4189,16 @@
     },
     {
       "from": "backend.app.mail.providers.gmail.GmailProvider._normalize_message",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._normalize_message",
+      "to": "backend.app.mail.identity.scoped_thread_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._normalize_message",
       "to": "backend.app.schemas.Email",
       "relation": "calls"
     },
@@ -3205,6 +4230,11 @@
     {
       "from": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
       "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.backfill_messages",
+      "to": "backend.app.mail.identity.scoped_email_id",
       "relation": "calls"
     },
     {
@@ -3244,11 +4274,6 @@
     },
     {
       "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
-      "to": "backend.app.db.repositories.Repository.email",
-      "relation": "calls"
-    },
-    {
-      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
       "to": "backend.app.db.repositories.Repository.email_exists",
       "relation": "calls"
     },
@@ -3279,6 +4304,11 @@
     },
     {
       "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider.sync_messages",
       "to": "datetime.datetime.now",
       "relation": "calls-inferred"
     },
@@ -3296,6 +4326,16 @@
       "from": "backend.app.main._analysis_worker",
       "to": "backend.app.mail.fingerprint.content_fingerprint",
       "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._analysis_worker",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main._analysis_worker",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
     },
     {
       "from": "backend.app.main._backfill_estimate_once",
@@ -3355,6 +4395,16 @@
     {
       "from": "backend.app.main._label_backfill",
       "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._label_backfill",
+      "to": "backend.app.mail.identity.provider_message_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main._label_backfill",
+      "to": "backend.app.mail.identity.strip_scope",
       "relation": "calls"
     },
     {
@@ -3523,6 +4573,11 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.main.dismiss_task",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.main.draft",
       "to": "fastapi.responses.JSONResponse",
       "relation": "calls-inferred"
@@ -3598,6 +4653,11 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.main.health",
+      "to": "backend.app.db.secure_store.status",
+      "relation": "calls"
+    },
+    {
       "from": "backend.app.main.import_csv",
       "to": "backend.app.mail.fingerprint.content_fingerprint",
       "relation": "calls"
@@ -3643,6 +4703,11 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.main.patch_task",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.main.pause_backfill",
       "to": "backend.app.mail.backfill.dump_cursor",
       "relation": "calls"
@@ -3671,6 +4736,16 @@
       "from": "backend.app.main.runtime_token_middleware",
       "to": "fastapi.responses.JSONResponse",
       "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.runtime_token_middleware",
+      "to": "secrets.compare_digest",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.search_emails_structured",
+      "to": "backend.app.mail.fingerprint.content_fingerprint",
+      "relation": "calls"
     },
     {
       "from": "backend.app.main.shutdown_backend",
@@ -3770,6 +4845,46 @@
     {
       "from": "backend.app.services.task_migration.TaskMigrationService.run_migration",
       "to": "backend.app.services.task_derivation.derive_tasks",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ai_supervisor.FakeClient.generate",
+      "to": "backend.app.ai.ollama_client.OllamaTimeout",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ai_supervisor.FakeClient.generate",
+      "to": "backend.app.ai.ollama_client.OllamaUnavailable",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ai_supervisor.FakeClient.health",
+      "to": "backend.app.ai.ollama_client.OllamaUnavailable",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ai_supervisor.make_supervisor",
+      "to": "backend.app.ai.supervisor.AISupervisor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ai_supervisor.run",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_ai_supervisor.test_failure_classification",
+      "to": "backend.app.ai.ollama_client.OllamaModelMissing",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ai_supervisor.test_failure_classification",
+      "to": "backend.app.ai.ollama_client.OllamaTimeout",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_ai_supervisor.test_failure_classification",
+      "to": "backend.app.ai.ollama_client.OllamaUnavailable",
       "relation": "calls"
     },
     {
@@ -4963,6 +6078,161 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_fts5.make_email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_body_truncation",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_case_insensitive",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_delete_cleans_index",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_empty_body",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_fallback_to_like",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_insert_and_search",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_insert_new_does_not_duplicate",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_multiple_delete",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_multiple_emails",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_rebuild_removes_orphans",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_search_no_match",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_special_characters",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_update_without_manual_repair",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts5.test_fts_upsert_idempotent",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.make_email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_capability_probe_is_isolated",
+      "to": "backend.app.db.database.fts_delete_supported",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_capability_probe_is_isolated",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_compile_empty",
+      "to": "backend.app.db.search_query.compile_fts_match",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_compile_plain_words",
+      "to": "backend.app.db.search_query.compile_fts_match",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_compile_special_characters_stay_literal",
+      "to": "backend.app.db.search_query.compile_fts_match",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_existing_schema_detection",
+      "to": "backend.app.db.database.fts_table_uses_contentless_delete",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_existing_schema_detection",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_existing_schema_detection",
+      "to": "sqlite3.connect",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_legacy_fts_schema_upgrades_through_connect",
+      "to": "backend.app.db.database.fts_table_uses_contentless_delete",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_legacy_fts_schema_upgrades_through_connect",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_legacy_fts_schema_upgrades_through_connect",
+      "to": "sqlite3.connect",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_old_sqlite_fallback_path",
+      "to": "backend.app.db.database.fts_table_uses_contentless_delete",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_old_sqlite_fallback_path",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_special_characters_search_literally",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_fts_upgrade.test_special_characters_search_literally",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
       "from": "backend.tests.test_gmail_mock.mock_gmail",
       "to": "backend.app.mail.providers.gmail.GmailProvider",
       "relation": "calls"
@@ -4974,6 +6244,11 @@
     },
     {
       "from": "backend.tests.test_gmail_mock.test_gmail_oauth_url_generation",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_gmail_mock.test_gmail_oauth_url_offers_account_chooser",
       "to": "asyncio.run",
       "relation": "calls-inferred"
     },
@@ -5158,6 +6433,286 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_identity_migration._legacy_payload",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_backup_failure_aborts_migration",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_backup_failure_aborts_migration",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_backup_failure_aborts_migration",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_backup_failure_aborts_migration",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_backup_is_readable_snapshot",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_backup_is_readable_snapshot",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_backup_is_readable_snapshot",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_backup_is_readable_snapshot",
+      "to": "sqlite3.connect",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_double_prefix_never_scopes_twice",
+      "to": "backend.app.mail.identity.parse_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_double_prefix_never_scopes_twice",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_legacy_raw_id_not_scoped",
+      "to": "backend.app.mail.identity.parse_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_round_trip",
+      "to": "backend.app.mail.identity.parse_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_round_trip",
+      "to": "backend.app.mail.identity.provider_message_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_round_trip",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_underscore_email",
+      "to": "backend.app.mail.identity.is_scoped_for",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_underscore_email",
+      "to": "backend.app.mail.identity.parse_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_identity_underscore_email",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_migration_is_idempotent",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_migration_is_idempotent",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_migration_is_idempotent",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_migration_rekeys_legacy_database",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_migration_rekeys_legacy_database",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_migration_rekeys_legacy_database",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_migration_rekeys_legacy_database",
+      "to": "sqlite3.connect",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_non_hex_scoped_identities_never_double_prefix",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_non_hex_scoped_identities_never_double_prefix",
+      "to": "backend.app.mail.identity.is_scoped_for",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_non_hex_scoped_identities_never_double_prefix",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_null_provider_rows_exempt_from_uniqueness",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_null_provider_rows_exempt_from_uniqueness",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_provider_uniqueness_enforced",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_provider_uniqueness_enforced",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_provider_uniqueness_enforced",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_identity_migration.test_provider_uniqueness_enforced",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_multi_account.make_analysis",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.make_email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_account_credentials_isolation",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_account_id_stored_correctly",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_account_prefixed_email_ids",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_account_specific_counts",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_delete_email_by_account",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_emails_missing_labels_by_account",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_label_update_by_account",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_same_provider_message_id_collision",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_same_provider_message_id_collision",
+      "to": "backend.app.mail.identity.provider_message_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_same_provider_message_id_collision",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_same_provider_message_id_collision",
+      "to": "backend.app.mail.providers.gmail.GmailProvider",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_same_provider_message_id_collision",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_same_provider_message_id_collision",
+      "to": "backend.app.schemas.Task",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_same_provider_message_id_collision",
+      "to": "base64.urlsafe_b64encode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_same_provider_message_id_collision.gmail_detail",
+      "to": "base64.urlsafe_b64encode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_search_respects_account_isolation",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_multi_account.test_search_respects_account_isolation",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_oauth_two_accounts._complete_callback",
+      "to": "unittest.mock.AsyncMock",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_oauth_two_accounts.test_reconnect_same_account_is_idempotent",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_oauth_two_accounts.test_second_google_identity_creates_separate_row",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.tests.test_ollama_mock.test_ai_service_analyze_email_success",
       "to": "asyncio.run",
       "relation": "calls-inferred"
@@ -5261,6 +6816,306 @@
       "from": "backend.tests.test_ollama_mock.test_ollama_client_sends_correct_payload",
       "to": "unittest.mock.MagicMock",
       "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_a_corrupt_versioned_blob_raises",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_a_corrupt_versioned_blob_raises",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_a_dpapi_decrypt_failure_raises_rather_than_returning_empty",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_a_dpapi_decrypt_failure_raises_rather_than_returning_empty",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_a_dpapi_decrypt_failure_raises_rather_than_returning_empty",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_a_dpapi_encrypt_failure_raises_rather_than_downgrading",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_a_dpapi_encrypt_failure_raises_rather_than_downgrading",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_encrypt_raises_when_the_store_is_unavailable",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_encrypt_raises_when_the_store_is_unavailable",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_no_credential_is_returned_when_storage_fails",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_no_credential_is_returned_when_storage_fails",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_status_reports_unavailable_when_dpapi_is_missing",
+      "to": "backend.app.db.secure_store.is_available",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestFailClosed.test_status_reports_unavailable_when_dpapi_is_missing",
+      "to": "backend.app.db.secure_store.status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestHealthReporting.test_health_reports_a_single_known_state",
+      "to": "backend.app.db.secure_store.status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_a_legacy_value_can_be_re_encrypted",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_a_legacy_value_can_be_re_encrypted",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_a_legacy_value_can_be_re_encrypted",
+      "to": "base64.b64encode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_a_versioned_blob_is_not_treated_as_legacy",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_a_versioned_blob_is_not_treated_as_legacy",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_legacy_base64_value_is_still_readable",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_legacy_base64_value_is_still_readable",
+      "to": "base64.b64encode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_legacy_value_is_flagged_as_a_security_event",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_legacy_value_is_flagged_as_a_security_event",
+      "to": "base64.b64encode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_unreadable_legacy_value_raises",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestLegacyMigration.test_unreadable_legacy_value_raises",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_availability_probe_succeeds_on_windows",
+      "to": "backend.app.db.secure_store.is_available",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_availability_probe_succeeds_on_windows",
+      "to": "backend.app.db.secure_store.status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_ciphertext_does_not_contain_the_plaintext",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_empty_secret_round_trips_to_empty",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_empty_secret_round_trips_to_empty",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_round_trip_returns_the_original_secret",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_round_trip_returns_the_original_secret",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_stored_blob_carries_the_format_version",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_stored_blob_is_not_reversible_base64",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_stored_blob_is_not_reversible_base64",
+      "to": "base64.b64decode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_stored_blob_is_not_reversible_base64",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_two_encryptions_of_the_same_value_differ",
+      "to": "backend.app.db.secure_store.decrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_secure_store.TestRealDpapiIsActuallyUsed.test_two_encryptions_of_the_same_value_differ",
+      "to": "backend.app.db.secure_store.encrypt_token",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search._seed_search_mail",
+      "to": "backend.app.db.repositories.Repository.upsert_email_commit",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.make_email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_account_scoped_structured_search",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_account_scoped_structured_search",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_filter_before_limit",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_global_free_text_finds_body_only_word",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_in_scope_mapping",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_in_scope_unknown_rejected",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_by_date",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_by_date",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_by_sender",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_by_sender",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_by_subject",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_by_subject",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_combined_filters",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_combined_filters",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_limit",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_limit",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_no_results",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_no_results",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_with_free_text",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_structured_search.test_structured_search_with_free_text",
+      "to": "backend.app.schemas.SearchFilters",
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines",
@@ -5513,13 +7368,243 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_task_user_corrections._seed_derived",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections._seed_derived",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_derivation_never_overwrites_user_priority",
+      "to": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_dismiss_hides_and_suppresses_rederivation",
+      "to": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_dismiss_hides_and_suppresses_rederivation",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_dismiss_unknown_task_404",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_dismissal_survives_reopen",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_migration_service_never_revives_dismissed",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_migration_service_never_revives_dismissed",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_migration_service_never_revives_dismissed",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_migration_service_respects_override",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_migration_service_respects_override",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_migration_service_respects_override",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_priority_patch_persists",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_priority_patch_rejects_invalid",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_user_corrections.test_priority_patch_unknown_task_404",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.gmail_detail",
+      "to": "base64.urlsafe_b64encode",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.provider",
+      "to": "backend.app.mail.providers.gmail.GmailProvider",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_draft_endpoint_isolation",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context",
+      "to": "backend.app.mail.identity.scoped_thread_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context.legacy_email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task",
+      "to": "backend.app.mail.identity.scoped_email_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task",
+      "to": "backend.app.mail.identity.scoped_thread_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task",
+      "to": "backend.app.services.task_derivation._normalize_action",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task",
+      "to": "backend.app.services.task_derivation.task_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_scoped_thread_identity",
+      "to": "backend.app.mail.identity.parse_thread_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_scoped_thread_identity",
+      "to": "backend.app.mail.identity.scoped_thread_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_strip_scope_rejects_foreign_ids",
+      "to": "backend.app.mail.identity.strip_scope",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_strip_scope_rejects_foreign_ids",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_task_fingerprint_dual_form_dedupe",
+      "to": "backend.app.mail.identity.scoped_thread_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_task_fingerprint_dual_form_dedupe",
+      "to": "backend.app.services.task_derivation._normalize_action",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_task_fingerprint_dual_form_dedupe",
+      "to": "backend.app.services.task_derivation.candidate_fingerprints",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_task_fingerprint_dual_form_dedupe",
+      "to": "backend.app.services.task_derivation.task_fingerprint",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_thread_migration_rekeys_legacy_rows",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_thread_migration_rekeys_legacy_rows",
+      "to": "backend.app.mail.identity.scoped_thread_id",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_thread_migration_rekeys_legacy_rows",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_thread_isolation.test_thread_query_isolation",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
       "from": "backend.tests.test_windows_deployment_contract.test_build_identity_is_logged",
       "to": "tools.release.check_windows_deployment.test_build_identity_is_logged",
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_windows_deployment_contract.test_credential_store_is_fail_closed",
+      "to": "tools.release.check_windows_deployment.test_credential_store_is_fail_closed",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_exit_does_not_depend_on_winning_a_lock_race",
+      "to": "tools.release.check_windows_deployment.test_exit_does_not_depend_on_winning_a_lock_race",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.tests.test_windows_deployment_contract.test_frontend_packaged_tauri_does_not_fall_back_to_dev_port",
       "to": "tools.release.check_windows_deployment.test_frontend_packaged_tauri_does_not_fall_back_to_dev_port",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_frozen_build_rejects_a_client_secret",
+      "to": "tools.release.check_windows_deployment.test_frozen_build_rejects_a_client_secret",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_main_window_is_created_visible",
+      "to": "tools.release.check_windows_deployment.test_main_window_is_created_visible",
       "relation": "calls-inferred"
     },
     {
@@ -5538,8 +7623,53 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_windows_deployment_contract.test_production_csp_has_no_development_origin",
+      "to": "tools.release.check_windows_deployment.test_production_csp_has_no_development_origin",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_readiness_is_protocol_based_not_a_substring_match",
+      "to": "tools.release.check_windows_deployment.test_readiness_is_protocol_based_not_a_substring_match",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_release_secret_scanner_exists_and_covers_known_patterns",
+      "to": "tools.release.check_windows_deployment.test_release_secret_scanner_exists_and_covers_known_patterns",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_reveal_is_not_confined_to_the_single_instance_callback",
+      "to": "tools.release.check_windows_deployment.test_reveal_is_not_confined_to_the_single_instance_callback",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_session_token_comes_from_the_os_csprng",
+      "to": "tools.release.check_windows_deployment.test_session_token_comes_from_the_os_csprng",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_session_token_is_never_logged",
+      "to": "tools.release.check_windows_deployment.test_session_token_is_never_logged",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_sidecar_builder_never_stages_a_client_secret",
+      "to": "tools.release.check_windows_deployment.test_sidecar_builder_never_stages_a_client_secret",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_sidecar_builder_refuses_to_build_with_a_client_secret",
+      "to": "tools.release.check_windows_deployment.test_sidecar_builder_refuses_to_build_with_a_client_secret",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.tests.test_windows_deployment_contract.test_sidecar_resolution_uses_tauri_external_bin_not_cwd",
       "to": "tools.release.check_windows_deployment.test_sidecar_resolution_uses_tauri_external_bin_not_cwd",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_staged_release_config_on_disk_has_no_secret",
+      "to": "tools.release.check_windows_deployment.test_staged_release_config_on_disk_has_no_secret",
       "relation": "calls-inferred"
     },
     {

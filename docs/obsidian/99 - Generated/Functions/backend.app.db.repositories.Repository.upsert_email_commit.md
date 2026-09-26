@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.upsert_email_commit
 source: backend/app/db/repositories.py
-line: 62
+line: 75
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Insert or update a single email with immediate commit.
 
 ## Location
 
-`backend/app/db/repositories.py:62`
+`backend/app/db/repositories.py:75`
 
 ## Signature
 
@@ -37,6 +37,7 @@ Insert or update a single email with immediate commit.
 
 ## Called By
 
+- [[backend.tests.test_structured_search._seed_search_mail|_seed_search_mail]]
 - [[backend.tests.test_task_migration.test_migration_idempotency_and_preservation|test_migration_idempotency_and_preservation]]
 - [[backend.tests.test_task_migration.test_migration_rollback|test_migration_rollback]]
 

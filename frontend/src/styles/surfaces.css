@@ -1,136 +1,70 @@
-/* ═══════════════════════════════════════════════════════════════
-   ALFRED SURFACES — the ambient aurora background system and the
-   disciplined glass/elevation vocabulary.
-   ═══════════════════════════════════════════════════════════════ */
+/*
+   Alfred surfaces — elevation, overlays, and the focus system.
 
-/* ── Ambient background system ──────────────────────────────────
-   Quiet Siri-like aurora: blurred color clouds drifting behind the
-   product UI. Pointer-events none; never scrolls; never flickers.
-   ─────────────────────────────────────────────────────────────── */
-.ambient-layer {
-  position: fixed;
-  inset: 0;
-  z-index: var(--z-ambient);
-  pointer-events: none;
-  overflow: hidden;
-  background: var(--bg-app);
-}
+   The ambient orb layer and the six glass-* backdrop-filter surfaces were
+   removed in Phase 1. They were decorative motion with no state meaning,
+   and a full-viewport blur behind a reading application is a continuous
+   compositing cost that bought nothing once panels became opaque.
 
-.ambient-orb {
-  position: absolute;
-  border-radius: 50%;
-  filter: blur(110px);
-  opacity: var(--ambient-opacity);
-  transform: translateZ(0);
-  will-change: transform;
-}
+   Structure is now carried by borders and surface steps, not by
+   translucency. See docs/UI-DESIGN-SPEC.md §15.
+*/
 
-.ambient-orb.orb-violet {
-  width: 54vw;
-  height: 54vw;
-  min-width: 520px;
-  min-height: 520px;
-  left: -16vw;
-  top: -20vw;
-  background: var(--ambient-violet);
-  animation: drift-a 110s ease-in-out infinite alternate;
-}
+/* ── Elevation helpers ────────────────────────────────────────────
+   Used sparingly. List rows, panes, buttons and inputs get a border,
+   never a shadow. */
 
-.ambient-orb.orb-indigo {
-  width: 48vw;
-  height: 48vw;
-  min-width: 440px;
-  min-height: 440px;
-  right: -18vw;
-  top: 6vh;
-  background: var(--ambient-indigo);
-  animation: drift-b 130s ease-in-out infinite alternate;
-}
-
-.ambient-orb.orb-cyan {
-  width: 38vw;
-  height: 38vw;
-  min-width: 340px;
-  min-height: 340px;
-  left: 30vw;
-  bottom: -22vw;
-  background: var(--ambient-cyan);
-  animation: drift-c 120s ease-in-out infinite alternate;
-}
-
-.ambient-orb.orb-pink {
-  width: 26vw;
-  height: 26vw;
-  min-width: 240px;
-  min-height: 240px;
-  right: 18vw;
-  bottom: -12vw;
-  background: var(--ambient-pink);
-  animation: drift-b 140s ease-in-out infinite alternate-reverse;
-}
-
-/* ── Glass vocabulary (disciplined, readable) ── */
-.glass-rail {
-  background: var(--glass-rail);
-  backdrop-filter: blur(var(--blur-strong)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(150%);
-}
-
-.glass-header {
-  background: var(--glass-header);
-  backdrop-filter: blur(var(--blur-strong)) saturate(160%);
-  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(160%);
-  box-shadow: var(--highlight-top), var(--shadow-1);
-}
-
-.glass-pane {
-  background: var(--glass-pane);
-  backdrop-filter: blur(var(--blur-soft)) saturate(140%);
-  -webkit-backdrop-filter: blur(var(--blur-soft)) saturate(140%);
-}
-
-.glass-panel {
-  background: var(--glass-panel);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  backdrop-filter: blur(var(--blur-soft)) saturate(140%);
-  -webkit-backdrop-filter: blur(var(--blur-soft)) saturate(140%);
-  box-shadow: var(--highlight-top), var(--shadow-2);
-}
-
-/* Floating / elevated glass (intelligence pane, dialogs) */
-.glass-floating {
-  background: var(--glass-strong);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-xl);
-  backdrop-filter: blur(var(--blur-strong)) saturate(150%);
-  -webkit-backdrop-filter: blur(var(--blur-strong)) saturate(150%);
-  box-shadow: var(--highlight-top), var(--shadow-3);
-}
-
-/* Frosted input surface */
-.glass-input {
-  background: var(--glass-input);
-  border: 1px solid var(--border-subtle);
-  backdrop-filter: blur(var(--blur-soft)) saturate(130%);
-  -webkit-backdrop-filter: blur(var(--blur-soft)) saturate(130%);
-}
-
-/* ── Elevation helpers ── */
 .elev-1 { box-shadow: var(--shadow-1); }
 .elev-2 { box-shadow: var(--shadow-2); }
 .elev-3 { box-shadow: var(--shadow-3); }
 
-.surface-highlight {
-  box-shadow: var(--highlight-top);
+/* ── Overlay backdrop ─────────────────────────────────────────────── */
+
+.overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: var(--z-overlay);
+  background: var(--bg-overlay);
 }
 
-/* ── Quiet accent wash (Alfred briefing, special panels) ── */
+/* ── Focus system ───────────────────────────────────────────────────
+   Two-layer ring: an inner ring in the surface colour plus an outer ring
+   in the focus colour. This stays visible on any background, which a
+   single-colour outline does not. */
+
+button:focus-visible,
+a:focus-visible,
+[role='button']:focus-visible,
+[role='option']:focus-visible,
+[role='tab']:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--bg-panel),
+    0 0 0 4px var(--border-focus);
+  border-radius: var(--radius-sm);
+}
+
+/* Rows use an inset ring so the selection bar is not overwritten. */
+[role='option']:focus-visible {
+  box-shadow: inset 0 0 0 2px var(--border-focus);
+  border-radius: var(--radius-xs);
+}
+
+/* Non-standard focusables that are neither button nor [role=button]
+   need their own rule, exactly as the pane separator does. */
+.pane-separator:focus-visible {
+  outline: none;
+  background: var(--accent);
+  box-shadow: none;
+}
+
+/* ── Accent wash ────────────────────────────────────────────────────
+   The single permitted use of a tinted surface behind content. It marks
+   a region as Alfred-generated rather than user-authored mail. */
 .accent-wash {
-  background:
-    radial-gradient(120% 160% at 100% 0%, var(--accent-soft) 0%, transparent 55%),
-    var(--glass-panel);
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--highlight-top), var(--shadow-2);
+  background: var(--accent-softer);
+  border-left: 2px solid var(--accent-border);
 }

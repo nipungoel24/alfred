@@ -10,7 +10,14 @@ import { DeadlinesPage } from './features/deadlines/DeadlinesPage';
 import { AccountsPage } from './features/accounts/AccountsPage';
 import { SettingsPage } from './features/settings/SettingsPage';
 import { AnalysisProgress } from './components/ui/AnalysisProgress';
-import { accounts as fetchAccounts, health as fetchHealth, syncAccount } from './api/emails';
+import {
+  accounts as fetchAccounts,
+  emailCounts as fetchEmailCounts,
+  health as fetchHealth,
+  syncAccount,
+  type MailFilter,
+  type MailScope,
+} from './api/emails';
 import './styles.css';
 
 const PAGE_META: Record<AppPage, { title: string; subtitle?: string }> = {
@@ -36,6 +43,11 @@ export default function App() {
   // task/deadline/overview source preview). No routing framework — the
   // workspace consumes and clears it.
   const [openEmailId, setOpenEmailId] = useState<string | null>(null);
+  // Mail view + filter live here, not inside MailWorkspace, so the sidebar
+  // is the single surface that owns them. Previously these were local to the
+  // pane and therefore invisible from every other page.
+  const [mailScope, setMailScope] = useState<MailScope>('inbox');
+  const [mailFilter, setMailFilter] = useState<MailFilter>('all');
   const queryClient = useQueryClient();
 
   const { data: accountsList = [] } = useQuery({ queryKey: ['accounts'], queryFn: fetchAccounts });
@@ -43,6 +55,13 @@ export default function App() {
     queryKey: ['health'],
     queryFn: fetchHealth,
     refetchInterval: 30_000,
+    retry: 0,
+  });
+
+  const { data: counts } = useQuery({
+    queryKey: ['emailCounts', 'all'],
+    queryFn: () => fetchEmailCounts(),
+    staleTime: 30_000,
     retry: 0,
   });
 
@@ -106,28 +125,48 @@ export default function App() {
     setPage('mail');
   }, []);
 
-  const accountInitial = useMemo(
-    () => (gmailAccount?.display_name?.[0] ?? gmailAccount?.email_address?.[0] ?? '').toUpperCase(),
-    [gmailAccount]
+  // Only counts the API actually returns. Alfred shows no count it cannot
+  // source from real data.
+  const navCounts = useMemo(
+    () => ({
+      inbox: counts?.active_inbox,
+      allMail: counts?.all_mail,
+    }),
+    [counts]
   );
+
+  const activeMailView = `${mailScope}:${mailFilter}`;
+
+  const handleNavigateMail = useCallback(
+    (scope: MailScope, filter: MailFilter) => {
+      setMailScope(scope);
+      setMailFilter(filter);
+      setPage('mail');
+    },
+    []
+  );
+
+  const syncAll = syncMutation;
+  const handleSyncAll = useCallback(() => {
+    void syncMutation.mutateAsync(gmailAccounts.map((a) => a.id));
+  }, [gmailAccounts, syncMutation]);
 
   const meta = PAGE_META[page];
 
   return (
     <div className="app-shell">
-      {/* Ambient aurora — quiet Siri-like glow behind the product UI */}
-      <div className="ambient-layer" aria-hidden="true">
-        <span className="ambient-orb orb-violet" />
-        <span className="ambient-orb orb-indigo" />
-        <span className="ambient-orb orb-cyan" />
-        <span className="ambient-orb orb-pink" />
-      </div>
+      <a className="skip-link" href="#main-content">
+        Skip to content
+      </a>
 
       <IconRail
         page={page}
         onNavigate={handleNavigate}
         aiReady={aiReady}
         gmailConnected={Boolean(gmailAccount)}
+        counts={navCounts}
+        activeMailView={activeMailView}
+        onNavigateMail={handleNavigateMail}
       />
 
       <WorkspaceHeader
@@ -137,10 +176,12 @@ export default function App() {
         onSearchChange={handleSearchChange}
         aiReady={aiReady}
         aiState={health?.ai}
-        accountInitial={accountInitial || undefined}
+        accountEmail={gmailAccount?.email_address}
+        onSync={syncAll.isPending ? undefined : handleSyncAll}
+        syncing={syncAll.isPending}
       />
 
-      <main className="workspace-content">
+      <main className="workspace-content" id="main-content" tabIndex={-1}>
         {page === 'overview' && <OverviewPage onNavigate={handleNavigate} onOpenEmail={handleOpenEmail} />}
         {page === 'mail' && (
           <MailWorkspace
@@ -155,6 +196,9 @@ export default function App() {
             }}
             syncReport={syncReport}
             onDismissSyncReport={() => setSyncReport(null)}
+            scopeOverride={mailScope}
+            filterOverride={mailFilter}
+            onScopeChange={handleNavigateMail}
             onRequestSync={(accountId?: string) => {
               // No account id (All accounts mode) => sync EVERY connected
               // Gmail account in one aggregate operation. A specific id

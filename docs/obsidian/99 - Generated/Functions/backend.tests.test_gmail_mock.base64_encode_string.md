@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_gmail_mock
 qualified_name: backend.tests.test_gmail_mock.base64_encode_string
 source: backend/tests/test_gmail_mock.py
-line: 51
+line: 64
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `base64_encode_string` in `backend/tests/test_gmail
 
 ## Location
 
-`backend/tests/test_gmail_mock.py:51`
+`backend/tests/test_gmail_mock.py:64`
 
 ## Signature
 

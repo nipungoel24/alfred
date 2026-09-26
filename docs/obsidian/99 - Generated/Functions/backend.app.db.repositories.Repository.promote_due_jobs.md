@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.promote_due_jobs
 source: backend/app/db/repositories.py
-line: 746
+line: 1034
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Promote retryable_failed jobs whose backoff window has elapsed.
 
 ## Location
 
-`backend/app/db/repositories.py:746`
+`backend/app/db/repositories.py:1034`
 
 ## Signature
 

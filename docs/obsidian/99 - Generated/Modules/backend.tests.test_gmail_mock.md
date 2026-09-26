@@ -51,6 +51,7 @@ tags: [module, backend]
 
 - [[backend.tests.test_gmail_mock.test_gmail_html_sanitisation|test_gmail_html_sanitisation]]
 - [[backend.tests.test_gmail_mock.test_gmail_oauth_url_generation|test_gmail_oauth_url_generation]]
+- [[backend.tests.test_gmail_mock.test_gmail_oauth_url_offers_account_chooser|test_gmail_oauth_url_offers_account_chooser]]
 - [[backend.tests.test_gmail_mock.test_gmail_sync_history_expired_recovery|test_gmail_sync_history_expired_recovery]]
 - [[backend.tests.test_gmail_mock.test_gmail_sync_incremental|test_gmail_sync_incremental]]
 - [[backend.tests.test_gmail_mock.test_gmail_sync_initial|test_gmail_sync_initial]]

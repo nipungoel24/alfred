@@ -24,7 +24,7 @@ React component declared in `frontend/src/features/tasks/TasksPage.tsx`.
 ## Signature
 
 ```ts
-export function TasksPage()
+export function TasksPage(
 ```
 
 ## React Query usage
@@ -34,7 +34,9 @@ export function TasksPage()
     queryFn: fetchTasks,
   }`
 - `mutate: toggleTask`
-- `mutate: deleteTask`
+- `mutate: dismissTask`
+- `mutate: ({ id, priority }: { id: string; priority: TaskPriority }) =>
+      patchTaskPriority(id, priority)`
 
 ## Related
 

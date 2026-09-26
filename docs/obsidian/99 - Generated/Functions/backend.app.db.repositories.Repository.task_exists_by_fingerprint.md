@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.task_exists_by_fingerprint
 source: backend/app/db/repositories.py
-line: 586
+line: 852
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Check if a task with this fingerprint already exists.
 
 ## Location
 
-`backend/app/db/repositories.py:586`
+`backend/app/db/repositories.py:852`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider._normalize_message
 source: backend/app/mail/providers/gmail.py
-line: 467
+line: 482
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_normalize_message` in `backend/app/mail/providers
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:467`
+`backend/app/mail/providers/gmail.py:482`
 
 ## Signature
 
@@ -41,6 +41,8 @@ Purpose inferred from usage: `_normalize_message` in `backend/app/mail/providers
 
 ## Calls
 
+- [[backend.app.mail.identity.scoped_email_id|scoped_email_id]] (calls)
+- [[backend.app.mail.identity.scoped_thread_id|scoped_thread_id]] (calls)
 - [[backend.app.schemas.Email|Email]] (calls)
 - `fromtimestamp` (`datetime.datetime.fromtimestamp`, calls-inferred)
 

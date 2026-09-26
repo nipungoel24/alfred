@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.shutdown_backend
 source: backend/app/main.py
-line: 522
+line: 583
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Graceful in-process shutdown requested by the desktop shell.
 
 ## Location
 
-`backend/app/main.py:522`
+`backend/app/main.py:583`
 
 ## Parameters
 

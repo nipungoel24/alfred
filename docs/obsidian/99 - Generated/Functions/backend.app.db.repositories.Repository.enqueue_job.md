@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.enqueue_job
 source: backend/app/db/repositories.py
-line: 615
+line: 903
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Enqueue a background job. Idempotent — skips if job already exists.
 
 ## Location
 
-`backend/app/db/repositories.py:615`
+`backend/app/db/repositories.py:903`
 
 ## Signature
 

@@ -24,6 +24,7 @@ tags: [module, backend]
 - `Enum` ← `enum.Enum`
 - `Field` ← `pydantic.Field`
 - `datetime` ← `datetime.datetime`
+- `field_validator` ← `pydantic.field_validator`
 
 ## Classes
 
@@ -37,4 +38,14 @@ tags: [module, backend]
 - [[backend.app.schemas.ErrorDetail|ErrorDetail]]
 - [[backend.app.schemas.InboxBriefing|InboxBriefing]]
 - [[backend.app.schemas.Priority|Priority]]
+- [[backend.app.schemas.SearchFilters|SearchFilters]]
 - [[backend.app.schemas.Task|Task]]
+- [[backend.app.schemas.TaskPriorityPatch|TaskPriorityPatch]]
+
+## Functions
+
+- [[backend.app.schemas.SearchFilters._resolve_mailbox_state|_resolve_mailbox_state]]
+
+## Constants
+
+- `IN_SCOPE_TO_MAILBOX_STATE`

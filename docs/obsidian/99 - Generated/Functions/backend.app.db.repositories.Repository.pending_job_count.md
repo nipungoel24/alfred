@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.pending_job_count
 source: backend/app/db/repositories.py
-line: 712
+line: 1000
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `pending_job_count` in `backend/app/db/repositories
 
 ## Location
 
-`backend/app/db/repositories.py:712`
+`backend/app/db/repositories.py:1000`
 
 ## Signature
 

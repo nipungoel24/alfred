@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.save_analysis
 source: backend/app/db/repositories.py
-line: 380
+line: 616
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Save analysis result. Does NOT create tasks — that is TaskDerivationService's 
 
 ## Location
 
-`backend/app/db/repositories.py:380`
+`backend/app/db/repositories.py:616`
 
 ## Signature
 

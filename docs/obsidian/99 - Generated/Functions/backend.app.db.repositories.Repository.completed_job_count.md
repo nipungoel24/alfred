@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.completed_job_count
 source: backend/app/db/repositories.py
-line: 721
+line: 1009
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `completed_job_count` in `backend/app/db/repositori
 
 ## Location
 
-`backend/app/db/repositories.py:721`
+`backend/app/db/repositories.py:1009`
 
 ## Signature
 

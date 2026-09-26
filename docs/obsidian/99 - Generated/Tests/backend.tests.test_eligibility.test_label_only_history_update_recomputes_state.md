@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_label_only_history_update_recomputes_state
 source: backend/tests/test_eligibility.py
-line: 199
+line: 200
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_label_only_history_update_recomputes_state` i
 
 ## Location
 
-`backend/tests/test_eligibility.py:199`
+`backend/tests/test_eligibility.py:200`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_counts_report_inbox_allmail_excluded
 source: backend/tests/test_allmail.py
-line: 121
+line: 122
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_counts_report_inbox_allmail_excluded` in `bac
 
 ## Location
 
-`backend/tests/test_allmail.py:121`
+`backend/tests/test_allmail.py:122`
 
 ## Signature
 

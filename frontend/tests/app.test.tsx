@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import { describe, expect, it, vi, beforeEach, afterEach } from 'vitest';
-import { render, screen, fireEvent, waitFor, cleanup } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, cleanup, within } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import App from '../src/App';
 import * as api from '../src/api/emails';
@@ -148,10 +148,17 @@ describe('Alfred Frontend Application', () => {
         <App />
       </QueryClientProvider>
     );
-    expect(await screen.findByRole('button', { name: 'Mail' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Overview' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Tasks' })).toBeInTheDocument();
-    expect(await screen.findByText(/AI Ready/)).toBeInTheDocument();
+    // The primary navigation now exposes every capability with a real label.
+    const nav = await screen.findByRole('navigation', { name: /sections/i });
+    for (const label of [
+      'Inbox', 'All Mail', 'Important', 'Needs Reply', 'Later',
+      'Overview', 'Tasks', 'Deadlines', 'Accounts', 'Settings',
+    ]) {
+      expect(within(nav).getByRole('button', { name: new RegExp(`^${label}`) })).toBeInTheDocument();
+    }
+    // Service status is reported as text, not a bare coloured dot.
+    expect(await screen.findByText('Local AI ready')).toBeInTheDocument();
+    expect(screen.getByText('Gmail connected')).toBeInTheDocument();
   }, 15000);
 
   it('renders briefing metrics and top attention items on Overview', async () => {
@@ -167,10 +174,12 @@ describe('Alfred Frontend Application', () => {
 
     await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
 
-    expect(screen.getByText('Inbox')).toBeInTheDocument();
-    expect(screen.getByText('Important')).toBeInTheDocument();
-    expect(screen.getByText('Deadlines')).toBeInTheDocument();
-    expect(screen.getByText('Needs attention')).toBeInTheDocument();
+    // Scope to the page: the sidebar now also carries an "Inbox" label.
+    const main = screen.getByRole('main');
+    expect(within(main).getByText('Inbox')).toBeInTheDocument();
+    expect(within(main).getByText('Important')).toBeInTheDocument();
+    expect(within(main).getByText('Deadlines')).toBeInTheDocument();
+    expect(within(main).getByText('Needs attention')).toBeInTheDocument();
   }, 15000);
 
   it('opens Mail workspace by default and navigates via the rail', async () => {
@@ -191,7 +200,8 @@ describe('Alfred Frontend Application', () => {
     // Rail navigation to other surfaces still works
     fireEvent.click(screen.getByRole('button', { name: 'Overview' }));
     await screen.findByText('One payment failed. Tech newsletter received.', {}, { timeout: 8000 });
-    fireEvent.click(screen.getByRole('button', { name: 'Mail' }));
+    const nav = screen.getByRole('navigation', { name: /sections/i });
+    fireEvent.click(within(nav).getByRole('button', { name: /^Inbox/ }));
     await screen.findByRole('tab', { name: /Primary/ }, { timeout: 8000 });
   }, 15000);
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_inbox_scope_shows_active_inbox_only
 source: backend/tests/test_allmail.py
-line: 41
+line: 42
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_inbox_scope_shows_active_inbox_only` in `back
 
 ## Location
 
-`backend/tests/test_allmail.py:41`
+`backend/tests/test_allmail.py:42`
 
 ## Signature
 

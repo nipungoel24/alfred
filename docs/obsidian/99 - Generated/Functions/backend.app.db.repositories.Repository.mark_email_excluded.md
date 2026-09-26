@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.mark_email_excluded
 source: backend/app/db/repositories.py
-line: 160
+line: 180
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Exclude a cached message from all current-attention projections.
 
 ## Location
 
-`backend/app/db/repositories.py:160`
+`backend/app/db/repositories.py:180`
 
 ## Signature
 

@@ -24,7 +24,7 @@ Function declared in `frontend/src/features/overview/OverviewPage.test.tsx`.
 ## Signature
 
 ```ts
-function renderPage(onNavigate?: (page: string) => void)
+function renderPage(onNavigate?: (page: string) => void, onOpenEmail?: (id: string) => void)
 ```
 
 ## Related

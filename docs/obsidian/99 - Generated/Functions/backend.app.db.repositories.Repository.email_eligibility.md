@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.email_eligibility
 source: backend/app/db/repositories.py
-line: 102
+line: 122
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Persisted eligibility projection for one message.
 
 ## Location
 
-`backend/app/db/repositories.py:102`
+`backend/app/db/repositories.py:122`
 
 ## Signature
 

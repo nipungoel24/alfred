@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_category_filter_is_db_driven
 source: backend/tests/test_eligibility.py
-line: 258
+line: 259
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_category_filter_is_db_driven` in `backend/tes
 
 ## Location
 
-`backend/tests/test_eligibility.py:258`
+`backend/tests/test_eligibility.py:259`
 
 ## Signature
 

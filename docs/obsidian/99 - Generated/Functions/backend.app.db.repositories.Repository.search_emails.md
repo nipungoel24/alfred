@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.search_emails
 source: backend/app/db/repositories.py
-line: 319
+line: 369
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Full-text search using FTS5 if available, falling back to LIKE.
 
 ## Location
 
-`backend/app/db/repositories.py:319`
+`backend/app/db/repositories.py:369`
 
 ## Signature
 
@@ -41,6 +41,7 @@ Full-text search using FTS5 if available, falling back to LIKE.
 
 ## Calls
 
+- [[backend.app.db.search_query.compile_fts_match|compile_fts_match]] (calls)
 - `model_validate_json` (`backend.app.schemas.Email.model_validate_json`, calls-inferred)
 
 ## Called By

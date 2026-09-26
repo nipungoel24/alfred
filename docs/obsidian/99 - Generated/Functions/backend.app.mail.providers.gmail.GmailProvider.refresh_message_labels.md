@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.refresh_message_labels
 source: backend/app/mail/providers/gmail.py
-line: 75
+line: 80
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Fetch ONLY the current label set of a message (format=METADATA).
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:75`
+`backend/app/mail/providers/gmail.py:80`
 
 ## Signature
 

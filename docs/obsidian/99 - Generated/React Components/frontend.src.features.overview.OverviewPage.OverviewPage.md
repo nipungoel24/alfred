@@ -34,7 +34,7 @@ export function OverviewPage(
     queryKey: ['emails', { scope: 'overview' }],
     queryFn: () => fetchEmails({ limit: 200 }),
   }`
-- `{ queryKey: ['emailCounts'], queryFn: emailCounts }`
+- `{ queryKey: ['emailCounts'], queryFn: () => emailCounts() }`
 - `mutate: regenerateBriefing`
 
 ## Related

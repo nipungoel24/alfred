@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.lifespan
 source: backend/app/main.py
-line: 442
+line: 500
 status: active
 tags: [backend, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `lifespan` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:442`
+`backend/app/main.py:500`
 
 ## Signature
 

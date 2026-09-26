@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._derive_and_save_tasks
 source: backend/app/main.py
-line: 300
+line: 321
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Derive tasks from analysis and persist them, deduplicating.
 
 ## Location
 
-`backend/app/main.py:300`
+`backend/app/main.py:321`
 
 ## Signature
 

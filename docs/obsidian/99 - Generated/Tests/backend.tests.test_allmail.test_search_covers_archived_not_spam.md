@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_search_covers_archived_not_spam
 source: backend/tests/test_allmail.py
-line: 112
+line: 113
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_search_covers_archived_not_spam` in `backend/
 
 ## Location
 
-`backend/tests/test_allmail.py:112`
+`backend/tests/test_allmail.py:113`
 
 ## Signature
 

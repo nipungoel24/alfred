@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.backfill_messages
 source: backend/app/mail/providers/gmail.py
-line: 121
+line: 126
 status: active
 tags: [gmail, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Progressive All Mail backfill — ONE bounded page per call.
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:121`
+`backend/app/mail/providers/gmail.py:126`
 
 ## Signature
 
@@ -48,6 +48,7 @@ Progressive All Mail backfill — ONE bounded page per call.
 - [[backend.app.db.repositories.Repository.update_email_labels|update_email_labels]] (calls)
 - [[backend.app.db.repositories.Repository.upsert_email|upsert_email]] (calls)
 - [[backend.app.mail.fingerprint.content_fingerprint|content_fingerprint]] (calls)
+- [[backend.app.mail.identity.scoped_email_id|scoped_email_id]] (calls)
 - `AsyncClient` (`httpx.AsyncClient`, calls-inferred)
 
 ## Reads

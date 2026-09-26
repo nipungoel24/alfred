@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.save_credentials
 source: backend/app/db/repositories.py
-line: 478
+line: 714
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `save_credentials` in `backend/app/db/repositories.
 
 ## Location
 
-`backend/app/db/repositories.py:478`
+`backend/app/db/repositories.py:714`
 
 ## Signature
 

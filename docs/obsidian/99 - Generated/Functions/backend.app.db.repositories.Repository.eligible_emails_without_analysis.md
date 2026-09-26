@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.eligible_emails_without_analysis
 source: backend/app/db/repositories.py
-line: 289
+line: 327
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ ACTIVE-Inbox messages that still need analysis (for the queue).
 
 ## Location
 
-`backend/app/db/repositories.py:289`
+`backend/app/db/repositories.py:327`
 
 ## Signature
 

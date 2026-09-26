@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.save_account
 source: backend/app/db/repositories.py
-line: 432
+line: 668
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `save_account` in `backend/app/db/repositories.py`.
 
 ## Location
 
-`backend/app/db/repositories.py:432`
+`backend/app/db/repositories.py:668`
 
 ## Signature
 

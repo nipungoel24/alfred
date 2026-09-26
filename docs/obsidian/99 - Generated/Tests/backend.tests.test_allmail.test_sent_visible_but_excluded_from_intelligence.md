@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail.test_sent_visible_but_excluded_from_intelligence
 source: backend/tests/test_allmail.py
-line: 78
+line: 79
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_sent_visible_but_excluded_from_intelligence` 
 
 ## Location
 
-`backend/tests/test_allmail.py:78`
+`backend/tests/test_allmail.py:79`
 
 ## Signature
 

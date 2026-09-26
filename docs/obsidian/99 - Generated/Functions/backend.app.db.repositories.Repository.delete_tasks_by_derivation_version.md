@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.delete_tasks_by_derivation_version
 source: backend/app/db/repositories.py
-line: 595
+line: 882
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Delete all tasks created by a specific derivation version.
 
 ## Location
 
-`backend/app/db/repositories.py:595`
+`backend/app/db/repositories.py:882`
 
 ## Signature
 

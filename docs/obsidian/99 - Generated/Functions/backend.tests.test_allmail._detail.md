@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_allmail
 qualified_name: backend.tests.test_allmail._detail
 source: backend/tests/test_allmail.py
-line: 188
+line: 189
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_detail` in `backend/tests/test_allmail.py`.
 
 ## Location
 
-`backend/tests/test_allmail.py:188`
+`backend/tests/test_allmail.py:189`
 
 ## Signature
 

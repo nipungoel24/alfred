@@ -1,0 +1,34 @@
+---
+type: function
+generated: true
+language: rust
+layer: backend
+module: desktop.src-tauri.src.main
+qualified_name: desktop.src-tauri.src.main.tokens_are_unique_across_many_draws
+source: desktop/src-tauri/src/main.rs
+line: 1528
+status: active
+tags: [backend, function]
+---
+
+# tokens_are_unique_across_many_draws
+
+> Auto-generated from source code. Do not manually edit this file; update source code or generator instead.
+
+## Purpose
+
+Purpose inferred from usage: `tokens_are_unique_across_many_draws` in `desktop/src-tauri/src/main.rs`.
+
+## Location
+
+`desktop/src-tauri/src/main.rs:1528`
+
+## Signature
+
+```rust
+fn tokens_are_unique_across_many_draws()
+```
+
+## Side Effects
+
+- handles credentials/tokens — see [[Token Security]]

@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.cached_analysis
 source: backend/app/db/repositories.py
-line: 373
+line: 609
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `cached_analysis` in `backend/app/db/repositories.p
 
 ## Location
 
-`backend/app/db/repositories.py:373`
+`backend/app/db/repositories.py:609`
 
 ## Signature
 

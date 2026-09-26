@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail
 qualified_name: backend.app.mail.providers.gmail.GmailProvider
 source: backend/app/mail/providers/gmail.py
-line: 9
+line: 10
 status: active
 tags: [gmail, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `GmailProvider` in `backend/app/mail/providers/gmai
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:9`
+`backend/app/mail/providers/gmail.py:10`
 
 ## Bases
 
@@ -33,6 +33,8 @@ Purpose inferred from usage: `GmailProvider` in `backend/app/mail/providers/gmai
 - [[backend.tests.test_allmail.test_backfill_never_requests_spam_trash|test_backfill_never_requests_spam_trash]]
 - [[backend.tests.test_allmail.test_backfill_skips_cached_rows_and_updates_labels|test_backfill_skips_cached_rows_and_updates_labels]]
 - [[backend.tests.test_gmail_mock.mock_gmail|mock_gmail]]
+- [[backend.tests.test_multi_account.test_same_provider_message_id_collision|test_same_provider_message_id_collision]]
+- [[backend.tests.test_thread_isolation.provider|provider]]
 
 ## Side Effects
 

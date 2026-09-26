@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.job
 source: backend/app/db/repositories.py
-line: 692
+line: 980
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `job` in `backend/app/db/repositories.py`.
 
 ## Location
 
-`backend/app/db/repositories.py:692`
+`backend/app/db/repositories.py:980`
 
 ## Signature
 

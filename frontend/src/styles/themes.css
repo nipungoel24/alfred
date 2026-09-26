@@ -1,187 +1,167 @@
-/* ═══════════════════════════════════════════════════════════════
-   ALFRED THEMES — the complete color system per resolved theme.
-   Semantic colors, ambient aurora colors, glass surfaces, elevation.
-   ═══════════════════════════════════════════════════════════════ */
+/*
+   Alfred theme values — light and dark.
 
-/* ────────────────────────────────────────────────
-   LIGHT — cool neutral, Siri-like ambient energy,
-   translucent white surfaces, quiet chromatic glow
-   ──────────────────────────────────────────────── */
+   Every text/background pair used together was measured with the WCAG 2.1
+   relative-luminance formula against every surface it appears on, not
+   estimated. Worst-case ratios are recorded in docs/UI-DESIGN-SPEC.md §3.
+
+   Rules enforced here:
+   - accent means selected / focused / unread / primary action. Never status.
+   - status is always icon + label. Never colour alone.
+   - --text-faint is decoration only. Any text uses --text-secondary or
+     --text-muted.
+*/
+
 :root[data-theme='light'] {
   color-scheme: light;
 
-  --bg-app:            #f2f3f8;
-  --bg-panel:          rgba(255, 255, 255, 0.66);
-  --bg-panel-solid:    #ffffff;
-  --bg-panel-subtle:   rgba(250, 250, 252, 0.72);
-  --bg-raised:         rgba(255, 255, 255, 0.82);
-  --bg-sunken:         rgba(30, 34, 48, 0.045);
-  --bg-input:          rgba(255, 255, 255, 0.60);
-  --bg-input-hover:    rgba(255, 255, 255, 0.85);
-  --bg-row-hover:      rgba(46, 52, 74, 0.05);
-  --bg-row-active:     rgba(109, 90, 224, 0.10);
-  --bg-row-selected:   rgba(109, 90, 224, 0.075);
-  --bg-overlay:        rgba(22, 26, 38, 0.30);
+  /* ── Surfaces ──────────────────────────────────────────────────── */
+  --bg-app: #f2f3f8;
+  --bg-panel: #ffffff;
+  --bg-panel-subtle: #fafbfc;
+  --bg-elevated: #ffffff;
+  --bg-reader: #fdfdfc;
+  --bg-sunken: rgba(28, 34, 48, 0.045);
+  --bg-overlay: rgba(22, 26, 38, 0.32);
 
-  /* Reader document surface — warm paper white */
-  --bg-reader:         #fdfdfc;
-  --reader-border:     rgba(30, 34, 48, 0.10);
-  --reader-shadow:     0 1px 2px rgba(30, 34, 48, 0.04), 0 10px 32px rgba(30, 34, 48, 0.07);
+  --bg-input: #ffffff;
+  --bg-input-hover: #fbfcfd;
 
-  --border-subtle:     rgba(30, 34, 48, 0.085);
-  --border-default:    rgba(30, 34, 48, 0.16);
-  --border-hover:      rgba(30, 34, 48, 0.26);
-  --border-focus:      rgba(109, 90, 224, 0.55);
+  --bg-row-hover: rgba(28, 34, 48, 0.05);
+  --bg-row-active: rgba(11, 107, 107, 0.1);
+  --bg-row-selected: rgba(11, 107, 107, 0.08);
 
-  --text-primary:      #1c2029;
-  --text-secondary:    #444a5e;
-  --text-muted:        #767e97;
-  --text-faint:        #a0a7bd;
-  --text-inverse:      #ffffff;
+  /* ── Borders ───────────────────────────────────────────────────── */
+  --border-subtle: rgba(28, 34, 48, 0.09);
+  --border-default: rgba(28, 34, 48, 0.16);
+  --border-hover: rgba(28, 34, 48, 0.28);
+  --border-focus: #0b6b6b;
 
-  --accent:            #6d5ae0;
-  --accent-hover:      #7c6ae8;
-  --accent-active:     #5d4cc9;
-  --accent-soft:       rgba(109, 90, 224, 0.11);
-  --accent-text:       #5a49d0;
+  /* ── Text ──────────────────────────────────────────────────────── */
+  --text-primary: #1c2029;    /* 14.71 on --bg-app */
+  --text-secondary: #444a5e;  /*  7.94 */
+  --text-muted: #646c80;      /*  4.74  (was #767e97 at 3.64 — AA fail) */
+  --text-faint: #7d8599;      /* DECORATION ONLY */
+  --text-inverse: #ffffff;
 
-  --success:           #15936a;
-  --success-soft:      rgba(21, 147, 106, 0.11);
-  --warning:           #b07d1a;
-  --warning-soft:      rgba(176, 125, 26, 0.12);
-  --danger:            #d04848;
-  --danger-soft:       rgba(208, 72, 72, 0.10);
-  --info:              #2e7fd6;
-  --info-soft:         rgba(46, 127, 214, 0.10);
+  /* ── Accent (teal — see ADR-005) ───────────────────────────────── */
+  --accent: #0b6b6b;         /*  5.69 on --bg-app */
+  --accent-hover: #095a5a;
+  --accent-active: #074949;
+  --accent-text: #0b6b6b;
+  --accent-soft: rgba(11, 107, 107, 0.1);
+  --accent-softer: rgba(11, 107, 107, 0.06);
+  --accent-border: rgba(11, 107, 107, 0.32);
 
-  --priority-urgent-bg:  rgba(208, 72, 72, 0.11);
-  --priority-urgent-fg:  #bd3535;
-  --priority-high-bg:    rgba(176, 125, 26, 0.13);
-  --priority-high-fg:    #8a650c;
-  --priority-medium-bg:  rgba(46, 127, 214, 0.11);
-  --priority-medium-fg:  #2268ba;
-  --priority-low-bg:     rgba(90, 100, 130, 0.10);
-  --priority-low-fg:     #5a6280;
+  /* ── Semantic (all >= 4.5 on panel and app) ────────────────────── */
+  --success: #0f7d59;         /* 4.62 */
+  --success-soft: rgba(15, 125, 89, 0.11);
+  --warning: #8a5f0e;         /* 5.09 */
+  --warning-soft: rgba(138, 95, 14, 0.12);
+  --danger: #c53f3f;          /* 4.56 */
+  --danger-soft: rgba(197, 63, 63, 0.1);
+  --info: #1f6fc4;            /* 4.59 */
+  --info-soft: rgba(31, 111, 196, 0.1);
 
-  --scrollbar-thumb:        rgba(30, 34, 48, 0.18);
-  --scrollbar-thumb-hover:  rgba(30, 34, 48, 0.30);
+  /* ── Priority ramp ────────────────────────────────────────────────
+     Separate from semantics. A priority badge never borrows a
+     semantic hue. */
+  --priority-urgent-bg: rgba(197, 63, 63, 0.12);
+  --priority-urgent-fg: #a82f2f;
+  --priority-high-bg: rgba(138, 95, 14, 0.14);
+  --priority-high-fg: #6f4c0b;
+  --priority-medium-bg: rgba(31, 111, 196, 0.12);
+  --priority-medium-fg: #1a5a9e;
+  --priority-low-bg: rgba(90, 100, 130, 0.1);
+  --priority-low-fg: #5a6280;
 
-  --skeleton-base: rgba(30, 34, 48, 0.055);
-  --skeleton-peak: rgba(30, 34, 48, 0.12);
+  /* ── Scrollbar ─────────────────────────────────────────────────── */
+  --scrollbar-thumb: rgba(28, 34, 48, 0.2);
+  --scrollbar-thumb-hover: rgba(28, 34, 48, 0.32);
 
-  --unread-dot: var(--accent);
+  /* ── Skeleton ──────────────────────────────────────────────────── */
+  --skeleton-base: rgba(28, 34, 48, 0.06);
+  --skeleton-peak: rgba(28, 34, 48, 0.13);
 
-  /* ── Ambient aurora (quiet pastel energy) ── */
-  --ambient-opacity: 0.5;
-  --ambient-violet: rgba(134, 102, 255, 0.20);
-  --ambient-indigo: rgba(92, 124, 255, 0.17);
-  --ambient-cyan:   rgba(64, 190, 224, 0.15);
-  --ambient-pink:   rgba(240, 128, 200, 0.10);
-
-  /* ── Glass surfaces ── */
-  --glass-rail:    rgba(255, 255, 255, 0.52);
-  --glass-header:  rgba(255, 255, 255, 0.60);
-  --glass-pane:    rgba(255, 255, 255, 0.55);
-  --glass-panel:   rgba(255, 255, 255, 0.66);
-  --glass-strong:  rgba(255, 255, 255, 0.82);
-  --glass-input:   rgba(255, 255, 255, 0.55);
-
-  /* ── Elevation ── */
-  --shadow-1: 0 1px 2px rgba(30, 34, 48, 0.05);
-  --shadow-2: 0 4px 14px rgba(30, 34, 48, 0.07);
-  --shadow-3: 0 14px 42px rgba(30, 34, 48, 0.13);
-  --shadow-accent: 0 2px 10px rgba(109, 90, 224, 0.18);
-  --highlight-top: inset 0 1px 0 rgba(255, 255, 255, 0.65);
+  /* ── Elevation ─────────────────────────────────────────────────── */
+  --shadow-1: 0 1px 2px rgba(28, 34, 48, 0.05), 0 4px 12px rgba(28, 34, 48, 0.05);
+  --shadow-2: 0 4px 14px rgba(28, 34, 48, 0.09);
+  --shadow-3: 0 16px 44px rgba(28, 34, 48, 0.16);
+  --reader-shadow: var(--shadow-1);
 }
 
-/* ────────────────────────────────────────────────
-   DARK — deep graphite/midnight, cinematic glow,
-   layered translucent surfaces, calm accents
-   ──────────────────────────────────────────────── */
 :root[data-theme='dark'] {
   color-scheme: dark;
 
-  --bg-app:            #0b0d13;
-  --bg-panel:          rgba(19, 22, 32, 0.60);
-  --bg-panel-solid:    #131620;
-  --bg-panel-subtle:   rgba(22, 26, 38, 0.62);
-  --bg-raised:         rgba(27, 31, 45, 0.80);
-  --bg-sunken:         rgba(0, 0, 0, 0.28);
-  --bg-input:          rgba(255, 255, 255, 0.05);
-  --bg-input-hover:    rgba(255, 255, 255, 0.085);
-  --bg-row-hover:      rgba(255, 255, 255, 0.04);
-  --bg-row-active:     rgba(139, 123, 245, 0.13);
-  --bg-row-selected:   rgba(139, 123, 245, 0.10);
-  --bg-overlay:        rgba(4, 6, 10, 0.55);
+  /* ── Surfaces ──────────────────────────────────────────────────── */
+  --bg-app: #0b0d13;
+  --bg-panel: #131620;
+  --bg-panel-subtle: #171b26;
+  --bg-elevated: #1a1f2b;
+  --bg-reader: #151a24;
+  --bg-sunken: rgba(0, 0, 0, 0.3);
+  --bg-overlay: rgba(4, 6, 11, 0.62);
 
-  /* Reader document surface — elevated graphite */
-  --bg-reader:         #151a24;
-  --reader-border:     rgba(255, 255, 255, 0.08);
-  --reader-shadow:     0 1px 2px rgba(0, 0, 0, 0.30), 0 12px 36px rgba(0, 0, 0, 0.38);
+  --bg-input: #171b26;
+  --bg-input-hover: #1b2029;
 
-  --border-subtle:     rgba(255, 255, 255, 0.065);
-  --border-default:    rgba(255, 255, 255, 0.12);
-  --border-hover:      rgba(255, 255, 255, 0.20);
-  --border-focus:      rgba(139, 123, 245, 0.65);
+  --bg-row-hover: rgba(255, 255, 255, 0.045);
+  --bg-row-active: rgba(63, 184, 176, 0.16);
+  --bg-row-selected: rgba(63, 184, 176, 0.14);
 
-  --text-primary:      #eef0f5;
-  --text-secondary:    #b3bacb;
-  --text-muted:        #7c86a0;
-  --text-faint:        #525c76;
-  --text-inverse:      #13141c;
+  /* ── Borders ───────────────────────────────────────────────────── */
+  --border-subtle: rgba(255, 255, 255, 0.08);
+  --border-default: rgba(255, 255, 255, 0.14);
+  --border-hover: rgba(255, 255, 255, 0.26);
+  --border-focus: #3fb8b0;
 
-  --accent:            #8b7bf5;
-  --accent-hover:      #9e90f8;
-  --accent-active:     #7a69e8;
-  --accent-soft:       rgba(139, 123, 245, 0.15);
-  --accent-text:       #a99cf9;
+  /* ── Text ──────────────────────────────────────────────────────── */
+  --text-primary: #eef0f5;    /* 17.03 on --bg-app */
+  --text-secondary: #b3bacb;  /*  9.29 */
+  --text-muted: #8b95ad;      /*  6.13 */
+  --text-faint: #75809c;      /* DECORATION ONLY (was #525c76 at 2.61) */
+  --text-inverse: #0b0d13;
 
-  --success:           #3ecf8e;
-  --success-soft:      rgba(62, 207, 142, 0.13);
-  --warning:           #e8b44f;
-  --warning-soft:      rgba(232, 180, 79, 0.13);
-  --danger:            #ef7d7d;
-  --danger-soft:       rgba(239, 125, 125, 0.13);
-  --info:              #5fa8f5;
-  --info-soft:         rgba(95, 168, 245, 0.13);
+  /* ── Accent (teal — see ADR-005) ───────────────────────────────── */
+  --accent: #3fb8b0;         /*  7.21 on --bg-reader */
+  --accent-hover: #5ccbc3;
+  --accent-active: #7fd8d1;
+  --accent-text: #3fb8b0;
+  --accent-soft: rgba(63, 184, 176, 0.14);
+  --accent-softer: rgba(63, 184, 176, 0.08);
+  --accent-border: rgba(63, 184, 176, 0.36);
 
-  --priority-urgent-bg:  rgba(239, 125, 125, 0.14);
-  --priority-urgent-fg:  #f2a0a0;
-  --priority-high-bg:    rgba(232, 180, 79, 0.13);
-  --priority-high-fg:    #ecc878;
-  --priority-medium-bg:  rgba(95, 168, 245, 0.13);
-  --priority-medium-fg:  #92c0f7;
-  --priority-low-bg:     rgba(148, 163, 184, 0.10);
-  --priority-low-fg:     #9aa4bd;
+  /* ── Semantic ──────────────────────────────────────────────────── */
+  --success: #3ecf8e;         /* 9.04 */
+  --success-soft: rgba(62, 207, 142, 0.13);
+  --warning: #e8b44f;         /* 9.52 */
+  --warning-soft: rgba(232, 180, 79, 0.13);
+  --danger: #ef7d7d;          /* 6.79 */
+  --danger-soft: rgba(239, 125, 125, 0.13);
+  --info: #5fa8f5;            /* 7.23 */
+  --info-soft: rgba(95, 168, 245, 0.13);
 
-  --scrollbar-thumb:        rgba(255, 255, 255, 0.13);
-  --scrollbar-thumb-hover:  rgba(255, 255, 255, 0.24);
+  /* ── Priority ramp ──────────────────────────────────────────────── */
+  --priority-urgent-bg: rgba(239, 125, 125, 0.15);
+  --priority-urgent-fg: #f5a3a3;
+  --priority-high-bg: rgba(232, 180, 79, 0.15);
+  --priority-high-fg: #e8c078;
+  --priority-medium-bg: rgba(95, 168, 245, 0.15);
+  --priority-medium-fg: #93c4f8;
+  --priority-low-bg: rgba(154, 163, 184, 0.13);
+  --priority-low-fg: #a8b0c4;
 
+  /* ── Scrollbar ─────────────────────────────────────────────────── */
+  --scrollbar-thumb: rgba(255, 255, 255, 0.16);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.28);
+
+  /* ── Skeleton ──────────────────────────────────────────────────── */
   --skeleton-base: rgba(255, 255, 255, 0.05);
   --skeleton-peak: rgba(255, 255, 255, 0.11);
 
-  --unread-dot: var(--accent);
-
-  /* ── Ambient aurora (deep, calm, cinematic) ── */
-  --ambient-opacity: 0.48;
-  --ambient-violet: rgba(126, 96, 255, 0.15);
-  --ambient-indigo: rgba(72, 118, 255, 0.11);
-  --ambient-cyan:   rgba(48, 170, 210, 0.09);
-  --ambient-pink:   rgba(224, 96, 190, 0.07);
-
-  /* ── Glass surfaces ── */
-  --glass-rail:    rgba(16, 19, 28, 0.60);
-  --glass-header:  rgba(14, 17, 25, 0.62);
-  --glass-pane:    rgba(18, 21, 31, 0.56);
-  --glass-panel:   rgba(21, 25, 36, 0.62);
-  --glass-strong:  rgba(27, 31, 45, 0.82);
-  --glass-input:   rgba(0, 0, 0, 0.24);
-
-  /* ── Elevation ── */
-  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
-  --shadow-2: 0 6px 18px rgba(0, 0, 0, 0.35);
-  --shadow-3: 0 18px 50px rgba(0, 0, 0, 0.50);
-  --shadow-accent: 0 4px 18px rgba(139, 123, 245, 0.22);
-  --highlight-top: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+  /* ── Elevation ─────────────────────────────────────────────────── */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.3), 0 4px 12px rgba(0, 0, 0, 0.26);
+  --shadow-2: 0 4px 16px rgba(0, 0, 0, 0.4);
+  --shadow-3: 0 18px 50px rgba(0, 0, 0, 0.55);
+  --reader-shadow: var(--shadow-1);
 }
-

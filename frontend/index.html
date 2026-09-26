@@ -3,9 +3,10 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="color-scheme" content="light dark" />
     <title>Alfred</title>
+    <meta name="description" content="A local-first Gmail command center for Windows." />
     <link rel="icon" type="image/png" href="/alfred-icon.png" />
-    <link rel="apple-touch-icon" href="/icon-192.png" />
     <script>
       // Apply theme BEFORE first paint to avoid light/dark flashes.
       (function () {
@@ -22,9 +23,70 @@
         document.documentElement.dataset.theme = resolved;
       })();
     </script>
+    <style>
+      /*
+        Pre-React startup shell.
+        The native window is created visible so the user sees Alfred
+        immediately, which means the very first painted frame must already be
+        branded. React replaces this markup on mount; nothing here is a
+        duplicate of the React component, it is a static first frame.
+        Colours are duplicated from the theme tokens on purpose: at this point
+        the bundled stylesheet has not loaded yet.
+      */
+      html, body { height: 100%; margin: 0; }
+      body {
+        background: #f2f3f8;
+        color: #1c2029;
+        font-family: 'Segoe UI Variable Text', 'Segoe UI', system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+      }
+      html[data-theme='dark'] body { background: #0b0d13; color: #eef0f5; }
+      #root { height: 100%; }
+      .alfred-boot {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+      }
+      .alfred-boot-mark { width: 44px; height: 44px; display: block; }
+      .alfred-boot-title { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+      .alfred-boot-bar {
+        width: 168px; height: 2px; border-radius: 2px; overflow: hidden;
+        background: rgba(28, 32, 41, 0.12);
+      }
+      html[data-theme='dark'] .alfred-boot-bar { background: rgba(238, 240, 245, 0.14); }
+      .alfred-boot-bar::after {
+        content: ''; display: block; height: 100%; width: 40%; border-radius: 2px;
+        background: currentColor; opacity: 0.55;
+        animation: alfred-boot-slide 1.4s cubic-bezier(0.22, 1, 0.36, 1) infinite;
+      }
+      @keyframes alfred-boot-slide {
+        0%   { transform: translateX(-100%); }
+        100% { transform: translateX(250%); }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .alfred-boot-bar::after { animation: none; width: 100%; opacity: 0.35; }
+      }
+    </style>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!-- Static first frame. Replaced by React on mount. -->
+      <div class="alfred-boot" role="status" aria-live="polite">
+        <svg class="alfred-boot-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect x="1" y="1" width="30" height="30" rx="7" fill="currentColor" opacity="0.1" />
+          <path
+            d="M16 7 L24 25 H20.2 L16 14.6 L11.8 25 H8 Z"
+            fill="currentColor"
+          />
+          <path d="M12.4 20.4 H19.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" opacity="0.55" />
+        </svg>
+        <div class="alfred-boot-title">Starting Alfred</div>
+        <div class="alfred-boot-bar"></div>
+      </div>
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

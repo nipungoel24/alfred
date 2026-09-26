@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.all_analyses_with_emails
 source: backend/app/db/repositories.py
-line: 391
+line: 627
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Load all email+analysis pairs efficiently in a single query.
 
 ## Location
 
-`backend/app/db/repositories.py:391`
+`backend/app/db/repositories.py:627`
 
 ## Signature
 

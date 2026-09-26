@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.runtime_token_middleware
 source: backend/app/main.py
-line: 503
+line: 561
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `runtime_token_middleware` in `backend/app/main.py`
 
 ## Location
 
-`backend/app/main.py:503`
+`backend/app/main.py:561`
 
 ## Signature
 
@@ -37,6 +37,7 @@ Purpose inferred from usage: `runtime_token_middleware` in `backend/app/main.py`
 ## Calls
 
 - `JSONResponse` (`fastapi.responses.JSONResponse`, calls-inferred)
+- `compare_digest` (`secrets.compare_digest`, calls-inferred)
 
 ## Side Effects
 

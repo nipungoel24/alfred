@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_eligibility
 qualified_name: backend.tests.test_eligibility.test_history_label_changes_refresh_via_metadata
 source: backend/tests/test_eligibility.py
-line: 340
+line: 341
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_history_label_changes_refresh_via_metadata` i
 
 ## Location
 
-`backend/tests/test_eligibility.py:340`
+`backend/tests/test_eligibility.py:341`
 
 ## Signature
 

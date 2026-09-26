@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.repositories.Repository
 qualified_name: backend.app.db.repositories.Repository.emails_missing_labels
 source: backend/app/db/repositories.py
-line: 174
+line: 194
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ IDs of cached Gmail messages whose label set is unknown.
 
 ## Location
 
-`backend/app/db/repositories.py:174`
+`backend/app/db/repositories.py:194`
 
 ## Signature
 
