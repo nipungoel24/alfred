@@ -179,7 +179,7 @@ Documents: `docs/UI-AUDIT.md`, `docs/UI-DESIGN-SPEC.md`, ADR-005 updated to **Ac
 | UI-2 sidebar | done | 56px icon rail → **232px labelled sidebar**; 10 capabilities, 3 groups, real counts, arrow keys, roving tabindex |
 | UI-3 header | done | first-class search with clear affordance, sync, AI chip, account |
 | UI-4 message list | done | unread bar visible at rest, hover transform removed, badge cap |
-| UI-5 reading pane | partial | `sr-only` h1 added to the Mail view; full hierarchy pass is remaining work |
+| UI-5 reading pane | done | subject → From/To/Date → body → attachments → actions; 68ch measure; responsive rules un-deadened; 43 new tests |
 | UI-6 intelligence | done | every section conditional; real empty states; no invented output |
 | UI-7 states | done | all 4 pages distinguish loading / empty / success / failure; real `refetch()` retry; 33 new tests |
 | UI-8 accounts/settings | not done | remaining |
@@ -320,19 +320,92 @@ maps) and the release secret scan all clean. Knowledge graph `--check` reports c
 
 ---
 
+## UI-5 READING PANE (DONE — commit `69d392b`)
+
+Files: `MessageReader.tsx`, `MessageReader.test.tsx` (new), `globals.css`,
+`MailWorkspace.tsx`. +841 / −256.
+
+The order is now the required one, and asserted as a strict DOM-order test:
+**subject → From → To → Date → body → attachments → actions.** Actions moved out of
+the sticky toolbar that sat *above* the subject into a right-aligned row at the foot
+of the document. Sender address and recipients were one concatenated string
+(`a@b.com · to x, y`); they are now separate labelled fields in a
+`max-content minmax(0,1fr)` grid, so a long name or a long recipient list wraps
+inside its own cell instead of pushing the timestamp off the pane.
+
+Also corrected: measure `800px` → `68ch` (800px was ~110 characters per line against
+a spec ceiling of ~80); body `--text-md` → `--text-base`; subject `700` → semibold;
+sender/address sizes per §9.6; `MailWorkspace`'s `sr-only` `<h2>Mail</h2>` removed
+because `WorkspaceHeader` already renders that view's `<h1>Mail</h1>` — a screen
+reader was hearing "Mail" twice. The sender avatar was removed: §0 rejects fake
+avatars, §8 allows an icon only where it carries meaning, and the name is already on
+screen. It was also the only source of a raw `#ffffff` and two raw `rgba()` values.
+
+### The finding that mattered most
+**Every responsive rule for the reading pane had never once applied.**
+`.mail-pane` (the list pane) is `container-name: mail-pane`, and four
+`@container mail-pane` queries style `.reader-scroll`, `.reader-document`,
+`.reader-subject` and `.toolbar-title`. But the reader is a **sibling** of the list
+pane, not a descendant, so none of those rules ever matched. The reader had no
+responsive behaviour at any width. They now sit in `@container mail-workspace`, whose
+container element (`.mail-workspace`) does contain the reader. This is the same class
+of defect as the UI-7 specificity bug: code that looks correct and does nothing.
+
+### Undefined tokens
+`--reader-border`, `--radius-xl` and `--highlight-top` are referenced 26 times across
+the app and **defined in no stylesheet**, so every one of those declarations is
+invalid at computed-value time. Six were in the reader: the surface had no border, no
+radius and no shadow, there was no divider under the metadata, and the attachment tile
+had no border — all quietly absent, not merely wrong. The reader's six are fixed.
+**The other 20 sites are not** and are listed under remaining work.
+
+### Honesty fix
+`hasAttachments()` inferred attachments from `sizeEstimate > 250_000` and checked that
+guess *before* the provider's `has_attachment` flag — but `sizeEstimate` is Gmail's
+size for the **whole RFC822 message**, not its attachments. A large plain email was
+therefore reported as "Attachment · 900 KB". The authoritative flag is now checked
+first and the heuristic is only a fallback. The backend persists no per-file metadata,
+so the pane shows a count only when one is actually supplied and never invents a
+filename; it says "Attachments" rather than guessing. A per-file list needs a backend
+data change, not a UI change.
+
+### Also fixed
+`.skeleton` was defined twice with different gradients and durations (the later block
+won); a duplicate `.reader-body` rule; `.reader-scroll` padding of `28px 32px 44px`
+(§2 names 28 and 44 as non-existent); `160px` and `380px` magic numbers; `9px`/`5px`
+gaps and a literal `font-weight: 600` on `.toolbar-action`; `0.06em` tracking on a
+caps label (§1 says `0.04em`); six inline `style` blocks in the loading skeleton.
+A copy-acknowledgement timer is now cleared on message change, so selecting another
+message could not leave "Copied" showing against the wrong email.
+
+**43 new tests** cover short and very long subjects, long sender names, empty/single/
+twelve recipients, long and short bodies, absent and unparseable timestamps, missing
+display names, attachments with and without a flag or count, the narrow-width CSS
+rules, and heading order. Nine of them assert against the **real stylesheets on disk**,
+because a declaration naming an undefined token or a rule stranded in a dead
+container query passes every DOM test and does nothing on screen. They would have
+caught both defects above.
+
+**Verification:** Rust 35, backend 239, tools 9, frontend 265 — **548 passed, 0
+failed** (up from 505). `cargo fmt`, `clippy`, `tsc`, ESLint, production build (0
+source maps) and the secret scan clean. Knowledge graph current.
+
+---
+
 ## REMAINING WORK
 
 **UI (this phase):**
-1. Reading-pane hierarchy pass (UI-5): subject/sender/recipients/date/actions/body order
-   and the 68ch measure.
-2. Accounts + Settings onto the shared primitives (UI-8): four buttons with no
+1. Accounts + Settings onto the shared primitives (UI-8): four buttons with no
    `aria-label`, and a duplicated AI-label map.
-3. Focus movement on page change and message selection (UI-10).
-4. Replace the 31 inline `style` objects with tokens.
-5. 900px intelligence-pane collapse (UI-9).
-6. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
-7. Real brand asset set — still placeholders (F8).
-8. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
+2. Focus movement on page change and message selection (UI-10).
+3. Replace the 31 inline `style` objects with tokens.
+4. 900px intelligence-pane collapse (UI-9) — **the CSS for it is dead**, see below.
+5. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
+6. Real brand asset set — still placeholders (F8).
+7. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
+8. Define or delete the four tokens that 26 declarations reference but no
+   stylesheet defines: `--highlight-top`, `--reader-border`, `--radius-xl`,
+   `--shadow-accent`. All 26 sites are outside the reading pane and are untouched.
 
 **Not started (later phases):** first-run model setup (Phase 2), website (Phase 6),
 installer signing and CI (Phases 5, 7).
@@ -349,21 +422,33 @@ attached and a `tasklist` check after quit.
 **Gate 0: PASS** (unchanged).
 
 **Phase 1: PARTIAL — not declared PASS.** Priorities 1–6 are complete with test
-evidence. UI foundation is substantially complete; UI-7 (error vs empty) is now done and
-items 1–8 above remain. The directive states explicitly: do not claim the phase is
-complete if only the foundation is done. Gate 1 cannot be declared PASS until the
-packaged-app manual launch is observed.
+evidence. UI foundation is substantially complete; UI-7 (error vs empty) and UI-5
+(reading pane) are now done and items 1–8 above remain. The directive states
+explicitly: do not claim the phase is complete if only the foundation is done. Gate 1
+cannot be declared PASS until the packaged-app manual launch is observed.
 
 ---
 
 ## NEXT TASK
 
-Reading-pane hierarchy pass (UI-5) on the Mail view: subject, sender, recipients, date,
-actions, then body, and enforce the 68ch measure. Verify at 1440×900 and 1280×800 in
-both themes, and confirm the existing `sr-only` h1 still names the view.
+UI-8: move Accounts and Settings onto the shared primitives. Four buttons carry no
+`aria-label` and an AI-label map is duplicated between the header and Settings.
 
-Note for whoever picks this up: **UI-7 still owes a real visual pass.** The four error
-branches are covered by jsdom tests only — nobody has looked at them rendered. Launch
-the app with a backend that fails deliberately (stop `alfred-backend` while the UI is
-open, or point it at a dead port) and check each page in light and dark, plus Tab order
-onto the retry control.
+Before starting it, settle the dead-CSS debt, because it is cheap now and expensive
+later: `.intelligence-pane`'s 900px collapse rules are stranded in `@container
+mail-pane` exactly as the reader's were, and 20 declarations across the app reference
+four tokens that no stylesheet defines. Every one of them currently renders as *no
+style at all* rather than as a wrong style, which is why no test noticed.
+
+**Two things are still owed and are not optional to skip:**
+
+- **UI-5 has had no visual pass.** The hierarchy work is verified by jsdom and by
+  static stylesheet assertions only. Nobody has looked at the rendered pane. Launch
+  the app, open a long email with many recipients, resize to 900px, and check both
+  themes and Tab order into the action row.
+- **Gate 1 packaged-app verification.** F1 is fixed in code and statically asserted,
+  but "one launch shows the window" has still not been observed on a real install,
+  with `desktop.log` attached and a `tasklist` check after quit.
+
+Manual visual verification status: **NOT PERFORMED.** Gate 1 status: **NOT PERFORMED.**
+Automated verification status: **PASS** (548 tests, 0 failures).
