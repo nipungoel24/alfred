@@ -58,16 +58,19 @@ function StateBlock({
 }
 
 export function EmptyState({
+  icon,
   title,
   body,
   action,
 }: {
+  /** Defaults to the inbox mark; a surface with a more specific idea passes its own. */
+  icon?: LucideIcon;
   title: string;
   body?: ReactNode;
   action?: ReactNode;
 }) {
   return (
-    <StateBlock icon={Inbox} title={title} body={body} actions={action} />
+    <StateBlock icon={icon ?? Inbox} title={title} body={body} actions={action} />
   );
 }
 

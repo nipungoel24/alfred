@@ -1,23 +1,6 @@
 import { useEffect, useRef } from 'react';
 import { Search, X, RefreshCw, Cpu } from 'lucide-react';
-
-const AI_LABELS: Record<string, { label: string; online: boolean; hint: string }> = {
-  ready: { label: 'AI ready', online: true, hint: 'Local AI is ready' },
-  initializing: { label: 'AI starting', online: false, hint: 'Local AI is starting' },
-  ollama_not_running: {
-    label: 'AI offline',
-    online: false,
-    hint: 'Ollama is not running. Your mailbox works; summaries resume when it is.',
-  },
-  model_missing: {
-    label: 'Model missing',
-    online: false,
-    hint: 'The local model is not installed. Choose one in Settings.',
-  },
-  temporarily_unavailable: { label: 'AI busy', online: false, hint: 'Local AI is busy' },
-  recovering: { label: 'AI recovering', online: false, hint: 'Local AI is recovering' },
-  error: { label: 'AI error', online: false, hint: 'Local AI reported an error' },
-};
+import { aiStateMeta } from '../lib/aiState';
 
 export interface WorkspaceHeaderProps {
   title: string;
@@ -76,7 +59,10 @@ export function WorkspaceHeader({
     return () => document.removeEventListener('keydown', onKeyDown);
   }, []);
 
-  const ai = AI_LABELS[aiState ?? ''] ?? (aiReady ? AI_LABELS.ready : AI_LABELS.ollama_not_running);
+  // One shared description of the AI state machine, so this chip and the
+  // Settings page can never disagree about what a state is called.
+  const ai = aiStateMeta(aiState ?? (aiReady ? 'ready' : 'ollama_not_running'));
+  const aiOnline = ai.tone === 'ok';
   const hasSearch = searchValue.trim().length > 0;
 
   return (
@@ -136,9 +122,9 @@ export function WorkspaceHeader({
           </button>
         )}
 
-        <span className="status-chip" data-online={ai.online} title={ai.hint}>
+        <span className="status-chip" data-online={aiOnline} title={ai.hint}>
           <Cpu size={13} aria-hidden="true" />
-          <span className="status-chip-label">{ai.label}</span>
+          <span className="status-chip-label">{ai.chip}</span>
         </span>
 
         {accountEmail && (

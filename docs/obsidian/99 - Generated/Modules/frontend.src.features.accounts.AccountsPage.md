@@ -21,6 +21,9 @@ tags: [module, frontend]
 
 - `react` â† useEffect
 - `@tanstack/react-query` â† useQuery, useMutation, useQueryClient
+- `lucide-react` â† Mail, RefreshCw, Unplug, UserCircle, KeyRound
 - `../../api/emails` â† fetchAccounts, connectGmail, syncAccount, deleteAccount
+- `../../api/emails` â† EmailAccount
 - `../../api/client` â† apiBase
-- `lucide-react` â† Mail, RefreshCw, Unplug, UserCircle
+- `../../components/ui/States` â† EmptyState, ErrorState
+- `../../components/ui/Settings` â† StatusIndicator

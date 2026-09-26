@@ -1,18 +1,10 @@
 import { useQuery } from '@tanstack/react-query';
-import { Cpu, Database, Palette, ShieldCheck, Info } from 'lucide-react';
+import { Cpu, Database, Palette, ShieldCheck, Info, HardDrive } from 'lucide-react';
 import { ThemeToggle } from '../../theme/ThemeToggle';
 import { health as fetchHealth, analysisStatus } from '../../api/emails';
 import { ErrorState } from '../../components/ui/States';
-
-const AI_LABELS: Record<string, string> = {
-  ready: 'Ready',
-  initializing: 'Starting',
-  ollama_not_running: "Ollama isn't running",
-  model_missing: 'Model missing',
-  temporarily_unavailable: 'Temporarily unavailable',
-  recovering: 'Recovering',
-  error: 'Error',
-};
+import { SettingsSection, SettingsRow, SettingsValue, StatusIndicator } from '../../components/ui/Settings';
+import { aiStateMeta } from '../../lib/aiState';
 
 export function SettingsPage() {
   const healthQuery = useQuery({ queryKey: ['health'], queryFn: fetchHealth, retry: 0 });
@@ -25,6 +17,7 @@ export function SettingsPage() {
   const aiStatus = aiStatusQuery.data;
   const runtimeFailed = healthQuery.isError || aiStatusQuery.isError;
   const runtimeRetrying = healthQuery.isFetching || aiStatusQuery.isFetching;
+  const runtimePending = healthQuery.isPending || aiStatusQuery.isPending;
 
   const retryRuntime = () => {
     void healthQuery.refetch();
@@ -35,26 +28,28 @@ export function SettingsPage() {
 
   return (
     <div className="page-scroll">
-      <div style={{ maxWidth: 640, margin: '0 auto', padding: 'var(--space-6) var(--space-6) var(--space-10)' }}>
+      <div className="page-container page-container-narrow">
         <div className="reveal">
-          <h1 className="page-title" style={{ fontSize: 'var(--text-xl)' }}>Settings</h1>
-          <p className="page-subtitle" style={{ marginBottom: 'var(--space-6)' }}>Preferences and runtime information</p>
+          <h1 className="page-title">Settings</h1>
+          <p className="page-subtitle">Preferences and runtime information</p>
         </div>
 
-        <div className="settings-group reveal" style={{ ['--stagger' as string]: 1 }}>
-          <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-3)' }}>
-            <Palette size={12} aria-hidden="true" /> Appearance
-          </div>
-          <div className="settings-row">
-            <span className="settings-label">Theme</span>
+        <SettingsSection
+          title="Appearance"
+          icon={<Palette size={12} aria-hidden="true" />}
+          stagger={1}
+        >
+          <SettingsRow label="Theme" hint="Follows your system setting unless you choose one.">
             <ThemeToggle />
-          </div>
-        </div>
+          </SettingsRow>
+        </SettingsSection>
 
-        <div className="settings-group reveal" style={{ ['--stagger' as string]: 2 }}>
-          <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-3)' }}>
-            <Cpu size={12} aria-hidden="true" /> Local AI
-          </div>
+        <SettingsSection
+          title="Local AI"
+          icon={<Cpu size={12} aria-hidden="true" />}
+          description="Summaries and actions are produced on this machine. Nothing is sent to a server."
+          stagger={2}
+        >
           {/* Scoped, not page-level: Theme, Data, Privacy and About all work
               without this query, so a failure here must not hide them. */}
           {runtimeFailed ? (
@@ -64,83 +59,102 @@ export function SettingsPage() {
               onRetry={retryRuntime}
               retrying={runtimeRetrying}
             />
+          ) : runtimePending ? (
+            <div className="settings-skeleton" aria-busy="true">
+              <div className="skeleton skeleton-line-md skeleton-w-full" />
+              <div className="skeleton skeleton-line-md skeleton-w-80" />
+              <div className="skeleton skeleton-line-md skeleton-w-55" />
+            </div>
           ) : (
             <>
-              <div className="settings-row">
-                <span className="settings-label">Model</span>
-                <span className="settings-value">qwen3:4b</span>
-              </div>
-              <div className="settings-row">
-                <span className="settings-label">Runtime</span>
-                <span className="settings-value">Ollama (local)</span>
-              </div>
-              <div className="settings-row">
-                <span className="settings-label">Status</span>
-                <span className="settings-value" style={{ color: health?.ai === 'ready' ? 'var(--success)' : 'var(--warning)' }}>
-                  {AI_LABELS[health?.ai ?? ''] ?? 'Starting'}
-                </span>
-              </div>
+              <SettingsRow label="Model">
+                {/* The supervisor reports the model it is actually using. */}
+                <SettingsValue mono>{aiStatus?.model ?? 'Unknown'}</SettingsValue>
+              </SettingsRow>
+              <SettingsRow label="Runtime">
+                <SettingsValue>Ollama (local)</SettingsValue>
+              </SettingsRow>
+              <SettingsRow label="Status">
+                <StatusIndicator
+                  tone={aiStateMeta(aiStatus?.state ?? health?.ai).tone}
+                  label={aiStateMeta(aiStatus?.state ?? health?.ai).word}
+                  hint={aiStateMeta(aiStatus?.state ?? health?.ai).hint}
+                />
+              </SettingsRow>
               {aiStatus && (
                 <>
-                  <div className="settings-row">
-                    <span className="settings-label">Model installed</span>
-                    <span className="settings-value">{aiStatus.model_installed === null ? 'Unknown' : aiStatus.model_installed ? 'Yes' : 'No'}</span>
-                  </div>
-                  <div className="settings-row">
-                    <span className="settings-label">Ollama installed</span>
-                    <span className="settings-value">{aiStatus.ollama_installed ? 'Yes' : 'No'}</span>
-                  </div>
-                  <div className="settings-row">
-                    <span className="settings-label">Queue</span>
-                    <span className="settings-value">{aiStatus.pending} pending{aiStatus.queue_paused ? ' (paused)' : ''}</span>
-                  </div>
+                  <SettingsRow label="Model installed">
+                    <SettingsValue>
+                      {aiStatus.model_installed === null ? 'Unknown' : aiStatus.model_installed ? 'Yes' : 'No'}
+                    </SettingsValue>
+                  </SettingsRow>
+                  <SettingsRow label="Ollama installed">
+                    <SettingsValue>{aiStatus.ollama_installed ? 'Yes' : 'No'}</SettingsValue>
+                  </SettingsRow>
+                  <SettingsRow label="Ollama running">
+                    <SettingsValue>{aiStatus.ollama_running ? 'Yes' : 'No'}</SettingsValue>
+                  </SettingsRow>
+                  <SettingsRow label="Analysis queue">
+                    <SettingsValue>
+                      {aiStatus.pending} pending
+                      {aiStatus.queue_paused ? ' · paused' : ''}
+                      {aiStatus.queue_paused ? '' : aiStatus.worker_running ? ' · running' : ' · idle'}
+                    </SettingsValue>
+                  </SettingsRow>
                 </>
               )}
             </>
           )}
-        </div>
+        </SettingsSection>
 
-        <div className="settings-group reveal" style={{ ['--stagger' as string]: 3 }}>
-          <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-3)' }}>
-            <Database size={12} aria-hidden="true" /> Data
-          </div>
-          <div className="settings-row">
-            <span className="settings-label">Storage</span>
-            <span className="settings-value">Local SQLite (AppData)</span>
-          </div>
-          <div className="settings-row">
-            <span className="settings-label">Credentials</span>
-            <span className="settings-value" style={{ color: 'var(--success)' }}>
-              DPAPI encrypted
-            </span>
-          </div>
-        </div>
+        <SettingsSection
+          title="Data"
+          icon={<Database size={12} aria-hidden="true" />}
+          stagger={3}
+        >
+          <SettingsRow label="Storage">
+            <SettingsValue>Local SQLite (AppData)</SettingsValue>
+          </SettingsRow>
+          <SettingsRow label="Credentials">
+            <StatusIndicator
+              tone="ok"
+              label="Encrypted with DPAPI"
+              hint="Tokens are encrypted per Windows user and never leave this machine."
+            />
+          </SettingsRow>
+        </SettingsSection>
 
-        <div className="settings-group reveal" style={{ ['--stagger' as string]: 4 }}>
-          <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-3)' }}>
-            <ShieldCheck size={12} aria-hidden="true" /> Privacy
-          </div>
-          <div className="settings-row">
-            <span className="settings-label">Analysis</span>
-            <span className="settings-value" style={{ color: 'var(--success)' }}>
-              All processing stays local
-            </span>
-          </div>
-        </div>
+        <SettingsSection
+          title="Privacy"
+          icon={<ShieldCheck size={12} aria-hidden="true" />}
+          stagger={4}
+        >
+          <SettingsRow label="Analysis">
+            <StatusIndicator
+              tone="ok"
+              label="All processing stays local"
+              hint="No message content is sent anywhere."
+            />
+          </SettingsRow>
+        </SettingsSection>
 
-        <div className="settings-group reveal" style={{ ['--stagger' as string]: 5 }}>
-          <div className="section-label" style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 'var(--space-3)' }}>
-            <Info size={12} aria-hidden="true" /> About
-          </div>
-          <div className="settings-row">
-            <span className="settings-label">Frontend build</span>
-            <span className="settings-value settings-mono">{frontendBuild}</span>
-          </div>
-          <div className="settings-row">
-            <span className="settings-label">Backend build</span>
-            <span className="settings-value settings-mono">{health?.build ?? '—'}</span>
-          </div>
-        </div>
+        <SettingsSection
+          title="About"
+          icon={<Info size={12} aria-hidden="true" />}
+          stagger={5}
+        >
+          <SettingsRow label="Frontend build">
+            <SettingsValue mono>{frontendBuild}</SettingsValue>
+          </SettingsRow>
+          <SettingsRow label="Backend build">
+            <SettingsValue mono>{health?.build ?? 'Unavailable'}</SettingsValue>
+          </SettingsRow>
+        </SettingsSection>
+
+        <p className="settings-footnote">
+          <HardDrive size={12} aria-hidden="true" />
+          Alfred stores everything locally and sends no telemetry.
+        </p>
       </div>
     </div>
   );

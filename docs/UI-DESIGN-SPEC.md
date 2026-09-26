@@ -667,6 +667,17 @@ because §UI-AUDIT §18/§19 found the behaviour duplicated or missing.
 | `Tabs` | 3 hand-rolled tablists | one keyboard contract |
 | `Section` | `.overview-section` etc. | label + action + body |
 
+`StatusIndicator`, `Section` and the settings row/label pair are now implemented in
+`src/components/ui/Settings.tsx`. The label/value pair is a single component because
+Accounts and Settings both needed it and neither wanted a bespoke one; nothing else
+was added speculatively.
+
+Status wording for the local-AI state machine lives in exactly one place,
+`src/lib/aiState.ts`, because it was previously restated with five different
+vocabularies across the header, the rail, the intelligence panel, the progress bar and
+Settings. The other four call sites still carry their own wording and are the obvious
+next consumer of that module.
+
 Rule: a primitive is added only when ≥2 call sites need it, or when its absence causes a
 defect (ErrorState, Dialog). No speculative components.
 

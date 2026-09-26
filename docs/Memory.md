@@ -182,7 +182,7 @@ Documents: `docs/UI-AUDIT.md`, `docs/UI-DESIGN-SPEC.md`, ADR-005 updated to **Ac
 | UI-5 reading pane | done | subject → From/To/Date → body → attachments → actions; 68ch measure; responsive rules un-deadened; 43 new tests |
 | UI-6 intelligence | done | every section conditional; real empty states; no invented output |
 | UI-7 states | done | all 4 pages distinguish loading / empty / success / failure; real `refetch()` retry; 33 new tests |
-| UI-8 accounts/settings | not done | remaining |
+| UI-8 accounts/settings | done | real account + runtime states; shared primitives; model read from the supervisor, not hardcoded; 39 new tests |
 | UI-9 responsive | done | 1100px collapse to icon rail implemented; 900px intelligence collapse remaining |
 | UI-10 accessibility | partial | skip link, `sr-only`, h1 on Mail, landmarks, roving tabindex done; focus movement on navigation remaining |
 | UI-11 motion | done | orb drift animations deleted; reduced motion intact |
@@ -472,23 +472,115 @@ source maps), secret scan and knowledge graph all clean.
 
 ---
 
+## UI-8 ACCOUNTS + SETTINGS (DONE — commit `feat(alfred): productize accounts and settings UI`)
+
+Files: `AccountsPage.tsx`, `SettingsPage.tsx`, `WorkspaceHeader.tsx`, `States.tsx`,
+`styles/globals.css`, plus new `components/ui/Settings.tsx`, `lib/aiState.ts`,
+`AccountsPage.states.test.tsx`, `SettingsPage.states.test.tsx`.
+
+### Two real defects, not restyling
+**Accounts had no error state at all.** A failed `/api/accounts` rendered
+"No accounts connected" — the exact conflation UI-7 removed from four other pages,
+still live in the fifth. It now has a distinct error branch with a real `refetch`
+retry, and a test asserts the empty state never appears on failure.
+
+**Settings fabricated the model.** The page hardcoded `qwen3:4b` while
+`AnalysisStatus.model` reports what the supervisor is actually running. It now reads
+the real field, shows `Unknown` before the first response, and a test fails if the
+hardcoded string reappears. The status row also used the loose `health.ai` string
+where the typed `AIState` machine exists; it now uses the real state.
+
+### States are the backend's, not invented
+The backend only ever writes `connection_status` of `connected` or `error`
+(`gmail.py` sets `error` when the token refresh fails). There is no `disconnected`,
+no `connecting`, no `auth_required` value — so none is shown. `error` is presented
+as **Authentication required** with a **Reconnect** action, because that is what it
+actually means and reconnect is an action the app really supports. An unrecognised
+status is reported as reported rather than coerced into a healthy-looking row.
+
+Backfill is surfaced read-only (`Complete` / `Importing · about N left` / `Paused` /
+`Failed`), because the resume and pause controls already live in the mail pane and
+duplicating them would be two places to keep in sync.
+
+### One component layer, not a bespoke one per page
+`SettingsSection`, `SettingsRow`, `SettingsValue` and `StatusIndicator` in
+`components/ui/Settings.tsx`. `StatusIndicator` is the spec §3.5 requirement made
+real: icon *and* label, so status survives greyscale and a screen reader. The old
+`.status-dot`-plus-adjacent-text pattern is gone from both pages.
+
+`lib/aiState.ts` is now the single description of the AI state machine, carrying a
+chip label, a settings word, a hint, a sentence and a tone. It was previously
+restated with **five** vocabularies; the header and Settings now share it and the
+strings their tests pin are unchanged.
+
+### Preserved deliberately
+The OAuth flow is untouched: same `connectGmail(apiBase() + callback)` call, same
+`window.open`, same `auth_success` message listener, same dynamic-port handling for
+packaged Tauri. Both existing tests for that still pass. No token handling, no
+origin validation and no credential storage was touched — UI-8 styles the current
+OAuth state and nothing more. `analysisRetry` stays in `AnalysisProgress` alone
+rather than gaining a second restart button in Settings.
+
+### What was removed, and why
+The account card's 38px accent-soft tile with a Mail glyph: spec §0 rejects fake
+avatars and §8 allows an icon only where it carries meaning. The real identity is
+the address, which is shown as text. A test asserts no avatar element and no
+"score"/"health" copy exists.
+
+~25 inline `style` objects across the two pages became classes. One real UI bug
+surfaced while testing them: with no `display_name`, the address rendered **twice**
+(name and detail). The detail line is now shown only when it adds something.
+
+### CSS
+New rules are intrinsically responsive — `flex-wrap` and `repeat(auto-fit, minmax())`
+— deliberately **not** container queries, because these pages sit outside the mail
+workspace and a pane-keyed query could never reach them. The style gate now asserts
+that no `@container` block mentions settings or accounts, so that mistake cannot be
+reintroduced silently. The account card dropped `--radius-lg` to `--radius-md` and
+its `--shadow-1`: §4 says a panel is not a card, and §6 gives panels no shadow.
+
+**39 new tests** (22 Accounts, 17 Settings) plus 5 new stylesheet guards. The style
+guards were **mutation-tested**: dropping `min-width: 0`, un-wrapping a row, turning
+`auto-fit` into a fixed count, deleting a tone, and substituting a literal for a
+spacing token are each caught.
+
+One gap the mutation pass exposed and I closed: the off-scale check had been lost
+when the stylesheet suite was rewritten in the dead-CSS gate, so a `2px` gap slipped
+in. It now also rejects *on-scale literals*, because `padding: 20px` is as much a
+one-off as `padding: 22px`.
+
+**Verification:** Rust 35, backend 239, tools 9, frontend 337 — **620 passed, 0
+failed** (up from 575). `cargo fmt`, `clippy`, `tsc`, ESLint, production build (0
+source maps), secret scan and knowledge graph all clean.
+
+---
+
 ## REMAINING WORK
 
 **UI (this phase):**
-1. Accounts + Settings onto the shared primitives (UI-8): four buttons with no
-   `aria-label`, and a duplicated AI-label map.
-2. Focus movement on page change and message selection (UI-10).
-3. Replace the 31 inline `style` objects with tokens.
-4. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
-5. Real brand asset set — still placeholders (F8).
-6. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
-7. `.status-dot.online` pulses on a 3.2 s infinite loop. Spec §7 does not list a
+1. Focus movement on page change and message selection (UI-10).
+2. Replace the remaining inline `style` objects with tokens. The Accounts and
+   Settings pages are now clean; the rest are untouched.
+3. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
+4. Real brand asset set — still placeholders (F8).
+5. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
+6. `.status-dot.online` pulses on a 3.2 s infinite loop. Spec §7 does not list a
    looping status pulse as animatable, and it never stops. UI-11 decision.
-8. `.badge-reply` is coloured with `--accent-soft` / `--accent-text`. Spec §3.3
+7. `.badge-reply` is coloured with `--accent-soft` / `--accent-text`. Spec §3.3
    reserves accent for selected, focused, unread and primary action — "nothing
    else". A reply-needed badge is arguably none of those. Needs a call.
-9. Four `#f28b82` values survive as `var(--danger, #f28b82)` fallbacks. They never
+8. Four `#f28b82` values survive as `var(--danger, #f28b82)` fallbacks. They never
    paint, so they are harmless, but spec §3 says components never name a raw hex.
+9. Four more AI-state vocabularies (rail, intelligence panel, progress bar, and the
+   header's own consumers) still restate the state machine. `src/lib/aiState.ts` is
+   the single source; fold them in.
+10. Three pre-existing off-scale values survive in the intelligence panel
+    (`.intel-kv` and `.intel-item` at `6px 0`, and a `3px` optical nudge on
+    `.intel-item svg`). Deliberately left: correcting them moves pixels in a pane
+    that has never been rendered, so it belongs with the visual pass.
+11. `.section-label` uses `font-size: 10px` and `letter-spacing: 0.09em`; the spec
+    scale is `--text-2xs` (10.5px) and `0.04em` for caps. It is shared with pages
+    outside this phase, so it was not changed here.
 
 **Not started (later phases):** first-run model setup (Phase 2), website (Phase 6),
 installer signing and CI (Phases 5, 7).
@@ -506,33 +598,36 @@ attached and a `tasklist` check after quit.
 
 **Phase 1: PARTIAL — not declared PASS.** Priorities 1–6 are complete with test
 evidence. UI foundation is substantially complete; UI-7 (error vs empty), UI-5
-(reading pane) and the dead-CSS gate are done, and items 1–9 above remain. The
-directive states explicitly: do not claim the phase is complete if only the foundation
-is done. Gate 1 cannot be declared PASS until the packaged-app manual launch is
-observed.
+(reading pane), the dead-CSS gate and UI-8 (accounts/settings) are done, and items
+1–11 above remain. The directive states explicitly: do not claim the phase is
+complete if only the foundation is done. Gate 1 cannot be declared PASS until the
+packaged-app manual launch is observed.
 
 ---
 
 ## NEXT TASK
 
-**UI-8: Accounts and Settings onto the shared primitives.** Four buttons carry no
-`aria-label` and an AI-label map is duplicated between the header and Settings.
+**UI-10: focus movement.** Moving pages moves focus to the new `<h1>`; selecting a
+message moves focus to the reader heading. Accounts and Settings do not introduce
+any dialog, so nothing is deferred there beyond that.
 
-Before starting it, and because the last two gates both found silent, render-nothing
-CSS: run `npx vitest run src/styles/styles.test.ts` after any stylesheet edit. It is
-now the cheapest defect detector in the repo.
+The cheapest remaining defect detector in the repo is
+`npx vitest run src/styles/styles.test.ts` — run it after any stylesheet edit. It
+caught a lost off-scale check, an escaped-regex bug in its own assertions, and a
+`min-width` omission in this session alone.
 
 **Two things are still owed and are not optional to skip:**
 
-- **Manual visual verification NOT PERFORMED.** UI-5, UI-7 and this gate have all
-  been verified by jsdom and by static stylesheet assertions only. Nobody has looked
-  at the rendered app. This gate in particular *restores* styles that were never
-  painting — new borders on the intelligence pane and draft panel, a background on
-  the startup mark, new corner radii, lighter small-caps labels, no status-dot halo.
-  Launch the app, open a long email with many recipients, resize through 1100px and
-  900px, and check both themes.
+- **Manual visual verification NOT PERFORMED.** UI-5, UI-7, the dead-CSS gate and
+  UI-8 have all been verified by jsdom and static stylesheet assertions only. Nobody
+  has looked at the rendered app. This is now three visual changes deep: the
+  intelligence pane, draft panel and startup mark gained borders/backgrounds, the
+  account card lost its avatar tile and gained a fact grid, and Settings swapped a
+  hardcoded model for a real one. Launch the app, open a long email with many
+  recipients, visit Accounts and Settings, resize through 1100px and 900px, and check
+  both themes.
 - **Gate 1 packaged-app verification NOT PERFORMED.** F1 is fixed in code and
   statically asserted, but "one launch shows the window" has still not been observed
   on a real install, with `desktop.log` attached and a `tasklist` check after quit.
 
-Automated verification status: **PASS** (575 tests, 0 failures).
+Automated verification status: **PASS** (620 tests, 0 failures).

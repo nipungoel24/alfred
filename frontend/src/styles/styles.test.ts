@@ -370,3 +370,101 @@ describe('stylesheets: no horizontal overflow introduced', () => {
     expect(css).toMatch(/\.reader-surface\s*\{[^}]*max-width:\s*68ch/);
   });
 });
+
+describe('stylesheets: settings and accounts', () => {
+  const css = () => stripComments(sheets.get('globals.css')!);
+
+  it('lets every account and settings text field shrink and wrap', () => {
+    for (const sel of [
+      '.account-name', '.account-detail', '.account-fact-value',
+      '.account-inline-error', '.settings-hint', '.settings-value',
+    ]) {
+      expect(css(), `${sel} must be able to wrap`).toMatch(
+        new RegExp(`\\${sel}\\s*\\{[^}]*overflow-wrap:\\s*(anywhere|break-word)`)
+      );
+    }
+  });
+
+  it('gives every shrinkable row a min-width so it can actually shrink', () => {
+    // A flex or grid child without min-width: 0 refuses to shrink below its
+    // content, which is how a long address pushes a pane wide.
+    for (const sel of ['.settings-row-text', '.account-identity', '.account-facts']) {
+      expect(css(), `${sel} needs min-width: 0`).toMatch(
+        new RegExp(`\\${sel}\\s*\\{[^}]*min-width:\\s*0`)
+      );
+    }
+  });
+
+  it('sizes the settings and accounts grids intrinsically, not with a query', () => {
+    // These pages live outside the mail workspace, so a pane-keyed container
+    // query could never reach them. auto-fit/minmax reflow on their own.
+    expect(css()).toMatch(/\.account-facts\s*\{[^}]*repeat\(auto-fit,\s*minmax\(/);
+    expect(css()).toMatch(/\.settings-row\s*\{[^}]*flex-wrap:\s*wrap/);
+    const queries = [...css().matchAll(/@container[^{]*\{/g)].map((m) => m[0]);
+    for (const q of queries) {
+      expect(q).not.toMatch(/settings|account/);
+    }
+  });
+
+  it('gives status an icon slot, not only a colour', () => {
+    expect(css()).toMatch(/\.status-indicator\s*\{[^}]*display:\s*inline-flex/);
+    for (const tone of ['ok', 'working', 'warning', 'danger']) {
+      expect(css(), `.status-indicator.tone-${tone} must exist`).toMatch(
+        new RegExp(`\\.status-indicator\\.tone-${tone}\\s*\\{`)
+      );
+    }
+  });
+
+  it('gives destructive actions the danger treatment, not a custom colour', () => {
+    expect(css()).toMatch(/\.account-inline-error\s*\{[^}]*color:\s*var\(--danger\)/);
+  });
+
+  it('uses no off-scale spacing in the surfaces built for this phase', () => {
+    // The 4px scale is the whole system (spec §2). 2px, 6px and 10px are not
+    // "close enough" — they are a second, invisible scale creeping back in.
+    // Scoped to the panes this work owns. Note `.account-filter` and
+    // `.account-select` are task and deadline row controls that merely share
+    // the prefix — they are not the Accounts page. The intelligence panel still
+    // carries three pre-existing off-scale values; those are recorded as
+    // follow-up rather than churned here, because changing them moves pixels
+    // nobody has seen.
+    const OWNED = [
+      'reader', 'status-indicator', 'page-container', 'toolbar-action',
+      'account-card', 'account-list', 'account-identity', 'account-name',
+      'account-detail', 'account-facts', 'account-fact', 'account-fact-label',
+      'account-fact-value', 'account-actions', 'account-inline-error', 'account-add',
+      'settings-group', 'settings-section', 'settings-rows', 'settings-row',
+      'settings-control', 'settings-label', 'settings-hint', 'settings-value',
+      'settings-skeleton', 'settings-footnote',
+    ];
+    const offenders: string[] = [];
+    for (const m of stripComments(sheets.get('globals.css')!).matchAll(
+      /([^{}]+)\{([^{}]*)\}/g
+    )) {
+      const selectors = m[1].split(',').map((x) => x.trim());
+      if (!selectors.some((x) => OWNED.some((o) => x.includes(`.${o}`)))) continue;
+      // border widths and 1px hairlines are not spacing.
+      for (const d of m[2].matchAll(
+        /(?:padding|margin|gap|row-gap|column-gap)(?:-[a-z]+)?\s*:\s*([^;}]+)/g
+      )) {
+        const value = d[1].trim();
+        // `0` is on the scale and needs no token.
+        if (/^(?:0(?:\s+0)*)$/.test(value)) continue;
+        const literals = [...value.matchAll(/(\d+)px/g)];
+        for (const n of literals) {
+          if (Number(n[1]) % 4 !== 0) {
+            offenders.push(
+              `${selectors[0].split(/\s+/).join(' ').slice(0, 30)}: ${d[0].trim()} -> ${n[1]}px (off the 4px scale)`
+            );
+          } else {
+            // On-scale but still a one-off literal: the value belongs in a token.
+            offenders.push(
+              `${selectors[0].split(/\s+/).join(' ').slice(0, 30)}: ${d[0].trim()} -> ${n[1]}px (literal, not var(--space-*))`
+            );
+          }
+        }
+      }
+    }
+    expect(offenders).toEqual([]);
+  });
+});
