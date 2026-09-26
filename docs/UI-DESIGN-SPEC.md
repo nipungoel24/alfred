@@ -438,18 +438,23 @@ Three panes, unchanged in structure:
 │ 320–460px    │ flex, min 420px         │ 300–380px        │
 │ -            │                         │ -                │
 │ view switch  │ subject (h2)            │ SUMMARY          │
-│ categories   │ sender · to · date      │ WHY IT MATTERS   │
+│ categories   │ from / to / date        │ WHY IT MATTERS   │
 │ kind switch  │ ─────────────────       │ NEEDS REPLY      │
 │ backfill     │ body                    │ TASKS            │
-│ toolbar      │                         │ DEADLINES        │
-│ ─────────    │                         │ CONTEXT          │
-│ virtualised  │                         │                  │
+│ toolbar      │ attachments             │ DEADLINES        │
+│ ─────────    │ ─────────────────       │ CONTEXT          │
+│ virtualised  │ actions                 │                  │
 │ rows         │                         │                  │
 └──────────────┴─────────────────────────┴──────────────────┘
 ```
 
-The list pane is a `container-type: inline-size` container and responds to **its own**
-width, not the window's. Preserved from the existing implementation — it was correct.
+**Only the list pane is a container.** `.mail-pane` is `container-name: mail-pane`, so
+list-pane rules respond to the list's own width. The reader and the intelligence pane
+are **siblings** of the list pane, not descendants, so nothing inside either can be
+reached from `@container mail-pane` — a rule written there matches nothing. Their
+rules live in `@container mail-workspace`, because `.mail-workspace` is the container
+that actually contains them. A container query is only as good as the ancestor it
+names; check the DOM before trusting one.
 
 ### 9.5 Message row
 
@@ -486,10 +491,23 @@ Rules:
 Priority order, and it is a strict order:
 
 1. Subject — `--text-2xl`, `--weight-semibold`, the only large type in the pane
-2. From / To / Date — `--text-sm`, `--text-secondary`, `--text-muted` for the address
-3. Actions — Later, Copy, Alfred — `--text-xs` icon buttons, right-aligned
-4. Body — `--text-base`, `--leading-reader`, 68ch measure, `overflow-wrap: anywhere`
-5. Attachments — a bordered list, `--radius-sm`, size in `--text-xs`
+2. From — `--text-sm` name, `--text-xs` `--text-muted` address beneath it
+3. To — recipients as their own labelled field, not folded into the From line
+4. Date — a `<time>` element carrying the machine-readable timestamp
+5. Body — `--text-base`, `--leading-reader`, 68ch measure, `overflow-wrap: anywhere`
+6. Attachments — a bordered list, `--radius-sm`, size in `--text-xs`
+7. Actions — Later, Copy, Intelligence — `--text-xs` icon buttons, right-aligned
+
+**Message actions are placed after the message content so primary reading and
+metadata remain visually dominant.** A control bar above the subject competes with
+the one thing the pane exists for. Putting the actions last also means the subject,
+the correspondent and the body own the top of the pane, uninterrupted, and the
+controls arrive only once the reader has what they came for.
+
+From / To / Date are three separate labelled fields in a
+`max-content minmax(0, 1fr)` grid, not one flex row and not a single concatenated
+line. A long sender name or a long recipient list then wraps inside its own cell
+instead of pushing the timestamp off the pane.
 
 **The reader is the default view of this pane.** Intelligence lives in its own pane to
 the right, never above the body. A user reading a message must not have their reading
@@ -666,9 +684,20 @@ defect (ErrorState, Dialog). No speculative components.
 | `.message-row:hover { translateX(3px) }` | A moving hover target. §7. |
 | Hover-gated unread bar | Unread must be visible at rest. §9.5. |
 | `--shadow-accent` | Coloured shadow. §6. |
+| `--highlight-top` | A fake inset gloss on raised surfaces. §6 allows shadow for elevation only, never decoration. Its 18 call sites were left rendering **no shadow at all**, because the declaration was invalid at computed-value time. |
+| `--reader-border` | Duplicated `--border-subtle`. A separate "reader border" would mean the same thing twice. The reader surface and the intelligence pane share `--bg-reader`, so they share one subtle edge. |
+| `--radius-xl` | Not a step in the §4 scale, which is `xs`/`sm`/`md`/`lg`/`full`. Overlays take `--radius-lg`; a panel takes `--radius-md`, because a panel is not a card. |
+| `--bg-panel-solid` | Duplicated `--bg-panel`. |
 | `--ambient-*` tokens | Orb palette. |
 | `Priority` section in the intelligence panel (unconditional) | Renders an empty section when there is nothing to say. §9.7. |
 | 2 of 7 badges from a message row | Density and signal-to-noise. §9.5. |
+
+**These four tokens were never defined.** Every one of them was referenced and never
+created, so every declaration naming one was invalid and silently rendered as *no
+style at all* rather than as a wrong style — which is why no DOM test noticed. They
+are listed here as removals so they are not reintroduced. **A static test now fails
+the build if any custom property is referenced without either a definition or an
+explicit fallback** (`src/styles/styles.test.ts`).
 
 ---
 

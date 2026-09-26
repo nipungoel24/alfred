@@ -392,6 +392,86 @@ source maps) and the secret scan clean. Knowledge graph current.
 
 ---
 
+## DEAD CSS GATE (DONE — commit `fix(alfred): resolve dead responsive and token CSS`)
+
+Files: `styles/globals.css`, `styles/surfaces.css`, `styles/styles.test.ts` (new),
+`docs/UI-DESIGN-SPEC.md`. CSS shrank 57.93 kB → 56.57 kB.
+
+### The intelligence pane had exactly the reader's bug
+`.intel-head` and `.intel-scroll` padding rules sat in `@container mail-pane
+(max-width: 900px)`. The intelligence pane is a **sibling** of the list pane, so
+that query could never match them — the rules had never applied. They now sit in
+`@container mail-workspace`, whose container element contains them. The
+`@container mail-pane` blocks now hold only list-pane selectors, and
+`@container mail-workspace` holds only reader and intelligence selectors. The
+1100px rail collapse is a window `@media` block and touches only shell/rail/header
+selectors, so it cannot collide.
+
+Design intent was preserved verbatim — the 900px intelligence rule is padding
+compression, *not* the collapse-to-toggle of spec §13. That collapse was never
+written; the old comment claiming otherwise was corrected.
+
+### Four tokens, none of them defined — and none of them worth defining
+| Token | Sites | Resolution |
+| --- | --- | --- |
+| `--highlight-top` | 18 | **Deleted.** A fake inset gloss. Spec §6 allows shadow for elevation only, never decoration. Every one of those declarations was invalid, so 18 elements were rendering with *no shadow at all*. Where the same declaration also held a valid token it was kept. |
+| `--shadow-accent` | 3 | **Deleted.** Spec §6 and §15 removed it by name. |
+| `--reader-border` | 2 | **Replaced with `--border-subtle`.** A separate "reader border" would duplicate it. |
+| `--radius-xl` | 2 | **Replaced** with `--radius-lg` on the modal `.source-preview` and `--radius-md` on the `.intelligence-pane` panel. §4's scale is xs/sm/md/lg/full; §4 also says a panel is not a card. |
+
+The sweep then found two more: `--bg-panel-solid` on `.startup-mark` (→ `--bg-panel`)
+and `--danger-border` on `.analysis-progress-bar.tone-error` (→ `--danger`, dropping a
+raw `rgba()` fallback). `--stagger` is **not** a defect: it is set inline by Overview
+and Settings and carries a `0` fallback, which is the one legitimate use of an
+undefined property.
+
+### Six selectors were fighting themselves
+Two generations of button and badge styling, with the older block's values silently
+dead in every case: `.badge` (4), `.btn` (5), `.btn-danger`, `.btn-primary` (its
+whole gradient background), `.btn-sm`, `.draft-panel`. Merged, with the later
+value winning per property — provably render-neutral, and verified as such by
+diffing effective computed declarations against HEAD. Also removed: an exact
+duplicate `.reader-pane` block **introduced during UI-5**, and a cross-sheet
+`.pane-separator:focus-visible` defined in both `surfaces.css` and `globals.css`
+with conflicting values.
+
+### Spec violations fixed along the way
+`font-weight: 800` at 4 sites (spec §1 allows four steps) and 43 more weights
+written as literals rather than tokens. Three coloured glows removed — the
+`.status-dot` trio and `.deadline-dot` — because §6 says shadow is elevation,
+never glow, and no coloured shadow. The 7 zero-blur `0 0 0 3px var(--accent-soft)`
+rings were **kept**: those are focus indicators, which §5 and §11 require.
+
+### The gate is a test, not a promise
+`src/styles/styles.test.ts` (27 tests) reads the six real stylesheets from disk and
+asserts: no property is referenced without a definition or a fallback; the retired
+tokens stay retired; no raw hex outside the token layer; weights are tokens and
+only the four steps exist; no tinted glow while focus rings survive; every
+container name a query names is actually declared; no reader or intelligence rule
+sits in a container that cannot reach it; no property is declared twice in one
+rule; no identical selector is defined twice in flat scope; the reading measure
+stays 68ch; the reader and intelligence text containers can wrap.
+
+**It was mutation-tested.** Reintroducing each defect one at a time — the undefined
+tokens, the intel rule moved back into `mail-pane`, a coloured glow, `font-weight:
+800`, the duplicate `.reader-pane`, a deleted wrap guard, and a query naming a
+container that does not exist — fails the suite in all seven cases. It is not a
+string search.
+
+### What this gate changed on screen
+Fixing an invalid declaration restores the style that was always meant to be there,
+so these are real visual changes: the intelligence pane, the draft panel and the
+startup mark **gain** a border or background that was never rendering; the source
+preview gains an 8px radius and the intelligence pane a 6px one; four small-caps
+labels drop from 800 to 600; the status dots lose their coloured halo. None of it
+can be confirmed without rendering the app.
+
+**Verification:** Rust 35, backend 239, tools 9, frontend 292 — **575 passed, 0
+failed** (up from 548). `cargo fmt`, `clippy`, `tsc`, ESLint, production build (0
+source maps), secret scan and knowledge graph all clean.
+
+---
+
 ## REMAINING WORK
 
 **UI (this phase):**
@@ -399,13 +479,16 @@ source maps) and the secret scan clean. Knowledge graph current.
    `aria-label`, and a duplicated AI-label map.
 2. Focus movement on page change and message selection (UI-10).
 3. Replace the 31 inline `style` objects with tokens.
-4. 900px intelligence-pane collapse (UI-9) — **the CSS for it is dead**, see below.
-5. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
-6. Real brand asset set — still placeholders (F8).
-7. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
-8. Define or delete the four tokens that 26 declarations reference but no
-   stylesheet defines: `--highlight-top`, `--reader-border`, `--radius-xl`,
-   `--shadow-accent`. All 26 sites are outside the reading pane and are untouched.
+4. `Ctrl+1..6` navigation shortcuts and a `?` shortcut overlay (spec §12).
+5. Real brand asset set — still placeholders (F8).
+6. Accounts: OAuth popup → system browser, `event.origin` check (F13, F14) — Phase 2.
+7. `.status-dot.online` pulses on a 3.2 s infinite loop. Spec §7 does not list a
+   looping status pulse as animatable, and it never stops. UI-11 decision.
+8. `.badge-reply` is coloured with `--accent-soft` / `--accent-text`. Spec §3.3
+   reserves accent for selected, focused, unread and primary action — "nothing
+   else". A reply-needed badge is arguably none of those. Needs a call.
+9. Four `#f28b82` values survive as `var(--danger, #f28b82)` fallbacks. They never
+   paint, so they are harmless, but spec §3 says components never name a raw hex.
 
 **Not started (later phases):** first-run model setup (Phase 2), website (Phase 6),
 installer signing and CI (Phases 5, 7).
@@ -422,33 +505,34 @@ attached and a `tasklist` check after quit.
 **Gate 0: PASS** (unchanged).
 
 **Phase 1: PARTIAL — not declared PASS.** Priorities 1–6 are complete with test
-evidence. UI foundation is substantially complete; UI-7 (error vs empty) and UI-5
-(reading pane) are now done and items 1–8 above remain. The directive states
-explicitly: do not claim the phase is complete if only the foundation is done. Gate 1
-cannot be declared PASS until the packaged-app manual launch is observed.
+evidence. UI foundation is substantially complete; UI-7 (error vs empty), UI-5
+(reading pane) and the dead-CSS gate are done, and items 1–9 above remain. The
+directive states explicitly: do not claim the phase is complete if only the foundation
+is done. Gate 1 cannot be declared PASS until the packaged-app manual launch is
+observed.
 
 ---
 
 ## NEXT TASK
 
-UI-8: move Accounts and Settings onto the shared primitives. Four buttons carry no
+**UI-8: Accounts and Settings onto the shared primitives.** Four buttons carry no
 `aria-label` and an AI-label map is duplicated between the header and Settings.
 
-Before starting it, settle the dead-CSS debt, because it is cheap now and expensive
-later: `.intelligence-pane`'s 900px collapse rules are stranded in `@container
-mail-pane` exactly as the reader's were, and 20 declarations across the app reference
-four tokens that no stylesheet defines. Every one of them currently renders as *no
-style at all* rather than as a wrong style, which is why no test noticed.
+Before starting it, and because the last two gates both found silent, render-nothing
+CSS: run `npx vitest run src/styles/styles.test.ts` after any stylesheet edit. It is
+now the cheapest defect detector in the repo.
 
 **Two things are still owed and are not optional to skip:**
 
-- **UI-5 has had no visual pass.** The hierarchy work is verified by jsdom and by
-  static stylesheet assertions only. Nobody has looked at the rendered pane. Launch
-  the app, open a long email with many recipients, resize to 900px, and check both
-  themes and Tab order into the action row.
-- **Gate 1 packaged-app verification.** F1 is fixed in code and statically asserted,
-  but "one launch shows the window" has still not been observed on a real install,
-  with `desktop.log` attached and a `tasklist` check after quit.
+- **Manual visual verification NOT PERFORMED.** UI-5, UI-7 and this gate have all
+  been verified by jsdom and by static stylesheet assertions only. Nobody has looked
+  at the rendered app. This gate in particular *restores* styles that were never
+  painting — new borders on the intelligence pane and draft panel, a background on
+  the startup mark, new corner radii, lighter small-caps labels, no status-dot halo.
+  Launch the app, open a long email with many recipients, resize through 1100px and
+  900px, and check both themes.
+- **Gate 1 packaged-app verification NOT PERFORMED.** F1 is fixed in code and
+  statically asserted, but "one launch shows the window" has still not been observed
+  on a real install, with `desktop.log` attached and a `tasklist` check after quit.
 
-Manual visual verification status: **NOT PERFORMED.** Gate 1 status: **NOT PERFORMED.**
-Automated verification status: **PASS** (548 tests, 0 failures).
+Automated verification status: **PASS** (575 tests, 0 failures).

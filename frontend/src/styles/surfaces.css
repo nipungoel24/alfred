@@ -55,11 +55,6 @@ textarea:focus-visible {
 
 /* Non-standard focusables that are neither button nor [role=button]
    need their own rule, exactly as the pane separator does. */
-.pane-separator:focus-visible {
-  outline: none;
-  background: var(--accent);
-  box-shadow: none;
-}
 
 /* ── Accent wash ────────────────────────────────────────────────────
    The single permitted use of a tinted surface behind content. It marks
