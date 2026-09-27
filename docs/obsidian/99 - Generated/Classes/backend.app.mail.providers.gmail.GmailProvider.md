@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail
 qualified_name: backend.app.mail.providers.gmail.GmailProvider
 source: backend/app/mail/providers/gmail.py
-line: 10
+line: 11
 status: active
 tags: [gmail, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `GmailProvider` in `backend/app/mail/providers/gmai
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:10`
+`backend/app/mail/providers/gmail.py:11`
 
 ## Bases
 

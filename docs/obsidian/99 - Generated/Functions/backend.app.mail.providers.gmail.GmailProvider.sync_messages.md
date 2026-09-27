@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.sync_messages
 source: backend/app/mail/providers/gmail.py
-line: 236
+line: 237
 status: active
 tags: [gmail, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `sync_messages` in `backend/app/mail/providers/gmai
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:236`
+`backend/app/mail/providers/gmail.py:237`
 
 ## Signature
 

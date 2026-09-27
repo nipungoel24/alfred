@@ -106,12 +106,16 @@ export function IconRail({
 
   const flat = sections.flatMap((s) => s.items);
 
+  // Exactly one item is active, and it is the one that matches where the user
+  // actually is. `activeMailView` is always defined (App builds it from the
+  // current scope/filter even off the mail page), so a mail item must also be
+  // gated on being on the mail page. Without that gate a stale view such as
+  // "inbox:later" kept a mail row lit while Overview was on screen, and the
+  // Overview row could never light up at all.
   const isActive = (item: NavItem): boolean => {
-    if (item.page) return page === item.page && !(item.page === 'overview' && activeMailView);
-    if (item.mail && activeMailView) {
-      return activeMailView === `${item.mail.scope}:${item.mail.filter}`;
-    }
-    return false;
+    if (item.page) return page === item.page;
+    if (!item.mail || !activeMailView) return false;
+    return page === 'mail' && activeMailView === `${item.mail.scope}:${item.mail.filter}`;
   };
 
   // Exactly one item is always tabbable. If nothing is active (for example a

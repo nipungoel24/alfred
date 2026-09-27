@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.every_diagnostic_code_has_distinct_guidance
 source: desktop/src-tauri/src/main.rs
-line: 1954
+line: 1958
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `every_diagnostic_code_has_distinct_guidance` in `d
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1954`
+`desktop/src-tauri/src/main.rs:1958`
 
 ## Signature
 

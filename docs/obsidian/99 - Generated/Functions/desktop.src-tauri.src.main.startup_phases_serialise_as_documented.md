@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.startup_phases_serialise_as_documented
 source: desktop/src-tauri/src/main.rs
-line: 1997
+line: 2001
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `startup_phases_serialise_as_documented` in `deskto
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1997`
+`desktop/src-tauri/src/main.rs:2001`
 
 ## Signature
 

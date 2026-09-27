@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.diagnostic_codes_are_stable_strings
 source: desktop/src-tauri/src/main.rs
-line: 1982
+line: 1986
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `diagnostic_codes_are_stable_strings` in `desktop/s
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1982`
+`desktop/src-tauri/src/main.rs:1986`
 
 ## Signature
 

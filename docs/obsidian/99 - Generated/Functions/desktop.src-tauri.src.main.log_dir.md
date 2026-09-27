@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.log_dir
 source: desktop/src-tauri/src/main.rs
-line: 750
+line: 754
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `log_dir` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:750`
+`desktop/src-tauri/src/main.rs:754`
 
 ## Signature
 

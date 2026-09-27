@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.await_backend_ready_returns_immediately_when_already_ready
 source: desktop/src-tauri/src/main.rs
-line: 1914
+line: 1918
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `await_backend_ready_returns_immediately_when_alrea
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1914`
+`desktop/src-tauri/src/main.rs:1918`
 
 ## Signature
 

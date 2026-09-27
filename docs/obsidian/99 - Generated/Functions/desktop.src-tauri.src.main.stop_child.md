@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.stop_child
 source: desktop/src-tauri/src/main.rs
-line: 624
+line: 628
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `stop_child` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:624`
+`desktop/src-tauri/src/main.rs:628`
 
 ## Signature
 

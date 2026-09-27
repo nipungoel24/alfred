@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider._clean_html
 source: backend/app/mail/providers/gmail.py
-line: 542
+line: 546
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_clean_html` in `backend/app/mail/providers/gmail.
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:542`
+`backend/app/mail/providers/gmail.py:546`
 
 ## Signature
 
@@ -37,6 +37,10 @@ Purpose inferred from usage: `_clean_html` in `backend/app/mail/providers/gmail.
 ## Returns
 
 `str`
+
+## Calls
+
+- `unescape` (`html.unescape`, calls-inferred)
 
 ## Side Effects
 

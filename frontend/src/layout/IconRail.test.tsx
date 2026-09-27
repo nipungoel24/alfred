@@ -86,6 +86,37 @@ describe('IconRail (primary navigation)', () => {
     expect(screen.getByRole('button', { name: /^Important/ })).toHaveAttribute('aria-current', 'page');
   });
 
+  it('never lights two items at once', () => {
+    // Regression: a mail view left over from the mail page used to keep a mail
+    // row active while a different page was on screen, so the rail showed two
+    // active items and the real page row stayed dark.
+    for (const page of ['overview', 'tasks', 'deadlines', 'accounts', 'settings'] as const) {
+      const { unmount } = render(
+        <IconRail
+          page={page}
+          onNavigate={vi.fn()}
+          onNavigateMail={vi.fn()}
+          aiReady
+          gmailConnected
+          activeMailView="inbox:later"
+        />,
+      );
+      const current = screen.getAllByRole('button').filter((b) => b.getAttribute('aria-current') === 'page');
+      expect(current).toHaveLength(1);
+      expect(current[0]).toHaveTextContent(
+        { overview: 'Overview', tasks: 'Tasks', deadlines: 'Deadlines', accounts: 'Accounts', settings: 'Settings' }[page],
+      );
+      unmount();
+    }
+  });
+
+  it('keeps a mail row active on the mail page', () => {
+    renderRail({ page: 'mail', activeMailView: 'inbox:later' });
+    const current = screen.getAllByRole('button').filter((b) => b.getAttribute('aria-current') === 'page');
+    expect(current).toHaveLength(1);
+    expect(current[0]).toHaveTextContent('Later');
+  });
+
   it('shows real counts from the API', () => {
     renderRail({ counts: { inbox: 42, allMail: 1284 } });
     expect(screen.getByRole('button', { name: /^Inbox/ })).toHaveTextContent('42');

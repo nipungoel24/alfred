@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.failure_envelope
 source: desktop/src-tauri/src/main.rs
-line: 1210
+line: 1214
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `failure_envelope` in `desktop/src-tauri/src/main.r
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1210`
+`desktop/src-tauri/src/main.rs:1214`
 
 ## Signature
 

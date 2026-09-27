@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.everything_healthy_is_ready
 source: desktop/src-tauri/src/main.rs
-line: 1710
+line: 1714
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `everything_healthy_is_ready` in `desktop/src-tauri
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1710`
+`desktop/src-tauri/src/main.rs:1714`
 
 ## Signature
 

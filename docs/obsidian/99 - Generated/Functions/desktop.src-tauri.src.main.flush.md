@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.flush
 source: desktop/src-tauri/src/main.rs
-line: 911
+line: 915
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `flush` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:911`
+`desktop/src-tauri/src/main.rs:915`
 
 ## Signature
 

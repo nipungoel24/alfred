@@ -479,7 +479,11 @@ impl BackendSupervisor {
                     }
                     CommandEvent::Terminated(payload) => {
                         log::error!(
-                            "sidecar.exited pid={} code={:?} generation={}",
+                            // Not "code=": the global redaction filter treats a
+                            // bare `code=` as the OAuth authorization code and
+                            // replaced the process exit status with [redacted],
+                            // hiding the one value that explains a sidecar exit.
+                            "sidecar.exited pid={} exit={:?} generation={}",
                             pid,
                             payload.code,
                             generation_child

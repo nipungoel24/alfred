@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.probe_health_rejects_a_200_that_merely_contains_200
 source: desktop/src-tauri/src/main.rs
-line: 1642
+line: 1646
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `probe_health_rejects_a_200_that_merely_contains_20
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1642`
+`desktop/src-tauri/src/main.rs:1646`
 
 ## Signature
 

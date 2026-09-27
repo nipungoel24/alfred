@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.probe_health_survives_a_cold_backend_that_returns_503_first
 source: desktop/src-tauri/src/main.rs
-line: 1680
+line: 1684
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `probe_health_survives_a_cold_backend_that_returns_
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1680`
+`desktop/src-tauri/src/main.rs:1684`
 
 ## Signature
 

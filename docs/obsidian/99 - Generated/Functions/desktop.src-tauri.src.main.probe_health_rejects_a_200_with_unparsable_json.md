@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.probe_health_rejects_a_200_with_unparsable_json
 source: desktop/src-tauri/src/main.rs
-line: 1658
+line: 1662
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `probe_health_rejects_a_200_with_unparsable_json` i
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1658`
+`desktop/src-tauri/src/main.rs:1662`
 
 ## Signature
 

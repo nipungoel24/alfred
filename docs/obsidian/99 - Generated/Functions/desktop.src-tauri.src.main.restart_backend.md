@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.restart_backend
 source: desktop/src-tauri/src/main.rs
-line: 1237
+line: 1241
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `restart_backend` in `desktop/src-tauri/src/main.rs
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1237`
+`desktop/src-tauri/src/main.rs:1241`
 
 ## Signature
 

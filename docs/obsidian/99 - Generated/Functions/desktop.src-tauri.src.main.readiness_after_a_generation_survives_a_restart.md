@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.readiness_after_a_generation_survives_a_restart
 source: desktop/src-tauri/src/main.rs
-line: 1807
+line: 1811
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `readiness_after_a_generation_survives_a_restart` i
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1807`
+`desktop/src-tauri/src/main.rs:1811`
 
 ## Signature
 

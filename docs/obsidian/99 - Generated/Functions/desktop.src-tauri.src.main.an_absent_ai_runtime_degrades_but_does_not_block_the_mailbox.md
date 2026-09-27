@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.an_absent_ai_runtime_degrades_but_does_not_block_the_mailbox
 source: desktop/src-tauri/src/main.rs
-line: 1750
+line: 1754
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `an_absent_ai_runtime_degrades_but_does_not_block_t
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1750`
+`desktop/src-tauri/src/main.rs:1754`
 
 ## Signature
 

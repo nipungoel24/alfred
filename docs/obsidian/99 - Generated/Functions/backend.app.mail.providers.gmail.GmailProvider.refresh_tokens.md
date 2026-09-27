@@ -6,7 +6,7 @@ layer: gmail
 module: backend.app.mail.providers.gmail.GmailProvider
 qualified_name: backend.app.mail.providers.gmail.GmailProvider.refresh_tokens
 source: backend/app/mail/providers/gmail.py
-line: 60
+line: 61
 status: active
 tags: [gmail, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `refresh_tokens` in `backend/app/mail/providers/gma
 
 ## Location
 
-`backend/app/mail/providers/gmail.py:60`
+`backend/app/mail/providers/gmail.py:61`
 
 ## Signature
 

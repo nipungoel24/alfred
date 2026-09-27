@@ -674,10 +674,76 @@ no `autoFocus` anywhere, and every `useEffect` has a dependency array.
 **Not started (later phases):** first-run model setup (Phase 2), website (Phase 6),
 installer signing and CI (Phases 5, 7).
 
-**Verification still owed for Gate 1:** the packaged-app manual launch. F1 is fixed in
-code and statically asserted, but "one launch shows the window" has not been observed on
-a real install. `docs/Phases.md` Gate 1 requires that manual pass with `desktop.log`
-attached and a `tasklist` check after quit.
+**Verification still owed for Gate 1:** the visual pass. The packaged-app lifecycle half is
+now done — installed from the NSIS artifact, launched once, no white frame, no second
+launch, no terminal, clean graceful shutdown, zero orphans, `desktop.log` reviewed. What
+remains is the reader with a message open, the intelligence panel, the Tasks page, the
+error states, and every window size below 1440. See `docs/VISUAL-QA-PHASE1.md`.
+
+---
+
+## SECOND VISUAL PASS - INSTALLED APP (commit `fix(alfred): correct rail active state, snippet entities and startup flash`)
+
+The first pass stopped at "the installer exists". This pass installed and ran it.
+
+### The installed build was stale
+
+`%LOCALAPPDATA%\Alfred` held a **10 Sep** shell *and* sidecar while four backend sources
+were newer, including `secure_store.py`. Shipping it would have omitted the current DPAPI
+credential handling. Rebuilt before drawing any conclusion.
+
+Two build steps, both required:
+
+1. `py -3.12 backend/build_sidecar.py` — the sidecar is PyInstaller, not Rust, so
+   editing backend Python does nothing until this runs. PyInstaller was **not installed**
+   in this interpreter.
+2. `cargo tauri build` from `desktop/`.
+
+`build_sidecar.py` **refuses** when `GMAIL_CLIENT_SECRET` is set (ADR-010). It reads
+`backend/.env` via `load_dotenv`, so unsetting it in the shell is useless — it is
+reloaded. Building without touching `backend/.env` needs the key set to a *present but
+empty* value: `load_dotenv(override=False)` then skips it and the guard's truthiness
+check passes. PowerShell 5.1 makes this awkward — `$env:X=$null` and `$env:X=''` both
+**remove** the key, so the variable has to be set from Python.
+
+The install itself preserved the 14.6 MB mailbox database untouched.
+
+### Four confirmed defects, all fixed
+
+- **B1 - the sidebar lit two items at once** (high). Reproduced on Overview, Deadlines,
+  Settings and Accounts: the current page *and* a mail row both carried the active
+  treatment. `App.tsx:184` builds `activeMailView` as a template string, so it is
+  **always truthy**, and `handleNavigate` never resets it; `IconRail.tsx:110` then made
+  the Overview row permanently unactivatable. A mail item is now active only when
+  `page === 'mail'`. Two regression tests added, one iterating all five non-mail pages.
+- **B2 - ~1.2 s blank white frame** (medium). Window at +1.22 s showed pure white; boot
+  shell at +2.89 s. `tauri.conf.json` had `visible: true` and no background. Added
+  `"backgroundColor": "#0b0d13"`. Re-verified: first frame is now the dark boot shell.
+- **B3 - raw HTML entities in snippets** (medium). `gmail.py` took `snippet` and
+  `subject` raw. `normalize_text()` already unescapes but **only on the import path** —
+  the Gmail sync path builds `Email` directly and bypassed it. Fixed at ingestion.
+  *Residual:* already-stored messages keep their snippet, so the backlog still shows
+  `&#39;` until re-fetched. Confirmed still visible, as expected.
+- **B4 - the sidecar exit code was redacted out of the log** (low). Every line passes
+  through a global filter that treats bare `code=` as the OAuth code, so
+  `sidecar.exited … code=Some(0)` logged as `code=[redacted]` — destroying the one value
+  that explains a sidecar exit. Renamed the field to `exit=`. Redaction logic untouched.
+
+### A retracted false finding
+
+"Reader shows a full-bleed unconstrained image covering the whole window, making the app
+unusable." **Not a defect.** A topmost Chrome window was painting over Alfred, and
+`CopyFromScreen` captured Chrome. The "image" was a product page in the operator's
+browser; the "dead navigation" was my clicks landing on Chrome. The reader renders plain
+text via `LinkifiedBody` and has no HTML image path. Caught only by checking
+`WindowFromPoint` before trusting a frame.
+
+### The app did not quit by itself
+
+It exited cleanly twice, both times at my own tool-call boundaries, with
+`desktop.exit_requested` and no error. There is no idle timer or watchdog in `main.rs`,
+and `/health` was still 200 immediately before each exit. Running launch + tour inside a
+single invocation kept it alive throughout. Do not read this as an app fault.
 
 ---
 
@@ -685,42 +751,47 @@ attached and a `tasklist` check after quit.
 
 **Gate 0: PASS** (unchanged).
 
-**Phase 1: PARTIAL — not declared PASS.** Priorities 1–6 are complete with test
-evidence, and the UI steps UI-1 through UI-11 are now all done with test evidence.
-The first visual pass found the desktop shell **did not compile at all** — the
-release build was broken while `cargo test` stayed green, because dev-dependencies
-enable the `log/std` feature in test builds and nothing else does. That is fixed, and
-`cargo tauri build` now produces the installer. What is still missing is the rest of
-the visual pass: the reading pane with a message open, the intelligence panel, dark
-mode, four unvisited pages, the error states, and every window size below 1440. Gate 1
-cannot be declared PASS until a packaged install is actually run.
+**Phase 1: PARTIAL - not declared PASS.** All UI-1..UI-11 steps are done with test
+evidence, and the release build now compiles and packages. The second visual pass
+installed and ran the real artifact and cleared the lifecycle half of Gate 1: one launch,
+no white frame, no second launch, no terminal window, clean graceful shutdown, **zero**
+orphan processes, `desktop.log` reviewed. Still missing: the reader with a message open,
+the intelligence panel with content, the Tasks page, the error states, and every window
+size below 1440. Gate 1 is not declared PASS while those are unseen.
 
 ---
 
 ## NEXT TASK
 
-**Repeat the visual pass.** The first attempt was partial — see
-`docs/VISUAL-QA-PHASE1.md`. The build blocker is gone; the window automation is not.
+**Finish the visual pass.** See `docs/VISUAL-QA-PHASE1.md` for the full record, the
+capture hazards, and the exact outstanding list.
 
-Before retrying, note two environment lessons that cost most of the session:
+Three environment lessons, each of which cost real time:
 
-1. **A DPI-unaware capture process produces convincing false defects.** `GetWindowRect`
-   returns logical pixels while `CopyFromScreen` reads physical ones, so the capture is
-   a mis-scaled crop — it showed black bands and duplicated, offset panes that looked
-   exactly like a severe layout bug and were entirely fictional. Call
-   `SetProcessDpiAwarenessContext(PER_MONITOR_AWARE_V2)` before any window call. This
-   display is 3840×2160 physical / 2560×1440 logical at 150%.
-2. **`cargo build --release` does not embed the frontend.** The webview requests
-   localhost and shows Chromium's `ERR_CONNECTION_REFUSED` page. Build with
-   `cargo tauri build` **from `desktop/`** — `tauri-cli` is a Rust dev-dependency, so
-   `npx tauri build` does not work.
+1. **A DPI-unaware capture produces convincing false defects.** `GetWindowRect` returns
+   logical pixels while `CopyFromScreen` reads physical ones. Call
+   `SetProcessDpiAwarenessContext(PER_MONITOR_AWARE_V2)` first. This display is
+   3840x2160 physical / 2560x1440 logical at 150%.
+2. **Verify occlusion before trusting a frame.** A covering window silently turns a
+   capture into fiction. `WindowFromPoint` before capture, and prefer
+   `PrintWindow(PW_RENDERFULLCONTENT)` which renders the target's own surface. Note
+   `PrintWindow` intermittently returns an all-black frame here, so reject uniformly
+   black frames and retry. UI Automation finds 0 buttons in this WebView2, and
+   `MoveWindow` repeatedly collapsed the window to 199x34 - navigation has to be driven
+   by mouse input at verified coordinates.
+3. **`cargo build --release` does not embed the frontend.** Build with
+   `cargo tauri build` **from `desktop/`** - `tauri-cli` is a Rust dev-dependency, so
+   `npx tauri build` does not work. And any backend Python change needs
+   `build_sidecar.py` re-run before it reaches the app at all.
 
 Still unverified, in priority order: the reading pane with a message open, the
-intelligence panel with real content, dark mode, Accounts/Settings/Overview/Tasks/
-Deadlines, error and empty states, and 1100/1000/900/800px.
+intelligence panel with real content, the Tasks page, error and empty states, and
+1100/1000/900/800px. Also unresolved: Deadlines reported `0 upcoming` while skeleton rows
+were still on screen - whether the empty state replaces the skeleton promptly was never
+rechecked.
 
-**Gate 1 packaged-app verification: NOT PERFORMED.** The build now succeeds and the app
-launches, but a packaged install has not been run, and `desktop.log` plus a post-quit
-`tasklist` check have not been captured.
-**Automated verification status: PASS** (657 tests, 0 failures).
+**Automated verification status: PASS** (657 tests, 0 failures). The frontend runner
+reports 31/31 files passing but exits non-zero on a pre-existing unhandled `boom`
+rejection in `src/features/focus.retry.test.tsx`, which this work does not touch.
+
 

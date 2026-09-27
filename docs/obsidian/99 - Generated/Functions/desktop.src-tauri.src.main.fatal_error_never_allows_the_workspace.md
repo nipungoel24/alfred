@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.fatal_error_never_allows_the_workspace
 source: desktop/src-tauri/src/main.rs
-line: 1784
+line: 1788
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `fatal_error_never_allows_the_workspace` in `deskto
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1784`
+`desktop/src-tauri/src/main.rs:1788`
 
 ## Signature
 

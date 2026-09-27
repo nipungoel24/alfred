@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.port
 source: desktop/src-tauri/src/main.rs
-line: 1501
+line: 1505
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `port` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1501`
+`desktop/src-tauri/src/main.rs:1505`
 
 ## Signature
 

@@ -33,6 +33,7 @@ tags: [module, backend]
 - `scoped_thread_id` ← `backend.app.mail.identity.scoped_thread_id`
 - `timedelta` ← `datetime.timedelta`
 - `timezone` ← `datetime.timezone`
+- `unescape` ← `html.unescape`
 
 ## Classes
 

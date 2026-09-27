@@ -4163,6 +4163,11 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._clean_html",
+      "to": "html.unescape",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.mail.providers.gmail.GmailProvider._ensure_access_token",
       "to": "backend.app.db.repositories.Repository.save_credentials",
       "relation": "calls"
@@ -4205,6 +4210,11 @@
     {
       "from": "backend.app.mail.providers.gmail.GmailProvider._normalize_message",
       "to": "datetime.datetime.fromtimestamp",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.mail.providers.gmail.GmailProvider._normalize_message",
+      "to": "html.unescape",
       "relation": "calls-inferred"
     },
     {

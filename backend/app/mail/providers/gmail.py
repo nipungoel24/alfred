@@ -1,6 +1,7 @@
 import base64
 import httpx
 from datetime import datetime, timezone, timedelta
+from html import unescape
 from typing import Dict, Any, List
 from .base import MailProvider
 from ...schemas import Email, EmailAccount
@@ -499,7 +500,7 @@ class GmailProvider(MailProvider):
         recipients_raw = headers_dict.get("to", "")
         recipients = [r.strip() for r in recipients_raw.split(",") if r.strip()]
 
-        subject = headers_dict.get("subject", "(No Subject)")
+        subject = unescape(str(headers_dict.get("subject") or "(No Subject)"))
         body = self._extract_body(detail.get("payload", {}))
         
         received_ms = int(detail.get("internalDate", 0))
@@ -510,7 +511,10 @@ class GmailProvider(MailProvider):
         # Lean metadata only — the full raw payload (with base64 bodies) is
         # never persisted twice. The raw thread id is kept here because the
         # stored thread_id is the account-scoped local identity.
-        snippet = detail.get("snippet", "") or ""
+        # Gmail returns the snippet already HTML-escaped, so a subject line
+        # containing an apostrophe arrives as "we&#39;ve" and was stored and
+        # shown verbatim in the message list.
+        snippet = unescape(str(detail.get("snippet") or ""))
         raw_meta = {
             "labelIds": label_ids,
             "internalDate": detail.get("internalDate"),
