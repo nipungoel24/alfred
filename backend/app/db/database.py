@@ -105,10 +105,11 @@ CREATE TABLE IF NOT EXISTS tasks (
     id TEXT PRIMARY KEY,
     source_email_id TEXT REFERENCES emails(id) ON DELETE SET NULL,
     source_thread_id TEXT,
-    title TEXT NOT NULL,
-    description TEXT,
-    due_at TEXT,
-    priority TEXT,
+   title TEXT NOT NULL,
+   description TEXT,
+   due_at TEXT,
+   owner TEXT,
+   priority TEXT,
     status TEXT NOT NULL,
     created_at TEXT,
     derivation_version TEXT DEFAULT '1',
@@ -357,6 +358,15 @@ def _migrate(connection: sqlite3.Connection):
                           ("provider_message_id", "TEXT")]:
         if col not in email_cols:
             cursor.execute(f"ALTER TABLE emails ADD COLUMN {col} {col_type}")
+
+    # tasks table migrations. `owner` used to be smuggled inside `description`
+    # as the string "Owner: user"; it is a real column now. Additive only, so
+    # existing rows keep every value they already had.
+    cursor.execute("PRAGMA table_info(tasks)")
+    task_cols = {row["name"] for row in cursor.fetchall()}
+    for col, col_type in [("owner", "TEXT")]:
+        if col not in task_cols:
+            cursor.execute(f"ALTER TABLE tasks ADD COLUMN {col} {col_type}")
 
     # Backfill mailbox state / category / eligibility from stored payloads
     # when the new columns are empty but Gmail raw metadata is present.

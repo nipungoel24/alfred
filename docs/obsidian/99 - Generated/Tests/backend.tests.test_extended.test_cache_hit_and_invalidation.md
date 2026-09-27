@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_cache_hit_and_invalidation
 source: backend/tests/test_extended.py
-line: 49
+line: 59
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_cache_hit_and_invalidation` in `backend/tests
 
 ## Location
 
-`backend/tests/test_extended.py:49`
+`backend/tests/test_extended.py:59`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_prompt_injection_safety
 source: backend/tests/test_extended.py
-line: 257
+line: 267
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_prompt_injection_safety` in `backend/tests/te
 
 ## Location
 
-`backend/tests/test_extended.py:257`
+`backend/tests/test_extended.py:267`
 
 ## Signature
 

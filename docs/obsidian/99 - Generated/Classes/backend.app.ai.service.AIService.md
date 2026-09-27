@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service
 qualified_name: backend.app.ai.service.AIService
 source: backend/app/ai/service.py
-line: 110
+line: 112
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `AIService` in `backend/app/ai/service.py`.
 
 ## Location
 
-`backend/app/ai/service.py:110`
+`backend/app/ai/service.py:112`
 
 ## Called By
 

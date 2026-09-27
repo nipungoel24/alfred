@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.Category
 source: backend/app/schemas.py
-line: 7
+line: 24
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `Category` in `backend/app/schemas.py`.
 
 ## Location
 
-`backend/app/schemas.py:7`
+`backend/app/schemas.py:24`
 
 ## Bases
 

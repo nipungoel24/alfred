@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.database
 qualified_name: backend.app.db.database.transaction
 source: backend/app/db/database.py
-line: 768
+line: 778
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Context manager for batched write transactions.
 
 ## Location
 
-`backend/app/db/database.py:768`
+`backend/app/db/database.py:778`
 
 ## Signature
 

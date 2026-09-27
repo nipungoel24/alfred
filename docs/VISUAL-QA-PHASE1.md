@@ -251,26 +251,211 @@ list settled, so whether the empty state replaces the skeleton promptly is **unr
 
 ---
 
+## Tasks UI and task extraction (surgical pass)
+
+Date: 2026-09-27. Baseline `9783a66`.
+
+### The action column moved between rows
+
+**Cause, structural.** `.list-row` was a plain flex row and the two actions were loose
+flex children. One of them was rendered conditionally:
+
+```tsx
+{task.source_email_id && (<button className="icon-btn">…View email</button>)}
+<button className="icon-btn">…trash…</button>
+```
+
+so a row with a source email carried two controls and a row without carried one, and the
+trash icon sat at a different x on each. Separately, `.icon-btn` is a fixed **28px**
+`inline-grid` while `.icon-btn .btn-label` is `white-space: nowrap`, so the "View email"
+label overflowed its own button and collided with its neighbour. The group also had no
+`align-items`, so it drifted vertically on wrapped rows.
+
+**Fix.** The row is now a three-track grid, `auto minmax(0, 1fr) var(--task-actions-width)`,
+with a new `--task-actions-width: 116px` token. Both controls always render — the view
+action is `disabled` with an honest label when a row has no source email — so the column
+is the same width on every row. Icon and label are one control (`.task-action`,
+`inline-flex`, auto width) rather than text inside a 28px box. Two inline `style` objects
+in the row became `.task-content`, `.task-note` and `.task-due`.
+
+**Measured on the installed app at 1940px, 8 consecutive task rows** spanning short and
+long titles, with and without a due date, with and without a description, and three
+priorities:
+
+| control | x range | spread across rows |
+| --- | --- | --- |
+| mail icon | 1682–1702 | 0 px |
+| "View email" label | 1709–1792 | 0 px |
+| trash icon | 1825–1843 | 0 px |
+
+### Task extraction was writing prose into structured fields
+
+Traced with real data from `%LOCALAPPDATA%\Alfred\alfred.sqlite3` (982-message
+mailbox, `qwen3:4b`). **Gmail normalisation is not the cause** — the stored bodies are
+clean. The corruption is introduced at the **AI extraction boundary**, in three places
+that compounded:
+
+1. **The prompt asked for it.** `ANALYSIS_PROMPT` rule 4 read *"In 'deadlines', preserve
+   the relative wording as 'due_at' when no calendar date is present"* — an instruction
+   to write prose into a date field. It also contradicted rule 5, which said to skip
+   ambiguous timings like "soon".
+2. **The schema invited it.** `ActionItem.deadline` and `Deadline.due_at` were typed
+   `str | None` and described to the model as *"a raw string (e.g. 'Friday' or '5 PM
+   today')"*. These descriptions ship verbatim in `model_json_schema()`, so the model
+   was being told prose was correct.
+3. **Nothing validated the result.** `EmailAnalysis.model_validate_json(raw_text)`
+   accepted whatever came back.
+
+Derivation then propagated it unexamined, and additionally used
+`deadlines[].description` as the **task title**, which is how a bare date became a task.
+
+**Traced example** — `[GitHub] Sudo email verification code`, an automated OTP with no
+user action. Model output: `action_items[0].deadline = "15 minutes from now"` and
+`deadlines[0] = {description: "15 minutes from now", due_at: "15 minutes from now"}`.
+Persisted: a task titled `15 minutes from now` with `due_at = "15 minutes from now"`.
+After the fix, re-deriving that same email produces **no task at all**.
+
+Four more real emails were traced the same way: a Techugo marketing blast, an Indeed
+application receipt, a DM360 job alert, and a job description. The Indeed receipt had
+`deadline = "due_at: soon"`; the DM360 alert had `description = "No action required"`,
+which the model meant as *there is no task* and which became one. All four now produce
+nothing.
+
+**Fix, at the earliest incorrect boundary:**
+
+- `backend/app/services/due_dates.py` (new) is the single place that decides what a due
+  value may be. It rejects field labels, vague prose, bare clock times and free text, and
+  returns a normalised ISO-8601 instant or `None`. Relative offsets resolve only against
+  a supplied reference timestamp; months are refused rather than guessed.
+- `ActionItem.deadline` / `Deadline.due_at` gained `mode="before"` validators, so the
+  invariant holds the instant model output becomes a domain object. Their descriptions
+  were rewritten to state the ISO-or-null contract, which is what the model now sees.
+- The prompt lost rule 4 and gained explicit rules: never prose, never a field name in a
+  field's value, a `description` must state something to DO, and "no action required"
+  means return empty lists.
+- `derive_tasks` re-normalises against `email.received_at` (the one place a reference
+  exists), rejects non-action and temporal-only titles, drops an "explicit" deadline
+  whose value is unreadable, and no longer writes `"Owner: user"` / `"Due: …"` into
+  `description`. `owner` is a real column now.
+- Derivation version 2 → 3.
+
+**Domain check.** `due_at` is one shape: `2026-09-12T00:00:00+00:00`. Of the 90 distinct
+`due_at` values in the live database, 43 normalise to `None` and 47 are real instants.
+
+### Existing data: documented, not rewritten
+
+Nothing in the database was modified. The pre-existing rows are **stale historical
+extraction**, and the brief is explicit that reprocessing must be an explicit, safe
+operation rather than an implicit migration — so it was not performed.
+
+| | count |
+| --- | --- |
+| tasks total | 291 |
+| `due_at` holds prose or a field label, not an instant | 97 |
+| title is provably not an action (all still `pending`) | 57 |
+| `description` carries `Owner: …` | 174 |
+| `description` carries `Due: …` | 59 |
+| already correct on both counts | 137 |
+
+The Tasks page in the screenshots below therefore still shows `12th September 2026`,
+`15 minutes from now`, `due_at: soon` and `No action required`. That is the honest
+current state, not a regression.
+
+`TaskMigrationService.run_migration()` is the existing explicit repair: it re-derives
+from cached analyses, preserves `status`, `created_at` and any `priority_override`, and
+removes only *pending* rows the new logic no longer produces. It was **not run**.
+
+### Overview / sidebar active state — verified on the device
+
+`9783a66` was not taken on trust. All ten destinations were visited in the installed app
+and the active state was measured by detecting the 2px accent bar each active rail item
+paints at its left edge:
+
+| destination | active items detected | count |
+| --- | --- | --- |
+| Inbox / All Mail / Important / Needs Reply / Later | the matching mail row | 1 |
+| **Overview** | **Overview** | **1** |
+| **Tasks** | **Tasks** | **1** |
+| Deadlines / Accounts / Settings | the matching row | 1 |
+
+Overview is active when on Overview, Tasks is active when on Tasks, **no mail row stays
+lit after leaving the mail pages**, and no capture ever showed two active rows.
+
+---
+
+## Visual verification actually performed
+
+Against the NSIS install of the current `cargo tauri build`, real mailbox, dark theme.
+Screenshots are in `%TEMP%\opencode\qa\` and are not committed.
+
+- **Tasks, 1940x1330** — inspected. 8 rows visible: short title, long title, title with a
+  description, rows with and without a due date, `high`/`medium`/`low` priority. Action
+  column measured at 0 px spread. No source-email-less row was present in view, so the
+  disabled-view-action state was verified by unit test rather than by eye.
+- **Tasks, 900x1330** (the `minWidth`) — inspected. Rail collapses to icons correctly and
+  the Tasks icon is active. The action column stays aligned, but the row is **clipped at
+  the right edge** — and so is the header ("AI ready", the Pending/Completed control).
+  This is a **pre-existing global horizontal overflow at 900 px**, not caused by this
+  change; the whole layout is wider than the viewport there.
+- **Sidebar, 1940x1330** — all ten destinations, measured as above.
+- **Mail with a message open, 1100x1330** — inspected incidentally at the collapsed-rail
+  width. The reader renders correctly: subject, From/To/Date grid, body, empty-reader state.
+  This closes a screen the previous gate had listed as never seen.
+- **Reader with a message open, 1940px** — **not** inspected. The reader evidence above is
+  at 1100 px only.
+- **Intelligence panel with content** — still not opened.
+- **1400 px and 1000 px** — **not** verified. A capture at 1400 px came back showing the
+  desktop wallpaper because Alfred was not foreground, so it was discarded rather than
+  reported.
+- **Scrolling deep into the list, wrapped multi-line titles, completed tasks** — not
+  inspected; the 8 measured rows were all single-line titles.
+- **Light theme** — not re-inspected this pass.
+
+---
+
+## Tests
+
+| Suite | Result |
+| --- | --- |
+| Backend | **283 passed**, 0 failed (was 241) |
+| Tools | 9 passed |
+| Rust | 35 passed |
+| Frontend | **383 passed**, 32/32 files (was 376/31) |
+| `tsc -b` / ESLint / `cargo fmt` / `cargo clippy` / frontend build | all clean |
+| Release secret scan / Windows deployment check | exit 0 |
+
+New: `backend/tests/test_task_extraction_contract.py` (40 cases) and
+`frontend/src/features/tasks/TasksPage.layout.test.tsx` (7 cases).
+
+Four existing tests asserted the defect and were corrected rather than deleted —
+`due_at == "Friday"`, `due_at == "Before 5 PM"` and `deadline_count == 2` all encoded
+prose in a date field. Each keeps its original intent, restated against a real ISO date,
+and gained a companion case asserting the prose form is now rejected.
+
+The frontend runner still exits non-zero on the pre-existing unhandled `boom` rejection
+in `src/features/focus.retry.test.tsx`, which this work does not touch.
+
+---
+
 ## Manual verification
 
-**What was done:** rebuilt the sidecar and the bundle, installed the NSIS artifact over
-the existing install (mailbox database verified untouched), launched the installed app,
-and inspected the real UI across both themes with a real mailbox — plus a full clean
-shutdown with a process and log audit.
+**What was done this pass:** rebuilt the sidecar and bundle, installed the NSIS artifact,
+and inspected the Tasks page and all ten sidebar destinations in the running installed
+app against a real mailbox, with the action column and the active state measured from
+captures rather than judged by eye. Separately, five real malformed emails were traced
+from the database through normalisation, extraction, persistence and back out again, and
+re-derived to confirm the corrected pipeline.
 
-**What was not done:** open a message, visit Tasks, open the intelligence panel, resize
-the window, or trigger error states.
+**What was not done:** the reader at 1940 px, the intelligence panel, 1400/1000 px,
+deep scrolling, wrapped titles, and light theme.
 
 **Status:**
 
-- Automated verification: **PASS** — 657 tests, 0 failures. (Frontend runner reports 31/31
-  files passing but exits non-zero on a pre-existing unhandled `boom` rejection in
-  `focus.retry.test.tsx`, a file untouched by this work.)
-- Manual visual verification: **PARTIAL** — installed app, real mailbox, both themes, one
-  window size. Reader-with-message, intelligence panel, Tasks and all size breakpoints
-  still unverified.
-- Gate 1 packaged-app verification: **PASS on lifecycle and packaging** — installed from
-  the NSIS artifact, launched once, no white frame, no second launch, no terminal, clean
-  graceful shutdown, zero orphan processes, `desktop.log` reviewed. **The gate is not
-  fully PASS** because the reader-with-message, intelligence panel, Tasks and
-  multiple-size checks remain outstanding.
+- Automated verification: **PASS** — 659 tests, 0 failures.
+- Tasks action column: **FIXED and measured** (0 px spread across 8 rows).
+- Task extraction: **FIXED at the earliest boundary** and verified by replaying real
+  emails; newly derived tasks are correct. The 291 existing rows are stale and were
+  deliberately left untouched.
+- Sidebar active state: **VERIFIED on the device** for all ten destinations.
+- Gate 1 remains **PARTIAL**: the reader at full width, the intelligence panel, and
+  most window widths are still unverified.

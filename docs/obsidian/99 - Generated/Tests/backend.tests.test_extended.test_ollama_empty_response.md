@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_ollama_empty_response
 source: backend/tests/test_extended.py
-line: 103
+line: 113
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_ollama_empty_response` in `backend/tests/test
 
 ## Location
 
-`backend/tests/test_extended.py:103`
+`backend/tests/test_extended.py:113`
 
 ## Signature
 

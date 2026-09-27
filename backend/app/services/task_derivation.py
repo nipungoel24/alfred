@@ -9,9 +9,10 @@ import hashlib
 import re
 from datetime import datetime, timezone
 from ..schemas import Email, EmailAnalysis, ActionItem, Task
+from .due_dates import is_non_action, is_temporal_only, normalize_due_at
 
 
-DERIVATION_VERSION = "2"
+DERIVATION_VERSION = "3"
 
 # Patterns that indicate noise, not real user tasks
 NOISE_PATTERNS = [
@@ -33,7 +34,17 @@ NOISE_PATTERNS = [
     re.compile(r"update\s+payment\s+method", re.I),
     re.compile(r"(flight|travel|meeting)\s+(schedule\s+)?(change|delay|update)", re.I),
     re.compile(r"receipt|invoice", re.I),
-    re.compile(r"review\s+recent\s+activity", re.I)
+    re.compile(r"review\s+recent\s+activity", re.I),
+    # One-time codes are not work. "Enter GitHub sudo authentication code"
+    # came from an automated security notification. The gap allows a product or
+    # vendor name between the verb and the noun ("Enter GitHub sudo ... code").
+    re.compile(r"\b(enter|use|input|supply|provide)\b[^,.;:]{0,48}?"
+               r"\b(code|password|pin|otp|passcode|one[-\s]?time\s+code)\b", re.I),
+    # Marketing CTAs: joining a community channel is not the recipient's work.
+    re.compile(r"join\s+.*\b(whatsapp|telegram|discord|slack)\b.*\b(channel|group|community)\b", re.I),
+    re.compile(r"join\s+the\s+.*\b(channel|community|group)\b", re.I),
+    # Conditional support CTAs attached to an automated receipt.
+    re.compile(r"contact\s+\w+\s+if\s+.*\b(error|issue|problem|incorrect)\b.*\b(notice|notice[d]?|see|found)\b", re.I),
 ]
 
 # Categories that should rarely generate user tasks
@@ -58,7 +69,17 @@ def _is_user_actionable(item: ActionItem, email: Email, analysis: EmailAnalysis)
     # Too short to be meaningful
     if len(desc) < MIN_TASK_LENGTH:
         return False
-    
+
+    # "No action required" is the model stating there is NO task. It used to
+    # become a task titled "No action required".
+    if is_non_action(desc):
+        return False
+
+    # A date, a clock time, or a leaked field label is not an action. These
+    # became task titles such as "12th September 2026" and "due_at: soon".
+    if is_temporal_only(desc):
+        return False
+
     # Known noise
     if _is_noise(desc):
         return False
@@ -80,6 +101,11 @@ def _is_user_actionable(item: ActionItem, email: Email, analysis: EmailAnalysis)
         return False
     
     return True
+
+
+def _reference(email: Email) -> datetime | None:
+    """The timestamp relative wording is resolved against, when we have one."""
+    return email.received_at if isinstance(email.received_at, datetime) else None
 
 
 def _normalize_action(description: str) -> str:
@@ -146,7 +172,8 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
     """
     candidates: list[Task] = []
     seen_fingerprints: set[str] = set()
-    
+    reference = _reference(email)
+
     for idx, item in enumerate(analysis.action_items):
         # Validate this is a genuine user task
         if not _is_user_actionable(item, email, analysis):
@@ -166,9 +193,12 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
             id=f"task_{fp}",
             source_email_id=email.id,
             source_thread_id=email.thread_id,
-            title=item.description,
-            description=f"Owner: {item.owner}" if item.owner else None,
-            due_at=item.deadline,
+            title=item.description.strip(),
+            description=None,
+            # Re-normalised against the message timestamp so a relative form
+            # can still resolve here, where the reference finally exists.
+            due_at=normalize_due_at(item.deadline, reference=reference),
+            owner=item.owner or None,
             priority=analysis.priority.value,
             status='pending',
             created_at=datetime.now(timezone.utc).isoformat(),
@@ -182,20 +212,36 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
     
     # Deadlines that are NOT already represented by action items
     for idx, dl in enumerate(analysis.deadlines):
-        normalized = _normalize_action(dl.description)
+        desc = dl.description.strip()
+        if not desc:
+            continue
+
+        normalized = _normalize_action(desc)
         fp = task_fingerprint(email.thread_id, normalized)
         
         if fp in seen_fingerprints:
             continue
         
         # Apply same noise filtering
-        if _is_noise(dl.description):
+        if _is_noise(desc):
             continue
-        if len(dl.description.strip()) < MIN_TASK_LENGTH:
+        if len(desc) < MIN_TASK_LENGTH:
+            continue
+
+        # A deadline is a task only if it names something TO DO. "15 minutes
+        # from now" and "12th September 2026" describe no action, so they are
+        # dropped rather than becoming a task with the phrase as its title.
+        if is_non_action(desc) or is_temporal_only(desc):
             continue
         
         # Only add deadline-tasks for explicit deadlines
         if dl.confidence != "explicit":
+            continue
+        
+        due_at = normalize_due_at(dl.due_at, reference=reference)
+        # An "explicit" deadline we cannot read as a real moment is not a
+        # deadline. The prose is not preserved anywhere.
+        if due_at is None:
             continue
         
         seen_fingerprints.add(fp)
@@ -204,15 +250,16 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
             id=f"deadline_{email.id}_{idx}",
             source_email_id=email.id,
             source_thread_id=email.thread_id,
-            title=dl.description,
-            description=f"Due: {dl.due_at}" if dl.due_at else None,
-            due_at=dl.due_at,
+            title=desc,
+            description=None,
+            due_at=due_at,
+            owner=None,
             priority=analysis.priority.value,
             status='pending',
             created_at=datetime.now(timezone.utc).isoformat(),
         )
         task.derivation_version = DERIVATION_VERSION  # type: ignore
-        task.confidence = "high" if dl.due_at else "medium"  # type: ignore
+        task.confidence = "high"  # type: ignore
         task.fingerprint = fp  # type: ignore
         
         candidates.append(task)

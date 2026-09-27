@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service.AIService
 qualified_name: backend.app.ai.service.AIService.__init__
 source: backend/app/ai/service.py
-line: 111
+line: 113
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/app/ai/service.py`.
 
 ## Location
 
-`backend/app/ai/service.py:111`
+`backend/app/ai/service.py:113`
 
 ## Signature
 

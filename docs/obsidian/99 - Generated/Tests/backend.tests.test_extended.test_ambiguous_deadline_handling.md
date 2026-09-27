@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_ambiguous_deadline_handling
 source: backend/tests/test_extended.py
-line: 44
+line: 54
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_ambiguous_deadline_handling` in `backend/test
 
 ## Location
 
-`backend/tests/test_extended.py:44`
+`backend/tests/test_extended.py:54`
 
 ## Signature
 

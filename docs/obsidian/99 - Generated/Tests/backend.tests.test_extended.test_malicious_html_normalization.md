@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_malicious_html_normalization
 source: backend/tests/test_extended.py
-line: 159
+line: 169
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_malicious_html_normalization` in `backend/tes
 
 ## Location
 
-`backend/tests/test_extended.py:159`
+`backend/tests/test_extended.py:169`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service.AIService
 qualified_name: backend.app.ai.service.AIService.draft_reply
 source: backend/app/ai/service.py
-line: 147
+line: 149
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Generate a reply draft using bounded thread context.
 
 ## Location
 
-`backend/app/ai/service.py:147`
+`backend/app/ai/service.py:149`
 
 ## Signature
 

@@ -23,6 +23,7 @@ SQLite table `tasks` defined in the Alfred schema.
 - `title`
 - `description`
 - `due_at`
+- `owner`
 - `priority`
 - `status`
 - `created_at`

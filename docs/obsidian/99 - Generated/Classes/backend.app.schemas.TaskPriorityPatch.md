@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.TaskPriorityPatch
 source: backend/app/schemas.py
-line: 121
+line: 160
 status: active
 tags: [backend, class]
 ---
@@ -17,11 +17,11 @@ tags: [backend, class]
 
 ## Purpose
 
-Validated priority edit for one task (task only — never rewrites
+Validated priority edit for one task (task only â€” never rewrites
 
 ## Location
 
-`backend/app/schemas.py:121`
+`backend/app/schemas.py:160`
 
 ## Bases
 

@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_derivation
 qualified_name: backend.app.services.task_derivation._assign_confidence
 source: backend/app/services/task_derivation.py
-line: 124
+line: 150
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Assign confidence level to a derived task.
 
 ## Location
 
-`backend/app/services/task_derivation.py:124`
+`backend/app/services/task_derivation.py:150`
 
 ## Signature
 

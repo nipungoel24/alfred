@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.database
 qualified_name: backend.app.db.database._migrate
 source: backend/app/db/database.py
-line: 343
+line: 344
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Run incremental schema migrations for legacy databases.
 
 ## Location
 
-`backend/app/db/database.py:343`
+`backend/app/db/database.py:344`
 
 ## Signature
 

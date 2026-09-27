@@ -60,9 +60,9 @@ class TaskMigrationService:
                         task.priority = existing.priority
                         task.priority_override = existing.priority_override
                     cur.execute(
-                        '''UPDATE tasks SET title=?, description=?, due_at=?, priority=?, status=?, 
+                        '''UPDATE tasks SET title=?, description=?, due_at=?, owner=?, priority=?, status=?, 
                         derivation_version=?, confidence=?, fingerprint=?, priority_override=? WHERE id=?''',
-                        (task.title, task.description, task.due_at, task.priority, task.status,
+                        (task.title, task.description, task.due_at, task.owner, task.priority, task.status,
                           getattr(task, 'derivation_version', DERIVATION_VERSION),
                           getattr(task, 'confidence', 'medium'), fp,
                           getattr(task, 'priority_override', None), task.id)
@@ -70,9 +70,9 @@ class TaskMigrationService:
                 else:
                     # Insert new
                     cur.execute(
-                        'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, priority, status, created_at, derivation_version, confidence, fingerprint) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)',
+                        'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, owner, priority, status, created_at, derivation_version, confidence, fingerprint) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)',
                         (task.id, task.source_email_id, task.source_thread_id, task.title, task.description,
-                         task.due_at, task.priority, task.status, task.created_at,
+                         task.due_at, task.owner, task.priority, task.status, task.created_at,
                          getattr(task, 'derivation_version', DERIVATION_VERSION),
                          getattr(task, 'confidence', 'medium'), fp)
                     )

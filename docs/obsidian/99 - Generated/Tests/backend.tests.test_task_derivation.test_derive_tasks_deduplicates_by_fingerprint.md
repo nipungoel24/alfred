@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_derivation
 qualified_name: backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint
 source: backend/tests/test_task_derivation.py
-line: 97
+line: 133
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_derive_tasks_deduplicates_by_fingerprint` in 
 
 ## Location
 
-`backend/tests/test_task_derivation.py:97`
+`backend/tests/test_task_derivation.py:133`
 
 ## Signature
 

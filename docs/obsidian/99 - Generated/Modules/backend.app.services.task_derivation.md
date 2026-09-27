@@ -25,6 +25,9 @@ tags: [module, backend]
 - `Task` ← `backend.app.schemas.Task`
 - `datetime` ← `datetime.datetime`
 - `hashlib` ← `hashlib`
+- `is_non_action` ← `backend.app.services.due_dates.is_non_action`
+- `is_temporal_only` ← `backend.app.services.due_dates.is_temporal_only`
+- `normalize_due_at` ← `backend.app.services.due_dates.normalize_due_at`
 - `re` ← `re`
 - `timezone` ← `datetime.timezone`
 
@@ -34,6 +37,7 @@ tags: [module, backend]
 - [[backend.app.services.task_derivation._is_noise|_is_noise]]
 - [[backend.app.services.task_derivation._is_user_actionable|_is_user_actionable]]
 - [[backend.app.services.task_derivation._normalize_action|_normalize_action]]
+- [[backend.app.services.task_derivation._reference|_reference]]
 - [[backend.app.services.task_derivation.candidate_fingerprints|candidate_fingerprints]]
 - [[backend.app.services.task_derivation.derive_tasks|derive_tasks]]
 - [[backend.app.services.task_derivation.rebuild_tasks_from_analyses|rebuild_tasks_from_analyses]]

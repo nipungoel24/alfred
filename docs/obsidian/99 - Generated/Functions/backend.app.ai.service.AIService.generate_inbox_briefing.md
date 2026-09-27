@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service.AIService
 qualified_name: backend.app.ai.service.AIService.generate_inbox_briefing
 source: backend/app/ai/service.py
-line: 183
+line: 185
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Generate an executive inbox briefing from pre-analyzed emails.
 
 ## Location
 
-`backend/app/ai/service.py:183`
+`backend/app/ai/service.py:185`
 
 ## Signature
 

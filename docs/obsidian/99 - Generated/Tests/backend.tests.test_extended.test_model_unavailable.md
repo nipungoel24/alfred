@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_model_unavailable
 source: backend/tests/test_extended.py
-line: 127
+line: 137
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_model_unavailable` in `backend/tests/test_ext
 
 ## Location
 
-`backend/tests/test_extended.py:127`
+`backend/tests/test_extended.py:137`
 
 ## Signature
 

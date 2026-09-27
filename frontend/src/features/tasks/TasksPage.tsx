@@ -151,7 +151,7 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
                     transform: `translateY(${virtualRow.start}px)`,
                   }}
                 >
-                  <div className="list-row" style={{ borderBottom: virtualRow.index === displayTasks.length - 1 ? 'none' : undefined }}>
+                  <div className="list-row task-row" style={{ borderBottom: virtualRow.index === displayTasks.length - 1 ? 'none' : undefined }}>
                     <button
                       type="button"
                       className={`task-checkbox ${isCompleted ? 'checked' : ''}`}
@@ -161,15 +161,13 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
                     >
                       {isCompleted && <Check aria-hidden="true" />}
                     </button>
-                    <div style={{ flex: 1, minWidth: 0 }}>
+                    <div className="task-content">
                       <div className={`task-title ${isCompleted ? 'completed' : ''}`}>{task.title}</div>
                       {task.description && (
-                        <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 2, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                          {task.description}
-                        </div>
+                        <div className="task-note">{task.description}</div>
                       )}
                       <div className="task-meta">
-                        {task.due_at && <span style={{ color: 'var(--accent-text)' }}>Due: {task.due_at}</span>}
+                        {task.due_at && <span className="task-due">Due: {task.due_at}</span>}
                         <label className="priority-edit" title="Task priority (your edit is kept)">
                           <ChevronDown size={10} aria-hidden="true" />
                           <select
@@ -189,28 +187,36 @@ export function TasksPage({ onOpenInMail }: TasksPageProps) {
                         </label>
                       </div>
                     </div>
-                    {task.source_email_id && (
+                    {/* The action group is a fixed-width column and always
+                        renders both controls, so every row puts them at the
+                        same x. It used to be two loose flex children, one of
+                        them conditional, which moved the trash icon left or
+                        right depending on whether the row had a source email. */}
+                    <div className="task-actions">
                       <button
                         type="button"
-                        className="icon-btn"
+                        className="task-action task-action-view"
                         onClick={() => setPreviewTaskId(task.id)}
-                        aria-label={`View source email for ${task.title}`}
-                        title="View email"
+                        disabled={!task.source_email_id}
+                        aria-label={task.source_email_id
+                          ? `View source email for ${task.title}`
+                          : `No source email for ${task.title}`}
+                        title={task.source_email_id ? 'View email' : 'No source email'}
                       >
                         <Mail size={14} aria-hidden="true" />
                         <span className="btn-label">View email</span>
                       </button>
-                    )}
-                    <button
-                      type="button"
-                      className="icon-btn"
-                      onClick={() => dismissMutation.mutate(task.id)}
-                      disabled={dismissMutation.isPending}
-                      aria-label={`Not a task: dismiss ${task.title}`}
-                      title="Not a task"
-                    >
-                      <Trash2 aria-hidden="true" />
-                    </button>
+                      <button
+                        type="button"
+                        className="task-action task-action-dismiss"
+                        onClick={() => dismissMutation.mutate(task.id)}
+                        disabled={dismissMutation.isPending}
+                        aria-label={`Not a task: dismiss ${task.title}`}
+                        title="Not a task"
+                      >
+                        <Trash2 aria-hidden="true" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               );

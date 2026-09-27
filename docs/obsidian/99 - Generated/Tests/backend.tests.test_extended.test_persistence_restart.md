@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_persistence_restart
 source: backend/tests/test_extended.py
-line: 136
+line: 146
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_persistence_restart` in `backend/tests/test_e
 
 ## Location
 
-`backend/tests/test_extended.py:136`
+`backend/tests/test_extended.py:146`
 
 ## Signature
 

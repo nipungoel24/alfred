@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_derivation
 qualified_name: backend.app.services.task_derivation.candidate_fingerprints
 source: backend/app/services/task_derivation.py
-line: 102
+line: 128
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ All fingerprints under which a task for this action may be stored.
 
 ## Location
 
-`backend/app/services/task_derivation.py:102`
+`backend/app/services/task_derivation.py:128`
 
 ## Signature
 

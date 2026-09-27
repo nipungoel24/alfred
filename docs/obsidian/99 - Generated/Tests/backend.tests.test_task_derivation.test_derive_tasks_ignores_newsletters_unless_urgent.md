@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_derivation
 qualified_name: backend.tests.test_task_derivation.test_derive_tasks_ignores_newsletters_unless_urgent
 source: backend/tests/test_task_derivation.py
-line: 56
+line: 76
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_derive_tasks_ignores_newsletters_unless_urgen
 
 ## Location
 
-`backend/tests/test_task_derivation.py:56`
+`backend/tests/test_task_derivation.py:76`
 
 ## Signature
 

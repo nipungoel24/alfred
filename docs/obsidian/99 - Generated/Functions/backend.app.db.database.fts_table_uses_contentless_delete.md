@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.database
 qualified_name: backend.app.db.database.fts_table_uses_contentless_delete
 source: backend/app/db/database.py
-line: 222
+line: 223
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ What schema does the EXISTING emails_fts table actually use?
 
 ## Location
 
-`backend/app/db/database.py:222`
+`backend/app/db/database.py:223`
 
 ## Signature
 

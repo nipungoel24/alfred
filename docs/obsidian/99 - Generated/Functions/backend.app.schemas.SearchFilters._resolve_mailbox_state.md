@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas.SearchFilters
 qualified_name: backend.app.schemas.SearchFilters._resolve_mailbox_state
 source: backend/app/schemas.py
-line: 73
+line: 107
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Map the user-facing `in:` scope to storage, strictly.
 
 ## Location
 
-`backend/app/schemas.py:73`
+`backend/app/schemas.py:107`
 
 ## Signature
 

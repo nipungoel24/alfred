@@ -106,7 +106,10 @@ export type Task = {
   source_thread_id?: string | null;
   title: string;
   description?: string | null;
+  /** Normalised ISO-8601 instant, or null. Never prose. */
   due_at?: string | null;
+  /** Who is responsible. A field, not a line inside `description`. */
+  owner?: string | null;
   priority?: string | null;
   status: string; // 'pending', 'completed', 'dismissed'
   created_at?: string | null;

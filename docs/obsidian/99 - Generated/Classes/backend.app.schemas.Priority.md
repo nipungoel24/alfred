@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.Priority
 source: backend/app/schemas.py
-line: 6
+line: 23
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `Priority` in `backend/app/schemas.py`.
 
 ## Location
 
-`backend/app/schemas.py:6`
+`backend/app/schemas.py:23`
 
 ## Bases
 

@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.database
 qualified_name: backend.app.db.database.fts_delete_supported
 source: backend/app/db/database.py
-line: 192
+line: 193
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Does the RUNTIME SQLite support contentless_delete=1?
 
 ## Location
 
-`backend/app/db/database.py:192`
+`backend/app/db/database.py:193`
 
 ## Signature
 

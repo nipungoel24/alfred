@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.Task
 source: backend/app/schemas.py
-line: 103
+line: 137
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `Task` in `backend/app/schemas.py`.
 
 ## Location
 
-`backend/app/schemas.py:103`
+`backend/app/schemas.py:137`
 
 ## Bases
 

@@ -77,7 +77,11 @@
   --rail-width-collapsed: 56px;
   --header-height: 52px;
   --mail-pane-width: 340px;
-  --intel-pane-width: 340px;
+   --intel-pane-width: 340px;
+   /* Fixed width of a task row's action column: the "View email" control plus
+      the dismiss control and the gap between them. Declared once so every task
+      row reserves identical space and the controls never shift sideways. */
+   --task-actions-width: 116px;
 
   /* ── Elevation ─────────────────────────────────────────────────────
      Three levels. Elevation only — never glow, never decoration. */

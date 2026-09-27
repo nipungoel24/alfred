@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service
 qualified_name: backend.app.ai.service._prepare_body
 source: backend/app/ai/service.py
-line: 49
+line: 51
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Prepare email body for analysis: truncate, strip quotes, strip noise.
 
 ## Location
 
-`backend/app/ai/service.py:49`
+`backend/app/ai/service.py:51`
 
 ## Signature
 

@@ -33,9 +33,9 @@ class Repository:
             self.con.close()
             self.con = None
 
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # EMAILS
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def upsert_email(self, email: Email, fingerprint: str):
         """Insert or update a single email. Caller manages transaction."""
@@ -50,7 +50,7 @@ class Repository:
         eligibility = MailEligibilityPolicy.pipeline_eligibility(labels).value
         # provider_message_id backs the (account_id, provider_message_id)
         # uniqueness invariant. It is written ONLY from the explicit model
-        # field (set by provider normalization) — never guessed — so legacy
+        # field (set by provider normalization) â€” never guessed â€” so legacy
         # rows and CSV imports keep NULL and stay exempt from the partial
         # unique index. Guessing here could collide with the scoped-ID
         # migration's renames and break Gmail sync with IntegrityError.
@@ -149,7 +149,7 @@ class Repository:
         """Recompute mailbox state / category / eligibility for a message.
 
         Used by Gmail history labelAdded/labelRemoved events and metadata
-        refreshes. Source payload is NOT destroyed — only eligibility is.
+        refreshes. Source payload is NOT destroyed â€” only eligibility is.
         Returns False when the message is not cached locally.
         """
         labels = set(label_ids or [])
@@ -223,13 +223,13 @@ class Repository:
 
         Scopes:
         - 'inbox' (default): active Gmail INBOX only; category tabs apply.
-        - 'all': the real All Mail — received inbox, archived received,
+        - 'all': the real All Mail â€” received inbox, archived received,
           AND sent messages. Spam/Trash/Draft never appear. `kind` refines
           it (received | sent | archived); `category` is ignored here
           (Gmail tab semantics belong to the Inbox experience).
         - include_excluded=True bypasses the scope (internal use only).
 
-        Archived/sent visibility never widens intelligence eligibility —
+        Archived/sent visibility never widens intelligence eligibility â€”
         those stay inbox-only per MailEligibilityPolicy.
         """
         sql = 'SELECT payload FROM emails WHERE 1=1'
@@ -410,7 +410,7 @@ class Repository:
         Every membership-changing filter is applied in SQL BEFORE
         LIMIT/OFFSET. Free text uses FTS5 with BM25 ranking; without
         free text the results are ordered by received time. Only
-        stored data is filterable — operators map 1:1 to columns or
+        stored data is filterable â€” operators map 1:1 to columns or
         the persisted analysis payload.
         """
         conditions = ["e.mailbox_state IN ('active_inbox','archived','sent')"]
@@ -464,8 +464,8 @@ class Repository:
 
         where_clause = " AND ".join(conditions)
 
-        # Free text is compiled to literal FTS terms — FTS operators in
-        # user input (OR/NEAR/colons/asterisks/…) can never change meaning.
+        # Free text is compiled to literal FTS terms â€” FTS operators in
+        # user input (OR/NEAR/colons/asterisks/â€¦) can never change meaning.
         fts_match = compile_fts_match(filters.free_text)
 
         try:
@@ -489,7 +489,7 @@ class Repository:
             return [Email.model_validate_json(r['payload']) for r in rows]
         except Exception as exc:
             # FTS failure: degrade to LIKE search but KEEP every
-            # structured filter — never silently drop user filters.
+            # structured filter â€” never silently drop user filters.
             logging.getLogger("alfred.search").warning(
                 "structured_search_fts_failed: %s", exc)
             like_where = where_clause
@@ -556,7 +556,7 @@ class Repository:
                 (rowid,)
             ).fetchone()
             if existing:
-                # Entry exists — check if content actually changed
+                # Entry exists â€” check if content actually changed
                 # by comparing subject/sender (cheap proxy for body changes)
                 old = self.con.execute(
                     "SELECT subject, sender FROM emails_fts WHERE rowid=?",
@@ -602,9 +602,9 @@ class Repository:
         except Exception as exc:
             logger.warning("fts_rebuild_failed: %s", exc)  # never silent
 
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # ANALYSIS
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def cached_analysis(self, email_id: str, fingerprint: str, model: str, schema='1'):
         r = self.con.execute(
@@ -614,7 +614,7 @@ class Repository:
         return EmailAnalysis.model_validate_json(r['payload']) if r else None
 
     def save_analysis(self, email_id: str, fingerprint: str, model: str, analysis: EmailAnalysis, schema='1'):
-        """Save analysis result. Does NOT create tasks — that is TaskDerivationService's job."""
+        """Save analysis result. Does NOT create tasks â€” that is TaskDerivationService's job."""
         self.con.execute(
             'INSERT INTO email_analysis (email_id, content_hash, model_name, schema_version, payload, analyzed_at) '
             'VALUES(?,?,?,?,?,?) ON CONFLICT(email_id) DO UPDATE SET '
@@ -640,9 +640,9 @@ class Repository:
             results.append((email, analysis))
         return results
 
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # BRIEFINGS
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def cached_briefing(self, fingerprint: str, model: str, schema='1'):
         row = self.con.execute(
@@ -661,9 +661,9 @@ class Repository:
         )
         self.con.commit()
 
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # ACCOUNTS
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def save_account(self, account: EmailAccount):
         self.con.execute(
@@ -707,9 +707,9 @@ class Repository:
         self.con.execute('DELETE FROM accounts WHERE id=?', (account_id,))
         self.con.commit()
 
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # CREDENTIALS
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def save_credentials(self, account_id: str, encrypted_refresh_token, encrypted_access_token, expires_at: str):
         self.con.execute(
@@ -728,22 +728,22 @@ class Repository:
         ).fetchone()
         return dict(r) if r else None
 
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # TASKS
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def save_task(self, task: Task):
         self.con.execute(
-            'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, priority, status, created_at, '
+            'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, owner, priority, status, created_at, '
             'derivation_version, confidence, fingerprint, priority_override) '
-            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
-            'title=excluded.title, description=excluded.description, due_at=excluded.due_at, '
+            'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+            'title=excluded.title, description=excluded.description, due_at=excluded.due_at, owner=excluded.owner, '
             'priority=excluded.priority, status=excluded.status, '
             'derivation_version=excluded.derivation_version, confidence=excluded.confidence, '
             'fingerprint=excluded.fingerprint, priority_override=excluded.priority_override',
             (
                 task.id, task.source_email_id, task.source_thread_id, task.title, task.description,
-                task.due_at, task.priority, task.status,
+                task.due_at, task.owner, task.priority, task.status,
                 task.created_at or datetime.now(timezone.utc).isoformat(),
                 getattr(task, 'derivation_version', '1'),
                 getattr(task, 'confidence', 'medium'),
@@ -758,16 +758,16 @@ class Repository:
         with transaction(self.con) as _:
             for task in tasks_list:
                 self.con.execute(
-                    'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, priority, status, created_at, '
+                    'INSERT INTO tasks (id, source_email_id, source_thread_id, title, description, due_at, owner, priority, status, created_at, '
                     'derivation_version, confidence, fingerprint, priority_override) '
-                    'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
-                    'title=excluded.title, description=excluded.description, due_at=excluded.due_at, '
+                    'VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?) ON CONFLICT(id) DO UPDATE SET '
+                    'title=excluded.title, description=excluded.description, due_at=excluded.due_at, owner=excluded.owner, '
                     'priority=excluded.priority, status=excluded.status, '
                     'derivation_version=excluded.derivation_version, confidence=excluded.confidence, '
                     'fingerprint=excluded.fingerprint, priority_override=excluded.priority_override',
                     (
                         task.id, task.source_email_id, task.source_thread_id, task.title, task.description,
-                        task.due_at, task.priority, task.status,
+                        task.due_at, task.owner, task.priority, task.status,
                         task.created_at or datetime.now(timezone.utc).isoformat(),
                         getattr(task, 'derivation_version', '2'),
                         getattr(task, 'confidence', 'medium'),
@@ -793,7 +793,7 @@ class Repository:
     def tasks_all(self) -> list[Task]:
         """Every persisted task row in every state, including dismissed.
 
-        Dedicated migration/reconciliation path — the normal active-task
+        Dedicated migration/reconciliation path â€” the normal active-task
         API (tasks()/active_tasks()) must keep hiding dismissed tasks.
         The migration service needs the tombstones so it never re-creates
         a task the user explicitly rejected.
@@ -887,7 +887,7 @@ class Repository:
     def _task_from_row(self, r) -> Task:
         task = Task(
             id=r['id'], source_email_id=r['source_email_id'], source_thread_id=r['source_thread_id'],
-            title=r['title'], description=r['description'], due_at=r['due_at'],
+            title=r['title'], description=r['description'], due_at=r['due_at'], owner=r['owner'],
             priority=r['priority'], status=r['status'], created_at=r['created_at']
         )
         task.derivation_version = r['derivation_version']
@@ -896,13 +896,13 @@ class Repository:
         task.priority_override = r['priority_override'] if 'priority_override' in r.keys() else None
         return task
 
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # JOBS
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def enqueue_job(self, job_id: str, job_type: str, target_id: str, priority: int = 50,
                     not_before: str | None = None):
-        """Enqueue a background job. Idempotent — skips if job already exists."""
+        """Enqueue a background job. Idempotent â€” skips if job already exists."""
         self.con.execute(
             'INSERT OR IGNORE INTO jobs (id, job_type, target_id, priority, status, created_at, not_before) '
             'VALUES (?,?,?,?,?,?,?)',
@@ -915,7 +915,7 @@ class Repository:
         """Get the next queued job by priority, honouring not_before.
 
         Jobs whose not_before timestamp is still in the future are not
-        returned — this is how the backfill worker rate-limits itself
+        returned â€” this is how the backfill worker rate-limits itself
         (bounded page + scheduled next page) without blocking polling.
         """
         now_iso = now_iso or datetime.now(timezone.utc).isoformat()
@@ -1041,9 +1041,9 @@ class Repository:
         )
         self.con.commit()
 
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     # INFERENCE METRICS
-    # ──────────────────────────────────────────────
+    # â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     def record_inference_metric(self, job_id: str, model: str, total_ms: float = 0,
                                  load_ms: float = 0, prompt_eval_ms: float = 0,

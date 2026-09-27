@@ -23,7 +23,8 @@ def test_derive_tasks_ignores_noise():
         needs_reply=False,
         action_items=[
             ActionItem(description="Decode the base64 string", owner="user"),
-            ActionItem(description="Submit Q3 report", owner="user", deadline="Friday")
+            ActionItem(description="Submit Q3 report", owner="user",
+                       deadline="2026-09-12T17:00:00+00:00")
         ],
         deadlines=[]
     )
@@ -31,7 +32,26 @@ def test_derive_tasks_ignores_noise():
     tasks = derive_tasks(email, analysis)
     assert len(tasks) == 1
     assert tasks[0].title == "Submit Q3 report"
-    assert tasks[0].due_at == "Friday"
+    assert tasks[0].due_at == "2026-09-12T17:00:00+00:00"
+
+def test_derive_tasks_drops_unresolvable_deadline():
+    # "Friday" names no moment, and the message carries no timestamp to resolve
+    # it against. The task is still real; its due date is simply unknown.
+    email = Email(id="1", sender="a@b.com", subject="Test", body="Test")
+    analysis = EmailAnalysis(
+        short_summary="Test",
+        category=Category.work,
+        priority=Priority.medium,
+        priority_score=50,
+        reason_for_priority="Test",
+        needs_reply=False,
+        action_items=[ActionItem(description="Submit Q3 report", owner="user", deadline="Friday")],
+        deadlines=[]
+    )
+    tasks = derive_tasks(email, analysis)
+    assert len(tasks) == 1
+    assert tasks[0].title == "Submit Q3 report"
+    assert tasks[0].due_at is None
 
 def test_derive_tasks_ignores_third_party_owner():
     email = Email(id="1", sender="a@b.com", subject="Test", body="Test")
@@ -83,7 +103,7 @@ def test_derive_tasks_adds_explicit_deadlines():
         needs_reply=True,
         action_items=[],
         deadlines=[
-            Deadline(description="Submit proposal", due_at="Before 5 PM", confidence="explicit"),
+            Deadline(description="Submit proposal", due_at="2026-09-12T17:00:00+00:00", confidence="explicit"),
             Deadline(description="Ambiguous deadline", due_at="Soon", confidence="inferred")
         ]
     )
@@ -91,8 +111,24 @@ def test_derive_tasks_adds_explicit_deadlines():
     tasks = derive_tasks(email, analysis)
     assert len(tasks) == 1
     assert tasks[0].title == "Submit proposal"
-    assert tasks[0].due_at == "Before 5 PM"
+    assert tasks[0].due_at == "2026-09-12T17:00:00+00:00"
     assert tasks[0].confidence == "high"
+
+def test_derive_tasks_skips_deadline_without_a_readable_moment():
+    # An "explicit" deadline whose value is prose names no moment, so there is
+    # nothing to put in due_at and nothing to title a task with.
+    email = Email(id="1", sender="a@b.com", subject="Test", body="Test")
+    analysis = EmailAnalysis(
+        short_summary="Test",
+        category=Category.work,
+        priority=Priority.high,
+        priority_score=80,
+        reason_for_priority="Test",
+        needs_reply=True,
+        action_items=[],
+        deadlines=[Deadline(description="Submit proposal", due_at="Before 5 PM", confidence="explicit")]
+    )
+    assert derive_tasks(email, analysis) == []
 
 def test_derive_tasks_deduplicates_by_fingerprint():
     email = Email(id="1", sender="a@b.com", subject="Test", body="Test", thread_id="t1")

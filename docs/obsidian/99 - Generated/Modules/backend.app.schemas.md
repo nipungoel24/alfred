@@ -25,6 +25,8 @@ tags: [module, backend]
 - `Field` ← `pydantic.Field`
 - `datetime` ← `datetime.datetime`
 - `field_validator` ← `pydantic.field_validator`
+- `is_relative_expression` ← `backend.app.services.due_dates.is_relative_expression`
+- `normalize_due_at` ← `backend.app.services.due_dates.normalize_due_at`
 
 ## Classes
 
@@ -45,7 +47,9 @@ tags: [module, backend]
 ## Functions
 
 - [[backend.app.schemas.SearchFilters._resolve_mailbox_state|_resolve_mailbox_state]]
+- [[backend.app.schemas._clean_due|_clean_due]]
 
 ## Constants
 
 - `IN_SCOPE_TO_MAILBOX_STATE`
+- `_DUE_CONTRACT`

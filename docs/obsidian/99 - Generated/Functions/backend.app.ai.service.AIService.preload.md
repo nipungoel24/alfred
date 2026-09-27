@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service.AIService
 qualified_name: backend.app.ai.service.AIService.preload
 source: backend/app/ai/service.py
-line: 118
+line: 120
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Preload model into VRAM/RAM during startup.
 
 ## Location
 
-`backend/app/ai/service.py:118`
+`backend/app/ai/service.py:120`
 
 ## Signature
 

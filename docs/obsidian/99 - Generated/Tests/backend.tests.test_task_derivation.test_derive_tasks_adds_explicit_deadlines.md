@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_derivation
 qualified_name: backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines
 source: backend/tests/test_task_derivation.py
-line: 75
+line: 95
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_derive_tasks_adds_explicit_deadlines` in `bac
 
 ## Location
 
-`backend/tests/test_task_derivation.py:75`
+`backend/tests/test_task_derivation.py:95`
 
 ## Signature
 

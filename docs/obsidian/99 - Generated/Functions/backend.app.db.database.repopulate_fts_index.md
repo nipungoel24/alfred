@@ -6,7 +6,7 @@ layer: database
 module: backend.app.db.database
 qualified_name: backend.app.db.database.repopulate_fts_index
 source: backend/app/db/database.py
-line: 236
+line: 237
 status: active
 tags: [database, function]
 ---
@@ -21,7 +21,7 @@ Re-index every email row into emails_fts (content repair).
 
 ## Location
 
-`backend/app/db/database.py:236`
+`backend/app/db/database.py:237`
 
 ## Signature
 

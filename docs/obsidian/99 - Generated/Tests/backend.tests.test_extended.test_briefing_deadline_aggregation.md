@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_briefing_deadline_aggregation
 source: backend/tests/test_extended.py
-line: 71
+line: 81
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_briefing_deadline_aggregation` in `backend/te
 
 ## Location
 
-`backend/tests/test_extended.py:71`
+`backend/tests/test_extended.py:81`
 
 ## Signature
 

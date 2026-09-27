@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service.AIService
 qualified_name: backend.app.ai.service.AIService.analyze_email
 source: backend/app/ai/service.py
-line: 122
+line: 124
 status: active
 tags: [ai, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Analyze a single email and return structured analysis with metrics.
 
 ## Location
 
-`backend/app/ai/service.py:122`
+`backend/app/ai/service.py:124`
 
 ## Signature
 

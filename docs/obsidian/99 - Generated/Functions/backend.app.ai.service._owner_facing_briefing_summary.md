@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service
 qualified_name: backend.app.ai.service._owner_facing_briefing_summary
 source: backend/app/ai/service.py
-line: 95
+line: 97
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Produce a factual fallback when a small local model describes its input instead 
 
 ## Location
 
-`backend/app/ai/service.py:95`
+`backend/app/ai/service.py:97`
 
 ## Signature
 

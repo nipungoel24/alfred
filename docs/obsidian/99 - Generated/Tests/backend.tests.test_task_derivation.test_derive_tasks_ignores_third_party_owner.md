@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_derivation
 qualified_name: backend.tests.test_task_derivation.test_derive_tasks_ignores_third_party_owner
 source: backend/tests/test_task_derivation.py
-line: 36
+line: 56
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_derive_tasks_ignores_third_party_owner` in `b
 
 ## Location
 
-`backend/tests/test_task_derivation.py:36`
+`backend/tests/test_task_derivation.py:56`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.SearchFilters
 source: backend/app/schemas.py
-line: 53
+line: 87
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Structured search filters parsed from the frontend.
 
 ## Location
 
-`backend/app/schemas.py:53`
+`backend/app/schemas.py:87`
 
 ## Bases
 

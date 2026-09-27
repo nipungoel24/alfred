@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_derivation
 qualified_name: backend.app.services.task_derivation.rebuild_tasks_from_analyses
 source: backend/app/services/task_derivation.py
-line: 223
+line: 270
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Rebuild all derived tasks from cached analyses using the current derivation logi
 
 ## Location
 
-`backend/app/services/task_derivation.py:223`
+`backend/app/services/task_derivation.py:270`
 
 ## Signature
 

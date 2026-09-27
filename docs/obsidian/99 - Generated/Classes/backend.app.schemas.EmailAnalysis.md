@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.EmailAnalysis
 source: backend/app/schemas.py
-line: 19
+line: 53
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `EmailAnalysis` in `backend/app/schemas.py`.
 
 ## Location
 
-`backend/app/schemas.py:19`
+`backend/app/schemas.py:53`
 
 ## Bases
 
@@ -35,9 +35,12 @@ Purpose inferred from usage: `EmailAnalysis` in `backend/app/schemas.py`.
 - [[backend.tests.test_multi_account.make_analysis|make_analysis]]
 - [[backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines|test_derive_tasks_adds_explicit_deadlines]]
 - [[backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint|test_derive_tasks_deduplicates_by_fingerprint]]
+- [[backend.tests.test_task_derivation.test_derive_tasks_drops_unresolvable_deadline|test_derive_tasks_drops_unresolvable_deadline]]
 - [[backend.tests.test_task_derivation.test_derive_tasks_ignores_newsletters_unless_urgent|test_derive_tasks_ignores_newsletters_unless_urgent]]
 - [[backend.tests.test_task_derivation.test_derive_tasks_ignores_noise|test_derive_tasks_ignores_noise]]
 - [[backend.tests.test_task_derivation.test_derive_tasks_ignores_third_party_owner|test_derive_tasks_ignores_third_party_owner]]
+- [[backend.tests.test_task_derivation.test_derive_tasks_skips_deadline_without_a_readable_moment|test_derive_tasks_skips_deadline_without_a_readable_moment]]
+- [[backend.tests.test_task_extraction_contract.make_analysis|make_analysis]]
 - [[backend.tests.test_task_migration.test_migration_idempotency_and_preservation|test_migration_idempotency_and_preservation]]
 - [[backend.tests.test_task_migration.test_migration_rollback|test_migration_rollback]]
 - [[backend.tests.test_task_user_corrections._seed_derived|_seed_derived]]

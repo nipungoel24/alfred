@@ -35,10 +35,20 @@ def get_analysis(short_summary="Payment request", priority=Priority.high, priori
 
 # 1. Explicit Deadline Extraction Schema Handling
 def test_explicit_deadline_schema_handling():
-    analysis = get_analysis(deadlines=[Deadline(description="Submit report", due_at="before 5 PM today")])
+    # A definite moment is kept, normalised to ISO-8601.
+    analysis = get_analysis(deadlines=[Deadline(description="Submit report", due_at="2026-09-12T17:00:00+00:00")])
     assert len(analysis.deadlines) == 1
-    assert analysis.deadlines[0].due_at == "before 5 PM today"
+    assert analysis.deadlines[0].due_at == "2026-09-12T17:00:00+00:00"
     assert analysis.deadlines[0].confidence == "explicit"
+
+    # Wording that names no moment is not a deadline. It used to be stored
+    # verbatim, which is how "before 5 PM today" reached the Tasks page.
+    vague = get_analysis(deadlines=[Deadline(description="Submit report", due_at="before 5 PM today")])
+    assert vague.deadlines[0].due_at is None
+
+    # A leaked field label is not a deadline either.
+    labelled = get_analysis(deadlines=[Deadline(description="Submit report", due_at="due_at: soon")])
+    assert labelled.deadlines[0].due_at is None
 
 # 2. Ambiguous Deadline Handling
 def test_ambiguous_deadline_handling():
@@ -88,10 +98,10 @@ def test_briefing_deadline_aggregation():
     ai = AIService(mock_client, "qwen3:4b")
     
     email_a = get_email("a", "Pay today before 5 PM")
-    email_a.analysis = get_analysis(deadlines=[Deadline(description="Pay today", due_at="before 5 PM today")])
+    email_a.analysis = get_analysis(deadlines=[Deadline(description="Pay today", due_at="2026-09-12T17:00:00+00:00")])
     
     email_b = get_email("b", "Do it by Friday")
-    email_b.analysis = get_analysis(deadlines=[Deadline(description="Submit by Friday", due_at="Friday")])
+    email_b.analysis = get_analysis(deadlines=[Deadline(description="Submit by Friday", due_at="2026-09-11T00:00:00+00:00")])
     
     res = asyncio.run(ai.generate_inbox_briefing([email_a, email_b]))
     

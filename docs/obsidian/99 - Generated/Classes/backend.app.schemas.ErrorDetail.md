@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.ErrorDetail
 source: backend/app/schemas.py
-line: 38
+line: 72
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `ErrorDetail` in `backend/app/schemas.py`.
 
 ## Location
 
-`backend/app/schemas.py:38`
+`backend/app/schemas.py:72`
 
 ## Bases
 

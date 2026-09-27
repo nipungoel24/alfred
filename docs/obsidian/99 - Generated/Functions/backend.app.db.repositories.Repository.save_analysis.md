@@ -17,7 +17,7 @@ tags: [database, function]
 
 ## Purpose
 
-Save analysis result. Does NOT create tasks — that is TaskDerivationService's job.
+Save analysis result. Does NOT create tasks â€” that is TaskDerivationService's job.
 
 ## Location
 

@@ -17,7 +17,7 @@ tags: [database, function]
 
 ## Purpose
 
-Enqueue a background job. Idempotent — skips if job already exists.
+Enqueue a background job. Idempotent â€” skips if job already exists.
 
 ## Location
 

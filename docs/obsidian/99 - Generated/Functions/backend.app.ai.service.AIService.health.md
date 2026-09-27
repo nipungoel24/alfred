@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.service.AIService
 qualified_name: backend.app.ai.service.AIService.health
 source: backend/app/ai/service.py
-line: 115
+line: 117
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `health` in `backend/app/ai/service.py`.
 
 ## Location
 
-`backend/app/ai/service.py:115`
+`backend/app/ai/service.py:117`
 
 ## Signature
 

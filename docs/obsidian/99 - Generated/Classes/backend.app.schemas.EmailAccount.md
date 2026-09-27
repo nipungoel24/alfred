@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.schemas
 qualified_name: backend.app.schemas.EmailAccount
 source: backend/app/schemas.py
-line: 92
+line: 126
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `EmailAccount` in `backend/app/schemas.py`.
 
 ## Location
 
-`backend/app/schemas.py:92`
+`backend/app/schemas.py:126`
 
 ## Bases
 

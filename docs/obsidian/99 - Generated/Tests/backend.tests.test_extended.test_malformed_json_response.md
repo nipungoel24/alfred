@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_extended
 qualified_name: backend.tests.test_extended.test_malformed_json_response
 source: backend/tests/test_extended.py
-line: 115
+line: 125
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_malformed_json_response` in `backend/tests/te
 
 ## Location
 
-`backend/tests/test_extended.py:115`
+`backend/tests/test_extended.py:125`
 
 ## Signature
 
