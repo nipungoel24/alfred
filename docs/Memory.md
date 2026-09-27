@@ -687,39 +687,40 @@ attached and a `tasklist` check after quit.
 
 **Phase 1: PARTIAL — not declared PASS.** Priorities 1–6 are complete with test
 evidence, and the UI steps UI-1 through UI-11 are now all done with test evidence.
-What is missing is the one thing no test can supply: someone has to look at the
-running app. Items 1–12 above remain, and Gate 1 cannot be declared PASS until the
-packaged-app manual launch is observed. The directive states explicitly: do not
-claim the phase is complete if only the foundation is done.
+The first visual pass found the desktop shell **did not compile at all** — the
+release build was broken while `cargo test` stayed green, because dev-dependencies
+enable the `log/std` feature in test builds and nothing else does. That is fixed, and
+`cargo tauri build` now produces the installer. What is still missing is the rest of
+the visual pass: the reading pane with a message open, the intelligence panel, dark
+mode, four unvisited pages, the error states, and every window size below 1440. Gate 1
+cannot be declared PASS until a packaged install is actually run.
 
 ---
 
 ## NEXT TASK
 
-**Phase 1 visual verification, then UI cleanup.** Every automated gate is now
-closed; what is missing is someone looking at the thing. Five commits' worth of
-change has never been rendered: restored borders and backgrounds from the dead-CSS
-gate, the new reading-pane hierarchy, the productised Accounts and Settings, and
-the focus work.
+**Repeat the visual pass.** The first attempt was partial — see
+`docs/VISUAL-QA-PHASE1.md`. The build blocker is gone; the window automation is not.
 
-**Manual visual verification NOT PERFORMED.** This environment cannot render Alfred.
+Before retrying, note two environment lessons that cost most of the session:
 
-The pass should cover, at minimum:
+1. **A DPI-unaware capture process produces convincing false defects.** `GetWindowRect`
+   returns logical pixels while `CopyFromScreen` reads physical ones, so the capture is
+   a mis-scaled crop — it showed black bands and duplicated, offset panes that looked
+   exactly like a severe layout bug and were entirely fictional. Call
+   `SetProcessDpiAwarenessContext(PER_MONITOR_AWARE_V2)` before any window call. This
+   display is 3840×2160 physical / 2560×1440 logical at 150%.
+2. **`cargo build --release` does not embed the frontend.** The webview requests
+   localhost and shows Chromium's `ERR_CONNECTION_REFUSED` page. Build with
+   `cargo tauri build` **from `desktop/`** — `tauri-cli` is a Rust dev-dependency, so
+   `npx tauri build` does not work.
 
-1. Launch the app; confirm the window appears (this is also **Gate 1**, still
-   NOT PERFORMED — attach `desktop.log` and a `tasklist` check after quit).
-2. Overview, Mail, Tasks, Deadlines, Accounts, Settings in **both themes**.
-3. The reading pane with a short subject, a very long one, a long sender, many
-   recipients, a long body, and attachments.
-4. Resize through 1280 / 1100 / 1000 / 900 / 800px and look for horizontal
-   overflow, a cramped reader, and the intelligence pane at 900px.
-5. Keyboard only: `Tab` from the top, the skip link, `Ctrl+K` then `Escape`,
-   arrow the sidebar, `Enter` a message and confirm focus lands on the subject,
-   `Shift+Tab` back.
-6. Error and empty states on all four pages, with a deliberately failing backend.
+Still unverified, in priority order: the reading pane with a message open, the
+intelligence panel with real content, dark mode, Accounts/Settings/Overview/Tasks/
+Deadlines, error and empty states, and 1100/1000/900/800px.
 
-Two things to watch that no test can catch: the account card lost its avatar tile
-and gained a fact grid, and Settings swapped a hardcoded model for a real one.
-
-**Gate 1 packaged-app verification: NOT PERFORMED.**
+**Gate 1 packaged-app verification: NOT PERFORMED.** The build now succeeds and the app
+launches, but a packaged install has not been run, and `desktop.log` plus a post-quit
+`tasklist` check have not been captured.
 **Automated verification status: PASS** (657 tests, 0 failures).
+

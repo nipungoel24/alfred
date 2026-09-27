@@ -15,7 +15,12 @@ tauri-plugin-opener = "=2.5.5"
 tauri-plugin-single-instance = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
-log = "0.4"
+# `std` must be requested explicitly. `set_boxed_logger` lives behind that
+# feature, and nothing in the runtime dependency graph enabled it — only the dev
+# dependencies did, so `cargo test` compiled and passed while `cargo build` of
+# the actual desktop binary failed. Features unify across dev-dependencies in a
+# test build, which is exactly why this hid for so long.
+log = { version = "0.4", features = ["std"] }
 # OS CSPRNG. Maps to BCryptGenRandom on Windows and getrandom(2) on Linux.
 # Used for the per-launch runtime session token; never implement this by hand.
 getrandom = "0.2"
