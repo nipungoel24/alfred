@@ -265,11 +265,29 @@ def analyze_python(paths: list[Path]) -> dict:
     symbols: dict[str, PySymbol] = {}
 
     for path in sorted(paths):
+        # A parse failure is a hard error, never a skip. Skipping silently is
+        # how a UTF-8 BOM in a source file went unnoticed: `import` tolerates
+        # the BOM so every test still passed, this function quietly dropped the
+        # whole module from the vault, and the only symptom was a missing
+        # symbol much later. Reading as utf-8-sig also strips a BOM rather than
+        # making it a parse error, so an accidental BOM is a no-op here.
         try:
-            tree = ast.parse(path.read_text(encoding="utf-8"))
-        except (SyntaxError, UnicodeDecodeError):
-            continue
-        rel = path.relative_to(ROOT).as_posix()
+            rel = path.relative_to(ROOT).as_posix()
+        except ValueError:
+            rel = path.as_posix()
+        try:
+            tree = ast.parse(path.read_text(encoding="utf-8-sig"))
+        except SyntaxError as exc:
+            raise SyntaxError(
+                f"{rel} does not parse: {exc}. "
+                "Refusing to generate a knowledge graph that silently omits a "
+                "module. Check for a stray byte-order mark or a broken edit."
+            ) from exc
+        except UnicodeDecodeError as exc:
+            raise UnicodeDecodeError(
+                exc.encoding, exc.object, exc.start, exc.end,
+                f"{rel} is not valid UTF-8: {exc.reason}",
+            ) from exc
         if rel.startswith("backend/"):
             module = rel[:-3].replace("/", ".").replace("\\", ".")
         else:
