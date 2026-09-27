@@ -725,6 +725,164 @@ out from under the click twice. I stopped rather than report a dark frame as lig
 
 ---
 
+## Final verification pass: the exact `421f808` build
+
+Date: 2026-09-27. Baseline `421f808` — `chore(alfred): close phase one release
+verification`. No source code was changed in this pass; the working tree was clean
+before it and no tracked file was modified during it.
+
+The previous section closed Gate 1 at `bf1a171` with light theme and the
+startup/shutdown cycle unverified. This pass re-verified the **exact artifact that
+`421f808` produces**, installed it, and closed those two gaps. It did not close the
+intelligence panel or any window-size regression.
+
+### Canonical build and packaging — verified
+
+Run as the single documented command, not as two remembered steps:
+
+```
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\release\build_release.ps1
+```
+
+It completed end to end: build the PyInstaller sidecar, freshness check, `cargo tauri
+build`, freshness check again, release secret scan. The freshness check passed on both
+sides of the bundle, so the packaged sidecar was not stale at either point.
+
+| artifact | size | timestamp |
+| --- | --- | --- |
+| `desktop/src-tauri/binaries/alfred-backend-x86_64-pc-windows-msvc.exe` | 24.5 MB | 2026-09-27 21:14:03 |
+| `desktop/src-tauri/target/release/alfred-desktop.exe` | 11.4 MB | 2026-09-27 |
+| `desktop/src-tauri/target/release/bundle/nsis/Alfred_0.1.0_x64-setup.exe` | 27 MB | 2026-09-27 21:51:42 |
+
+The NSIS installer ran with `/S` and exited 0. The installed shell
+(`%LOCALAPPDATA%\Alfred\alfred-desktop.exe`) is stamped 21:51:28, i.e. this build, not
+a previous one.
+
+### Startup — verified
+
+With 0 Alfred processes present beforehand:
+
+- Main window appeared at **t+1.21 s**.
+- Boot frames were **dark from the first captured frame**. No white flash — the
+  `backgroundColor` fix still holds on this build.
+- Process tree afterwards: **1** `alfred-desktop` and **2** `alfred-backend`. The pair
+  is expected for a PyInstaller one-file executable (parent + extracted child), not a
+  duplicate launch.
+- **No terminal/console window**, and no second Alfred instance.
+
+### Clean shutdown — verified
+
+From `%LOCALAPPDATA%\AlfredData\logs\desktop.log`, in order:
+
+```
+desktop.exit_requested
+POST /api/shutdown            200 OK
+shutdown.graceful_requested   pid=13648 port=59932 delivered=true
+sidecar.exited                pid=13648 exit=Some(0) generation=1
+shutdown.exited_cleanly       pid=13648
+```
+
+**Sidecar exit code 0.** Afterwards: **0** `alfred-desktop`, **0** `alfred-backend`, **0**
+orphan processes left behind.
+
+One minor, non-blocking observation, deliberately **not** changed in this pass: the
+clean exit is emitted at `ERROR` severity (`sidecar.exited ... exit=Some(0)`). The exit
+status is correct and the shutdown is clean, so this is a log-level nit, not a
+functional defect. Left for a follow-up.
+
+### Light theme — objectively confirmed on three screens
+
+The theme is now genuinely light, confirmed by pixel measurement rather than by eye and
+not by a single point sample (a one-pixel probe hit an overlay and was misleading).
+The modal background of the light surface measures **(242, 243, 248)** — exactly
+`--bg-app: #f2f3f8` — with mean luminance ~241.6 across the frame.
+
+| screen | what was actually on screen |
+| --- | --- |
+| **Settings** | the Settings page itself, on the light surface |
+| **Mail** | the real message list on the light surface |
+| **Reader** | a **real message open**: subject, `FROM` (name + address), `TO`, `DATE`, and body text, all light |
+
+The earlier claim in this document that light mode was unreachable was a tooling
+failure, and it is now resolved. The Settings theme control was reached at the expanded
+1940px rail.
+
+### NOT verified in this pass — no claim is made about any of this
+
+- **The intelligence panel.** Never opened on this build. Borders, radius, separation
+  and the off-scale values deferred above remain unverified.
+- **1100px.** Not captured on this build.
+- **1000px.** Not captured on this build.
+- **900px final regression.** **Not re-verified on `421f808`.** 900px was inspected and
+  passed on the earlier `bf1a171` build; the 900px overflow fix is therefore evidenced
+  by that pass and by its layout tests, *not* by a fresh capture of the final artifact.
+  Do not read the earlier 900px result as covering `421f808`.
+- **Light theme on Tasks, Overview, Deadlines and Accounts.** Only Settings, Mail and
+  Reader are confirmed light. A capture named `light-tasks-1940` exists but the click
+  missed and the frame shows **Mail**; it was discarded rather than counted as Tasks.
+- All ten sidebar destinations were measured from the accent bar on the `9783a66` pass
+  and confirmed again at `bf1a171`. In this pass only the Settings active state was
+  re-measured; the other nine were not re-measured on `421f808`.
+- Attachments, and the reader's action row.
+- The Deadlines `0 upcoming` / skeleton-timing question is still unresolved.
+
+### GUI capture limitations that cost this pass its remaining budget
+
+Recorded so the next attempt does not repeat them. Every one of these produced
+*plausible but wrong* evidence, not a defect in the application.
+
+1. **`PrintWindow` is occlusion-proof but not reliable.** With
+   `PW_RENDERFULLCONTENT` it renders the target window's own surface, so it cannot record
+   another application — that is why it replaced `CopyFromScreen`, which had captured the
+   operator's Chrome and produced a wholly false layout finding. But it *intermittently
+   returns an unusable or black frame*, so every capture needs a retry-and-reject loop
+   with a distinct-colour check. A single frame is never evidence.
+2. **Point sampling a pixel is not a theme check.** A one-pixel probe landed on an
+   overlay and reported the wrong surface. Theme state was only accepted from the modal
+   colour and mean luminance of the whole frame.
+3. **UI Automation exposes nothing.** The WebView2 tree returns **0 buttons**, so
+   elements cannot be targeted by name or automation id. Navigation has to be driven by
+   mouse input at coordinates.
+4. **The rail collapses below roughly 1600px.** Coordinates learned at the expanded
+   1940px rail silently miss at 1440px and narrower, landing on the message list instead
+   of the intended destination. This is what produced the discarded "light Tasks" frame
+   and the earlier "clicked Tasks, got Deadlines" result. Navigate while expanded, then
+   resize.
+5. **The app restores to Mail, not to the page last visited.** A pass that assumes the
+   previous page is still showing will capture the wrong screen.
+6. **The window handle went invalid mid-run.** A late scripted pass received a 0x0
+   window rectangle, so capture aborted rather than writing a blank image. Screen
+   identity has to be confirmed *before* a frame counts.
+7. **`MoveWindow` has repeatedly collapsed the window** to a tiny size rather than
+   resizing it, so any resize must be confirmed by reading the rectangle back.
+
+The consistent lesson: with no automation tree available, each script must navigate,
+confirm what is actually on screen, and capture in a single pass — and a frame whose
+identity was not confirmed is discarded, not reported.
+
+### Tests at this baseline
+
+Not re-run in this pass; no source changed, so the `421f808` baseline stands: **295
+backend, 18 tools, 35 Rust, 383 frontend (32/32 files) = 731 passing, 0 failures.**
+`tsc -b`, ESLint, `cargo fmt --check`, `cargo clippy -D warnings`, frontend production
+build, knowledge-graph generation, sidecar freshness, release secret scan and the
+Windows deployment check were all clean. The frontend runner still exits non-zero on
+the pre-existing unhandled `boom` rejection in `src/features/focus.retry.test.tsx`;
+reported separately, not a regression.
+
+---
+
 ## Manual verification
 
-**Gate 1: PARTIAL.** Packaging, startup, navigation, the task domain, 900px responsive behaviour and the dark theme are verified. Light theme and the intelligence panel are not. Full detail and the exact reason the theme switch failed are recorded above.
+**Gate 1: PARTIAL.**
+
+Closed on the exact `421f808` build: canonical sidecar-first build with freshness checks
+on both sides of the bundle, NSIS install, startup (1.21s, no white flash, correct
+process tree, no console), clean shutdown with sidecar exit code 0 and no orphan
+processes, and light theme objectively confirmed on Settings, Mail and the reader with
+a real message open.
+
+Not closed: the **intelligence panel**, **1100px**, **1000px**, the **900px final
+regression on this build** (900px was verified on `bf1a171`, not re-checked here), and
+light theme on Tasks, Overview, Deadlines and Accounts. The blocker in every case was
+GUI automation without an accessibility tree, not an observed application fault.
