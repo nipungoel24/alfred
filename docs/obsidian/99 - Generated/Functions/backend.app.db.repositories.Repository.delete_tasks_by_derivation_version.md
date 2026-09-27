@@ -34,10 +34,6 @@ Delete all tasks created by a specific derivation version.
 - `self`
 - `version` (`str`)
 
-## Called By
-
-- [[backend.app.services.task_derivation.rebuild_tasks_from_analyses|rebuild_tasks_from_analyses]]
-
 ## Writes
 
 - [[table_tasks]]

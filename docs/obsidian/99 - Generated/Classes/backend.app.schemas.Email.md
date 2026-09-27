@@ -60,6 +60,7 @@ Purpose inferred from usage: `Email` in `backend/app/schemas.py`.
 - [[backend.tests.test_task_extraction_contract.make_email|make_email]]
 - [[backend.tests.test_task_migration.test_migration_idempotency_and_preservation|test_migration_idempotency_and_preservation]]
 - [[backend.tests.test_task_migration.test_migration_rollback|test_migration_rollback]]
+- [[backend.tests.test_task_reconcile_idempotency.make_email|make_email]]
 - [[backend.tests.test_task_user_corrections._seed_derived|_seed_derived]]
 - [[backend.tests.test_task_user_corrections.test_migration_service_never_revives_dismissed|test_migration_service_never_revives_dismissed]]
 - [[backend.tests.test_task_user_corrections.test_migration_service_respects_override|test_migration_service_respects_override]]

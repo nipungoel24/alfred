@@ -19,15 +19,9 @@ tags: [module, backend]
 
 ## Imports
 
-- `DERIVATION_VERSION` ← `backend.app.services.task_derivation.DERIVATION_VERSION`
-- `Email` ← `backend.app.schemas.Email`
-- `EmailAnalysis` ← `backend.app.schemas.EmailAnalysis`
-- `List` ← `typing.List`
 - `Repository` ← `backend.app.db.repositories.Repository`
-- `Set` ← `typing.Set`
-- `Task` ← `backend.app.schemas.Task`
 - `Tuple` ← `typing.Tuple`
-- `derive_tasks` ← `backend.app.services.task_derivation.derive_tasks`
+- `reconcile_tasks_from_analyses` ← `backend.app.services.task_derivation.reconcile_tasks_from_analyses`
 
 ## Classes
 

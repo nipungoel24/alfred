@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_derivation
 qualified_name: backend.app.services.task_derivation.derive_tasks
 source: backend/app/services/task_derivation.py
-line: 167
+line: 168
 status: active
 tags: [backend, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Derive genuine user tasks from an email analysis.
 
 ## Location
 
-`backend/app/services/task_derivation.py:167`
+`backend/app/services/task_derivation.py:168`
 
 ## Signature
 
@@ -41,15 +41,14 @@ Derive genuine user tasks from an email analysis.
 ## Calls
 
 - [[backend.app.schemas.Task|Task]] (calls)
-- `is_non_action` (`backend.app.services.due_dates.is_non_action`, calls-inferred)
-- `is_temporal_only` (`backend.app.services.due_dates.is_temporal_only`, calls-inferred)
-- `normalize_due_at` (`backend.app.services.due_dates.normalize_due_at`, calls-inferred)
+- [[backend.app.services.due_dates.is_non_action|is_non_action]] (calls)
+- [[backend.app.services.due_dates.is_temporal_only|is_temporal_only]] (calls)
+- [[backend.app.services.due_dates.normalize_due_at|normalize_due_at]] (calls)
 - `now` (`datetime.datetime.now`, calls-inferred)
 
 ## Called By
 
 - [[backend.app.main._derive_and_save_tasks|_derive_and_save_tasks]]
-- [[backend.app.services.task_migration.TaskMigrationService.run_migration|run_migration]]
 - [[backend.tests.test_task_derivation.test_derive_tasks_adds_explicit_deadlines|test_derive_tasks_adds_explicit_deadlines]]
 - [[backend.tests.test_task_derivation.test_derive_tasks_deduplicates_by_fingerprint|test_derive_tasks_deduplicates_by_fingerprint]]
 - [[backend.tests.test_task_derivation.test_derive_tasks_drops_unresolvable_deadline|test_derive_tasks_drops_unresolvable_deadline]]

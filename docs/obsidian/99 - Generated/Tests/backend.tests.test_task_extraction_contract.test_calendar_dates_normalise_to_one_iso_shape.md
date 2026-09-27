@@ -36,7 +36,7 @@ Purpose inferred from usage: `test_calendar_dates_normalise_to_one_iso_shape` in
 
 ## Calls
 
-- `normalize_due_at` (`backend.app.services.due_dates.normalize_due_at`, calls-inferred)
+- [[backend.app.services.due_dates.normalize_due_at|normalize_due_at]] (calls)
 
 ## Side Effects
 

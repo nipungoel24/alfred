@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_migration.TaskMigrationService
 qualified_name: backend.app.services.task_migration.TaskMigrationService.run_migration
 source: backend/app/services/task_migration.py
-line: 15
+line: 23
 status: active
 tags: [backend, function]
 ---
@@ -17,11 +17,11 @@ tags: [backend, function]
 
 ## Purpose
 
-Run safe task migration over existing analyses.
+Reconcile every task against the current derivation logic.
 
 ## Location
 
-`backend/app/services/task_migration.py:15`
+`backend/app/services/task_migration.py:23`
 
 ## Signature
 
@@ -40,12 +40,8 @@ Run safe task migration over existing analyses.
 
 ## Calls
 
-- [[backend.app.services.task_derivation.derive_tasks|derive_tasks]] (calls)
-
-## Writes
-
-- [[table_tasks]]
+- [[backend.app.services.task_derivation.reconcile_tasks_from_analyses|reconcile_tasks_from_analyses]] (calls)
 
 ## Side Effects
 
-- SQLite
+- none statically observed

@@ -7,6 +7,7 @@ A task exists ONLY when there is evidence that THE USER is expected to do someth
 """
 import hashlib
 import re
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from ..schemas import Email, EmailAnalysis, ActionItem, Task
 from .due_dates import is_non_action, is_temporal_only, normalize_due_at
@@ -143,7 +144,7 @@ def candidate_fingerprints(thread_id: str | None, account_id: str | None,
             if legacy not in fps:
                 fps.append(legacy)
         except ValueError:
-            pass  # thread was never scoped — nothing legacy to cover
+            pass  # thread was never scoped â€” nothing legacy to cover
     return fps
 
 
@@ -168,7 +169,7 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
     """Derive genuine user tasks from an email analysis.
     
     Returns a deduplicated list of tasks with confidence scores and fingerprints.
-    Does NOT persist anything — caller is responsible for storage.
+    Does NOT persist anything â€” caller is responsible for storage.
     """
     candidates: list[Task] = []
     seen_fingerprints: set[str] = set()
@@ -267,55 +268,223 @@ def derive_tasks(email: Email, analysis: EmailAnalysis) -> list[Task]:
     return candidates
 
 
-def rebuild_tasks_from_analyses(repo, model: str):
-    """Rebuild all derived tasks from cached analyses using the current derivation logic.
-    
-    This is the safe migration path:
-    1. Delete all tasks from old derivation versions
-    2. Re-derive from cached analyses (no Ollama re-invocation needed)
-    3. Preserve user-modified task statuses where possible
+@dataclass
+class ReconcileReport:
+    """What a reconcile actually did, in the terms the migration contract uses.
 
-    Pipeline-ineligible source mail (spam/trash/archived) never produces
-    new tasks during rebuild — stale analyses stay cached but hidden.
+    Every pre-existing task lands in exactly one bucket, so a run can be
+    audited rather than trusted.
     """
+
+    before: int = 0
+    after: int = 0
+    preserved: int = 0      # already matched current logic, untouched
+    normalized: int = 0     # matched, but a field was corrected
+    recreated: int = 0      # no stored row matched, so a new one was written
+    removed: int = 0        # current logic rejects it and the user never touched it
+    duplicates: int = 0     # a second row for a task we already keep
+    kept_user_state: int = 0  # rejected by the extractor but completed/dismissed
+    linked: int = 0         # resulting tasks that carry source linkage
+    unlinked: int = 0       # resulting tasks with no source email
+
+    def as_dict(self) -> dict:
+        return {
+            "before": self.before, "after": self.after,
+            "preserved": self.preserved, "normalized": self.normalized,
+            "recreated": self.recreated, "removed": self.removed,
+            "duplicates": self.duplicates,
+            "kept_user_state": self.kept_user_state,
+            "linked": self.linked, "unlinked": self.unlinked,
+        }
+
+
+# Fields the extractor owns. A difference in any of them means the stored row
+# is stale and the reconcile must correct it. `status`, `created_at` and
+# `priority_override` are deliberately absent: those belong to the user.
+# `derivation_version` is included so a row that is otherwise correct still gets
+# stamped with the version that produced it - otherwise an unchanged row keeps a
+# stale version forever and a future version-filtered migration would miss it.
+_DERIVED_FIELDS = ("title", "description", "due_at", "owner", "priority",
+                   "source_email_id", "source_thread_id", "derivation_version")
+
+
+def _is_derived_change(new: Task, existing: Task) -> bool:
+    return any(getattr(new, f, None) != getattr(existing, f, None)
+               for f in _DERIVED_FIELDS)
+
+
+def reconcile_tasks_from_analyses(repo, model: str) -> ReconcileReport:
+    """Make the tasks table match the current derivation logic. The one path.
+
+    This is both the rebuild and the migration; there is deliberately no second
+    implementation. It is safe to run on every startup and safe to run twice:
+
+    * Every stored task is matched to the task the current logic derives from
+      the same message, by fingerprint, honouring both the account-scoped and
+      the legacy raw-thread fingerprint so a thread-id migration can never
+      duplicate a task.
+    * A matched row is *updated* rather than skipped, so a row written by an
+      older derivation is corrected in place instead of lingering beside a
+      fresh copy. This is what the previous implementation got wrong: it
+      skipped any fingerprint already present and only deleted derivation
+      version "1", so version "2" rows survived a logic change untouched.
+    * ``status``, ``created_at`` and any ``priority_override`` are carried
+      over from the stored row. The extractor never overwrites user intent.
+    * A stored row the current logic no longer produces is removed **only if it
+      is still ``pending``** - that is, only if the user never acted on it. A
+      completed or dismissed row is kept, because the user's decision to close
+      it is itself information.
+    * Messages excluded from the pipeline (spam, trash, archived) contribute
+      nothing, but their existing rows are reconciled like any other.
+
+    Returns a :class:`ReconcileReport` describing what changed.
+    """
+    from ..db.database import transaction
     from ..mail.eligibility import MailEligibilityPolicy
 
-    # Delete old auto-derived tasks
-    repo.delete_tasks_by_derivation_version("1")
-    
-    # Re-derive from all cached analyses
-    pairs = repo.all_analyses_with_emails(model)
-    all_new_tasks = []
-    global_fingerprints = set()
-    
+    report = ReconcileReport()
+    existing_rows = repo.tasks_all()
+    report.before = len(existing_rows)
+
+    # Index stored rows by every fingerprint they could be matched on.
+    by_fp: dict[str, list[Task]] = {}
+    for row in existing_rows:
+        fp = getattr(row, "fingerprint", None)
+        if fp:
+            by_fp.setdefault(fp, []).append(row)
+
+    # Deterministic order: the same analyses must always yield the same plan.
+    pairs = sorted(repo.all_analyses_with_emails(model), key=lambda p: p[0].id)
+
+    produced: list[Task] = []
+    produced_candidates: dict[int, list[str]] = {}
+    claimed: set[str] = set()
     for email, analysis in pairs:
-        if MailEligibilityPolicy.pipeline_eligibility(email.label_ids) == 'excluded':
+        if MailEligibilityPolicy.pipeline_eligibility(email.label_ids) == "excluded":
             continue
-        tasks = derive_tasks(email, analysis)
-        for task in tasks:
-            fp = getattr(task, 'fingerprint', None)
-            # A task counts as existing when ANY candidate fingerprint
-            # matches (current scoped-thread form or legacy raw-thread form),
-            # so the thread migration can never duplicate a task here either.
+        for task in derive_tasks(email, analysis):
+            fp = getattr(task, "fingerprint", None)
             try:
                 candidates = candidate_fingerprints(
                     email.thread_id, email.account_id,
-                    _normalize_action(task.title or ''))
+                    _normalize_action(task.title or ""))
             except Exception:
                 candidates = [fp] if fp else []
-            if fp and fp in global_fingerprints:
-                continue  # Cross-email deduplication
-            if any(c in global_fingerprints for c in candidates if c):
+            candidates = [c for c in candidates if c]
+            # Cross-message dedupe, and the guard that makes a second run a
+            # no-op: a fingerprint already claimed in this pass is skipped.
+            if any(c in claimed for c in candidates):
                 continue
-            for c in candidates:
-                if c:
-                    global_fingerprints.add(c)
-            # Also check if this fingerprint already exists in DB
-            if any(c and repo.task_exists_by_fingerprint(c) for c in candidates if c):
-                continue
-            all_new_tasks.append(task)
-    
-    if all_new_tasks:
-        repo.save_tasks_batch(all_new_tasks)
-    
-    return len(all_new_tasks)
+            claimed.update(candidates)
+            produced_candidates[id(task)] = candidates
+            produced.append(task)
+
+    matched_ids: set[str] = set()
+    matched_fps: set[str] = set()
+    to_write: list[Task] = []
+    to_delete: list[str] = []
+
+    for task in produced:
+        hit = None
+        for c in produced_candidates.get(id(task), []):
+            rows = by_fp.get(c)
+            if rows:
+                # Deterministic winner when a fingerprint is duplicated. A row
+                # the user has acted on always beats an untouched one, then the
+                # older row wins, then id - so the result never depends on row
+                # order or on which run created the copy.
+                hit = sorted(rows, key=lambda r: (
+                    r.status != "pending", r.created_at or "", r.id))[0]
+                break
+        if hit is None:
+            to_write.append(task)
+            report.recreated += 1
+            continue
+
+        if hit.id in matched_ids:
+            # A second stored row for a task we already matched.
+            if hit.status == "pending":
+                to_delete.append(hit.id)
+                report.duplicates += 1
+            else:
+                report.kept_user_state += 1
+            continue
+
+        matched_ids.add(hit.id)
+        matched_fps.update(produced_candidates.get(id(task), []))
+        merged = task.model_copy()
+        merged.id = hit.id
+        merged.status = hit.status
+        merged.created_at = hit.created_at
+        if getattr(hit, "priority_override", None):
+            merged.priority = hit.priority
+            merged.priority_override = hit.priority_override
+        if _is_derived_change(merged, hit):
+            to_write.append(merged)
+            report.normalized += 1
+        else:
+            report.preserved += 1
+
+    for row in existing_rows:
+        if row.id in matched_ids or row.id in to_delete:
+            continue
+        # The current logic no longer produces this task. If its fingerprint is
+        # one we just matched, it is a duplicate of a task we are keeping rather
+        # than an invalid extraction, and the report must say so.
+        is_duplicate = bool(getattr(row, "fingerprint", None)) and \
+            getattr(row, "fingerprint", None) in matched_fps
+        if row.status == "pending":
+            to_delete.append(row.id)
+            if is_duplicate:
+                report.duplicates += 1
+            else:
+                report.removed += 1
+        else:
+            report.kept_user_state += 1
+
+    with transaction(repo.con) as cur:
+        for task in to_write:
+            cur.execute(
+                """INSERT INTO tasks (id, source_email_id, source_thread_id, title,
+                   description, due_at, owner, priority, status, created_at,
+                   derivation_version, confidence, fingerprint, priority_override)
+                   VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                   ON CONFLICT(id) DO UPDATE SET
+                     source_email_id=excluded.source_email_id,
+                     source_thread_id=excluded.source_thread_id,
+                     title=excluded.title, description=excluded.description,
+                     due_at=excluded.due_at, owner=excluded.owner,
+                     priority=excluded.priority, derivation_version=excluded.derivation_version,
+                     confidence=excluded.confidence, fingerprint=excluded.fingerprint""",
+                (task.id, task.source_email_id, task.source_thread_id, task.title,
+                 task.description, task.due_at, task.owner, task.priority,
+                 # status and created_at are supplied by the stored row for an
+                 # update; for a genuinely new row these are the derived values.
+                 task.status or "pending",
+                 task.created_at or datetime.now(timezone.utc).isoformat(),
+                 getattr(task, "derivation_version", DERIVATION_VERSION),
+                 getattr(task, "confidence", "medium"),
+                 getattr(task, "fingerprint", None),
+                 getattr(task, "priority_override", None)),
+            )
+        for task_id in to_delete:
+            cur.execute("DELETE FROM tasks WHERE id=?", (task_id,))
+
+    report.after = len(repo.tasks_all())
+    for row in repo.tasks_all():
+        if row.source_email_id:
+            report.linked += 1
+        else:
+            report.unlinked += 1
+    return report
+
+
+def rebuild_tasks_from_analyses(repo, model: str) -> int:
+    """Back-compatible wrapper. Prefer :func:`reconcile_tasks_from_analyses`.
+
+    Kept because startup calls it by name; it is a thin alias, not a second
+    implementation, so there is still exactly one authoritative path.
+    """
+    return reconcile_tasks_from_analyses(repo, model).recreated
+
+

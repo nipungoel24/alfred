@@ -437,25 +437,188 @@ in `src/features/focus.retry.test.tsx`, which this work does not touch.
 
 ---
 
+## Final Phase 1 pass: task domain cleanup and verification
+
+Date: 2026-09-27. Baseline `f526bf4`.
+
+### Is a manually created task distinguishable? (the STOP condition, resolved)
+
+Before any destructive change: **no**. There is no task-creation route
+(`GET /api/tasks`, `POST .../toggle`, `POST .../dismiss`, `PATCH /api/tasks/{id}`,
+`DELETE /api/tasks/{id}` and nothing else), no frontend affordance that creates one,
+and `save_task`/`save_tasks_batch` are called only from derivation and from the
+toggle route. Every row in the table is machine-derived by construction, so a
+reconcile cannot destroy something the user typed. The ambiguity the brief warned
+about cannot arise here.
+
+### One authoritative path
+
+`reconcile_tasks_from_analyses(repo, model) -> ReconcileReport` is now the only code
+that changes the tasks table. `rebuild_tasks_from_analyses` is a thin wrapper (startup
+calls it by name) and `TaskMigrationService.run_migration` delegates to it, so there is
+no second implementation that can drift.
+
+What changed, and why the old code was unsafe:
+
+| | before | now |
+| --- | --- | --- |
+| stale derivation rows | skipped if the fingerprint existed, so a v2 row survived a logic change untouched | **updated in place** via `ON CONFLICT ... DO UPDATE` |
+| old versions | only `derivation_version = '1'` was deleted | every version is reconciled; rows are stamped with the current version |
+| duplicate rows | possible, and unclassified | collapsed deterministically - a row the user acted on wins, then the older, then the lowest id |
+| audit | returned a count | returns a per-category `ReconcileReport` |
+| safety | a failure mid-way left partial state | one transaction |
+
+The previous behaviour was exactly the hazard the brief named: `delete_tasks_by_
+derivation_version("1")` never touched the 291 v2 rows, and a fingerprint that already
+existed was skipped rather than corrected.
+
+### Idempotency and duplicate prevention
+
+`backend/tests/test_task_reconcile_idempotency.py` - 12 tests, including one that runs
+the reconcile against **a copy of the real 291-row database**. Properties pinned: a
+second pass is a byte-identical no-op; no count inflation; no duplicates; a stale row is
+corrected in place rather than copied; `status`, `created_at` and `priority_override`
+survive; a **completed** task the extractor rejects is kept while a **pending** one is
+removed; two messages with the same wording in different threads stay two tasks.
+
+Measured on the live database: pass 1 changed rows, pass 2 reported
+`preserved=194, normalized=0, removed=0, recreated=0, duplicates=0` and the row set was
+identical.
+
+### Backup, and running it
+
+Backup used the application's own WAL-safe `snapshot_database` (SQLite online backup) -
+no new format invented.
+
+- live: `%LOCALAPPDATA%\Alfred\alfred.sqlite3` (14.6 MB, 1068 emails, 621 analyses)
+- backup: `%LOCALAPPDATA%\Alfred\alfred.sqlite3.20260927-pre-reconcile.bak`
+
+The migration was proved on a scratch copy first, run twice there, and only then
+applied to the live file.
+
+| | before | after |
+| --- | --- | --- |
+| tasks | 291 | **194** |
+| `due_at` holding prose or a field label | 96 | **0** |
+| `description` holding `Owner: …` | 174 | **0** |
+| `description` holding `Due: …` | 59 | **0** |
+| `owner` column populated | 0 | **161** |
+| linked to a source email / unlinked | 291 / 0 | 194 / 0 |
+| duplicate fingerprints | 0 | 0 |
+| emails / analyses | 1068 / 621 | 1068 / 621 (untouched) |
+
+Report: `preserved 1, normalized 193, recreated 0, removed 95, duplicates 0,
+kept_user_state 0`. A second pass: `preserved 194`, nothing else, identical rows.
+
+The known malformed sources now resolve correctly: the GitHub sudo OTP, the Techugo
+blast, the Indeed receipt and the DM360 alert produce **no task**; the job description
+produces one clean actionable task with `due_at` NULL.
+
+A third pass, after the sidecar was rebuilt, removed 2 more rows that the stale sidecar
+had created ("72 hours from receiving this email", "15 Aug 2026, 00:00 - 18 Aug 2026,
+16:33") and stamped the last v2 row to v3. **This was my error**: I ran
+`cargo tauri build` without re-running `backend/build_sidecar.py`, so the installed
+sidecar carried the older extraction rules. Caught because the new rows were v3 yet
+still temporal-only. Both steps are required, every time.
+
+### The 900px overflow
+
+**Cause.** The shell grid was `grid-template-columns: var(--rail-width) 1fr`. A bare
+`1fr` track floors at its content's min-content width, and `.workspace-header` had no
+`min-width: 0`, while `.header-search` carried a hard `min-width: 200px` and
+`.header-context` a `min-width: 130px` with `white-space: nowrap`. One wide task row
+widened the track, and the header was dragged off the right edge with it.
+
+**Fix**, no font sizes and no transforms:
+- `grid-template-columns: var(--rail-width) minmax(0, 1fr)` and
+  `grid-template-rows: var(--header-height) minmax(0, 1fr)`
+- `.workspace-header { min-width: 0 }`
+- `.header-context { min-width: 0; overflow: hidden }`
+- `.header-search { flex: 1 1 380px; min-width: 0 }`
+- `.task-meta { flex-wrap: wrap; min-width: 0 }`
+
+**Verified at 900px in the packaged app.** The header now truncates its context text
+with an ellipsis, the search field shrinks and stays usable, and Sync / AI status /
+avatar are all fully visible. Pending / Completed / All are visible. Every row's action
+column is aligned, including two-line titles that wrap. Nothing is clipped and no
+horizontal scrolling is needed to reach View email or Delete.
+
+### A UTF-8 BOM I introduced, and the tooling it silently broke
+
+A PowerShell edit wrote a BOM into `due_dates.py`, `task_derivation.py` and
+`TasksPage.layout.test.tsx`. Python's `import` tolerates a BOM, so **every test still
+passed** - but `generate_knowledge_graph.py` parses with `ast.parse` and *silently
+skips* files that raise `SyntaxError`, so `task_derivation` had dropped out of the
+knowledge graph entirely and `tools/docs/tests/test_generator.py` failed. Fixed by
+stripping the BOMs. Worth knowing: this class of corruption is invisible to the test
+suite and only surfaces in AST-based tooling.
+
+---
+
+## Verification status
+
+**AUTOMATED VERIFIED**
+
+- 295 backend, 9 tools, 35 Rust, 383 frontend (32/32 files) - 0 failures.
+- `tsc -b`, ESLint, `cargo fmt --check`, `cargo clippy -D warnings`, frontend build,
+  release secret scan, Windows deployment check - all clean.
+- Migration and rebuild idempotency, duplicate prevention, user-state preservation -
+  12 dedicated tests plus a run against a copy of the real database.
+- Extraction contract - 40 cases in `test_task_extraction_contract.py`.
+- Task action column - 7 cases in `TasksPage.layout.test.tsx`.
+- The frontend runner still exits non-zero on the pre-existing unhandled `boom`
+  rejection in `src/features/focus.retry.test.tsx`, untouched here.
+
+**MANUALLY VISUALLY VERIFIED** (packaged NSIS install, real mailbox)
+
+- Tasks at **900px**: full layout fits, header truncates cleanly, search shrinks, all
+  header controls visible, action column aligned on every row including wrapped
+  two-line titles, with and without due dates, high and medium priority. This is the
+  screenshot that shows the overflow fix.
+- Mail with a **real message open at 1440px**: subject, FROM / TO / DATE, body text.
+  This closes the reader-at-full-width gap the previous gate could not close.
+- The action column measured at **0 px spread** across 8 consecutive rows (mail icon
+  1682-1702, label 1709-1792, trash 1825-1843).
+- All ten sidebar destinations, measured from the accent bar: exactly one active row
+  each, and the correct one.
+
+**NOT VERIFIED** - no claim is made about any of this
+
+- Light theme, on any screen. The theme was dark for the whole pass.
+- Tasks / Overview / Deadlines / Accounts / Settings at 1440, 1100 or 1000. The
+  captures exist but the rail collapses below ~1940, so the navigation clicks missed
+  and landed on the message list; the one frame I inspected turned out to be Mail, not
+  Tasks. Unverified rather than assumed.
+- The **intelligence panel**. Never opened in this pass.
+- Attachments, and the reader's action row.
+- Deep scrolling, and a task with no `source_email_id` (the disabled-view-action state
+  is covered by unit test only).
+- Two capture runs were **discarded** because they recorded the operator's Chrome
+  window rather than Alfred: a foreground check was unreliable and a centre-pixel
+  darkness test could not distinguish a black web page from a black app surface.
+  `PrintWindow` was used instead, which renders the target's own surface and cannot
+  capture another application. Every reported figure comes from a frame that was checked.
+
+---
+
 ## Manual verification
 
-**What was done this pass:** rebuilt the sidecar and bundle, installed the NSIS artifact,
-and inspected the Tasks page and all ten sidebar destinations in the running installed
-app against a real mailbox, with the action column and the active state measured from
-captures rather than judged by eye. Separately, five real malformed emails were traced
-from the database through normalisation, extraction, persistence and back out again, and
-re-derived to confirm the corrected pipeline.
-
-**What was not done:** the reader at 1940 px, the intelligence panel, 1400/1000 px,
-deep scrolling, wrapped titles, and light theme.
+**This pass:** established that no manually created task can exist, collapsed task
+rebuild and migration onto one deterministic path, proved it idempotent on a copy of
+the real database, backed the database up with the application's own snapshot
+mechanism, ran it on the live database (291 to 194 tasks, all prose out of `due_at`,
+`owner` promoted to a real column), fixed the 900px horizontal overflow at its cause,
+and inspected the packaged application at 900px and 1440px.
 
 **Status:**
 
-- Automated verification: **PASS** — 659 tests, 0 failures.
-- Tasks action column: **FIXED and measured** (0 px spread across 8 rows).
-- Task extraction: **FIXED at the earliest boundary** and verified by replaying real
-  emails; newly derived tasks are correct. The 291 existing rows are stale and were
-  deliberately left untouched.
-- Sidebar active state: **VERIFIED on the device** for all ten destinations.
-- Gate 1 remains **PARTIAL**: the reader at full width, the intelligence panel, and
-  most window widths are still unverified.
+- Automated verification: **PASS** - 722 tests, 0 failures.
+- Task domain migration: **DONE**, idempotent, reversible from the backup.
+- Tasks action column: **VERIFIED**, 0 px spread, including at 900px.
+- 900px responsive overflow: **FIXED and verified**.
+- Sidebar active state: **VERIFIED** on device for all ten destinations.
+- Reader at full width: **VERIFIED** at 1440px.
+- Light theme, the remaining page/width combinations, and the intelligence panel:
+  **NOT VERIFIED**.
+- **Gate 1 remains PARTIAL.** It cannot be PASS while light theme, the intelligence
+  panel and most width combinations are unseen.

@@ -49,6 +49,9 @@ Purpose inferred from usage: `ActionItem` in `backend/app/schemas.py`.
 - [[backend.tests.test_task_extraction_contract.test_task_due_at_is_never_prose|test_task_due_at_is_never_prose]]
 - [[backend.tests.test_task_extraction_contract.test_unusable_deadline_becomes_null|test_unusable_deadline_becomes_null]]
 - [[backend.tests.test_task_migration.test_migration_idempotency_and_preservation|test_migration_idempotency_and_preservation]]
+- [[backend.tests.test_task_reconcile_idempotency.seed_realistic_backlog|seed_realistic_backlog]]
+- [[backend.tests.test_task_reconcile_idempotency.test_a_completed_task_the_extractor_rejects_is_kept|test_a_completed_task_the_extractor_rejects_is_kept]]
+- [[backend.tests.test_task_reconcile_idempotency.test_two_messages_with_the_same_action_do_not_collapse|test_two_messages_with_the_same_action_do_not_collapse]]
 
 ## Side Effects
 

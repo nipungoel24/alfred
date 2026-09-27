@@ -46,7 +46,7 @@ Load all email+analysis pairs efficiently in a single query.
 
 ## Called By
 
-- [[backend.app.services.task_derivation.rebuild_tasks_from_analyses|rebuild_tasks_from_analyses]]
+- [[backend.app.services.task_derivation.reconcile_tasks_from_analyses|reconcile_tasks_from_analyses]]
 
 ## Reads
 

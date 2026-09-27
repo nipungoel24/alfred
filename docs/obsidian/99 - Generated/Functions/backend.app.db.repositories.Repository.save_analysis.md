@@ -46,6 +46,7 @@ Save analysis result. Does NOT create tasks â€” that is TaskDerivationServi
 
 - [[backend.tests.test_task_migration.test_migration_idempotency_and_preservation|test_migration_idempotency_and_preservation]]
 - [[backend.tests.test_task_migration.test_migration_rollback|test_migration_rollback]]
+- [[backend.tests.test_task_reconcile_idempotency.store|store]]
 
 ## Writes
 

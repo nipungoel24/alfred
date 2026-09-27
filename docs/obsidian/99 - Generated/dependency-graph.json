@@ -1351,27 +1351,77 @@
       "source": "backend/app/schemas.py"
     },
     {
+      "id": "backend.app.services.due_dates._has_temporal_token",
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
+    },
+    {
+      "id": "backend.app.services.due_dates._is_definitely_not_a_date",
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
+    },
+    {
+      "id": "backend.app.services.due_dates._iso_from_parts",
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
+    },
+    {
+      "id": "backend.app.services.due_dates._month_number",
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
+    },
+    {
+      "id": "backend.app.services.due_dates._resolve_calendar",
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
+    },
+    {
+      "id": "backend.app.services.due_dates._resolve_relative",
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
+    },
+    {
+      "id": "backend.app.services.due_dates._strip_wrapping",
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
+    },
+    {
       "id": "backend.app.services.due_dates.is_non_action",
-      "type": "external",
-      "source": null
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
     },
     {
       "id": "backend.app.services.due_dates.is_relative_expression",
-      "type": "external",
-      "source": null
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
     },
     {
       "id": "backend.app.services.due_dates.is_temporal_only",
-      "type": "external",
-      "source": null
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
     },
     {
       "id": "backend.app.services.due_dates.normalize_due_at",
-      "type": "external",
-      "source": null
+      "type": "function",
+      "source": "backend/app/services/due_dates.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation.ReconcileReport",
+      "type": "class",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation.ReconcileReport.as_dict",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
     },
     {
       "id": "backend.app.services.task_derivation._assign_confidence",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation._is_derived_change",
       "type": "function",
       "source": "backend/app/services/task_derivation.py"
     },
@@ -1407,6 +1457,11 @@
     },
     {
       "id": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "type": "function",
+      "source": "backend/app/services/task_derivation.py"
+    },
+    {
+      "id": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
       "type": "function",
       "source": "backend/app/services/task_derivation.py"
     },
@@ -2766,6 +2821,101 @@
       "source": "backend/tests/test_task_migration.py"
     },
     {
+      "id": "backend.tests.test_task_reconcile_idempotency._live_db",
+      "type": "function",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.make_analysis",
+      "type": "function",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.make_email",
+      "type": "function",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.repo",
+      "type": "function",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.seed_realistic_backlog",
+      "type": "function",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.store",
+      "type": "function",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.temp_db",
+      "type": "function",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_a_completed_task_the_extractor_rejects_is_kept",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_duplicate_stored_rows_collapse_to_one",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_migration_service_is_idempotent",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_pending_rejected_task_is_removed",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_reconcile_corrects_stale_rows_and_removes_invalid",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_reconcile_normalizes_an_existing_stale_row_in_place",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_reconcile_on_a_copy_of_the_live_database_is_idempotent",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_running_the_migration_twice_changes_nothing_the_second_time",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_running_the_rebuild_twice_is_stable",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_source_linkage_survives",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_two_messages_with_the_same_action_do_not_collapse",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
+      "id": "backend.tests.test_task_reconcile_idempotency.test_user_state_is_preserved_across_a_reconcile",
+      "type": "test",
+      "source": "backend/tests/test_task_reconcile_idempotency.py"
+    },
+    {
       "id": "backend.tests.test_task_user_corrections._seed_derived",
       "type": "function",
       "source": "backend/tests/test_task_user_corrections.py"
@@ -3007,6 +3157,11 @@
     },
     {
       "id": "csv.DictReader",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "datetime.datetime",
       "type": "external",
       "source": null
     },
@@ -3596,6 +3751,11 @@
       "source": null
     },
     {
+      "id": "re.search",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "re.sub",
       "type": "external",
       "source": null
@@ -3607,6 +3767,11 @@
     },
     {
       "id": "secrets.token_urlsafe",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "shutil.copy2",
       "type": "external",
       "source": null
     },
@@ -4970,22 +5135,47 @@
     {
       "from": "backend.app.schemas._clean_due",
       "to": "backend.app.services.due_dates.is_relative_expression",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.app.schemas._clean_due",
       "to": "backend.app.services.due_dates.normalize_due_at",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.services.due_dates._iso_from_parts",
+      "to": "datetime.datetime",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.services.due_dates._resolve_calendar",
+      "to": "datetime.datetime.fromisoformat",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.services.due_dates._resolve_calendar",
+      "to": "re.search",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.services.due_dates._resolve_relative",
+      "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.services.due_dates.is_temporal_only",
+      "to": "re.sub",
       "relation": "calls-inferred"
     },
     {
       "from": "backend.app.services.task_derivation._is_user_actionable",
       "to": "backend.app.services.due_dates.is_non_action",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.app.services.task_derivation._is_user_actionable",
       "to": "backend.app.services.due_dates.is_temporal_only",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.app.services.task_derivation._normalize_action",
@@ -5000,17 +5190,17 @@
     {
       "from": "backend.app.services.task_derivation.derive_tasks",
       "to": "backend.app.services.due_dates.is_non_action",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.app.services.task_derivation.derive_tasks",
       "to": "backend.app.services.due_dates.is_temporal_only",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.app.services.task_derivation.derive_tasks",
       "to": "backend.app.services.due_dates.normalize_due_at",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.app.services.task_derivation.derive_tasks",
@@ -5018,24 +5208,19 @@
       "relation": "calls-inferred"
     },
     {
-      "from": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "from": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
       "to": "backend.app.db.repositories.Repository.all_analyses_with_emails",
       "relation": "calls"
     },
     {
-      "from": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
-      "to": "backend.app.db.repositories.Repository.delete_tasks_by_derivation_version",
+      "from": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
       "relation": "calls"
     },
     {
-      "from": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
-      "to": "backend.app.db.repositories.Repository.save_tasks_batch",
-      "relation": "calls"
-    },
-    {
-      "from": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
-      "to": "backend.app.db.repositories.Repository.task_exists_by_fingerprint",
-      "relation": "calls"
+      "from": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "to": "datetime.datetime.now",
+      "relation": "calls-inferred"
     },
     {
       "from": "backend.app.services.task_derivation.task_fingerprint",
@@ -5044,7 +5229,7 @@
     },
     {
       "from": "backend.app.services.task_migration.TaskMigrationService.run_migration",
-      "to": "backend.app.services.task_derivation.derive_tasks",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
       "relation": "calls"
     },
     {
@@ -7480,7 +7665,7 @@
     {
       "from": "backend.tests.test_task_extraction_contract.test_a_resolvable_relative_offset_is_kept_as_an_instant",
       "to": "backend.app.services.due_dates.normalize_due_at",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_extraction_contract.test_actionable_email_produces_the_action_as_the_title",
@@ -7495,7 +7680,7 @@
     {
       "from": "backend.tests.test_task_extraction_contract.test_calendar_dates_normalise_to_one_iso_shape",
       "to": "backend.app.services.due_dates.normalize_due_at",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_extraction_contract.test_date_becomes_due_at_not_the_title",
@@ -7540,7 +7725,7 @@
     {
       "from": "backend.tests.test_task_extraction_contract.test_month_relative_deadline_is_refused_as_ambiguous",
       "to": "backend.app.services.due_dates.normalize_due_at",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_extraction_contract.test_no_action_required_creates_no_task",
@@ -7560,7 +7745,7 @@
     {
       "from": "backend.tests.test_task_extraction_contract.test_non_action_titles_are_rejected",
       "to": "backend.app.services.due_dates.is_temporal_only",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_extraction_contract.test_non_action_titles_are_rejected",
@@ -7605,7 +7790,7 @@
     {
       "from": "backend.tests.test_task_extraction_contract.test_real_action_titles_are_kept",
       "to": "backend.app.services.due_dates.is_temporal_only",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_extraction_contract.test_real_action_titles_are_kept",
@@ -7670,7 +7855,7 @@
     {
       "from": "backend.tests.test_task_extraction_contract.test_task_due_at_is_never_prose",
       "to": "backend.app.services.due_dates.normalize_due_at",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_extraction_contract.test_task_due_at_is_never_prose",
@@ -7685,7 +7870,7 @@
     {
       "from": "backend.tests.test_task_extraction_contract.test_unusable_deadline_becomes_null",
       "to": "backend.app.services.due_dates.normalize_due_at",
-      "relation": "calls-inferred"
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_extraction_contract.test_unusable_deadline_becomes_null",
@@ -7831,6 +8016,256 @@
       "from": "backend.tests.test_task_migration.test_migration_rollback",
       "to": "pytest.raises",
       "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency._live_db",
+      "to": "os.environ.get",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency._live_db",
+      "to": "pathlib.Path",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.make_analysis",
+      "to": "backend.app.schemas.EmailAnalysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.make_email",
+      "to": "backend.app.schemas.Email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.repo",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.seed_realistic_backlog",
+      "to": "backend.app.schemas.ActionItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.seed_realistic_backlog",
+      "to": "backend.app.schemas.Deadline",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.store",
+      "to": "backend.app.db.repositories.Repository.save_analysis",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.store",
+      "to": "backend.app.db.repositories.Repository.upsert_email",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.temp_db",
+      "to": "os.close",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.temp_db",
+      "to": "os.path.exists",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.temp_db",
+      "to": "os.remove",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.temp_db",
+      "to": "pathlib.Path",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.temp_db",
+      "to": "tempfile.mkstemp",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_a_completed_task_the_extractor_rejects_is_kept",
+      "to": "backend.app.db.repositories.Repository.con.commit",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_a_completed_task_the_extractor_rejects_is_kept",
+      "to": "backend.app.db.repositories.Repository.con.execute",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_a_completed_task_the_extractor_rejects_is_kept",
+      "to": "backend.app.schemas.ActionItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_a_completed_task_the_extractor_rejects_is_kept",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_duplicate_stored_rows_collapse_to_one",
+      "to": "backend.app.db.repositories.Repository.con.commit",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_duplicate_stored_rows_collapse_to_one",
+      "to": "backend.app.db.repositories.Repository.con.execute",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_duplicate_stored_rows_collapse_to_one",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_duplicate_stored_rows_collapse_to_one",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_migration_service_is_idempotent",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_migration_service_is_idempotent",
+      "to": "backend.app.services.task_migration.TaskMigrationService",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_pending_rejected_task_is_removed",
+      "to": "backend.app.db.repositories.Repository.con.commit",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_pending_rejected_task_is_removed",
+      "to": "backend.app.db.repositories.Repository.con.execute",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_pending_rejected_task_is_removed",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_pending_rejected_task_is_removed",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_corrects_stale_rows_and_removes_invalid",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_corrects_stale_rows_and_removes_invalid",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_normalizes_an_existing_stale_row_in_place",
+      "to": "backend.app.db.repositories.Repository.con.execute",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_normalizes_an_existing_stale_row_in_place",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_normalizes_an_existing_stale_row_in_place",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_on_a_copy_of_the_live_database_is_idempotent",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_on_a_copy_of_the_live_database_is_idempotent",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_on_a_copy_of_the_live_database_is_idempotent",
+      "to": "shutil.copy2",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_reconcile_on_a_copy_of_the_live_database_is_idempotent",
+      "to": "sqlite3.connect",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_running_the_migration_twice_changes_nothing_the_second_time",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_running_the_migration_twice_changes_nothing_the_second_time",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_running_the_rebuild_twice_is_stable",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_running_the_rebuild_twice_is_stable",
+      "to": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_source_linkage_survives",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_source_linkage_survives",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_two_messages_with_the_same_action_do_not_collapse",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_two_messages_with_the_same_action_do_not_collapse",
+      "to": "backend.app.schemas.ActionItem",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_two_messages_with_the_same_action_do_not_collapse",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_user_state_is_preserved_across_a_reconcile",
+      "to": "backend.app.db.repositories.Repository.con.commit",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_user_state_is_preserved_across_a_reconcile",
+      "to": "backend.app.db.repositories.Repository.con.execute",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_user_state_is_preserved_across_a_reconcile",
+      "to": "backend.app.db.repositories.Repository.tasks_all",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_task_reconcile_idempotency.test_user_state_is_preserved_across_a_reconcile",
+      "to": "backend.app.services.task_derivation.reconcile_tasks_from_analyses",
+      "relation": "calls"
     },
     {
       "from": "backend.tests.test_task_user_corrections._seed_derived",

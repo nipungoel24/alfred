@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_migration.TaskMigrationService
 qualified_name: backend.app.services.task_migration.TaskMigrationService.__init__
 source: backend/app/services/task_migration.py
-line: 12
+line: 20
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/app/services/task_migration.
 
 ## Location
 
-`backend/app/services/task_migration.py:12`
+`backend/app/services/task_migration.py:20`
 
 ## Signature
 

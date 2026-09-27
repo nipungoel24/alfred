@@ -36,7 +36,7 @@ Purpose inferred from usage: `test_unusable_deadline_becomes_null` in `backend/t
 ## Calls
 
 - [[backend.app.schemas.ActionItem|ActionItem]] (calls)
-- `normalize_due_at` (`backend.app.services.due_dates.normalize_due_at`, calls-inferred)
+- [[backend.app.services.due_dates.normalize_due_at|normalize_due_at]] (calls)
 - [[backend.app.services.task_derivation.derive_tasks|derive_tasks]] (calls)
 
 ## Side Effects

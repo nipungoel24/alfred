@@ -36,7 +36,7 @@ Purpose inferred from usage: `test_real_action_titles_are_kept` in `backend/test
 ## Calls
 
 - [[backend.app.schemas.Deadline|Deadline]] (calls)
-- `is_temporal_only` (`backend.app.services.due_dates.is_temporal_only`, calls-inferred)
+- [[backend.app.services.due_dates.is_temporal_only|is_temporal_only]] (calls)
 - [[backend.app.services.task_derivation.derive_tasks|derive_tasks]] (calls)
 
 ## Side Effects

@@ -23,6 +23,7 @@ tags: [module, backend]
 - `Email` ← `backend.app.schemas.Email`
 - `EmailAnalysis` ← `backend.app.schemas.EmailAnalysis`
 - `Task` ← `backend.app.schemas.Task`
+- `dataclass` ← `dataclasses.dataclass`
 - `datetime` ← `datetime.datetime`
 - `hashlib` ← `hashlib`
 - `is_non_action` ← `backend.app.services.due_dates.is_non_action`
@@ -31,9 +32,15 @@ tags: [module, backend]
 - `re` ← `re`
 - `timezone` ← `datetime.timezone`
 
+## Classes
+
+- [[backend.app.services.task_derivation.ReconcileReport|ReconcileReport]]
+
 ## Functions
 
+- [[backend.app.services.task_derivation.ReconcileReport.as_dict|as_dict]]
 - [[backend.app.services.task_derivation._assign_confidence|_assign_confidence]]
+- [[backend.app.services.task_derivation._is_derived_change|_is_derived_change]]
 - [[backend.app.services.task_derivation._is_noise|_is_noise]]
 - [[backend.app.services.task_derivation._is_user_actionable|_is_user_actionable]]
 - [[backend.app.services.task_derivation._normalize_action|_normalize_action]]
@@ -41,6 +48,7 @@ tags: [module, backend]
 - [[backend.app.services.task_derivation.candidate_fingerprints|candidate_fingerprints]]
 - [[backend.app.services.task_derivation.derive_tasks|derive_tasks]]
 - [[backend.app.services.task_derivation.rebuild_tasks_from_analyses|rebuild_tasks_from_analyses]]
+- [[backend.app.services.task_derivation.reconcile_tasks_from_analyses|reconcile_tasks_from_analyses]]
 - [[backend.app.services.task_derivation.task_fingerprint|task_fingerprint]]
 
 ## Constants
@@ -49,3 +57,4 @@ tags: [module, backend]
 - `LOW_TASK_CATEGORIES`
 - `MIN_TASK_LENGTH`
 - `NOISE_PATTERNS`
+- `_DERIVED_FIELDS`

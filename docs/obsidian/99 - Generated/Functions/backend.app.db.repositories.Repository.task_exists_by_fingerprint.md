@@ -38,10 +38,6 @@ Check if a task with this fingerprint already exists.
 
 `bool`
 
-## Called By
-
-- [[backend.app.services.task_derivation.rebuild_tasks_from_analyses|rebuild_tasks_from_analyses]]
-
 ## Reads
 
 - [[table_tasks]]

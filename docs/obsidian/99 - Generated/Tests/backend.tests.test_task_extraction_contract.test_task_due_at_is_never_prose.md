@@ -32,7 +32,7 @@ Purpose inferred from usage: `test_task_due_at_is_never_prose` in `backend/tests
 ## Calls
 
 - [[backend.app.schemas.ActionItem|ActionItem]] (calls)
-- `normalize_due_at` (`backend.app.services.due_dates.normalize_due_at`, calls-inferred)
+- [[backend.app.services.due_dates.normalize_due_at|normalize_due_at]] (calls)
 - [[backend.app.services.task_derivation.derive_tasks|derive_tasks]] (calls)
 
 ## Side Effects

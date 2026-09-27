@@ -7,8 +7,11 @@
 .app-shell {
   position: relative;
   display: grid;
-  grid-template-columns: var(--rail-width) 1fr;
-  grid-template-rows: var(--header-height) 1fr;
+   /* minmax(0, 1fr), not a bare 1fr: a bare grid track floors at its content's
+      min-content width, so one wide row pushed the whole shell past the
+      viewport and dragged the header off the right edge with it. */
+   grid-template-columns: var(--rail-width) minmax(0, 1fr);
+   grid-template-rows: var(--header-height) minmax(0, 1fr);
   grid-template-areas:
     'rail header'
     'rail content';
@@ -50,11 +53,13 @@
 /* ═══════════════════════════════════════════════════════════════
    WORKSPACE HEADER — frosted bar with glowing search
    ═══════════════════════════════════════════════════════════════ */
-.workspace-header {
-  grid-area: header;
-  display: flex;
-  align-items: center;
-  gap: var(--space-4);
+  .workspace-header {
+    grid-area: header;
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+    /* Without this the header floors at its own min-content width. */
+    min-width: 0;
   padding: 0 var(--space-4);
   border-bottom: 1px solid var(--border-subtle);
   z-index: var(--z-header);
@@ -62,8 +67,10 @@
   box-shadow: var(--shadow-1);
 }
 
-.header-context {
-  min-width: 130px;
+  .header-context {
+    /* May shrink and truncate rather than force the header wider. */
+    min-width: 0;
+    overflow: hidden;
   display: flex;
   align-items: baseline;
   gap: var(--space-2);
@@ -1665,7 +1672,7 @@ button.metric-cell:hover::before {
 
    .task-title { font-size: var(--text-sm); font-weight: var(--weight-semibold); color: var(--text-primary); }
    .task-title.completed { text-decoration: line-through; color: var(--text-muted); }
-   .task-meta { display: flex; align-items: center; gap: var(--space-2); margin-top: 3px; font-size: 11px; color: var(--text-muted); }
+   .task-meta { display: flex; align-items: center; flex-wrap: wrap; min-width: 0; gap: var(--space-2); margin-top: 3px; font-size: 11px; color: var(--text-muted); }
 
    /* Task row: checkbox | flexible content | fixed action column.
 
@@ -2788,12 +2795,14 @@ input:focus-visible,
 /* ── Header search ─────────────────────────────────────────────────────
    A first-class control, not an afterthought. */
 
-.header-search {
-  position: relative;
-  display: flex;
-  align-items: center;
-  flex: 0 1 380px;
-  min-width: 200px;
+  .header-search {
+    position: relative;
+    display: flex;
+    align-items: center;
+    flex: 1 1 380px;
+    /* This used to be a 200px floor the header could never shrink under, which
+       is what overflowed a 900px window. It now shrinks with the header. */
+    min-width: 0;
 }
 
 .header-search-icon {

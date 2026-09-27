@@ -79,6 +79,8 @@ Purpose inferred from usage: `Repository` in `backend/app/db/repositories.py`.
 - [[backend.tests.test_structured_search.test_structured_search_no_results|test_structured_search_no_results]]
 - [[backend.tests.test_structured_search.test_structured_search_with_free_text|test_structured_search_with_free_text]]
 - [[backend.tests.test_task_migration.repo|repo]]
+- [[backend.tests.test_task_reconcile_idempotency.repo|repo]]
+- [[backend.tests.test_task_reconcile_idempotency.test_reconcile_on_a_copy_of_the_live_database_is_idempotent|test_reconcile_on_a_copy_of_the_live_database_is_idempotent]]
 - [[backend.tests.test_task_user_corrections.test_dismissal_survives_reopen|test_dismissal_survives_reopen]]
 - [[backend.tests.test_task_user_corrections.test_migration_service_never_revives_dismissed|test_migration_service_never_revives_dismissed]]
 - [[backend.tests.test_task_user_corrections.test_migration_service_respects_override|test_migration_service_respects_override]]

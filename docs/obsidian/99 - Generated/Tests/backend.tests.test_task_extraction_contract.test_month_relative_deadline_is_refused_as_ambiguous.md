@@ -31,7 +31,7 @@ Purpose inferred from usage: `test_month_relative_deadline_is_refused_as_ambiguo
 
 ## Calls
 
-- `normalize_due_at` (`backend.app.services.due_dates.normalize_due_at`, calls-inferred)
+- [[backend.app.services.due_dates.normalize_due_at|normalize_due_at]] (calls)
 
 ## Side Effects
 

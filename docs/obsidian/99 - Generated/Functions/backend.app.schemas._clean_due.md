@@ -39,8 +39,8 @@ Reduce a model-supplied due value to a stored instant, or keep a
 
 ## Calls
 
-- `is_relative_expression` (`backend.app.services.due_dates.is_relative_expression`, calls-inferred)
-- `normalize_due_at` (`backend.app.services.due_dates.normalize_due_at`, calls-inferred)
+- [[backend.app.services.due_dates.is_relative_expression|is_relative_expression]] (calls)
+- [[backend.app.services.due_dates.normalize_due_at|normalize_due_at]] (calls)
 
 ## Side Effects
 

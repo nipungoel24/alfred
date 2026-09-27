@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_derivation
 qualified_name: backend.app.services.task_derivation._is_noise
 source: backend/app/services/task_derivation.py
-line: 57
+line: 58
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Check if a task description matches known noise patterns.
 
 ## Location
 
-`backend/app/services/task_derivation.py:57`
+`backend/app/services/task_derivation.py:58`
 
 ## Signature
 

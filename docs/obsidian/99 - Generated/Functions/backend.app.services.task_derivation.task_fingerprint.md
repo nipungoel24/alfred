@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.services.task_derivation
 qualified_name: backend.app.services.task_derivation.task_fingerprint
 source: backend/app/services/task_derivation.py
-line: 120
+line: 121
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Create a stable fingerprint for task deduplication.
 
 ## Location
 
-`backend/app/services/task_derivation.py:120`
+`backend/app/services/task_derivation.py:121`
 
 ## Signature
 

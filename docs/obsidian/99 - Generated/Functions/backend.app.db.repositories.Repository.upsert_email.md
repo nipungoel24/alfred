@@ -73,6 +73,7 @@ Insert or update a single email. Caller manages transaction.
 - [[backend.tests.test_eligibility.test_permanent_delete_marks_excluded_not_destroyed|test_permanent_delete_marks_excluded_not_destroyed]]
 - [[backend.tests.test_eligibility.test_search_within_category_context|test_search_within_category_context]]
 - [[backend.tests.test_eligibility.test_spam_transition_hides_from_projections|test_spam_transition_hides_from_projections]]
+- [[backend.tests.test_task_reconcile_idempotency.store|store]]
 
 ## Writes
 

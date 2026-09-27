@@ -31,7 +31,7 @@ Purpose inferred from usage: `test_a_resolvable_relative_offset_is_kept_as_an_in
 
 ## Calls
 
-- `normalize_due_at` (`backend.app.services.due_dates.normalize_due_at`, calls-inferred)
+- [[backend.app.services.due_dates.normalize_due_at|normalize_due_at]] (calls)
 
 ## Side Effects
 

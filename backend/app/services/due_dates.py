@@ -1,4 +1,4 @@
-﻿"""Due-date normalisation for extracted tasks.
+"""Due-date normalisation for extracted tasks.
 
 The extraction model used to be *told* to keep relative wording in the due
 field, and the schema typed that field as a free-form ``str``. Both have been
@@ -135,6 +135,32 @@ _WEEKDAY_GLOSS_RE = re.compile(
 )
 
 _ORDINAL_SUFFIX_RE = re.compile(r"\b(\d{1,2})(?:st|nd|rd|th)\b", re.I)
+
+# Any token that only expresses *when*. Used to recognise a string that is
+# entirely timing, even when it spans a range or names a receiver.
+_TEMPORAL_TOKEN_RE = re.compile(
+    rf"(\d{{4}}-\d{{2}}-\d{{2}}"
+    rf"|\d{{1,2}}\s*(?:st|nd|rd|th)?\s+(?:{_MONTH_ALT})\.?\s*,?\s*\d{{4}}"
+    rf"|(?:{_MONTH_ALT})\.?\s*\d{{1,2}}\s*(?:st|nd|rd|th)?\s*,?\s*\d{{4}}"
+    rf"|\d{{1,2}}\s*(?:st|nd|rd|th)?\s+(?:{_MONTH_ALT})\b"
+    rf"|(?:{_MONTH_ALT})\.?\s*\d{{1,2}}\b"
+    rf"|\b\d{{1,2}}[:.]\d{{2}}\s*(?:[ap]\.?m\.?)?"
+    rf"|\b\d{{1,4}}\s*(?:minute|min|hour|hr|day|week|month)s?\b)",
+    re.I,
+)
+# Connector and filler words that carry no action once timing is removed.
+_TEMPORAL_FILLER_RE = re.compile(
+    r"\b(to|from|at|on|in|of|by|for|and|or|after|before|within|until|till|"
+    r"receiving|this|that|the|email|message|mail|it|be|is|are|was|were|"
+    r"eod|end|day|week|month|business|close|implied|no|explicit|not|provided|mentioned|"
+    r"approximate|estimated|estimate|deadline|due|date|time|when|your|you|"
+    r"am|pm|midnight|noon|start|starts|beginning|soonest|earliest|latest)\b",
+    re.I,
+)
+
+
+def _has_temporal_token(text: str) -> bool:
+    return bool(_TEMPORAL_TOKEN_RE.search(text))
 
 # "12 September 2026", "12th September, 2026", "September 12 2026"
 _DMY_RE = re.compile(
@@ -344,7 +370,17 @@ def is_temporal_only(value: object) -> bool:
 
     if _RELATIVE_RE.search(text):
         remainder = _RELATIVE_RE.sub(" ", text)
-        if not remainder.strip(" ,.-â€“â€”/()"):
+        if not remainder.strip(" ,.-–—/()"):
+            return True
+
+    # A range ("15 Aug 2026, 00:00 - 18 Aug 2026, 16:33") or a relative phrase
+    # with a receiver ("72 hours from receiving this email") is still only
+    # timing. Strip every temporal token and then only connector/filler words;
+    # if an action-bearing word survives, this really is a task.
+    if _has_temporal_token(text):
+        residue = _TEMPORAL_TOKEN_RE.sub(" ", flat)
+        residue = _TEMPORAL_FILLER_RE.sub(" ", residue)
+        if not residue.strip(" ,.-–—/()&+"):
             return True
     return False
 

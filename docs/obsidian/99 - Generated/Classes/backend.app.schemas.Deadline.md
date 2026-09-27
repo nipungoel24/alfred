@@ -39,6 +39,7 @@ Purpose inferred from usage: `Deadline` in `backend/app/schemas.py`.
 - [[backend.tests.test_task_extraction_contract.test_non_action_titles_are_rejected|test_non_action_titles_are_rejected]]
 - [[backend.tests.test_task_extraction_contract.test_real_action_titles_are_kept|test_real_action_titles_are_kept]]
 - [[backend.tests.test_task_migration.test_migration_idempotency_and_preservation|test_migration_idempotency_and_preservation]]
+- [[backend.tests.test_task_reconcile_idempotency.seed_realistic_backlog|seed_realistic_backlog]]
 
 ## Side Effects
 
