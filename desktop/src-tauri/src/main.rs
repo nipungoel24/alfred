@@ -35,7 +35,16 @@ use tokio::sync::watch;
 
 const HEALTH_TIMEOUT: Duration = Duration::from_secs(60);
 const HEALTH_INTERVAL: Duration = Duration::from_millis(500);
-const STARTUP_TIMEOUT: Duration = Duration::from_secs(60);
+/// Outer watchdog for `await_backend_ready`, deliberately LONGER than
+/// [`HEALTH_TIMEOUT`].
+///
+/// These used to be equal. The health poller starts its deadline when the
+/// sidecar is spawned; this one starts when the frontend invokes the command,
+/// a moment later. With both at 60s the generic `STARTUP_TIMEOUT` won the race
+/// and a hung backend was reported as a vague "took too long to finish
+/// starting" instead of `BACKEND_HEALTH_TIMEOUT`. The poller's verdict is
+/// authoritative, so this watchdog must always expire *after* it.
+const STARTUP_TIMEOUT: Duration = Duration::from_secs(HEALTH_TIMEOUT.as_secs() + 15);
 const HTTP_CONNECT_TIMEOUT: Duration = Duration::from_millis(900);
 const HTTP_READ_TIMEOUT: Duration = Duration::from_millis(1500);
 const MAX_SPAWN_ATTEMPTS: u32 = 3;
@@ -47,6 +56,24 @@ const LOG_MAX_BYTES: u64 = 2 * 1024 * 1024;
 const LOG_KEEP_FILES: usize = 3;
 
 // ── Startup state machine ───────────────────────────────────────────
+
+/// Emit exactly one lifecycle line per phase transition.
+///
+/// The diagnostic field is named `diag=`, never `code=`. The global redactor
+/// treats a bare `code=` as an OAuth authorization code (the uvicorn access log
+/// really does contain `?code=` on the OAuth callback), so a `code=` field here
+/// was replaced by `[redacted]` on every transition — silently deleting the
+/// diagnostic support surface this type exists to provide. Renaming the field is
+/// the same remedy previously applied to `sidecar.exited`; the OAuth rule itself
+/// is untouched.
+fn log_phase(status: &StartupStatus, generation: u64) {
+    log::info!(
+        "startup.phase phase={} diag={} generation={}",
+        status.phase_code(),
+        status.code,
+        generation
+    );
+}
 
 /// The explicit startup state machine. Every transition is deterministic and
 /// driven by an observed condition, never by a timer guessing.
@@ -81,6 +108,23 @@ impl StartupPhase {
     /// Phases after which the workspace must never be shown.
     fn is_terminal_failure(self) -> bool {
         matches!(self, StartupPhase::FatalError)
+    }
+}
+
+/// Bookkeeping once a readiness poll has resolved.
+///
+/// Returns the connection details the shell should keep publishing, or `None`
+/// for a terminal failure.
+///
+/// This deliberately does not touch the shutdown registry. Dropping ownership
+/// of a still-running child is what allowed a failed startup to orphan live
+/// `alfred-backend.exe` processes: `terminate()` found an empty slot and killed
+/// nothing. Connection details and process ownership are separate concerns.
+fn settle_poll_outcome(phase: StartupPhase, port: u16, token: String) -> Option<(u16, String)> {
+    if phase.is_terminal_failure() {
+        None
+    } else {
+        Some((port, token))
     }
 }
 
@@ -154,7 +198,9 @@ impl DiagnosticCode {
                  installer again to repair the installation."
             }
             DiagnosticCode::SidecarExited => {
-                "Alfred's local service stopped unexpectedly while starting. This is usually \
+                // Must read correctly both while starting and when the backend
+                // dies mid-session, so it makes no claim about which it was.
+                "Alfred's local service stopped unexpectedly. This is usually \
                  caused by a corrupted installation or a blocked antivirus rule."
             }
             DiagnosticCode::BackendHealthTimeout => {
@@ -382,12 +428,7 @@ impl BackendSupervisor {
         self.state_tx.send_replace(next.clone());
 
         let status = status_from(&next);
-        log::info!(
-            "startup.phase phase={} code={} generation={}",
-            status.phase_code(),
-            status.code,
-            generation
-        );
+        log_phase(&status, generation);
         // Emitting is best-effort: a UI that is not listening yet will read
         // the authoritative snapshot via `startup_phase` instead.
         let _ = self.app.emit("alfred://startup-phase", &status);
@@ -496,18 +537,21 @@ impl BackendSupervisor {
                         // new one.
                         let current = state_tx_child.borrow().generation;
                         if current == generation_child {
-                            state_tx_child.send_replace(BackendRuntimeState {
+                            let next = BackendRuntimeState {
                                 phase: StartupPhase::FatalError,
                                 code: DiagnosticCode::SidecarExited,
                                 port: None,
                                 token: None,
                                 generation: generation_child,
                                 phase_started: Instant::now(),
-                            });
-                            let _ = app_child.emit(
-                                "alfred://startup-phase",
-                                status_from(&state_tx_child.borrow()),
-                            );
+                            };
+                            state_tx_child.send_replace(next.clone());
+                            let status = status_from(&next);
+                            // Log it. The supervisor detected the death but the
+                            // lifecycle line was missing, so a crash was only
+                            // visible as a raw `sidecar.exited` entry.
+                            log_phase(&status, generation_child);
+                            let _ = app_child.emit("alfred://startup-phase", &status);
                         }
                         return;
                     }
@@ -519,7 +563,6 @@ impl BackendSupervisor {
         // Generation-guarded readiness polling.
         let state_tx_poll = self.state_tx.clone();
         let app_poll = self.app.clone();
-        let registry_poll = self.registry.clone();
         tauri::async_runtime::spawn(async move {
             let deadline = Instant::now() + HEALTH_TIMEOUT;
             let mut last_probe = String::new();
@@ -591,12 +634,16 @@ impl BackendSupervisor {
                 return;
             }
 
-            let keep_connection = !phase.is_terminal_failure();
-            if !keep_connection {
-                registry_poll.clear();
-            }
-            let port = keep_connection.then_some(port);
-            let token = port.map(|_| token);
+            // Deliberately NOT clearing the shutdown registry here. A terminal failure
+            // does not mean the child died: a hung backend is still running.
+            // Releasing ownership made exit-time `terminate()` a no-op, so a
+            // failed startup left live `alfred-backend.exe` processes behind —
+            // exactly the orphan the registry exists to prevent. Ownership is
+            // released only by `stop_child()` (before a deliberate restart) and
+            // by `terminate()` at exit, both of which actually kill the child.
+            let connection = settle_poll_outcome(phase, port, token);
+            let port = connection.as_ref().map(|(p, _)| *p);
+            let token = connection.map(|(_, t)| t);
 
             let next = BackendRuntimeState {
                 phase,
@@ -608,11 +655,7 @@ impl BackendSupervisor {
             };
             state_tx_poll.send_replace(next.clone());
             let status = status_from(&next);
-            log::info!(
-                "startup.phase phase={} code={} generation={generation}",
-                status.phase_code(),
-                status.code
-            );
+            log_phase(&status, generation);
             let _ = app_poll.emit("alfred://startup-phase", &status);
         });
 
@@ -879,6 +922,45 @@ fn iso8601_millis() -> String {
     format!("{y:04}-{m:02}-{d:02}T{hour:02}:{minute:02}:{second:02}.{millis:03}Z")
 }
 
+/// Serialises the whole append-rotate-write cycle.
+///
+/// Rotation and the append must be one critical section, or two threads can
+/// rotate between each other's open and write.
+static LOG_LOCK: Mutex<()> = Mutex::new(());
+
+/// Render one complete record, newline included, redaction applied.
+fn render_record(level: log::Level, target: &str, message: &str) -> String {
+    // Built with `format!` rather than `writeln!`: the latter would resolve to
+    // `std::io::Write` here (already imported for the log file) and cannot
+    // write into a String.
+    format!(
+        "{} {} {} {}\n",
+        iso8601_millis(),
+        level,
+        target,
+        redact(message)
+    )
+}
+
+/// Append one already-rendered record atomically.
+fn append_record(path: &Path, line: &str) {
+    let _guard = match LOG_LOCK.lock() {
+        Ok(guard) => guard,
+        // A panicking logger must not take the whole application down.
+        Err(poisoned) => poisoned.into_inner(),
+    };
+    if let Some(dir) = path.parent() {
+        if fs::create_dir_all(dir).is_err() {
+            return;
+        }
+    }
+    rotate_if_needed(path);
+    // One `write_all` of a finished line: the record cannot be interleaved.
+    if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(path) {
+        let _ = file.write_all(line.as_bytes());
+    }
+}
+
 /// A real `log` implementation. The previous code called `log::debug!` with no
 /// logger installed, so every sidecar line was silently discarded.
 struct AlfredLogger {
@@ -894,22 +976,12 @@ impl log::Log for AlfredLogger {
         if !self.enabled(record.metadata()) {
             return;
         }
-        let dir = log_dir();
-        if fs::create_dir_all(&dir).is_err() {
-            return;
-        }
-        let path = log_path();
-        rotate_if_needed(&path);
-        if let Ok(mut file) = OpenOptions::new().create(true).append(true).open(&path) {
-            let _ = writeln!(
-                file,
-                "{} {} {} {}",
-                iso8601_millis(),
-                record.level(),
-                record.target(),
-                redact(&record.args().to_string())
-            );
-        }
+        // `writeln!` performs a separate `write` syscall per format argument and
+        // the file is unbuffered, so two threads logging at the same instant
+        // interleaved *inside* a record, producing spliced lines such as
+        // `<ts><ts> INFOINFO  targettarget  msgmsg`. Render first, write once.
+        let line = render_record(record.level(), record.target(), &record.args().to_string());
+        append_record(&log_path(), &line);
     }
 
     fn flush(&self) {}
@@ -1900,6 +1972,215 @@ mod tests {
         );
     }
 
+    // ── D1: a terminal startup failure must not orphan the sidecar ──────
+
+    #[test]
+    fn a_terminal_failure_keeps_ownership_of_a_live_child() {
+        let registry = ShutdownRegistry::default();
+        registry.set(ShutdownTarget {
+            pid: 4242,
+            port: 5555,
+            token: "t".into(),
+        });
+
+        // The poller resolves to a terminal failure (health timeout).
+        let connection = settle_poll_outcome(StartupPhase::FatalError, 5555, "t".into());
+        assert!(
+            connection.is_none(),
+            "a terminal failure must stop publishing connection details"
+        );
+        assert!(
+            registry.target.lock().expect("lock").is_some(),
+            "ownership must survive a terminal failure: a hung backend is still running"
+        );
+        assert!(
+            registry.target.lock().expect("lock").take().is_some(),
+            "exit-time termination must still have a target, or the sidecar is orphaned"
+        );
+    }
+
+    #[test]
+    fn a_healthy_poll_keeps_the_connection() {
+        for phase in [StartupPhase::Ready, StartupPhase::Recovery] {
+            let connection = settle_poll_outcome(phase, 62000, "abc".into());
+            assert_eq!(connection, Some((62000, "abc".to_string())), "{phase:?}");
+        }
+    }
+
+    #[test]
+    fn a_terminal_failure_terminates_the_owned_child_and_leaves_no_orphan() {
+        // End-to-end: a real child process, the real registry, the real
+        // terminate(). This is the test that would have caught the orphan.
+        let mut child = std::process::Command::new("cmd")
+            .args(["/C", "ping -n 30 127.0.0.1 > nul"])
+            .spawn()
+            .expect("spawn a harmless stand-in child");
+        let pid = child.id();
+        assert!(process_is_alive(pid), "stand-in child should be running");
+
+        let registry = ShutdownRegistry::default();
+        registry.set(ShutdownTarget {
+            pid,
+            // Nothing is listening here, so the graceful leg fails and the hard
+            // kill is what must save us.
+            port: 1,
+            token: "t".into(),
+        });
+
+        // Exactly what exit-time shutdown does.
+        registry.terminate();
+
+        let deadline = Instant::now() + Duration::from_secs(10);
+        while Instant::now() < deadline && process_is_alive(pid) {
+            std::thread::sleep(Duration::from_millis(100));
+        }
+        assert!(
+            !process_is_alive(pid),
+            "terminate() left the child running: the sidecar would be orphaned"
+        );
+        let _ = child.wait();
+    }
+
+    #[test]
+    fn a_restart_hands_ownership_to_the_new_child_only() {
+        // A superseded generation must never be able to terminate the current
+        // child, and the registry must end up pointing at the new one.
+        let registry = ShutdownRegistry::default();
+        registry.set(ShutdownTarget {
+            pid: 111,
+            port: 1,
+            token: "old".into(),
+        });
+        // stop_child(): the old child is killed and ownership dropped.
+        registry.clear();
+        // spawn_and_watch(): the replacement registers itself.
+        registry.set(ShutdownTarget {
+            pid: 222,
+            port: 2,
+            token: "new".into(),
+        });
+
+        let taken = registry
+            .target
+            .lock()
+            .expect("lock")
+            .take()
+            .expect("target");
+        assert_eq!(taken.pid, 222, "only the current child may be terminated");
+        assert_eq!(taken.token, "new");
+    }
+
+    #[test]
+    fn termination_is_idempotent() {
+        let registry = ShutdownRegistry::default();
+        registry.set(ShutdownTarget {
+            pid: 333,
+            port: 1,
+            token: "t".into(),
+        });
+        // First call takes the target; a second must be a harmless no-op.
+        assert!(registry.target.lock().expect("lock").take().is_some());
+        assert!(registry.target.lock().expect("lock").take().is_none());
+    }
+
+    // ── D4: the lifecycle code must survive redaction ──────────────────
+
+    #[test]
+    fn the_startup_phase_diagnostic_code_is_not_redacted() {
+        let line = "startup.phase phase=FATAL_ERROR diag=BACKEND_HEALTH_TIMEOUT generation=1";
+        let safe = redact(line);
+        assert!(
+            safe.contains("diag=BACKEND_HEALTH_TIMEOUT"),
+            "the diagnostic support surface must reach the log: {safe}"
+        );
+    }
+
+    #[test]
+    fn an_oauth_authorization_code_is_still_redacted() {
+        // D4's fix must not weaken the rule that started it.
+        let safe = redact("GET /api/auth/callback?code=4/0AXc&state=xyz HTTP/1.1\" 302");
+        assert!(!safe.contains("4/0AXc"), "OAuth code leaked: {safe}");
+        assert!(safe.contains("code=[redacted]"), "{safe}");
+    }
+
+    #[test]
+    fn other_sensitive_values_are_still_redacted() {
+        for line in [
+            "GET /api/analysis/progress?token=abc123def HTTP/1.1",
+            "{\"access_token\":\"ya29.abcdef\",\"token\":\"t0ken\"}",
+            "client_secret=GOCSPX-xyz",
+        ] {
+            let safe = redact(line);
+            assert!(!safe.contains("abc123def"), "token leaked: {safe}");
+            assert!(!safe.contains("ya29.abcdef"), "access_token leaked: {safe}");
+            assert!(!safe.contains("GOCSPX-xyz"), "client_secret leaked: {safe}");
+        }
+    }
+
+    // ── D5: one record, one write ──────────────────────────────────────
+
+    #[test]
+    fn concurrent_records_are_never_spliced() {
+        let dir = std::env::temp_dir().join(format!("alfred-log-test-{}", std::process::id()));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).expect("temp dir");
+        let path = dir.join("desktop.log");
+
+        const THREADS: usize = 8;
+        const PER_THREAD: usize = 60;
+
+        let mut handles = Vec::new();
+        for t in 0..THREADS {
+            let path = path.clone();
+            handles.push(std::thread::spawn(move || {
+                for i in 0..PER_THREAD {
+                    let line = render_record(
+                        log::Level::Info,
+                        "alfred_desktop",
+                        &format!(
+                            "startup.phase phase=WAITING_FOR_BACKEND diag=NONE generation={t}-{i}"
+                        ),
+                    );
+                    append_record(&path, &line);
+                }
+            }));
+        }
+        for handle in handles {
+            handle.join().expect("logger thread");
+        }
+
+        let contents = fs::read_to_string(&path).expect("log file");
+        let lines: Vec<&str> = contents.lines().collect();
+        assert_eq!(
+            lines.len(),
+            THREADS * PER_THREAD,
+            "every record must land exactly once"
+        );
+
+        let mut seen = std::collections::HashSet::new();
+        for line in &lines {
+            // A spliced record fails one of these: it would carry two
+            // timestamps, two levels, or two targets.
+            assert!(line.starts_with("20"), "malformed record: {line}");
+            assert_eq!(line.matches(" INFO ").count(), 1, "level repeated: {line}");
+            assert_eq!(
+                line.matches("alfred_desktop").count(),
+                1,
+                "target repeated: {line}"
+            );
+            assert_eq!(
+                line.matches("startup.phase").count(),
+                1,
+                "message spliced: {line}"
+            );
+            let id = line.rsplit("generation=").next().expect("marker");
+            assert!(seen.insert(id.to_string()), "duplicate record: {id}");
+        }
+        assert_eq!(seen.len(), THREADS * PER_THREAD, "records were lost");
+
+        let _ = fs::remove_dir_all(&dir);
+    }
+
     #[test]
     fn shutdown_delivers_a_graceful_request_before_killing() {
         // The stub records that it received POST /api/shutdown, proving the
@@ -1999,10 +2280,26 @@ mod tests {
 
     #[test]
     fn startup_phases_serialise_as_documented() {
-        let json = serde_json::to_string(&StartupPhase::WaitingForBackend).expect("json");
-        assert_eq!(json, "\"WAITING_FOR_BACKEND\"");
-        let json = serde_json::to_string(&StartupPhase::FatalError).expect("json");
-        assert_eq!(json, "\"FATAL_ERROR\"");
+        // D8: the gate criterion is "every startup phase is represented and
+        // reachable". Pinning the whole set here is what makes that checkable
+        // rather than a matter of opinion.
+        const ALL: [(StartupPhase, &str); 11] = [
+            (StartupPhase::Boot, "BOOT"),
+            (StartupPhase::Initializing, "INITIALIZING"),
+            (StartupPhase::StartingBackend, "STARTING_BACKEND"),
+            (StartupPhase::WaitingForBackend, "WAITING_FOR_BACKEND"),
+            (StartupPhase::CheckingDatabase, "CHECKING_DATABASE"),
+            (StartupPhase::CheckingAiRuntime, "CHECKING_AI_RUNTIME"),
+            (StartupPhase::CheckingModel, "CHECKING_MODEL"),
+            (StartupPhase::RestoringSession, "RESTORING_SESSION"),
+            (StartupPhase::Ready, "READY"),
+            (StartupPhase::Recovery, "RECOVERY"),
+            (StartupPhase::FatalError, "FATAL_ERROR"),
+        ];
+        for (phase, wire) in ALL {
+            let json = serde_json::to_string(&phase).expect("json");
+            assert_eq!(json, format!("\"{wire}\""));
+        }
     }
 
     #[test]

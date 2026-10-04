@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_reveal_is_not_confined_to_the_single_instance_callback
 source: backend/tests/test_windows_deployment_contract.py
-line: 64
+line: 76
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_reveal_is_not_confined_to_the_single_instance
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:64`
+`backend/tests/test_windows_deployment_contract.py:76`
 
 ## Signature
 

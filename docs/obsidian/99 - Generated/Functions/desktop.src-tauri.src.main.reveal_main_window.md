@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.reveal_main_window
 source: desktop/src-tauri/src/main.rs
-line: 1295
+line: 1367
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `reveal_main_window` in `desktop/src-tauri/src/main
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1295`
+`desktop/src-tauri/src/main.rs:1367`
 
 ## Signature
 

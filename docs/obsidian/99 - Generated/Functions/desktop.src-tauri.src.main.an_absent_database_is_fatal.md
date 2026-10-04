@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.an_absent_database_is_fatal
 source: desktop/src-tauri/src/main.rs
-line: 1722
+line: 1794
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `an_absent_database_is_fatal` in `desktop/src-tauri
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1722`
+`desktop/src-tauri/src/main.rs:1794`
 
 ## Signature
 

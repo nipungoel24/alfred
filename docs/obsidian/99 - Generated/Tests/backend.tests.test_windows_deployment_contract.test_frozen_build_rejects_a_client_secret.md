@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_frozen_build_rejects_a_client_secret
 source: backend/tests/test_windows_deployment_contract.py
-line: 45
+line: 57
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_frozen_build_rejects_a_client_secret` in `bac
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:45`
+`backend/tests/test_windows_deployment_contract.py:57`
 
 ## Signature
 

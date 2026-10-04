@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_main_window_is_created_visible
 source: backend/tests/test_windows_deployment_contract.py
-line: 60
+line: 72
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_main_window_is_created_visible` in `backend/t
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:60`
+`backend/tests/test_windows_deployment_contract.py:72`
 
 ## Signature
 

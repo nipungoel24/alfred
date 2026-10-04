@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.ai_ready
 source: desktop/src-tauri/src/main.rs
-line: 679
+line: 722
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `ai_ready` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:679`
+`desktop/src-tauri/src/main.rs:722`
 
 ## Signature
 

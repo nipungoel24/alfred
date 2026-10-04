@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.an_unreported_credential_store_is_treated_as_ready
 source: desktop/src-tauri/src/main.rs
-line: 1762
+line: 1834
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `an_unreported_credential_store_is_treated_as_ready
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1762`
+`desktop/src-tauri/src/main.rs:1834`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_release_secret_scanner_exists_and_covers_known_patterns
 source: backend/tests/test_windows_deployment_contract.py
-line: 49
+line: 61
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_release_secret_scanner_exists_and_covers_know
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:49`
+`backend/tests/test_windows_deployment_contract.py:61`
 
 ## Signature
 

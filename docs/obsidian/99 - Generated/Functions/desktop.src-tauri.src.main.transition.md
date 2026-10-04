@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.transition
 source: desktop/src-tauri/src/main.rs
-line: 366
+line: 412
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `transition` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:366`
+`desktop/src-tauri/src/main.rs:412`
 
 ## Signature
 

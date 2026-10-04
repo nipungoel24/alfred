@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_production_csp_has_no_development_origin
 source: backend/tests/test_windows_deployment_contract.py
-line: 68
+line: 80
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_production_csp_has_no_development_origin` in 
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:68`
+`backend/tests/test_windows_deployment_contract.py:80`
 
 ## Signature
 

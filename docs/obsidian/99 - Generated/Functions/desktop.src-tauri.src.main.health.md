@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.health
 source: desktop/src-tauri/src/main.rs
-line: 1704
+line: 1776
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `health` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1704`
+`desktop/src-tauri/src/main.rs:1776`
 
 ## Signature
 

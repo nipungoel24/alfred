@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.is_fatal
 source: desktop/src-tauri/src/main.rs
-line: 207
+line: 253
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `is_fatal` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:207`
+`desktop/src-tauri/src/main.rs:253`
 
 ## Signature
 

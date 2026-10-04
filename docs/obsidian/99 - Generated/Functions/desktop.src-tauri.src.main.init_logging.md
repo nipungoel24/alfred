@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.init_logging
 source: desktop/src-tauri/src/main.rs
-line: 918
+line: 990
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `init_logging` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:918`
+`desktop/src-tauri/src/main.rs:990`
 
 ## Signature
 

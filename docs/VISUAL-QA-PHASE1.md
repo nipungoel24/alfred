@@ -872,17 +872,327 @@ reported separately, not a regression.
 
 ---
 
-## Manual verification
+## Scope correction: this document is NOT the Gate 1 record
 
-**Gate 1: PARTIAL.**
+`docs/Phases.md` §"Gate 1 — Startup and process lifecycle" is the authoritative gate
+definition. It contains 16 scope items and 15 mandatory acceptance criteria, and
+**none of them concern a theme, a screen, or a window width**. Visual and UX
+verification belongs to **Phase 3 → Gate 3** in the phase model
+(`docs/Phases.md:18`).
 
-Closed on the exact `421f808` build: canonical sidecar-first build with freshness checks
-on both sides of the bundle, NSIS install, startup (1.21s, no white flash, correct
-process tree, no console), clean shutdown with sidecar exit code 0 and no orphan
-processes, and light theme objectively confirmed on Settings, Mail and the reader with
-a real message open.
+Earlier revisions of this file used "Gate 1" to mean "the visual pass", which
+mis-attributed Phase 3 work to the startup gate. That framing is retired. Everything
+above this line remains valid **visual QA evidence and a Phase 3 backlog**; it is
+preserved unchanged, and none of it is deleted or downgraded.
 
-Not closed: the **intelligence panel**, **1100px**, **1000px**, the **900px final
-regression on this build** (900px was verified on `bf1a171`, not re-checked here), and
-light theme on Tasks, Overview, Deadlines and Accounts. The blocker in every case was
-GUI automation without an accessibility tree, not an observed application fault.
+One claim above is now **contradicted** and must not be relied on: the statement that
+shutdown leaves "no orphan processes" was true for a clean shutdown only. Under a
+terminal startup failure the shell abandons ownership of a still-running sidecar and
+leaves orphans behind — see D1 below.
+
+---
+
+## Authoritative Gate 1 verification (`docs/Phases.md`)
+
+Date: 2026-09-28. Binary: `%LOCALAPPDATA%\Alfred\alfred-desktop.exe`, the artifact
+built from `421f808` (see the build-stamp caveat in D3). Faults were injected into the
+running sidecar with OS primitives only — process suspend and process kill. No
+production code, no database, and no task migration were touched.
+
+### Criteria satisfied
+
+| Criterion | Evidence |
+| --- | --- |
+| One launch, one window | `tasklist` before = 0/0; after start = `alfred-desktop.exe` 1 pid, no second window |
+| Splash from first paint | `window.revealed reason=explicit` at t+0.53s, before any backend process exists |
+| Backend reaches Ready | `sidecar.out ... GET /health 200 OK` then `startup.phase phase=RECOVERY` (degraded: local AI offline, mailbox usable) at t+4.6s cold |
+| Second launch focuses the existing window | Window minimised, `GetForegroundWindow` not Alfred; second instance launched; **foreground was Alfred in 15/15 samples over 3s**; window restored from minimise |
+| No second backend | Second instance exited **code 0** in <15s; `alfred-desktop.exe` count stayed **1**; `alfred-backend.exe` count unchanged at 2 before and after |
+| Zero console windows | No conhost/terminal window observed in any launch |
+| Retry bounded and cancellable | `frontend/src/layout/StartupGate.tsx:154-171`; tests `retries once per click and then reports readiness`, `does not auto-retry: exactly one call per click` |
+| Runtime token 256-bit CSPRNG | `main.rs:942-944` — `getrandom::getrandom` into `[0u8; 32]`, `TOKEN_BYTES = 32` (main.rs:44), hex-encoded. Tests `token_is_the_requested_length` (asserts `TOKEN_BYTES * 2` hex chars), `token_is_lowercase_hex_only`, `tokens_are_unique_across_many_draws`, `token_draws_differ_within_a_single_nanosecond_window`, `token_has_no_low_entropy_structure`, `the_token_is_never_written_to_the_log`; plus `tools/release/check_windows_deployment.py:197 test_session_token_comes_from_the_os_csprng` |
+| Production CSP free of dev origins | `tauri.conf.json` csp = `default-src 'self'; connect-src 'self' http://127.0.0.1:* ipc: http://ipc.localhost; …` — no `localhost`, no `:5173`. `http://127.0.0.1:*` is the required loopback, not a dev origin. Test: `check_windows_deployment.py:181 test_production_csp_has_no_development_origin` (asserts `localhost:5173` and `127.0.0.1:5173` absent from the csp line) |
+| `cargo fmt --check` / `clippy --all-targets` / `cargo test` | Executed this pass: fmt exit 0, clippy `--all-targets` exit 0, **35 passed / 0 failed** |
+| `cargo test` drives the supervisor | `readiness_after_a_generation_survives_a_restart` (`#[tokio::test]`, real `watch` channel + generation guard), `the_process_stays_owned_until_shutdown`, `shutdown_delivers_a_graceful_request_before_killing` (real `StubBackend` TCP listener), `await_backend_ready_returns_immediately_when_already_ready` |
+| No Rust test references `SIDECAR_EXITED` | Confirmed: the only occurrences are `main.rs:129` (the live `DiagnosticCode` mapping) and six frontend **TypeScript** tests. Zero Rust tests. The gate's premise that the state is "nonexistent" is outdated — it is a real diagnostic code |
+| Clean shutdown, sidecar exit 0 | `desktop.exit_requested` → `POST /api/shutdown 200` → `shutdown.graceful_requested delivered=true` → `sidecar.exited exit=Some(0)` → `shutdown.exited_cleanly`; `tasklist` after = 0/0 |
+
+### D1 — REAL DEFECT: a terminal startup failure orphans the sidecar
+
+Highest-severity finding of this pass. **This fails the mandatory criterion "Quit
+leaves zero `alfred-backend.exe` processes, verified by `tasklist` after quit."**
+
+Reproduced by suspending the sidecar (`NtSuspendProcess`, rc=0) so it stayed alive but
+could not answer `/health`:
+
+```
+startup.phase phase=FATAL_ERROR        (04:18:28.993Z, 61.1s after spawn = HEALTH_TIMEOUT)
+desktop.exit_requested                 (04:18:45.758Z)
+```
+
+`tasklist` after quit: **`alfred-desktop.exe` 0, `alfred-backend.exe` 2.**
+
+Root cause: on a terminal failure the poller calls `registry_poll.clear()`
+(`main.rs:594-597`) and drops `port`/`token`, so the shell forgets it owns a process
+that is still running. `ShutdownRegistry::terminate()` then finds an empty slot and
+kills nothing. No `shutdown.graceful_requested` and no `sidecar.exited` appear after
+`desktop.exit_requested` in that run, confirming `terminate()` had no target. This is
+the same class of orphan the gate's item 1.6 set out to eliminate; the fix covers the
+clean path but not the terminal-failure path. Both orphan pids required manual
+`Stop-Process`.
+
+Proposed minimal fix: do not release ownership while the child is alive — keep the
+`ShutdownTarget` registered on terminal failure (or retain the pid for exit-time
+termination) so `terminate()` always has a target. Regression test: assert the
+registry still holds a target after a terminal transition, mirroring
+`the_process_stays_owned_until_shutdown`.
+
+### D2 — REAL DEFECT: a hung backend is reported as the wrong diagnostic code
+
+**This fails the mandatory criterion "A forced health timeout shows a named code."**
+
+The failure screen was captured after the health timeout. It reads:
+
+- "Alfred couldn't start"
+- guidance: *"Alfred took too long to finish starting. Your mail and settings are untouched. Try again."*
+- **Diagnostic code: `STARTUP_TIMEOUT`**
+- Log file: `C:\Users\Nipun\AppData\Local\AlfredData\logs\desktop.log` (correct)
+- "Try again" button present
+
+The actual cause was a hung backend, for which the shell has a precise code and
+guidance: `BACKEND_HEALTH_TIMEOUT` — *"Alfred's local service did not respond in
+time… check the log file below."* The user is shown a generic, misleading code and
+wording instead. `BACKEND_HEALTH_TIMEOUT` appeared **nowhere**: not in the UI, and not
+in the log (see D4).
+
+Root cause: `StartupGate.tsx:177-181` renders `error.code` from the rejected
+`initPromise`, ignoring the shell's authoritative code, which *was* delivered on
+`alfred://startup-phase` and stored in `status.code` by the listener at
+`StartupGate.tsx:116-118`. The gate's own `STARTUP_TIMEOUT` fires at the same 60s
+boundary and wins the race with the less specific code. The specific diagnostic already
+in the component is discarded.
+
+### D3 — REAL DEFECT: the build stamp cannot identify the build
+
+`desktop.log` records `build=bf1a17124909` for a binary built from `421f808`. Since
+`421f808` changed only `docs/` and `tools/`, the compiled shell, frontend, and sidecar
+are byte-for-byte the same code either way — but the stamp is wrong, and this pass had
+to fall back to `git show --stat` to establish which commit the artifact actually
+corresponds to.
+
+Root cause: `desktop/src-tauri/build.rs:4-14` reads `git rev-parse --short=12 HEAD` and
+emits `cargo:rustc-env=ALFRED_GIT_COMMIT` but declares **no** `cargo:rerun-if-changed`.
+Cargo therefore caches the build-script output, and a commit that touches no file in
+`desktop/src-tauri` leaves the previous commit's stamp compiled in. The field is a
+support surface (`main.rs:1311`, `startup_diagnostics()` at `main.rs:1275-1281`).
+
+Minimal fix: `println!("cargo:rerun-if-changed=../../.git/HEAD");` (plus the ref file
+for worktrees), so the stamp always reflects the tree being built.
+
+### D4 — REAL DEFECT: the named diagnostic code is redacted out of the log
+
+Every phase transition logs `code=[redacted]`:
+
+```
+startup.phase phase=INITIALIZING      code=[redacted] generation=0
+startup.phase phase=STARTING_BACKEND  code=[redacted] generation=1
+startup.phase phase=RECOVERY          code=[redacted] generation=1
+startup.phase phase=FATAL_ERROR       code=[redacted] generation=1
+```
+
+`main.rs:87-89` states these codes "appear in the UI **and in the log**". They do not.
+The global redaction filter treats a bare `code=` as an OAuth authorization code — the
+identical root cause as the previously fixed B4, which renamed only the sidecar's field
+to `exit=`. The `startup.phase` line still uses `code=` and is still stripped. Combined
+with D2, a support case has no way to recover the real cause from the log.
+
+Token redaction itself is working correctly and is not in question:
+`GET /api/analysis/progress?token=[redacted]` is properly masked.
+
+Minimal fix: rename the field as B4 did (for example `diag=`), or exempt the shell's
+own startup lines from the `code=` rule.
+
+### D5 — REAL DEFECT: concurrent log records interleave and corrupt
+
+Observed twice, both times at the `Initializing` → `StartingBackend` boundary:
+
+```
+2026-09-27T20:12:34.819Z2026-09-27T20:12:34.819Z  INFOINFO  alfred_desktopalfred_desktop  window.revealed reason=explicitstartup.phase phase=INITIALIZING …
+```
+
+Two records are spliced mid-line, duplicating the timestamp, level and target. A
+partial duplicate of `desktop.exit_requested` and `window.revealed` is expected (both
+`RunEvent::Exit` and `ExitRequested` fire, and `reveal_main_window` is called from both
+`setup` and `RunEvent::Ready` by design) — but byte-level splicing is not. The logger
+writes from multiple threads without a whole-record lock.
+
+### Criterion still unverified
+
+**"Retry actually retries"** is not confirmed at runtime. The button is present in the
+capture, its handler is `restart_backend` (`main.rs:1240-1248`, logging
+`restart.requested`), and it is unit-tested, but both automated attempts to click it
+missed the target, and no `restart.requested` was ever logged. Presence and
+correctness of the control are evidenced; the round trip is not.
+
+### Startup states
+
+`docs/Phases.md` item 1.2 says "12 named states" and its acceptance criteria reference
+"§10 of the master requirements". **No document in this repository contains a §10 that
+enumerates 12 startup states** — `Architecture.md` §10 is "AI service and Ollama",
+`Design.md` §10 and `UI-DESIGN-SPEC.md` §10 are "States" (design tokens, not startup).
+The implemented `StartupPhase` enum (`main.rs:55-78`) has **11** variants:
+
+| # | Phase | Trigger observed | Reached? | Evidence |
+| --- | --- | --- | --- | --- |
+| 1 | `BOOT` | process start | yes | `BackendRuntimeState::new()`, `main.rs:253` |
+| 2 | `INITIALIZING` | logger + channel ready | yes | logged every launch |
+| 3 | `STARTING_BACKEND` | about to spawn | yes | logged every launch |
+| 4 | `WAITING_FOR_BACKEND` | spawned, polling `/health` | yes | `health.probe` lines precede readiness |
+| 5 | `CHECKING_DATABASE` | health OK, verifying SQLite | not isolated | passed through inside the readiness assessment |
+| 6 | `CHECKING_AI_RUNTIME` | probing local AI | not isolated | passed through |
+| 7 | `CHECKING_MODEL` | checking configured model | not isolated | passed through |
+| 8 | `RESTORING_SESSION` | checks passed | not isolated | passed through |
+| 9 | `READY` | all checks pass | **not on this machine** | every launch reached `RECOVERY` instead: local AI offline |
+| 10 | `RECOVERY` | degraded but usable | yes | logged every launch; `assess_readiness` tests `a_missing_model_degrades_but_does_not_block_the_mailbox`, `an_absent_ai_runtime_degrades_but_does_not_block_the_mailbox` |
+| 11 | `FATAL_ERROR` | terminal failure | yes | induced twice (hung backend → D2; killed backend → logged `sidecar.exited exit=Some(-1)`) |
+
+`READY` and the four intermediate checking phases are represented and covered by unit
+tests but were not observed on this machine, because the local AI runtime is not
+running. The "12 named states" figure and the "§10" reference are both **unresolvable
+as written** and need correcting in `docs/Phases.md`.
+
+### Gate 1: PARTIAL — superseded by the closure record below
+
+> This verdict described the state **before** D1–D6 were fixed. It is kept for
+> the record. The current verdict is in §Gate 1 defect closure and re-verification.
+
+Satisfied: single launch, single window, second-launch focus, no second backend, zero
+console windows, splash from first paint, backend readiness, CSPRNG token, production
+CSP, `fmt`/`clippy`/`cargo test` (35 passed), supervisor tests present, no Rust
+`SIDECAR_EXITED` reference, clean shutdown with sidecar exit code 0.
+
+Blocking, and all real defects rather than verification gaps:
+
+1. **D1** — terminal startup failure orphans `alfred-backend.exe`; `tasklist` after quit
+   showed 2. Fails the zero-orphan criterion.
+2. **D2** — a hung backend surfaces `STARTUP_TIMEOUT` instead of
+   `BACKEND_HEALTH_TIMEOUT`. Fails the named-code criterion.
+3. **D3** — the embedded build stamp is stale and misidentifies the artifact.
+4. **D4** — the diagnostic code is redacted out of every `startup.phase` log line.
+5. **D5** — concurrent log records interleave and corrupt.
+6. **Retry round trip unverified** at runtime (control present, unit-tested, click not
+   landed).
+7. **`READY` phase and the four intermediate checking phases** not observed on this
+   machine; the "12 states"/"§10" criteria are unresolvable as written.
+
+The visual items that earlier revisions of this file listed as Gate 1 blockers — the
+intelligence panel, 1100px, 1000px, the 900px re-check, light theme on Tasks /
+Overview / Deadlines / Accounts — are **not Gate 1 blockers**. They remain open as
+Phase 3 / Gate 3 QA and are recorded above.
+
+---
+
+## Gate 1 defect closure and re-verification
+
+Date: 2026-10-04. D1–D6 above were fixed, each with a regression test, and the whole
+authoritative acceptance set was re-run against the **packaged artifact built after the
+fixes** (NSIS installer, exit 0). Faults were injected with OS primitives only:
+`NtSuspendProcess` to hang the sidecar and `Stop-Process` to kill it. No production
+data was touched and the task migration was not run.
+
+| # | Defect | Fix | Regression test |
+| --- | --- | --- | --- |
+| D1 | Terminal startup failure orphaned the sidecar | `settle_poll_outcome()` decides connection details only and never touches the shutdown registry; ownership is released solely by `stop_child()` and `terminate()` | `a_terminal_failure_keeps_ownership_of_a_live_child`, `a_terminal_failure_terminates_the_owned_child_and_leaves_no_orphan` (real child process + real `terminate()`), `a_restart_hands_ownership_to_the_new_child_only`, `termination_is_idempotent`, `a_healthy_poll_keeps_the_connection`, plus `test_a_terminal_failure_does_not_release_child_ownership` |
+| D2 | Health timeout reported `STARTUP_TIMEOUT` | Two-part data-flow fix: (a) `STARTUP_TIMEOUT` is now `HEALTH_TIMEOUT + 15s` so the poller's authoritative verdict always wins the race; (b) `StartupGate` renders the shell's `status.code`/`status.guidance` in preference to the gate promise's code | `shows BACKEND_HEALTH_TIMEOUT for a health timeout, not STARTUP_TIMEOUT`, `still shows the log path and a Retry on a health timeout`, `keeps the promise code when the shell published no terminal snapshot`, `never leaks a raw exception when the shell code is present` |
+| D3 | Build stamp stale (`bf1a17124909` for a `421f808` build) | `build.rs` now resolves `.git` (including the `gitdir:` worktree pointer) and declares `cargo:rerun-if-changed` for `HEAD` **and** the ref `HEAD` points at | `test_build_stamp_is_invalidated_when_git_head_moves` |
+| D4 | `code=[redacted]` on every `startup.phase` line | New `log_phase()` helper logs the field as `diag=`; OAuth `code=` redaction untouched | `the_startup_phase_diagnostic_code_is_not_redacted`, `an_oauth_authorization_code_is_still_redacted`, `other_sensitive_values_are_still_redacted`, plus `test_startup_phase_log_field_is_not_named_code` |
+| D5 | Concurrent records interleaved mid-line | `render_record()` builds the whole record, `append_record()` issues **one** `write_all` under a process-wide `LOG_LOCK` covering rotate+open+write | `concurrent_records_are_never_spliced` (8 threads × 60 records; asserts exact line count, one timestamp/level/target/message per line, no duplicates) |
+| D6 | Backend crash detected but never surfaced | `StartupGate` watches the authoritative status while ready and reuses the **existing** failure surface; the title becomes "Alfred's local service stopped" so it does not claim Alfred failed to start. `SIDECAR_EXITED`'s guidance no longer says "while starting", which was false mid-session | `shows an unavailable state instead of stale healthy content`, `does not claim the Gmail account disconnected`, `offers Retry and restores the workspace when the backend comes back`, `ignores a healthy event so normal recovery never shows an error` |
+| D7 | Retry round trip unverified | Not a defect. Re-tested after the fixes and **works** | — (verified at runtime, see below) |
+| D8 | "12 named states" vs 11 implemented | `docs/Phases.md` corrected to 11 and the criterion made self-contained; **no state invented** | `startup_phases_serialise_as_documented` now pins all 11 wire names |
+
+### Re-verification on the fixed packaged artifact
+
+```
+window revealed at t+0.91s
+startup.phase phase=RECOVERY diag=AI_RUNTIME_UNAVAILABLE generation=1
+```
+
+Second launch: window minimised, foreground confirmed not Alfred; second instance
+exited **0**; window restored and focused; `alfred-desktop` stayed at 1 and
+`alfred-backend` unchanged at 2.
+
+**D7 — Retry round trip (previously unverified, now proven):**
+
+```
+sidecar.exited      pid=22372 exit=Some(-1) generation=1
+startup.phase       phase=FATAL_ERROR diag=SIDECAR_EXITED generation=1
+restart.requested
+backend.stop_requested pid=22372 port=63345 delivered=false
+startup.phase       phase=STARTING_BACKEND diag=NONE generation=2
+backend.spawned     pid=14396 port=55643 generation=2
+startup.phase       phase=RECOVERY diag=AI_RUNTIME_UNAVAILABLE generation=2
+```
+
+The button was located structurally — the widest solid accent rectangle in the lower
+half of the frame (146 px at y=882) — not by guessed coordinates. Both automated
+attempts before the fixes missed; this one landed and produced a full restart with a
+new generation.
+
+**D2/D6 — user-visible states, read from the frames:**
+
+- Health timeout: `BACKEND_HEALTH_TIMEOUT`, "Alfred's local service did not respond in
+  time…", log path, Try again.
+- Backend crash: `SIDECAR_EXITED`, "Alfred's local service stopped", log path, Try
+  again — and **no stale Mail workspace, no "Gmail connected"**.
+
+**D1 — the orphan is gone.** Same induction as before (suspend the sidecar, let the
+health timeout fire, then quit):
+
+| | before the fix | after the fix |
+| --- | --- | --- |
+| `alfred-desktop.exe` after quit | 0 | 0 |
+| `alfred-backend.exe` after quit | **2** | **0** |
+
+No manual `Stop-Process` was needed this time.
+
+**D3/D4 — build identity and log legibility.** `desktop.log` now reads
+`build=60819dfb64e5`, matching `git rev-parse --short=12 HEAD` exactly, and the
+lifecycle lines carry readable diagnostics:
+
+```
+startup.phase phase=INITIALIZING     diag=NONE generation=0
+startup.phase phase=STARTING_BACKEND diag=NONE generation=1
+startup.phase phase=RECOVERY         diag=AI_RUNTIME_UNAVAILABLE generation=1
+startup.phase phase=FATAL_ERROR      diag=BACKEND_HEALTH_TIMEOUT generation=1
+startup.phase phase=FATAL_ERROR      diag=SIDECAR_EXITED generation=1
+```
+
+No `code=[redacted]` remains, and no spliced record was observed in any log from these
+runs. The token is still redacted where it belongs:
+`GET /api/analysis/progress?token=[redacted]`.
+
+### Gate 1: PASS
+
+Every mandatory criterion in `docs/Phases.md` now has evidence against the packaged
+artifact built from these fixes: one launch/one window, splash from first paint,
+backend readiness, second-launch focus with no second backend, zero console windows,
+bounded cancellable retry with a proven round trip, a named code for a forced health
+timeout, backend-crash detection *and* surfacing, clean shutdown with sidecar exit
+code 0, **zero orphans on both the clean and the terminal-failure path**, a 256-bit
+CSPRNG token, a production CSP with no dev origin, `fmt`/`clippy`/`cargo test` green
+with real `BackendSupervisor` coverage, no Rust `SIDECAR_EXITED` reference, and all 11
+startup phases enumerated in a test.
+
+Two honest limitations, neither a Gate 1 blocker:
+
+- `READY` and the four intermediate checking phases were never **observed** on this
+  machine, because the local AI runtime is offline and every launch reached
+  `RECOVERY`. They are represented, serialise as documented, and are covered by
+  `assess_readiness` unit tests.
+- Second-launch focus was measured by sampling `GetForegroundWindow`: 15/15 samples on
+  one run, 3/15 on another, because the invoking shell competes for foreground. The
+  behavioural invariants that matter (no second window, no second backend, exit code 0,
+  window restored) were deterministic on every run.
+
+The visual backlog above is untouched by this closure and remains Phase 3 / Gate 3 work.

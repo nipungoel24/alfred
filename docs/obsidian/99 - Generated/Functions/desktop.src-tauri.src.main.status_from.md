@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.status_from
 source: desktop/src-tauri/src/main.rs
-line: 711
+line: 754
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `status_from` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:711`
+`desktop/src-tauri/src/main.rs:754`
 
 ## Signature
 

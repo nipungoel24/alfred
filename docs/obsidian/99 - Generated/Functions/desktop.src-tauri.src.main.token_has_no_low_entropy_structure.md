@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.token_has_no_low_entropy_structure
 source: desktop/src-tauri/src/main.rs
-line: 1553
+line: 1625
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `token_has_no_low_entropy_structure` in `desktop/sr
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1553`
+`desktop/src-tauri/src/main.rs:1625`
 
 ## Signature
 

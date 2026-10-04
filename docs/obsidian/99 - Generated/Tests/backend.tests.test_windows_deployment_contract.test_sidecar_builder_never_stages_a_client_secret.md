@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_sidecar_builder_never_stages_a_client_secret
 source: backend/tests/test_windows_deployment_contract.py
-line: 37
+line: 49
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_sidecar_builder_never_stages_a_client_secret`
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:37`
+`backend/tests/test_windows_deployment_contract.py:49`
 
 ## Signature
 

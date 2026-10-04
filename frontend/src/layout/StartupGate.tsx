@@ -95,6 +95,8 @@ export function StartupGate({ initPromise, children, tauri }: StartupGateProps) 
   const [status, setStatus] = useState<StartupStatus | null>(null);
   const [logPath, setLogPath] = useState<string | null>(null);
   const [attempt, setAttempt] = useState(0);
+  /** True when the failure arrived after the workspace was already showing. */
+  const [serviceStopped, setServiceStopped] = useState(false);
 
   useEffect(() => {
     let unlisten: (() => void) | undefined;
@@ -159,6 +161,7 @@ export function StartupGate({ initPromise, children, tauri }: StartupGateProps) 
     setState('starting');
     setError(null);
     setStatus(null);
+    setServiceStopped(false);
     setAttempt((n) => n + 1);
     if (!isTauri) return;
     void retryStartup()
@@ -171,21 +174,52 @@ export function StartupGate({ initPromise, children, tauri }: StartupGateProps) 
       });
   }, [isTauri]);
 
+  /**
+   * The backend can die while Alfred is already running.
+   *
+   * The shell supervises the sidecar for the whole session, not just during
+   * startup, and publishes the same terminal phase on `alfred://startup-phase`
+   * when it dies. This reuses the one failure surface rather than adding a
+   * second, so a crash shows the same stable code, the same log path and the
+   * same working Retry.
+   *
+   * It deliberately says nothing about Gmail: a dead backend is not a
+   * disconnected account, and the wording must not imply that it is.
+   */
+  useEffect(() => {
+    if (state !== 'ready') return;
+    if (status?.phase !== 'FATAL_ERROR') return;
+    if (!status.code || status.code === 'NONE') return;
+    setServiceStopped(true);
+    setError(new StartupError(status.code, status.guidance, true));
+    setState('error');
+  }, [state, status]);
+
   if (state === 'ready') return <>{children}</>;
 
   if (state === 'error') {
-    const code = error?.code ?? 'UNKNOWN';
+    // The shell is authoritative about *why* startup failed: it publishes a
+    // terminal phase carrying a specific diagnostic code (for example
+    // BACKEND_HEALTH_TIMEOUT). `initPromise` can only ever report its own outer
+    // watchdog, which is deliberately longer and therefore strictly less
+    // specific. Prefer the shell's code so the user is told what actually
+    // happened; fall back to the promise when no terminal snapshot arrived.
+    const authoritative = status?.phase === 'FATAL_ERROR' && status.code !== 'NONE';
+    const code = authoritative ? status.code : error?.code ?? 'UNKNOWN';
     const guidance =
-      error?.guidance ||
+      (authoritative ? status.guidance : error?.guidance) ||
       'Alfred could not finish starting. Your mail and settings are untouched.';
     const logLocation = logPath ?? '%LOCALAPPDATA%\\AlfredData\\logs\\desktop.log';
+    const title = serviceStopped
+      ? "Alfred's local service stopped"
+      : "Alfred couldn't start";
     return (
       <div className="startup-gate" role="alert">
         <div className="startup-gate-inner startup-gate-inner--error">
           <div className="startup-mark startup-mark--error" aria-hidden="true">
             <AlertTriangle size={22} />
           </div>
-          <h1 className="startup-title">Alfred couldn&apos;t start</h1>
+          <h1 className="startup-title">{title}</h1>
           <p className="startup-sub">{guidance}</p>
           <p className="startup-diagnostic">
             Diagnostic code: <span className="startup-code">{code}</span>

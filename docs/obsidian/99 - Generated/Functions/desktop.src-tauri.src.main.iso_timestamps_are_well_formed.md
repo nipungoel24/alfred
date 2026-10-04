@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.iso_timestamps_are_well_formed
 source: desktop/src-tauri/src/main.rs
-line: 2009
+line: 2306
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `iso_timestamps_are_well_formed` in `desktop/src-ta
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2009`
+`desktop/src-tauri/src/main.rs:2306`
 
 ## Signature
 

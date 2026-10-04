@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.redact_removes_an_oauth_code
 source: desktop/src-tauri/src/main.rs
-line: 1584
+line: 1656
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `redact_removes_an_oauth_code` in `desktop/src-taur
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1584`
+`desktop/src-tauri/src/main.rs:1656`
 
 ## Signature
 

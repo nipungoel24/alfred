@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.model_missing
 source: desktop/src-tauri/src/main.rs
-line: 676
+line: 719
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `model_missing` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:676`
+`desktop/src-tauri/src/main.rs:719`
 
 ## Signature
 

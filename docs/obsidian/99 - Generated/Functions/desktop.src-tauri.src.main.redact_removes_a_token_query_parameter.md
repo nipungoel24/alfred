@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.redact_removes_a_token_query_parameter
 source: desktop/src-tauri/src/main.rs
-line: 1575
+line: 1647
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `redact_removes_a_token_query_parameter` in `deskto
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1575`
+`desktop/src-tauri/src/main.rs:1647`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.publish
 source: desktop/src-tauri/src/main.rs
-line: 359
+line: 405
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `publish` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:359`
+`desktop/src-tauri/src/main.rs:405`
 
 ## Signature
 

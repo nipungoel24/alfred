@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.kill_pid
 source: desktop/src-tauri/src/main.rs
-line: 954
+line: 1026
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `kill_pid` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:954`
+`desktop/src-tauri/src/main.rs:1026`
 
 ## Signature
 

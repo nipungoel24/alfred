@@ -3036,7 +3036,17 @@
       "source": "backend/tests/test_thread_isolation.py"
     },
     {
+      "id": "backend.tests.test_windows_deployment_contract.test_a_terminal_failure_does_not_release_child_ownership",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
       "id": "backend.tests.test_windows_deployment_contract.test_build_identity_is_logged",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
+      "id": "backend.tests.test_windows_deployment_contract.test_build_stamp_is_invalidated_when_git_head_moves",
       "type": "test",
       "source": "backend/tests/test_windows_deployment_contract.py"
     },
@@ -3131,6 +3141,11 @@
       "source": "backend/tests/test_windows_deployment_contract.py"
     },
     {
+      "id": "backend.tests.test_windows_deployment_contract.test_startup_phase_log_field_is_not_named_code",
+      "type": "test",
+      "source": "backend/tests/test_windows_deployment_contract.py"
+    },
+    {
       "id": "backend.tests.test_windows_deployment_contract.test_tauri_uses_standard_per_user_nsis_and_external_sidecar",
       "type": "test",
       "source": "backend/tests/test_windows_deployment_contract.py"
@@ -3186,7 +3201,27 @@
       "source": null
     },
     {
+      "id": "desktop.src-tauri.src.main.a_healthy_poll_keeps_the_connection",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.a_missing_model_degrades_but_does_not_block_the_mailbox",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.a_restart_hands_ownership_to_the_new_child_only",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.a_terminal_failure_keeps_ownership_of_a_live_child",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.a_terminal_failure_terminates_the_owned_child_and_leaves_no_orphan",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -3206,12 +3241,22 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.an_oauth_authorization_code_is_still_redacted",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.an_unavailable_credential_store_is_fatal_and_says_so",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
       "id": "desktop.src-tauri.src.main.an_unreported_credential_store_is_treated_as_ready",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.append_record",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -3247,6 +3292,11 @@
     },
     {
       "id": "desktop.src-tauri.src.main.clear",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.concurrent_records_are_never_spliced",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -3391,6 +3441,11 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.log_phase",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.main",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
@@ -3402,6 +3457,11 @@
     },
     {
       "id": "desktop.src-tauri.src.main.new",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.other_sensitive_values_are_still_redacted",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -3506,6 +3566,11 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.render_record",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.restart_backend",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
@@ -3522,6 +3587,11 @@
     },
     {
       "id": "desktop.src-tauri.src.main.set",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.settle_poll_outcome",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -3581,7 +3651,17 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.termination_is_idempotent",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.the_process_stays_owned_until_shutdown",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.the_startup_phase_diagnostic_code_is_not_redacted",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -3886,7 +3966,17 @@
       "source": null
     },
     {
+      "id": "tools.release.check_windows_deployment.test_a_terminal_failure_does_not_release_child_ownership",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "tools.release.check_windows_deployment.test_build_identity_is_logged",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_build_stamp_is_invalidated_when_git_head_moves",
       "type": "external",
       "source": null
     },
@@ -3977,6 +4067,11 @@
     },
     {
       "id": "tools.release.check_windows_deployment.test_staged_release_config_on_disk_has_no_secret",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "tools.release.check_windows_deployment.test_startup_phase_log_field_is_not_named_code",
       "type": "external",
       "source": null
     },
@@ -8478,8 +8573,18 @@
       "relation": "calls"
     },
     {
+      "from": "backend.tests.test_windows_deployment_contract.test_a_terminal_failure_does_not_release_child_ownership",
+      "to": "tools.release.check_windows_deployment.test_a_terminal_failure_does_not_release_child_ownership",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.tests.test_windows_deployment_contract.test_build_identity_is_logged",
       "to": "tools.release.check_windows_deployment.test_build_identity_is_logged",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_build_stamp_is_invalidated_when_git_head_moves",
+      "to": "tools.release.check_windows_deployment.test_build_stamp_is_invalidated_when_git_head_moves",
       "relation": "calls-inferred"
     },
     {
@@ -8570,6 +8675,11 @@
     {
       "from": "backend.tests.test_windows_deployment_contract.test_staged_release_config_on_disk_has_no_secret",
       "to": "tools.release.check_windows_deployment.test_staged_release_config_on_disk_has_no_secret",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_windows_deployment_contract.test_startup_phase_log_field_is_not_named_code",
+      "to": "tools.release.check_windows_deployment.test_startup_phase_log_field_is_not_named_code",
       "relation": "calls-inferred"
     },
     {

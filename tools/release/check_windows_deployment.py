@@ -102,6 +102,65 @@ def test_build_identity_is_logged() -> None:
     assert "ALFRED_GIT_COMMIT" in main
 
 
+def test_build_stamp_is_invalidated_when_git_head_moves() -> None:
+    """The embedded commit must match the tree that was actually built.
+
+    `build.rs` reads `git rev-parse HEAD`, but Cargo caches a build script's
+    output unless the script declares what it depends on. With no directive,
+    Cargo re-ran it only when a file inside `desktop/src-tauri` changed, so a
+    commit touching only `docs/` or `tools/` left the *previous* commit compiled
+    into `ALFRED_GIT_COMMIT` and the shell logged a build identity that did not
+    describe the running artifact.
+    """
+    build_rs = _read(ROOT / "desktop/src-tauri/build.rs")
+    assert "cargo:rerun-if-changed" in build_rs, (
+        "build.rs must declare its inputs or the embedded commit goes stale"
+    )
+    assert ".git" in build_rs and "HEAD" in build_rs, (
+        "the rerun trigger must track the repository HEAD"
+    )
+
+
+def test_startup_phase_log_field_is_not_named_code() -> None:
+    """The lifecycle diagnostic must survive the global redactor.
+
+    `redact()` treats a bare `code=` as an OAuth authorization code, because
+    uvicorn's access log really does contain `?code=` on the OAuth callback. A
+    `startup.phase ... code=` field was therefore rewritten to `code=[redacted]`
+    on every transition, deleting the support surface the diagnostic codes
+    exist to provide. The field is `diag=` now.
+    """
+    main = _read(ROOT / "desktop/src-tauri/src/main.rs")
+    body = _strip_rust_comments(main)
+    assert "startup.phase phase={} diag={}" in body, (
+        "startup.phase must log its diagnostic as diag=, not code="
+    )
+    assert "startup.phase phase={} code={}" not in body, (
+        "a bare code= field is stripped by the redactor"
+    )
+
+
+def test_a_terminal_failure_does_not_release_child_ownership() -> None:
+    """Exit-time termination must keep a target after a startup failure.
+
+    The poller used to clear the shutdown registry on a terminal failure. A
+    terminal failure does not mean the child died — a hung backend is still
+    running — so `terminate()` found an empty slot and left live
+    `alfred-backend.exe` processes behind.
+    """
+    main = _read(ROOT / "desktop/src-tauri/src/main.rs")
+    poller = main.split("Generation-guarded readiness polling.", 1)[-1]
+    settle = main.split("fn settle_poll_outcome", 1)[-1].split("\n}", 1)[0]
+    assert "registry" not in settle, (
+        "settle_poll_outcome must not touch the shutdown registry"
+    )
+    # The poller resolves through the helper rather than clearing the registry.
+    assert "settle_poll_outcome(phase, port, token)" in poller
+    assert "registry_poll.clear()" not in poller, (
+        "the poller must not release ownership of a possibly-live child"
+    )
+
+
 # ── Credential containment ─────────────────────────────────────────
 #
 # Alfred authenticates as a Google Desktop app client with PKCE, for which

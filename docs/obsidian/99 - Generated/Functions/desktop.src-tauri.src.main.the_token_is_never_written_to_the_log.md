@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.the_token_is_never_written_to_the_log
 source: desktop/src-tauri/src/main.rs
-line: 2022
+line: 2319
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `the_token_is_never_written_to_the_log` in `desktop
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2022`
+`desktop/src-tauri/src/main.rs:2319`
 
 ## Signature
 

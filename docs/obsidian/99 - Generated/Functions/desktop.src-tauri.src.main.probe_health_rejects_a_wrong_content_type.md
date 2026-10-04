@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.probe_health_rejects_a_wrong_content_type
 source: desktop/src-tauri/src/main.rs
-line: 1632
+line: 1704
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `probe_health_rejects_a_wrong_content_type` in `des
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1632`
+`desktop/src-tauri/src/main.rs:1704`
 
 ## Signature
 

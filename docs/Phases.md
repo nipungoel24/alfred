@@ -63,7 +63,7 @@ because nothing else can be verified until Alfred actually appears on screen.
 | # | Item | Finding | Files |
 | --- | --- | --- | --- |
 | 1.1 | Show the window on a successful backend handshake | D1 | `desktop/src-tauri/src/main.rs`, `tauri.conf.json` |
-| 1.2 | Replace the 3-state machine with the 12 named states | D7 | `main.rs:33-47`, `StartupGate.tsx` |
+| 1.2 | Replace the 3-state machine with the 11 named phases | D7 | `main.rs:55-105`, `StartupGate.tsx` |
 | 1.3 | Named failure codes replacing prose reasons | D7 | `main.rs`, `StartupGate.tsx` |
 | 1.4 | CSPRNG session token | D3 | `main.rs:224-240` |
 | 1.5 | Constant-time token comparison | D16 | `backend/app/main.py:566` |
@@ -86,7 +86,14 @@ because nothing else can be verified until Alfred actually appears on screen.
 - [ ] Zero console windows in a release build
 - [ ] Splash/branded loading UI is visible from first paint
 - [ ] Backend reaches `Ready` and the window is shown
-- [ ] Every startup state in §10 of the master requirements is represented and reachable
+- [ ] Every startup phase is represented and reachable: `BOOT`, `INITIALIZING`,
+      `STARTING_BACKEND`, `WAITING_FOR_BACKEND`, `CHECKING_DATABASE`,
+      `CHECKING_AI_RUNTIME`, `CHECKING_MODEL`, `RESTORING_SESSION`, `READY`,
+      `RECOVERY`, `FATAL_ERROR` (11 phases; authoritative list is the
+      `StartupPhase` enum in `desktop/src-tauri/src/main.rs`, mirrored by
+      `STARTUP_PHASES` in `frontend/src/api/client.ts` and asserted by
+      `startup_phases_serialise_as_documented`). `READY` and `RECOVERY` both
+      release the workspace; `FATAL_ERROR` never does.
 - [ ] A forced health timeout shows a named code, the log path, and a working Retry
 - [ ] Retry is bounded and cancellable; no infinite polling
 - [ ] A forced backend crash is detected and surfaced

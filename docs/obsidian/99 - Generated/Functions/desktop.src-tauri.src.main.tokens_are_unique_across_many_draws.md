@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.tokens_are_unique_across_many_draws
 source: desktop/src-tauri/src/main.rs
-line: 1532
+line: 1604
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `tokens_are_unique_across_many_draws` in `desktop/s
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1532`
+`desktop/src-tauri/src/main.rs:1604`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.redact_preserves_harmless_text
 source: desktop/src-tauri/src/main.rs
-line: 1599
+line: 1671
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `redact_preserves_harmless_text` in `desktop/src-ta
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1599`
+`desktop/src-tauri/src/main.rs:1671`
 
 ## Signature
 

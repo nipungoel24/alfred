@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.terminate
 source: desktop/src-tauri/src/main.rs
-line: 297
+line: 343
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `terminate` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:297`
+`desktop/src-tauri/src/main.rs:343`
 
 ## Signature
 

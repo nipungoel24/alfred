@@ -674,11 +674,15 @@ no `autoFocus` anywhere, and every `useEffect` has a dependency array.
 **Not started (later phases):** first-run model setup (Phase 2), website (Phase 6),
 installer signing and CI (Phases 5, 7).
 
-**Verification still owed for Gate 1:** the visual pass. The packaged-app lifecycle half is
-now done — installed from the NSIS artifact, launched once, no white frame, no second
-launch, no terminal, clean graceful shutdown, zero orphans, `desktop.log` reviewed. What
-remains is the reader with a message open, the intelligence panel, the Tasks page, the
-error states, and every window size below 1440. See `docs/VISUAL-QA-PHASE1.md`.
+**Verification owed — corrected 2026-09-28.** This paragraph previously treated the
+visual pass as Gate 1 work. It is not. `docs/Phases.md` defines Gate 1 as "Startup and
+process lifecycle"; visual/UX verification is Phase 3 (Gate 3). The visual pass is now
+recorded as a Gate 3 backlog in `docs/VISUAL-QA-PHASE1.md`, which preserves it in full.
+
+Two of the items listed here as outstanding are in fact done: the reader with a real
+message open was verified, and the Tasks page was verified. The genuine Gate 1
+verification was performed separately — see §Gate status and
+`docs/VISUAL-QA-PHASE1.md` §Authoritative Gate 1 verification.
 
 ---
 
@@ -749,15 +753,51 @@ single invocation kept it alive throughout. Do not read this as an app fault.
 
 ## GATE STATUS
 
+**Gate 1: PASS** (2026-10-04). Verified against the packaged artifact built from the
+defect-closure work, with faults injected using OS primitives only.
+
+Satisfied: one launch produces one window; the branded shell is revealed before the
+backend exists; the backend reaches a workspace-showing phase; a second launch focuses
+the existing window and starts no second backend; zero console windows; retry is
+bounded and cancellable and its round trip is proven at runtime (`restart.requested` →
+`backend.spawned` → ready, new generation); a forced health timeout surfaces
+`BACKEND_HEALTH_TIMEOUT` with its own guidance, the log path and a working Retry; a
+killed backend is detected *and* surfaced as `SIDECAR_EXITED` instead of leaving a
+stale healthy workspace; the runtime token is 32 bytes from `getrandom`; the production
+CSP carries no dev origin; `cargo fmt --check`, `cargo clippy --all-targets` and
+`cargo test` (44 passed) are green with real `BackendSupervisor` coverage; no Rust test
+references `SIDECAR_EXITED`; and a clean shutdown ends with sidecar exit code 0 and no
+orphans.
+
+Six real defects were found by this verification and fixed, each with a regression test.
+Full record, including the "before" evidence for each: `docs/VISUAL-QA-PHASE1.md`
+§Gate 1 defect closure and re-verification.
+
+- **D1** the poller cleared the shutdown registry on terminal failure, so a hung
+  backend was orphaned at exit (`tasklist` showed 2). Ownership is now released only by
+  `stop_child()` and `terminate()`.
+- **D2** a hung backend was reported as `STARTUP_TIMEOUT`. The outer watchdog now
+  exceeds `HEALTH_TIMEOUT`, and the gate renders the shell's authoritative code.
+- **D3** the embedded build stamp went stale because `build.rs` declared no
+  `cargo:rerun-if-changed`; it now tracks `.git/HEAD` and its ref.
+- **D4** `startup.phase ... code=` was being redacted as an OAuth code; the field is
+  now `diag=`. OAuth and token redaction are unchanged.
+- **D5** log records interleaved mid-line because `writeln!` wrote unbuffered, one
+  syscall per argument; records are now rendered then written once under a lock.
+- **D6** a backend crash was logged but never shown; the gate now reuses its existing
+  failure surface for a post-ready fatal phase.
+
+Also reconciled: `docs/Phases.md` said "12 named states" while the implementation has
+**11** (`docs/Memory.md` recorded 11 all along). The gate criterion is now
+self-contained and `startup_phases_serialise_as_documented` pins all 11. No twelfth
+state was invented.
+
 **Gate 0: PASS** (unchanged).
 
-**Phase 1: PARTIAL - not declared PASS.** All UI-1..UI-11 steps are done with test
-evidence, and the release build now compiles and packages. The second visual pass
-installed and ran the real artifact and cleared the lifecycle half of Gate 1: one launch,
-no white frame, no second launch, no terminal window, clean graceful shutdown, **zero**
-orphan processes, `desktop.log` reviewed. Still missing: the reader with a message open,
-the intelligence panel with content, the Tasks page, the error states, and every window
-size below 1440. Gate 1 is not declared PASS while those are unseen.
+The visual items that earlier notes listed as Gate 1 blockers — the intelligence panel,
+1100px, 1000px, the 900px re-check, and light theme on Tasks / Overview / Deadlines /
+Accounts — are **not Gate 1 items**. They are open Phase 3 / Gate 3 QA, preserved in
+`docs/VISUAL-QA-PHASE1.md`.
 
 ---
 

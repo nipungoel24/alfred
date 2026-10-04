@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_session_token_is_never_logged
 source: backend/tests/test_windows_deployment_contract.py
-line: 84
+line: 96
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_session_token_is_never_logged` in `backend/te
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:84`
+`backend/tests/test_windows_deployment_contract.py:96`
 
 ## Signature
 

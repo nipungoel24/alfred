@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.rotate_if_needed
 source: desktop/src-tauri/src/main.rs
-line: 767
+line: 810
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `rotate_if_needed` in `desktop/src-tauri/src/main.r
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:767`
+`desktop/src-tauri/src/main.rs:810`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.fail
 source: desktop/src-tauri/src/main.rs
-line: 622
+line: 665
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `fail` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:622`
+`desktop/src-tauri/src/main.rs:665`
 
 ## Signature
 

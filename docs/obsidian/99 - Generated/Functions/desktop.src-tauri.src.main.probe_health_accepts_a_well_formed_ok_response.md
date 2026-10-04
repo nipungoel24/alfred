@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.probe_health_accepts_a_well_formed_ok_response
 source: desktop/src-tauri/src/main.rs
-line: 1607
+line: 1679
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `probe_health_accepts_a_well_formed_ok_response` in
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1607`
+`desktop/src-tauri/src/main.rs:1679`
 
 ## Signature
 

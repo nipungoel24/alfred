@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.process_is_alive
 source: desktop/src-tauri/src/main.rs
-line: 961
+line: 1033
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `process_is_alive` in `desktop/src-tauri/src/main.r
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:961`
+`desktop/src-tauri/src/main.rs:1033`
 
 ## Signature
 

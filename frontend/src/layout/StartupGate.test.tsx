@@ -11,10 +11,19 @@ import {
   type StartupStatus,
 } from '../api/client';
 
-const listen = vi.fn(async () => () => {});
+const listen = vi.fn(
+  async (event: unknown, handler: unknown): Promise<() => void> => {
+    // The real listener signature is exercised by the D6 tests below, which
+    // capture `handler` and emit shell events through it.
+    void event;
+    void handler;
+    return () => {};
+  },
+);
 
 vi.mock('@tauri-apps/api/event', () => ({
-  listen: (...args: unknown[]) => listen(...(args as [])),
+  listen: (...args: unknown[]) =>
+    listen(args[0] as unknown, args[1] as unknown),
 }));
 
 vi.mock('../api/client', async (importOriginal) => {
@@ -232,6 +241,174 @@ describe('StartupGate', () => {
     expect(screen.getByText('workspace-content')).toBeInTheDocument();
     expect(listen).not.toHaveBeenCalled();
     expect(fetchStartupStatus).not.toHaveBeenCalled();
+  });
+});
+
+/**
+ * D2 — the shell owns the diagnosis.
+ *
+ * `await_backend_ready` has a deliberately longer outer watchdog than the
+ * health poller, so its rejection is the *less* specific of the two signals.
+ * The gate must render the shell's terminal code, not the promise's.
+ */
+describe('StartupGate authoritative diagnosis (D2)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    listen.mockResolvedValue(() => {});
+    vi.mocked(fetchStartupDiagnostics).mockResolvedValue(null);
+    vi.mocked(fetchStartupStatus).mockResolvedValue(null);
+  });
+
+  function terminalStatus(code: string, guidance: string): StartupStatus {
+    return { ...statusFor('FATAL_ERROR'), code, guidance };
+  }
+
+  it('shows BACKEND_HEALTH_TIMEOUT for a health timeout, not STARTUP_TIMEOUT', async () => {
+    vi.mocked(fetchStartupStatus).mockResolvedValue(
+      terminalStatus(
+        'BACKEND_HEALTH_TIMEOUT',
+        "Alfred's local service did not respond in time.",
+      ),
+    );
+    // The outer watchdog fired, which is what actually races the poller.
+    renderGate(Promise.reject(new StartupError('STARTUP_TIMEOUT', 'Took too long.', true)));
+    await flush();
+
+    expect(screen.getByText('BACKEND_HEALTH_TIMEOUT')).toBeInTheDocument();
+    expect(screen.queryByText('STARTUP_TIMEOUT')).not.toBeInTheDocument();
+    expect(screen.getByText("Alfred's local service did not respond in time.")).toBeInTheDocument();
+  });
+
+  it('still shows the log path and a Retry on a health timeout', async () => {
+    vi.mocked(fetchStartupDiagnostics).mockResolvedValue({
+      log_path: 'C:\\Users\\test\\AppData\\Local\\AlfredData\\logs\\desktop.log',
+      build: 'abc1234',
+      version: '0.1.0',
+    });
+    vi.mocked(fetchStartupStatus).mockResolvedValue(
+      terminalStatus('BACKEND_HEALTH_TIMEOUT', 'No response in time.'),
+    );
+    renderGate(Promise.reject(new StartupError('STARTUP_TIMEOUT', 'Took too long.', true)));
+    await flush();
+
+    expect(
+      screen.getByText('C:\\Users\\test\\AppData\\Local\\AlfredData\\logs\\desktop.log'),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Try again/ })).toBeInTheDocument();
+  });
+
+  it('keeps the promise code when the shell published no terminal snapshot', async () => {
+    // An ordinary failure with no authoritative snapshot must still report its
+    // own code rather than degrading to UNKNOWN.
+    renderGate(Promise.reject(new StartupError('BACKEND_REJECTED', 'Refused the check.', true)));
+    await flush();
+    expect(screen.getByText('BACKEND_REJECTED')).toBeInTheDocument();
+  });
+
+  it('never leaks a raw exception when the shell code is present', async () => {
+    vi.mocked(fetchStartupStatus).mockResolvedValue(
+      terminalStatus('BACKEND_HEALTH_TIMEOUT', 'No response in time.'),
+    );
+    renderGate(Promise.reject(new Error('panic at src/main.rs:1234')));
+    await flush();
+    expect(screen.getByText('BACKEND_HEALTH_TIMEOUT')).toBeInTheDocument();
+    expect(screen.queryByText(/panic at/)).not.toBeInTheDocument();
+  });
+});
+
+/**
+ * D6 — the backend can die long after startup succeeded.
+ */
+describe('StartupGate backend death after ready (D6)', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    vi.mocked(fetchStartupDiagnostics).mockResolvedValue(null);
+    vi.mocked(fetchStartupStatus).mockResolvedValue(statusFor('RECOVERY'));
+  });
+
+  /** Capture the listener the gate registers so a test can emit an event. */
+  async function renderReadyAndCaptureListener() {
+    let handler: ((event: { payload: StartupStatus }) => void) | undefined;
+    listen.mockImplementation(async (_event: unknown, cb: unknown) => {
+      handler = cb as (event: { payload: StartupStatus }) => void;
+      return () => {};
+    });
+    renderGate(Promise.resolve());
+    await flush();
+    expect(screen.getByText('workspace-content')).toBeInTheDocument();
+    return () => {
+      if (!handler) throw new Error('gate never subscribed');
+      return handler;
+    };
+  }
+
+  it('shows an unavailable state instead of stale healthy content', async () => {
+    const getHandler = await renderReadyAndCaptureListener();
+
+    await act(async () => {
+      getHandler()({
+        payload: {
+          ...statusFor('FATAL_ERROR'),
+          code: 'SIDECAR_EXITED',
+          guidance: "Alfred's local service stopped unexpectedly.",
+        },
+      });
+    });
+    await flush();
+
+    expect(screen.queryByText('workspace-content')).not.toBeInTheDocument();
+    expect(screen.getByText('SIDECAR_EXITED')).toBeInTheDocument();
+    expect(screen.getByRole('alert')).toBeInTheDocument();
+  });
+
+  it('does not claim the Gmail account disconnected', async () => {
+    const getHandler = await renderReadyAndCaptureListener();
+    await act(async () => {
+      getHandler()({
+        payload: {
+          ...statusFor('FATAL_ERROR'),
+          code: 'SIDECAR_EXITED',
+          guidance: "Alfred's local service stopped unexpectedly.",
+        },
+      });
+    });
+    await flush();
+    // A dead backend is not a signed-out account.
+    expect(screen.queryByText(/disconnect/i)).not.toBeInTheDocument();
+    expect(screen.queryByText(/signed out/i)).not.toBeInTheDocument();
+  });
+
+  it('offers Retry and restores the workspace when the backend comes back', async () => {
+    const getHandler = await renderReadyAndCaptureListener();
+    await act(async () => {
+      getHandler()({
+        payload: {
+          ...statusFor('FATAL_ERROR'),
+          code: 'SIDECAR_EXITED',
+          guidance: "Alfred's local service stopped unexpectedly.",
+        },
+      });
+    });
+    await flush();
+
+    await act(async () => {
+      screen.getByRole('button', { name: /Try again/ }).click();
+    });
+    await flush();
+
+    expect(retryStartup).toHaveBeenCalledTimes(1);
+    expect(screen.getByText('workspace-content')).toBeInTheDocument();
+    expect(screen.queryByText('SIDECAR_EXITED')).not.toBeInTheDocument();
+  });
+
+  it('ignores a healthy event so normal recovery never shows an error', async () => {
+    const getHandler = await renderReadyAndCaptureListener();
+    await act(async () => {
+      getHandler()({ payload: statusFor('RECOVERY') });
+    });
+    await flush();
+    expect(screen.getByText('workspace-content')).toBeInTheDocument();
+    expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 });
 

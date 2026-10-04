@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.recovery_and_ready_are_both_workspace_showing_states
 source: desktop/src-tauri/src/main.rs
-line: 1769
+line: 1841
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `recovery_and_ready_are_both_workspace_showing_stat
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1769`
+`desktop/src-tauri/src/main.rs:1841`
 
 ## Signature
 

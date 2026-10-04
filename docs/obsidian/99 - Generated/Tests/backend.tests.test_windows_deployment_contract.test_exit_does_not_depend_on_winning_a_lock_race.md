@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_exit_does_not_depend_on_winning_a_lock_race
 source: backend/tests/test_windows_deployment_contract.py
-line: 80
+line: 92
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_exit_does_not_depend_on_winning_a_lock_race` 
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:80`
+`backend/tests/test_windows_deployment_contract.py:92`
 
 ## Signature
 

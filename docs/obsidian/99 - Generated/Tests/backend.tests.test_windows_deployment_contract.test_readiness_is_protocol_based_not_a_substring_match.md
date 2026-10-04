@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_readiness_is_protocol_based_not_a_substring_match
 source: backend/tests/test_windows_deployment_contract.py
-line: 76
+line: 88
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_readiness_is_protocol_based_not_a_substring_m
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:76`
+`backend/tests/test_windows_deployment_contract.py:88`
 
 ## Signature
 

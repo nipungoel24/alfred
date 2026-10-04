@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_staged_release_config_on_disk_has_no_secret
 source: backend/tests/test_windows_deployment_contract.py
-line: 53
+line: 65
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_staged_release_config_on_disk_has_no_secret` 
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:53`
+`backend/tests/test_windows_deployment_contract.py:65`
 
 ## Signature
 

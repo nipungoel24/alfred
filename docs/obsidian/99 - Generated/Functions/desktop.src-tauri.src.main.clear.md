@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.clear
 source: desktop/src-tauri/src/main.rs
-line: 289
+line: 335
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `clear` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:289`
+`desktop/src-tauri/src/main.rs:335`
 
 ## Signature
 

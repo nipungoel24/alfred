@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.guidance
 source: desktop/src-tauri/src/main.rs
-line: 144
+line: 188
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `guidance` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:144`
+`desktop/src-tauri/src/main.rs:188`
 
 ## Signature
 

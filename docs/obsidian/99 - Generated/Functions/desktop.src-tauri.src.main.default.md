@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.default
 source: desktop/src-tauri/src/main.rs
-line: 1446
+line: 1518
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `default` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1446`
+`desktop/src-tauri/src/main.rs:1518`
 
 ## Signature
 

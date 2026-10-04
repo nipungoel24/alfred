@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.bare_supervisor
 source: desktop/src-tauri/src/main.rs
-line: 1805
+line: 1877
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `bare_supervisor` in `desktop/src-tauri/src/main.rs
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1805`
+`desktop/src-tauri/src/main.rs:1877`
 
 ## Signature
 

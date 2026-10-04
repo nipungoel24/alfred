@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.credential_store_ready
 source: desktop/src-tauri/src/main.rs
-line: 673
+line: 716
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `credential_store_ready` in `desktop/src-tauri/src/
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:673`
+`desktop/src-tauri/src/main.rs:716`
 
 ## Signature
 

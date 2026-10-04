@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.snapshot
 source: desktop/src-tauri/src/main.rs
-line: 353
+line: 399
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `snapshot` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:353`
+`desktop/src-tauri/src/main.rs:399`
 
 ## Signature
 

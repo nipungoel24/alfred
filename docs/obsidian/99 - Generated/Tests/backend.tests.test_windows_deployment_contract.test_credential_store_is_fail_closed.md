@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_windows_deployment_contract
 qualified_name: backend.tests.test_windows_deployment_contract.test_credential_store_is_fail_closed
 source: backend/tests/test_windows_deployment_contract.py
-line: 88
+line: 100
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_credential_store_is_fail_closed` in `backend/
 
 ## Location
 
-`backend/tests/test_windows_deployment_contract.py:88`
+`backend/tests/test_windows_deployment_contract.py:100`
 
 ## Signature
 

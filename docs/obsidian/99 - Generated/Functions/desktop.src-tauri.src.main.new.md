@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.new
 source: desktop/src-tauri/src/main.rs
-line: 251
+line: 297
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `new` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:251`
+`desktop/src-tauri/src/main.rs:297`
 
 ## Signature
 

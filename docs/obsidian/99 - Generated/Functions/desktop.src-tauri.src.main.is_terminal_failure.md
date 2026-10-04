@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.is_terminal_failure
 source: desktop/src-tauri/src/main.rs
-line: 82
+line: 109
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `is_terminal_failure` in `desktop/src-tauri/src/mai
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:82`
+`desktop/src-tauri/src/main.rs:109`
 
 ## Signature
 

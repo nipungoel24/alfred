@@ -31,6 +31,18 @@ def test_build_identity_is_logged():
     contract.test_build_identity_is_logged()
 
 
+def test_build_stamp_is_invalidated_when_git_head_moves():
+    contract.test_build_stamp_is_invalidated_when_git_head_moves()
+
+
+def test_startup_phase_log_field_is_not_named_code():
+    contract.test_startup_phase_log_field_is_not_named_code()
+
+
+def test_a_terminal_failure_does_not_release_child_ownership():
+    contract.test_a_terminal_failure_does_not_release_child_ownership()
+
+
 # ── Credential containment ─────────────────────────────────────────
 
 

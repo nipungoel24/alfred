@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.kill_orphaned_backends
 source: desktop/src-tauri/src/main.rs
-line: 974
+line: 1046
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `kill_orphaned_backends` in `desktop/src-tauri/src/
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:974`
+`desktop/src-tauri/src/main.rs:1046`
 
 ## Signature
 

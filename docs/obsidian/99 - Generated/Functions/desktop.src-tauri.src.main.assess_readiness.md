@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.assess_readiness
 source: desktop/src-tauri/src/main.rs
-line: 689
+line: 732
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `assess_readiness` in `desktop/src-tauri/src/main.r
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:689`
+`desktop/src-tauri/src/main.rs:732`
 
 ## Signature
 

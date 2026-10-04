@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.startup_diagnostics
 source: desktop/src-tauri/src/main.rs
-line: 1275
+line: 1347
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `startup_diagnostics` in `desktop/src-tauri/src/mai
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1275`
+`desktop/src-tauri/src/main.rs:1347`
 
 ## Signature
 

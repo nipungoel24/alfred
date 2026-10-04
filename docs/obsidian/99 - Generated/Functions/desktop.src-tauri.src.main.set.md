@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.set
 source: desktop/src-tauri/src/main.rs
-line: 283
+line: 123
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `set` in `desktop/src-tauri/src/main.rs`.
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:283`
+`desktop/src-tauri/src/main.rs:123`
 
 ## Signature
 
