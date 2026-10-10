@@ -7,18 +7,21 @@ Last updated: 2026-10-10, Phase 1 checkpoint documentation correction (Gate 1 re
 
 ## Current state
 
-At the Phase 1 checkpoint, 2026-10-10:
+At the Phase 1 checkpoint, 2026-10-10, as of the checkpoint commit `bafb206`.
+These rows describe the repository at that commit. Commits after it are
+documentation bookkeeping only and change none of the facts recorded here.
 
 | Field | Value |
 | --- | --- |
 | Current phase | **1 — Startup and process lifecycle (closed)** |
-| Gate 1 | **PASS** — see §Gate status |
+| Gate 1 | **PASS**, 15/16 acceptance criteria satisfied — see §GATE STATUS |
+| Criterion 13 | **unresolved** — no test drives `BackendSupervisor`; see `docs/Phases.md` §The one criterion left unresolved |
 | Phase 2 | **not started** (first run and local AI setup) |
 | Visual QA | deferred to **Phase 3 / Gate 3**; backlog in `docs/VISUAL-QA-PHASE1.md` |
 | Branch | `feature/mail-workspace-productization-20260907` |
-| HEAD | `b35a7f0` — `fix(alfred): close startup lifecycle gate defects` |
+| HEAD at checkpoint | `bafb206` — `docs(alfred): reconcile phase 1 checkpoint evidence` |
 | Working tree | **clean** |
-| Commits ahead of origin | **15**, none pushed |
+| Commits ahead of origin | **16**, none pushed |
 | Next gate | **Gate 2** (first run and local AI setup) |
 
 Historical, for the record only: this table previously read `HEAD at session start
