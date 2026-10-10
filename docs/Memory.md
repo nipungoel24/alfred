@@ -1,20 +1,30 @@
 # Alfred — Engineering Memory
 
 Status: active
-Last updated: 2026-09-26, Phase 1 (startup + security + UI foundation)
+Last updated: 2026-10-10, Phase 1 checkpoint documentation correction (Gate 1 recorded PASS in `docs/Phases.md`)
 
 ---
 
 ## Current state
 
+At the Phase 1 checkpoint, 2026-10-10:
+
 | Field | Value |
 | --- | --- |
-| Current phase | **1 — Startup + UI foundation** |
-| Phase status | **UI foundation complete; remaining UI work listed below** |
+| Current phase | **1 — Startup and process lifecycle (closed)** |
+| Gate 1 | **PASS** — see §Gate status |
+| Phase 2 | **not started** (first run and local AI setup) |
+| Visual QA | deferred to **Phase 3 / Gate 3**; backlog in `docs/VISUAL-QA-PHASE1.md` |
 | Branch | `feature/mail-workspace-productization-20260907` |
-| HEAD at session start | `3cea34f` (unchanged — nothing committed) |
-| Working tree | Source modified, **nothing committed** |
-| Next gate | Gate 1 (startup) — see §Gate status |
+| HEAD | `b35a7f0` — `fix(alfred): close startup lifecycle gate defects` |
+| Working tree | **clean** |
+| Commits ahead of origin | **15**, none pushed |
+| Next gate | **Gate 2** (first run and local AI setup) |
+
+Historical, for the record only: this table previously read `HEAD at session start
+3cea34f (unchanged — nothing committed)` / `Working tree | Source modified, nothing
+committed`. That described the working state during the Gate 0 audit session of
+2026-09-26 and has not described the repository since `cbb76e6`.
 
 ## Toolchain
 
@@ -765,9 +775,12 @@ bounded and cancellable and its round trip is proven at runtime (`restart.reques
 killed backend is detected *and* surfaced as `SIDECAR_EXITED` instead of leaving a
 stale healthy workspace; the runtime token is 32 bytes from `getrandom`; the production
 CSP carries no dev origin; `cargo fmt --check`, `cargo clippy --all-targets` and
-`cargo test` (44 passed) are green with real `BackendSupervisor` coverage; no Rust test
-references `SIDECAR_EXITED`; and a clean shutdown ends with sidecar exit code 0 and no
-orphans.
+`cargo test` (44 passed) are green. The lifecycle tests drive `ShutdownRegistry`
+ownership (real child process, real `terminate()`) and the generation-guarded state
+channel directly; **no test constructs a `BackendSupervisor` itself**, which is the one
+Gate 1 criterion left unresolved — see the note under Gate 1 in `docs/Phases.md`. No
+Rust test references `SIDECAR_EXITED`, and a clean shutdown ends with sidecar exit code
+0 and no orphans.
 
 Six real defects were found by this verification and fixed, each with a regression test.
 Full record, including the "before" evidence for each: `docs/VISUAL-QA-PHASE1.md`

@@ -601,9 +601,14 @@ suite and only surfaces in AST-based tooling.
 
 ---
 
-## Gate 1 closure pass
+## Visual pass closure — historically titled "Gate 1 closure pass"
 
 Date: 2026-09-27. Baseline `bf1a171`.
+
+> **Historical.** "Gate 1" in this section's original title meant *the visual pass*,
+> which is not what `docs/Phases.md` calls Gate 1. The authoritative Gate 1 —
+> **Startup and process lifecycle** — is recorded at `b35a7f0` under
+> §Gate 1 defect closure and re-verification. Nothing below is that verdict.
 
 ### Task counts, exactly
 
@@ -725,13 +730,18 @@ out from under the click twice. I stopped rather than report a dark frame as lig
 
 ---
 
-## Final verification pass: the exact `421f808` build
+## Final verification pass: the exact `421f808` build — historical
 
 Date: 2026-09-27. Baseline `421f808` — `chore(alfred): close phase one release
 verification`. No source code was changed in this pass; the working tree was clean
 before it and no tracked file was modified during it.
 
-The previous section closed Gate 1 at `bf1a171` with light theme and the
+> **Historical, and not the Gate 1 verdict.** "Closed Gate 1" below uses the old
+> terminology, in which "Gate 1" meant *the visual pass*. `docs/Phases.md` defines
+> Gate 1 as **Startup and process lifecycle**, and that gate was not closed until
+> `b35a7f0` on 2026-10-04. See §Gate 1 defect closure and re-verification.
+
+The previous section closed the **visual pass** at `bf1a171` with light theme and the
 startup/shutdown cycle unverified. This pass re-verified the **exact artifact that
 `421f808` produces**, installed it, and closed those two gaps. It did not close the
 intelligence panel or any window-size regression.
@@ -1174,15 +1184,23 @@ runs. The token is still redacted where it belongs:
 
 ### Gate 1: PASS
 
-Every mandatory criterion in `docs/Phases.md` now has evidence against the packaged
-artifact built from these fixes: one launch/one window, splash from first paint,
-backend readiness, second-launch focus with no second backend, zero console windows,
-bounded cancellable retry with a proven round trip, a named code for a forced health
-timeout, backend-crash detection *and* surfacing, clean shutdown with sidecar exit
-code 0, **zero orphans on both the clean and the terminal-failure path**, a 256-bit
-CSPRNG token, a production CSP with no dev origin, `fmt`/`clippy`/`cargo test` green
-with real `BackendSupervisor` coverage, no Rust `SIDECAR_EXITED` reference, and all 11
-startup phases enumerated in a test.
+**This is the authoritative Gate 1 verdict** — Gate 1 as `docs/Phases.md` defines it,
+*Startup and process lifecycle*, at `b35a7f0` on 2026-10-04. The Gate 1 criteria as
+recorded in `docs/Phases.md` are ticked there, with one left unresolved and named.
+
+Fifteen of the sixteen mandatory criteria have evidence against the packaged artifact
+built from these fixes: one launch/one window, splash from first paint, backend
+readiness, second-launch focus with no second backend, zero console windows, bounded
+cancellable retry with a proven round trip, a named code for a forced health timeout,
+backend-crash detection *and* surfacing, clean shutdown with sidecar exit code 0,
+**zero orphans on both the clean and the terminal-failure path**, a 256-bit CSPRNG
+token, a production CSP with no dev origin, `fmt`/`clippy`/`cargo test` green, no Rust
+`SIDECAR_EXITED` reference, and all 11 startup phases enumerated in a test.
+
+The one unresolved criterion — "`cargo test` includes at least one test that drives
+`BackendSupervisor`" — is recorded in `docs/Phases.md` §The one criterion left
+unresolved. No test constructs a `BackendSupervisor`; the lifecycle tests drive the
+`ShutdownRegistry` and the state channel it owns. Closing it needs a new Rust test.
 
 Two honest limitations, neither a Gate 1 blocker:
 

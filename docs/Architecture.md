@@ -35,11 +35,11 @@ flowchart TB
 
     subgraph Shell["NATIVE SHELL — Rust + Tauri (alfred-desktop.exe)"]
         direction TB
-        SI["Single-instance plugin<br/>rejects 2nd launch"]
-        Win["Main window<br/>visible:false — DEFECT D1"]
-        Sup["BackendSupervisor<br/>Arc&lt;Mutex&gt; state machine"]
-        Tok["Session token<br/>NON-CSPRNG — DEFECT D3"]
-        Log["desktop.log<br/>plain text, no rotation"]
+        SI["Single-instance plugin<br/>reveals the running window"]
+        Win["Main window<br/>created visible:false, revealed by reveal_main_window()"]
+        Sup["BackendSupervisor<br/>Arc&lt;Mutex&gt; state machine, 11 startup phases"]
+        Tok["Session token<br/>CSPRNG via getrandom — 32 bytes"]
+        Log["desktop.log<br/>ISO-8601 + severity, rotates 2 MB x 3"]
         SI --> Win
         Sup --> Tok
     end
@@ -67,7 +67,7 @@ flowchart TB
     end
 
     subgraph FE["FRONTEND — React"]
-        Gate["StartupGate<br/>3 states — D7"]
+        Gate["StartupGate<br/>11 startup phases, bounded retry"]
         App["App: manual page state<br/>6 pages, no router"]
         Api["api/client.ts<br/>loopback base + token"]
     end
@@ -98,7 +98,7 @@ and no page reload persistence. This is a deliberate simplification recorded in
 | Concern | Module | Notes |
 | --- | --- | --- |
 | Bootstrap | `src/main.tsx` | `initApi()` is called **before** `createRoot`, so backend resolution overlaps React startup |
-| Readiness gate | `src/layout/StartupGate.tsx` | 3 states: `starting`, `error`, `ready`. No timeout, no retry loop |
+| Readiness gate | `src/layout/StartupGate.tsx` | Renders the shell's 11-phase status (`starting` / `error` / `ready` UI states). Retry is **one attempt per click**, cancellable on unmount — never an automatic loop |
 | Navigation | `src/layout/IconRail.tsx` | 4 primary + 2 secondary items, all reachable |
 | Header / search | `src/layout/WorkspaceHeader.tsx` | `Ctrl+K` / `Cmd+K`, `Escape` to blur |
 | HTTP | `src/api/client.ts` | Base URL + token are module-level mutable state set once by `initApi()` |
@@ -214,78 +214,136 @@ rather than a migration error. See `docs/Memory.md` F25.
 
 ## 5. Native desktop architecture
 
-One Rust file, 810 lines: `desktop/src-tauri/src/main.rs`.
+One Rust file, 2 327 lines: `desktop/src-tauri/src/main.rs`.
 
 | Item | Value |
 | --- | --- |
 | Binary | `alfred-desktop.exe` |
 | Subsystem | `#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]` (`main.rs:1`) |
-| Window | 1280x850, min 900x650, `visible: false` |
+| Window | 1280x850, min 900x650, created `visible: false`, revealed by `reveal_main_window()` |
 | Sidecar | `tauri_plugin_shell` `externalBin: binaries/alfred-backend` |
-| Build id | `git rev-parse --short=12 HEAD` via `build.rs`, fallback `unknown` |
+| Build id | `git rev-parse --short=12 HEAD` via `build.rs`, fallback `unknown`. `build.rs` declares `cargo:rerun-if-changed` for `.git/HEAD` **and** the ref it points at, so the stamp cannot go stale across a commit that touches nothing else |
 | Capabilities | `core:default` + `opener:default` only. **No `shell:` grant** — the webview cannot spawn processes |
-| CSP | `tauri.conf.json:25` |
+| CSP | `tauri.conf.json:25` — no development origin |
 | Log | `%LOCALAPPDATA%\AlfredData\logs\desktop.log` |
-| Commands exposed | `await_backend_ready`, `restart_backend`, `backend_info` |
+| Commands exposed | `await_backend_ready`, `restart_backend`, `backend_info`, `startup_phase`, `startup_diagnostics` |
 
-### Actual state machine
+### Startup state machine
 
-Three states, not twelve. `main.rs:33-47`:
+Eleven named phases, not three. `main.rs:82-112`:
 
 ```rust
-enum BackendRuntimeState {
-    Starting { port: u16 },   // #[serde(skip)] — port is 0 at seed time
-    Ready { port: u16, token: String },
-    Failed { reason: String },  // raw English prose, no machine code
+pub enum StartupPhase {
+    Boot, Initializing, StartingBackend, WaitingForBackend,
+    CheckingDatabase, CheckingAiRuntime, CheckingModel, RestoringSession,
+    Ready,        // terminal success
+    Recovery,     // degraded but usable; the mailbox works
+    FatalError,   // terminal failure; requires user action
 }
 ```
 
-`Failed` reasons are literal strings: `"no free loopback port"`, `"health timeout"`,
-`"startup timeout"`, `"state channel closed"`, `"backend still starting"`,
-`"sidecar exited with code {:?}"`. `StartupGate.tsx:61` renders this verbatim under the
-label "Diagnostic code", which it is not.
+Every phase serialises to a stable wire string, mirrored by `STARTUP_PHASES` in
+`frontend/src/api/client.ts` and pinned by `startup_phases_serialise_as_documented`.
+`READY` and `RECOVERY` both release the workspace; `FATAL_ERROR` never does
+(`is_terminal_failure`, `main.rs:109`).
+
+Each state carries a machine-readable code and a user-facing sentence:
+
+```rust
+pub struct StartupStatus {          // main.rs:267
+    pub phase: StartupPhase,
+    pub code: &'static str,         // e.g. "BACKEND_HEALTH_TIMEOUT"
+    pub detail: String,
+    pub guidance: String,           // safe sentence; empty while healthy
+    pub ready: bool,
+    pub degraded: bool,
+    pub phase_elapsed_ms: u64,
+}
+```
+
+`code` comes from the `DiagnosticCode` enum (`main.rs:136`) and each variant has a
+matching `guidance()` (`main.rs:188`). The codes are stable strings —
+`SIDECAR_EXITED`, `BACKEND_HEALTH_TIMEOUT`, `DATABASE_UNAVAILABLE` and so on — and
+`startup.phase` is logged with the field name `diag=`, never `code=`, because the
+global redaction filter treats a bare `code=` as an OAuth authorization code.
+
+The shell is authoritative about *why* startup failed. `StartupGate` renders the
+shell's `status.code` / `status.guidance` whenever `status.phase === 'FATAL_ERROR'`,
+falling back to the frontend promise's own watchdog only when no terminal snapshot
+arrived. The two are deliberately offset: `STARTUP_TIMEOUT = HEALTH_TIMEOUT + 15 s`, so
+the poller's specific verdict always wins the race.
+
+**Historical (Gate 0 baseline, superseded by Phase 1).** This section previously
+described a three-state `BackendRuntimeState { Starting, Ready, Failed { reason: String } }`
+whose `Failed` reasons were raw English prose (`"health timeout"`, `"startup timeout"`,
+`"sidecar exited with code {:?}"`) rendered by `StartupGate` under the label
+"Diagnostic code", which it was not. That machine is gone.
 
 ### Startup sequence (shell)
 
-1. `main()` logs version, build, pid, exe, cwd to `desktop.log` (`main.rs:461-475`)
-2. Plugins registered: shell, opener, single-instance (`main.rs:477-485`)
-3. `setup()` creates the supervisor, then spawns `spawn_and_watch` on the async runtime
-   so setup returns immediately (`main.rs:486-499`)
-4. `spawn_and_watch` (`main.rs:73`): `pick_free_port()` (bind :0, read port, close) →
-   `kill_orphaned_backends()` → `generate_token()` → sidecar spawn with
-   `ALFRED_HOST/PORT/BACKEND_BUILD/RUNTIME_TOKEN` → drain stdout/stderr → poll `/health`
-   every 500 ms for 60 s
-5. Frontend loads in parallel and blocks on `await_backend_ready` in `StartupGate`
-6. **`window.show()` is never called** (defect D1)
+1. `main()` calls `init_logging()`, then logs version, build, pid, exe, cwd
+2. Plugins registered: shell, opener, single-instance. The single-instance callback
+   calls `reveal_main_window(app)` — a second launch surfaces the running window, and
+   is deliberately never the only thing that can reveal it
+3. `setup()` builds the `ShutdownRegistry` and the supervisor, then calls
+   `reveal_main_window()` immediately so the branded shell is on screen while the
+   backend boots; the run loop's `RunEvent::Ready` reveals again (idempotent)
+4. `spawn_and_watch`: `pick_free_port()` (bind :0, read port, close) →
+   `kill_orphaned_backends()` → `generate_token()` (CSPRNG, 32 bytes) → sidecar spawn
+   with `ALFRED_HOST/PORT/BACKEND_BUILD/RUNTIME_TOKEN` → drain stdout/stderr → poll
+   `/health` every 500 ms for 60 s
+5. The frontend loads in parallel and blocks on `await_backend_ready` in `StartupGate`
+6. **`window.show()` is called** — always, through the single reveal point
+   `reveal_main_window()` (`main.rs:1367`): `window.show()` then `set_focus()`, logged as
+   `window.revealed reason=explicit`. Its callers are `setup()`, `RunEvent::Ready`, the
+   single-instance callback, and the readiness command
+
+### Backend crash while running
+
+The shell supervises the sidecar for the whole session, not only during startup.
+`CommandEvent::Terminated` (`main.rs:521`) logs
+`sidecar.exited pid=… exit=Some(…) generation=…`, and — only if the dying process is
+still the current generation — publishes `StartupPhase::FatalError` with
+`DiagnosticCode::SidecarExited`, logs the lifecycle line
+`startup.phase phase=FATAL_ERROR diag=SIDECAR_EXITED`, and emits
+`alfred://startup-phase`.
+
+`StartupGate` watches for exactly that while `state === 'ready'` and reuses the same
+failure surface, titling it "Alfred's local service stopped" so it does not claim
+Alfred failed to start. It deliberately says nothing about Gmail: a dead backend is not
+a disconnected account.
 
 ### Timing
 
 ```
-HEALTH_TIMEOUT   60 s   (main.rs:27)
-HEALTH_INTERVAL 500 ms  (main.rs:28)
-STARTUP_TIMEOUT  60 s   (main.rs:29)
+HEALTH_TIMEOUT   60 s    main.rs:36
+HEALTH_INTERVAL  500 ms  main.rs:37
+STARTUP_TIMEOUT  75 s    main.rs:47   = HEALTH_TIMEOUT + 15 s
+SHUTDOWN_GRACE   600 ms  main.rs:51
+LOG_MAX_BYTES    2 MB    main.rs:55   (3 rotated files)
 ```
 
-Five documents state 45 s. The code says 60 s. The code is the truth; the documents are
-wrong and will be corrected.
+`STARTUP_TIMEOUT` is deliberately `HEALTH_TIMEOUT + 15 s`. When both were 60 s the
+frontend's generic `STARTUP_TIMEOUT` won the race against the poller and the user was
+told the wrong thing; the outer watchdog now always loses.
 
 ### Process supervision
 
 | Requirement | Implementation | State |
 | --- | --- | --- |
-| Single backend instance | Single-instance plugin + orphan kill | works, but see D2 |
-| Predictable port | bind-to-0 then release | **race** — the port is not reserved for the child |
-| Health endpoint | `GET /health` polled | **substring match**, D5 |
-| Startup timeout | 60 s | works |
-| Graceful shutdown | `POST /api/shutdown`, 600 ms, then kill | **skipped when mutex contended**, D2 |
-| Crash detection | `CommandEvent::Terminated` → `Failed` | works |
-| Restart | `restart_backend` | **no-op while `Starting`**, D6; **stale poll race**, D4 |
-| Structured logs | plain text, 1 s resolution | no severity, no correlation id, no rotation |
-| Diagnostic IDs | none | failed states carry prose, not codes |
-| No orphan processes | `try_lock` on exit | **can orphan**, D2 |
-| No console window | `windows_subsystem` | works in release builds |
+| Single backend instance | single-instance plugin + `kill_orphaned_backends` | works |
+| Predictable port | bind-to-0 then release | **known race** — the port is not reserved for the child. Not in Gate 1 scope |
+| Health endpoint | `GET /health` polled; `probe_health` parses the status, the `application/json` content type and the payload | works |
+| Startup watchdog | 60 s health poll; 75 s outer frontend watchdog | works; the poller's specific code wins |
+| Graceful shutdown | `ShutdownRegistry::terminate()`: `POST /api/shutdown`, 600 ms, then hard kill | works — blocking, **not** `try_lock` |
+| Crash detection | `CommandEvent::Terminated` → `FatalError` / `SidecarExited`, published and logged | works, including after `READY` |
+| Restart | `restart_backend` → `stop_child()` then `spawn_and_watch()` | works while `Starting`; generation-guarded, a stale poller cannot clobber a new child |
+| Structured logs | ISO-8601 with milliseconds, level, target; one `write_all` per record under a process-wide lock | severity and rotation present; **no correlation id** — `generation=` is lifecycle-only |
+| Diagnostic codes | `DiagnosticCode` + `guidance()`, stable wire strings | works; pinned by `diagnostic_codes_are_stable_strings` and `every_diagnostic_code_has_distinct_guidance` |
+| No orphan processes | ownership released only by `stop_child()` and `terminate()` | works; verified on the clean **and** the terminal-failure path |
+| No console window | `windows_subsystem = "windows"` | works in release builds |
 
-`kill_orphaned_backends` (`main.rs:244-288`) shells out to `netstat`, `tasklist`, and
+`kill_orphaned_backends` (`main.rs:1046`) shells out to `netstat`, `tasklist`, and
 `taskkill` by bare name, and kills any loopback listener whose image name contains
 `alfred-backend`. It is crude but it does prevent the common orphan case.
 
@@ -422,7 +480,8 @@ reads `backend/.env`. `.env.example` documents the deprecated
 %LOCALAPPDATA%\AlfredData\
   alfred.sqlite3            database (WAL: -wal, -shm)
   logs\
-    desktop.log             shell, plain text, no rotation
+    desktop.log             shell, ISO-8601 + severity, rotates 2 MB x 3
+    desktop.log.1..3        rotated shell log
     backend.log             sidecar, rotating 1 MB x 2
 
 %LOCALAPPDATA%\Alfred\     legacy location, still read by _default_database_path()
@@ -438,15 +497,17 @@ reads `backend/.env`. `.env.example` documents the deprecated
 
 | Stream | Format | Rotation | Secrets |
 | --- | --- | --- | --- |
-| `desktop.log` | `{unix_seconds} {event}` | none, append-only, never truncated | none — the token is never logged |
+| `desktop.log` | `{iso8601_ms} {level} {target} {redacted message}` — one `write_all` of a finished record under a process-wide `LOG_LOCK` | **yes**: 2 MB x 3 (`rotate_if_needed`, `main.rs:810`) | none — the token, the OAuth `code=` and JSON-shaped secrets are stripped by `redact()` before anything is written |
 | `backend.log` | stdlib logging, rotating | 1 MB x 2 | none |
 | `alfred.fts`, `alfred.search` | Python loggers | inherits | none |
 
 Gaps against the required structure (timestamp, subsystem, event, diagnostic code,
-severity, correlation id): no severity, no correlation id, no subsystem field, no
-diagnostic codes, no rotation on the shell side, and every write failure is discarded
-with `let _ =`. Nothing logs message bodies, tokens, or credentials — that constraint
-is currently met.
+severity, correlation id): severity, timestamp, rotation and diagnostic codes are now
+present on the shell side; **no correlation id** and **no subsystem field** remain, and
+every write failure is still discarded with `let _ =`. Lifecycle lines carry
+`generation=`, which correlates a record to a supervision generation but is not a
+request-scoped correlation id. Nothing logs message bodies, tokens, or credentials —
+that constraint is currently met.
 
 ## 15. Error handling
 
@@ -457,8 +518,11 @@ Today only the first exists, and only sometimes.
 - `MigrationSafetyError` is fail-closed
 - Everything else surfaces as a raw exception string, which `StartupGate` then labels
   "Diagnostic code"
-- `StartupGate` shows `err.message` to the user, which for a Rust error is prose like
-  `"health timeout"` or a shell-plugin message
+- **Shell/startup (corrected by Phase 1).** The shell no longer sends prose to the
+  gate. It publishes a `StartupStatus` carrying a stable `DiagnosticCode` wire string
+  and a `guidance()` sentence, and `StartupGate` renders those. The frontend's own
+  promise error is used only as a fallback when no terminal snapshot arrived, and a
+  raw exception is never the primary message
 - Frontend error extraction (`client.ts:57-60`) tries `body.error.message`, then
   `body.detail`, then a literal fallback
 
