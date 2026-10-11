@@ -17,7 +17,7 @@ tags: [backend, class]
 
 ## Purpose
 
-Validated priority edit for one task (task only â€” never rewrites
+Validated priority edit for one task (task only — never rewrites
 
 ## Location
 

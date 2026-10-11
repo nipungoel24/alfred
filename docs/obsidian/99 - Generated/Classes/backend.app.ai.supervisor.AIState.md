@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor
 qualified_name: backend.app.ai.supervisor.AIState
 source: backend/app/ai/supervisor.py
-line: 48
+line: 64
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `AIState` in `backend/app/ai/supervisor.py`.
 
 ## Location
 
-`backend/app/ai/supervisor.py:48`
+`backend/app/ai/supervisor.py:64`
 
 ## Side Effects
 

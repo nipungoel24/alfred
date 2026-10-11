@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client
 qualified_name: backend.app.ai.ollama_client.InferenceMetrics
 source: backend/app/ai/ollama_client.py
-line: 24
+line: 191
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ Container for Ollama response performance metrics.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:24`
+`backend/app/ai/ollama_client.py:191`
 
 ## Called By
 

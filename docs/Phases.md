@@ -203,20 +203,106 @@ bytes, never simulated. A fake progress bar is a release blocker.
 
 ### Mandatory acceptance criteria
 
-- [ ] On a machine with no Ollama, the first-run screen appears and explains the next step
-- [ ] On a machine with Ollama stopped, Alfred offers to start it and does
-- [ ] With Ollama running and no model, the real required size is shown
-- [ ] Download progress matches actual bytes pulled, verified against `ollama list`
-- [ ] Download can be cancelled and leaves no corrupt model
-- [ ] An interrupted download resumes or restarts cleanly
-- [ ] Insufficient disk space is detected before the download starts
-- [ ] The model is selectable in Settings and the change is applied without a restart
-- [ ] OAuth consent opens in the system browser
-- [ ] Denied consent shows a real message and leaves Alfred usable
-- [ ] A revoked refresh token surfaces reconnect, not a silent failure
-- [ ] The connected account is visibly identified with disconnect available
-- [ ] `OAUTH_STATES` cannot grow without bound
-- [ ] Full existing suite still passes
+**Status: PARTIAL** — implemented 2026-10-11 on
+`feature/mail-workspace-productization-20260907` (`1a13298`, `2e53cea`, `bb70971`,
+and the frontend commit above). Nine of fourteen criteria are met with automated
+evidence. Five require a real Ollama on a clean Windows machine and are **NOT
+VERIFIED** here: the verification machine has no working local AI runtime, so a
+download was never observed end to end. Nothing below is ticked on the strength of
+code alone.
+
+- [x] On a machine with no Ollama, the first-run screen appears and explains the
+      next step — `FirstRunChecklist` renders from live state only (connected
+      accounts, `ollama_installed`, AI state) and names the step that is next.
+      Covered by the OverviewPage suites; the no-Ollama rendering path is the
+      `ollama_installed: false` branch.
+- [ ] On a machine with Ollama stopped, Alfred offers to start it and does —
+      **NOT VERIFIED.** The backend auto-starts Ollama once per session
+      (`_try_auto_start`, single instance, never downloads models) and the
+      checklist explains it. No live run confirmed the process starting.
+- [ ] With Ollama running and no model, the real required size is shown —
+      **PARTIAL / NOT VERIFIED.** `/api/ai/model` reports the model's real
+      on-disk size from `/api/tags`. For a model that has never been pulled there
+      is no knowable size locally — Ollama does not publish registry sizes
+      through its local API — so that is reported as `null` / `"unknown size"`
+      rather than estimated, and the preflight re-checks against the first total
+      the registry announces. Showing a required size *before* the pull begins is
+      therefore not possible with the local API alone.
+- [ ] Download progress matches actual bytes pulled, verified against
+      `ollama list` — **PARTIAL.** Progress is computed only from the
+      `completed`/`total` byte counts Ollama streams; `test_model_pull.py`
+      drives a real `_StreamTransport` and asserts the emitted byte counts, and
+      `test_model_endpoints.py` asserts the same figures over HTTP. The
+      comparison against `ollama list` is a manual step on a live machine and was
+      not performed.
+- [ ] Download can be cancelled and leaves no corrupt model — **PARTIAL.**
+      Cancellation closes the HTTP stream, which makes Ollama abandon the pull;
+      the supervisor clears progress and restores the pre-pull state
+      (`test_model_supervisor.py`, `test_model_endpoints.py`). Whether the
+      partial model on disk is left in a state Ollama accepts on restart is
+      Ollama's layer handling and was not observed.
+- [ ] An interrupted download resumes or restarts cleanly — **NOT VERIFIED.**
+      No resume UI exists. Ollama resumes at layer granularity on a re-pull
+      (completed layers persist), so a second pull after an interruption
+      continues rather than starting over; this was not demonstrated live.
+- [x] Insufficient disk space is detected before the download starts —
+      `check_for_model_download` runs on the first announced total and raises
+      `OllamaInsufficientSpace` inside the stream, so it aborts before layer
+      bodies move. It reports a real shortfall figure, never a placeholder.
+      Covered in `test_model_pull.py` and `test_model_supervisor.py`.
+- [x] The model is selectable in Settings and the change is applied without a
+      restart — `POST /api/ai/model` calls `set_model` and re-runs the readiness
+      check, so the UI drops from a stale `ready` to `model_missing`. A 409 is
+      returned while a download is running. Covered in `test_model_endpoints.py`;
+      the Settings picker renders the installed list.
+- [ ] OAuth consent opens in the system browser — **NOT VERIFIED live.**
+      Implemented via `@tauri-apps/plugin-opener` (`openExternalUrl`), with a
+      browser-only fallback. No packaged run confirmed the system browser opening.
+- [x] Denied consent shows a real message and leaves Alfred usable — a denied
+      flow returns the styled failure page and now releases its OAuth state
+      immediately (`test_model_endpoints.py::test_a_denied_callback_releases_its_state_immediately`).
+- [x] A revoked refresh token surfaces reconnect, not a silent failure — an
+      account whose `connection_status` is not `connected` renders
+      "Authentication required" with a Reconnect action
+      (`AccountsPage.states.test.tsx`).
+- [x] The connected account is visibly identified with disconnect available —
+      each row shows provider, address, status and a Disconnect control
+      (`AccountsPage.states.test.tsx`).
+- [x] `OAUTH_STATES` cannot grow without bound — fixed as **D15**. The dict now
+      carries a 10-minute TTL and a 32-entry cap that evicts the oldest entry;
+      redemption checks the age itself rather than trusting the next purge. Five
+      tests cover purge, expiry-at-redemption, cap, oldest-first eviction and
+      concurrent flows surviving the TTL.
+- [x] Full existing suite still passes — verified 2026-10-11: **370 backend, 392
+      frontend across 32/32 test files**. The Gate 1 floors were 298 and 391; both
+      grew.
+
+### Defects closed in this gate
+
+| ID | Finding | Status |
+| --- | --- | --- |
+| D15 | `OAUTH_STATES` unbounded and never expired (`main.py:53`) | **Closed** — TTL + cap + oldest-first eviction; denied flows release state immediately |
+| D17 | No `event.origin` check on the OAuth message (`AccountsPage.tsx:45-53`) | **Closed** — handler accepts only the backend's own origin; a foreign origin is ignored and covered by a test |
+| D18 | OAuth consent opened as an in-app popup (`AccountsPage.tsx:27`) | **Closed** — opens in the system browser; the account list is watched for completion since there is no opener to post back to |
+
+### State-machine mapping
+
+The spec asks for `MODEL_RUNTIME_MISSING`, `MODEL_RUNTIME_STARTING`,
+`MODEL_DOWNLOAD_REQUIRED`, `MODEL_DOWNLOADING`, `MODEL_READY`, `MODEL_FAILED`.
+Four already existed under the shipped vocabulary and were left alone — renaming
+them would break the frontend contract and its tests for no behavioural gain:
+
+| Spec state | Shipped state |
+| --- | --- |
+| `MODEL_RUNTIME_MISSING` | `ollama_not_running` |
+| `MODEL_RUNTIME_STARTING` | `initializing` |
+| `MODEL_DOWNLOAD_REQUIRED` | `model_missing` |
+| `MODEL_DOWNLOADING` | `model_downloading` **(new)** |
+| `MODEL_READY` | `ready` |
+| `MODEL_FAILED` | `model_failed` **(new)** |
+
+The mapping is recorded in the `AISupervisor` docstring so it is not re-litigated
+at the next gate.
 
 ---
 

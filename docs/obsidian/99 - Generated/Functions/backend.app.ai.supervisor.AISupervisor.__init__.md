@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.__init__
 source: backend/app/ai/supervisor.py
-line: 88
+line: 109
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/app/ai/supervisor.py`.
 
 ## Location
 
-`backend/app/ai/supervisor.py:88`
+`backend/app/ai/supervisor.py:109`
 
 ## Signature
 

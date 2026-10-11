@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.ollama_invalid_handler
 source: backend/app/main.py
-line: 615
+line: 658
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `ollama_invalid_handler` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:615`
+`backend/app/main.py:658`
 
 ## Signature
 

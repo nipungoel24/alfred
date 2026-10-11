@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.on_analysis_failure
 source: backend/app/ai/supervisor.py
-line: 263
+line: 515
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Classify a mid-analysis failure and update state.
 
 ## Location
 
-`backend/app/ai/supervisor.py:263`
+`backend/app/ai/supervisor.py:515`
 
 ## Signature
 

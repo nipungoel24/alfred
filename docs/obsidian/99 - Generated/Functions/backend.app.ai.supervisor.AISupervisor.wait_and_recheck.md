@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.wait_and_recheck
 source: backend/app/ai/supervisor.py
-line: 297
+line: 553
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Sleep the bounded backoff, then refresh health.
 
 ## Location
 
-`backend/app/ai/supervisor.py:297`
+`backend/app/ai/supervisor.py:553`
 
 ## Signature
 

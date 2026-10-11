@@ -60,6 +60,7 @@ Purpose inferred from usage: `Repository` in `backend/app/db/repositories.py`.
 - [[backend.tests.test_identity_migration.test_non_hex_scoped_identities_never_double_prefix|test_non_hex_scoped_identities_never_double_prefix]]
 - [[backend.tests.test_identity_migration.test_null_provider_rows_exempt_from_uniqueness|test_null_provider_rows_exempt_from_uniqueness]]
 - [[backend.tests.test_identity_migration.test_provider_uniqueness_enforced|test_provider_uniqueness_enforced]]
+- [[backend.tests.test_model_endpoints.client|client]]
 - [[backend.tests.test_multi_account.test_account_credentials_isolation|test_account_credentials_isolation]]
 - [[backend.tests.test_multi_account.test_account_id_stored_correctly|test_account_id_stored_correctly]]
 - [[backend.tests.test_multi_account.test_account_prefixed_email_ids|test_account_prefixed_email_ids]]

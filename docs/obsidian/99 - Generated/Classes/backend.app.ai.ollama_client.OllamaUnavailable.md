@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client
 qualified_name: backend.app.ai.ollama_client.OllamaUnavailable
 source: backend/app/ai/ollama_client.py
-line: 7
+line: 15
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ Ollama service is not reachable.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:7`
+`backend/app/ai/ollama_client.py:15`
 
 ## Bases
 

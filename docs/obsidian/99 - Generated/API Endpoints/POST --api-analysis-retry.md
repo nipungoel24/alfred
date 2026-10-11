@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.analysis_retry
 source: backend/app/main.py
-line: 926
+line: 975
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,4 +23,4 @@ Manual recovery trigger: reset backoff and re-check AI health now.
 
 ## Location
 
-`backend/app/main.py:926`
+`backend/app/main.py:975`

@@ -38,6 +38,8 @@ tags: [module, backend]
 - `InboxBriefing` ← `backend.app.schemas.InboxBriefing`
 - `JSONResponse` ← `fastapi.responses.JSONResponse`
 - `MailEligibilityPolicy` ← `backend.app.mail.eligibility.MailEligibilityPolicy`
+- `ModelPullRequest` ← `backend.app.schemas.ModelPullRequest`
+- `ModelSelectRequest` ← `backend.app.schemas.ModelSelectRequest`
 - `OllamaClient` ← `backend.app.ai.ollama_client.OllamaClient`
 - `OllamaInvalidResponse` ← `backend.app.ai.ollama_client.OllamaInvalidResponse`
 - `OllamaModelMissing` ← `backend.app.ai.ollama_client.OllamaModelMissing`
@@ -56,6 +58,7 @@ tags: [module, backend]
 - `asyncio` ← `asyncio`
 - `base64` ← `base64`
 - `briefing_fingerprint` ← `backend.app.mail.briefing_fingerprint.briefing_fingerprint`
+- `check_for_model_download` ← `backend.app.ai.resources.check_for_model_download`
 - `content_fingerprint` ← `backend.app.mail.fingerprint.content_fingerprint`
 - `csv` ← `csv`
 - `datetime` ← `datetime.datetime`
@@ -66,6 +69,7 @@ tags: [module, backend]
 - `get_settings` ← `backend.app.config.get_settings`
 - `hashlib` ← `hashlib`
 - `httpx` ← `httpx`
+- `human_bytes` ← `backend.app.ai.resources.human_bytes`
 - `io` ← `io`
 - `json` ← `json`
 - `logging` ← `logging`
@@ -80,6 +84,7 @@ tags: [module, backend]
 - `set_state` ← `backend.app.mail.backfill.set_state`
 - `status_payload` ← `backend.app.mail.backfill.status_payload`
 - `strip_scope_from_local` ← `backend.app.mail.identity.strip_scope`
+- `time` ← `time`
 - `timedelta` ← `datetime.timedelta`
 - `timezone` ← `datetime.timezone`
 - `uuid` ← `uuid`
@@ -97,8 +102,14 @@ tags: [module, backend]
 - [[backend.app.main._label_backfill|_label_backfill]]
 - [[backend.app.main._mark_backfill_failure|_mark_backfill_failure]]
 - [[backend.app.main._oauth_callback_page|_oauth_callback_page]]
+- [[backend.app.main._purge_expired_oauth_states|_purge_expired_oauth_states]]
+- [[backend.app.main._register_oauth_state|_register_oauth_state]]
 - [[backend.app.main._set_backfill_state|_set_backfill_state]]
 - [[backend.app.main._startup_background|_startup_background]]
+- [[backend.app.main.ai_model|ai_model]]
+- [[backend.app.main.ai_model_cancel|ai_model_cancel]]
+- [[backend.app.main.ai_model_pull|ai_model_pull]]
+- [[backend.app.main.ai_model_select|ai_model_select]]
 - [[backend.app.main.analysis_progress|analysis_progress]]
 - [[backend.app.main.analysis_progress.event_stream|event_stream]]
 - [[backend.app.main.analysis_retry|analysis_retry]]
@@ -144,6 +155,8 @@ tags: [module, backend]
 - `BACKFILL_PAGE_SIZE`
 - `BACKFILL_PRIORITY`
 - `OAUTH_STATES`
+- `OAUTH_STATE_MAX`
+- `OAUTH_STATE_TTL_SECONDS`
 - `UNAUTHENTICATED_PATHS`
 - `VALID_CATEGORIES`
 - `WORKER_CONCURRENCY`

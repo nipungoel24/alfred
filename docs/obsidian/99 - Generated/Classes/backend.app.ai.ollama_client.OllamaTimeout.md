@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client
 qualified_name: backend.app.ai.ollama_client.OllamaTimeout
 source: backend/app/ai/ollama_client.py
-line: 11
+line: 19
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ Ollama request timed out.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:11`
+`backend/app/ai/ollama_client.py:19`
 
 ## Bases
 

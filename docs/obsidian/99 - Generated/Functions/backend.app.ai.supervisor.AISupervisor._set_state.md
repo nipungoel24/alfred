@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor._set_state
 source: backend/app/ai/supervisor.py
-line: 109
+line: 138
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_set_state` in `backend/app/ai/supervisor.py`.
 
 ## Location
 
-`backend/app/ai/supervisor.py:109`
+`backend/app/ai/supervisor.py:138`
 
 ## Signature
 

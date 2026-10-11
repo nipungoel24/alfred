@@ -21,10 +21,15 @@ tags: [module, backend]
 
 - `Callable` ← `typing.Callable`
 - `OllamaClient` ← `backend.app.ai.ollama_client.OllamaClient`
+- `OllamaInsufficientSpace` ← `backend.app.ai.ollama_client.OllamaInsufficientSpace`
 - `OllamaModelMissing` ← `backend.app.ai.ollama_client.OllamaModelMissing`
+- `OllamaPullFailed` ← `backend.app.ai.ollama_client.OllamaPullFailed`
 - `OllamaTimeout` ← `backend.app.ai.ollama_client.OllamaTimeout`
 - `OllamaUnavailable` ← `backend.app.ai.ollama_client.OllamaUnavailable`
+- `PullProgress` ← `backend.app.ai.ollama_client.PullProgress`
 - `asyncio` ← `asyncio`
+- `check_for_model_download` ← `backend.app.ai.resources.check_for_model_download`
+- `human_bytes` ← `backend.app.ai.resources.human_bytes`
 - `logging` ← `logging`
 - `os` ← `os`
 - `shutil` ← `shutil`
@@ -39,16 +44,25 @@ tags: [module, backend]
 ## Functions
 
 - [[backend.app.ai.supervisor.AISupervisor.__init__|__init__]]
+- [[backend.app.ai.supervisor.AISupervisor._pull_owns_state|_pull_owns_state]]
+- [[backend.app.ai.supervisor.AISupervisor._run_pull|_run_pull]]
+- [[backend.app.ai.supervisor.AISupervisor._run_pull.check_space|check_space]]
+- [[backend.app.ai.supervisor.AISupervisor._run_pull.on_progress|on_progress]]
 - [[backend.app.ai.supervisor.AISupervisor._set_state|_set_state]]
 - [[backend.app.ai.supervisor.AISupervisor._smoke_test|_smoke_test]]
 - [[backend.app.ai.supervisor.AISupervisor._tags|_tags]]
 - [[backend.app.ai.supervisor.AISupervisor._try_auto_start|_try_auto_start]]
+- [[backend.app.ai.supervisor.AISupervisor.cancel_pull|cancel_pull]]
 - [[backend.app.ai.supervisor.AISupervisor.next_backoff_seconds|next_backoff_seconds]]
 - [[backend.app.ai.supervisor.AISupervisor.on_analysis_failure|on_analysis_failure]]
 - [[backend.app.ai.supervisor.AISupervisor.payload|payload]]
+- [[backend.app.ai.supervisor.AISupervisor.pull_payload|pull_payload]]
+- [[backend.app.ai.supervisor.AISupervisor.pulling|pulling]]
 - [[backend.app.ai.supervisor.AISupervisor.queue_paused|queue_paused]]
 - [[backend.app.ai.supervisor.AISupervisor.refresh|refresh]]
 - [[backend.app.ai.supervisor.AISupervisor.reset_backoff|reset_backoff]]
+- [[backend.app.ai.supervisor.AISupervisor.set_model|set_model]]
+- [[backend.app.ai.supervisor.AISupervisor.start_pull|start_pull]]
 - [[backend.app.ai.supervisor.AISupervisor.subscribe|subscribe]]
 - [[backend.app.ai.supervisor.AISupervisor.wait_and_recheck|wait_and_recheck]]
 - [[backend.app.ai.supervisor.find_ollama_executable|find_ollama_executable]]

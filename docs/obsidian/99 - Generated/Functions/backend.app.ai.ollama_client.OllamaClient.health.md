@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client.OllamaClient
 qualified_name: backend.app.ai.ollama_client.OllamaClient.health
 source: backend/app/ai/ollama_client.py
-line: 56
+line: 223
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Check if Ollama is reachable and return available models.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:56`
+`backend/app/ai/ollama_client.py:223`
 
 ## Signature
 

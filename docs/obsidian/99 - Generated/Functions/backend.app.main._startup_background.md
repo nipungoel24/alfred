@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._startup_background
 source: backend/app/main.py
-line: 447
+line: 490
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Slow startup work that must NOT block /health readiness.
 
 ## Location
 
-`backend/app/main.py:447`
+`backend/app/main.py:490`
 
 ## Signature
 

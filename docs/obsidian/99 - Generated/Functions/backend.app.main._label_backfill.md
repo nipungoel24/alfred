@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._label_backfill
 source: backend/app/main.py
-line: 359
+line: 402
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Refresh Gmail labels for cached rows missing mailbox state.
 
 ## Location
 
-`backend/app/main.py:359`
+`backend/app/main.py:402`
 
 ## Signature
 

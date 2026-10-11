@@ -4,7 +4,6 @@ import { ThemeToggle } from '../../theme/ThemeToggle';
 import { health as fetchHealth, analysisStatus } from '../../api/emails';
 import { ErrorState } from '../../components/ui/States';
 import { SettingsSection, SettingsRow, SettingsValue, StatusIndicator } from '../../components/ui/Settings';
-import { aiStateMeta } from '../../lib/aiState';
 import { useRetryPreservingFocus } from '../../lib/focus';
 import { ModelSetup } from './ModelSetup';
 

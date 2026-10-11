@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.subscribe
 source: backend/app/ai/supervisor.py
-line: 105
+line: 134
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Register a synchronous callback invoked on state changes.
 
 ## Location
 
-`backend/app/ai/supervisor.py:105`
+`backend/app/ai/supervisor.py:134`
 
 ## Signature
 

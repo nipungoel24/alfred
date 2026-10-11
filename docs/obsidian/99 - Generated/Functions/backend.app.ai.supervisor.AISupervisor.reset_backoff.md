@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.reset_backoff
 source: backend/app/ai/supervisor.py
-line: 294
+line: 550
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `reset_backoff` in `backend/app/ai/supervisor.py`.
 
 ## Location
 
-`backend/app/ai/supervisor.py:294`
+`backend/app/ai/supervisor.py:550`
 
 ## Signature
 

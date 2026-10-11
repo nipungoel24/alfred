@@ -19,12 +19,13 @@ tags: [module, frontend]
 
 ## Imports
 
-- `react` â† useEffect
+- `react` â† useEffect, useRef, useState
 - `@tanstack/react-query` â† useQuery, useMutation, useQueryClient
 - `lucide-react` â† Mail, RefreshCw, Unplug, UserCircle, KeyRound
 - `../../api/emails` â† fetchAccounts, connectGmail, syncAccount, deleteAccount
 - `../../api/emails` â† EmailAccount
 - `../../api/client` â† apiBase
+- `../../lib/openExternal` â† openExternalUrl
 - `../../components/ui/States` â† EmptyState, ErrorState
 - `../../components/ui/Settings` â† StatusIndicator
 - `../../lib/focus` â† useRetryPreservingFocus

@@ -1,28 +1,39 @@
 # Alfred — Engineering Memory
 
 Status: active
-Last updated: 2026-10-10, Phase 1 checkpoint documentation correction (Gate 1 recorded PASS in `docs/Phases.md`)
+Last updated: 2026-10-11, Phase 2 implemented (Gate 2 recorded PARTIAL in `docs/Phases.md`)
 
 ---
 
 ## Current state
 
-At the Phase 1 checkpoint, 2026-10-10, as of the checkpoint commit `bafb206`.
-These rows describe the repository at that commit. Commits after it are
-documentation bookkeeping only and change none of the facts recorded here.
+At the Phase 2 implementation checkpoint, 2026-10-11, as of commit `bb70971` plus
+the frontend commit recorded below. These rows describe the repository at that
+commit.
 
 | Field | Value |
 | --- | --- |
-| Current phase | **1 — Startup and process lifecycle (closed)** |
-| Gate 1 | **PASS**, 15/16 acceptance criteria satisfied — see §GATE STATUS |
-| Criterion 13 | **unresolved** — no test drives `BackendSupervisor`; see `docs/Phases.md` §The one criterion left unresolved |
-| Phase 2 | **not started** (first run and local AI setup) |
+| Current phase | **2 — First run and local AI setup (implemented)** |
+| Gate 2 | **PARTIAL**, 9/14 acceptance criteria met with automated evidence — see `docs/Phases.md` §Gate 2 |
+| Gate 2 gap | 5 criteria need a real Ollama on a clean Windows machine and are **NOT VERIFIED**; the verification machine has no working local AI runtime |
+| Gate 1 | **PASS**, 15/16 — criterion 13 still **unresolved** and deliberately left open |
+| Phase 1 | closed |
 | Visual QA | deferred to **Phase 3 / Gate 3**; backlog in `docs/VISUAL-QA-PHASE1.md` |
 | Branch | `feature/mail-workspace-productization-20260907` |
-| HEAD at checkpoint | `bafb206` — `docs(alfred): reconcile phase 1 checkpoint evidence` |
+| HEAD | `bb70971` — `feat(alfred): serve model status, download and selection over HTTP`, plus one unpushed frontend commit |
 | Working tree | **clean** |
-| Commits ahead of origin | **16**, none pushed |
-| Next gate | **Gate 2** (first run and local AI setup) |
+| Next gate | **Gate 3** (UX, design system, accessibility) |
+
+### Defects closed in Phase 2
+
+| ID | Finding | Status |
+| --- | --- | --- |
+| D15 | `OAUTH_STATES` unbounded and never expired | **Closed** — 10-minute TTL, 32-entry cap, oldest-first eviction, denied flows release immediately |
+| D17 | No `event.origin` check on the OAuth message | **Closed** — only the backend's own origin is accepted; foreign origins ignored, with a test |
+| D18 | OAuth consent opened as an in-app popup | **Closed** — system browser via `@tauri-apps/plugin-opener`; the account list is watched for completion |
+
+Criterion 13 from Gate 1 (`cargo test` driving `BackendSupervisor`) remains
+**unresolved** and was not touched in Phase 2.
 
 Historical, for the record only: this table previously read `HEAD at session start
 3cea34f (unchanged — nothing committed)` / `Working tree | Source modified, nothing
@@ -42,39 +53,39 @@ from `desktop/src-tauri`.
 
 ---
 
-## TESTS — all run 2026-09-26
+## TESTS — all run 2026-10-11
 
 | Suite | Command | Result |
 | --- | --- | --- |
-| Backend | `py -3.12 -m pytest backend\tests -q` | **239 passed** (was 207) |
-| Tools | `py -3.12 -m pytest tools -q` | **9 passed** |
-| Frontend | `npm --prefix frontend test` | **189 passed / 19 files** (was 133/18) |
-| Rust | `cargo test` | **35 passed** (was 9) |
+| Backend | `py -3.12 -m pytest backend/tests -q` | **370 passed** (was 298 at Gate 1) |
+| Tools | `py -3.12 -m pytest tools -q` | **17 passed, 1 skipped** |
+| Frontend | `npm --prefix frontend test -- --run` | **392 passed / 32 files** (was 391/32) |
+| Rust | not run | **untouched this phase** — `git diff 608e72b..HEAD -- desktop/` is empty |
 | Lint | `npm --prefix frontend run lint` | exit 0 |
 | Typecheck | `tsc -b` | exit 0 |
-| Rust fmt | `cargo fmt --check` | exit 0 |
-| Rust lint | `cargo clippy --all-targets` | exit 0, no warnings |
 | Build | `npm --prefix frontend run build` | exit 0 |
 | Secret scan | `py -3.12 tools\release\scan_release_secrets.py` | **exit 0 (clean)** |
 
-**Total: 472 tests, 0 failures.**
+**Total: 779 tests, 0 failures** (1 skipped). The frontend run reports one
+pre-existing unhandled rejection from `focus.retry.test.tsx` — a deliberately
+rejected promise the test asserts is handled; it is not a failure.
 
 ### Production bundle
 
-| Asset | Phase 1 | Gate 0 baseline | Delta |
+| Asset | Phase 2 | Phase 1 | Delta |
 | --- | --- | --- | --- |
-| JS | 385.82 kB / **117.03 kB gzip** | 375.83 / 113.98 | +9.99 / **+3.05 kB gzip** |
-| CSS | 58.86 kB / **10.40 kB gzip** | 63.87 / 11.87 | **−5.01 / −1.47 kB** |
+| JS | 401.33 kB / **121.87 kB gzip** | 385.82 / 117.03 | +15.51 / **+4.84 kB gzip** |
+| CSS | 63.75 kB / **10.98 kB gzip** | 58.86 / 10.40 | +4.89 / **+0.58 kB gzip** |
 | Source maps | **0** | 0 | holds |
 | Fonts shipped | 0 bytes | 0 | holds |
 | `document.title` | `Alfred` | `Alfred` | holds |
-| Dev origin in bundle | none | present | **fixed** |
+| Dev origin in bundle | none | none | holds |
 | Analytics in bundle | none | none | holds |
-| Branded boot shell in `index.html` | yes | no | **new** |
 
-CSS shrank because ~2 500 lines of ambient/glass/dead rules were deleted. The +3 kB gzip
-JS buys the labelled sidebar, the state primitives, the intelligence rework, and the
-`@tauri-apps/api/event` chunk (`event-*.js`, 1.06 kB, now correctly split out).
+The +4.84 kB gzip buys the model picker, the download progress UI, the first-run
+checklist and the shared system-browser opener. CSS grows by the corresponding
+component rules; every new token reference was checked against
+`styles.test.ts`, which enforces the design-token contract.
 
 ---
 
@@ -650,6 +661,95 @@ no `autoFocus` anywhere, and every `useEffect` has a dependency array.
 
 ---
 
+## PHASE 2 — FIRST RUN AND LOCAL AI SETUP (commits `1a13298`, `2e53cea`, `bb70971`, + frontend)
+
+### Model download is real, not simulated
+
+Ollama's `/api/pull` streams newline-delimited JSON with per-layer
+`completed`/`total` byte counts. Every progress figure in the product is computed
+from those counts; there is no timer, no fake bar, and no estimated model size.
+
+- `NdjsonStreamDecoder` reassembles records split across HTTP chunks, holds an
+  unterminated tail, and drops malformed lines without stalling the stream.
+- `LayerProgressAggregator` keeps the latest value per digest so a layer that
+  reports twice is not double-counted — the common cause of a bar that races
+  past 100%.
+- The stream runs with an **infinite total timeout and a 300 s read timeout**:
+  an idle registry is tolerated, a dead connection is not.
+- Cancellation closes the HTTP stream, which is how Ollama is told to abandon a
+  pull. There is no byte-level HTTP range resume; resumability is Ollama's
+  layer granularity, and the docs say so rather than claiming more.
+
+### Disk and RAM preflight
+
+`check_for_model_download` runs on the **first announced total**, inside the
+stream, so an undersized disk aborts before layer bodies move rather than after
+the drive is full. It reports a real shortfall in bytes.
+
+- Free space is read from the volume that holds `~/.ollama`, walking up to the
+  nearest existing ancestor.
+- Installed RAM is read from the Windows API where available. An unreadable
+  measurement is reported as **uncertain**, never as a failure.
+- An unknown size (a model never pulled) is **not** judged insufficient — Ollama
+  does not publish registry sizes through its local API, and inventing one would
+  be a lie the user might act on.
+
+### Supervisor state machine
+
+`model_downloading` and `model_failed` were added; the other four required model
+states already existed under the shipped vocabulary and were left alone. Renaming
+`ollama_not_running` → `MODEL_RUNTIME_MISSING` and friends would have broken the
+frontend contract and its tests for no behavioural gain. The mapping is recorded
+in the `AISupervisor` docstring.
+
+Two invariants worth restating, because both are easy to get wrong:
+
+- **A finished download is not readiness.** On success the pull re-runs the real
+  health check and smoke test before the state can become `ready`.
+- **A download owns the state machine.** `refresh()` and `on_analysis_failure()`
+  defer to a live pull rather than reclassifying it, but the pull's own re-entry
+  into `refresh()` is allowed — distinguished by comparing against
+  `asyncio.current_task()`.
+
+`_pull_task` is deliberately **not** cleared on completion. Clearing it made the
+handle unobtainable for callers and turned the guard into a race; the guard now
+checks `task.done()` and identity instead.
+
+### HTTP surface
+
+`GET /api/ai/model` (status, real sizes, preflight), `POST /api/ai/model`
+(selection, 409 while pulling), `POST /api/ai/model/pull` (idempotent),
+`POST /api/ai/model/cancel` (idempotent). Pull progress rides on the existing
+`/api/analysis/status` under `"pull"`.
+
+### Frontend
+
+- Settings gains a model picker driven by the installed list, an arbitrary-tag
+  input, the real installed size, free disk, and RAM. The download bar is
+  **indeterminate until a total is announced**, then driven by byte counts.
+- A first-run checklist on Overview reports only live state and is dismissible.
+- `lib/openExternal.ts` is now the single path for opening a URL outside the app;
+  `LinkifiedBody` and OAuth share it instead of carrying two copies.
+
+### Test-infrastructure findings
+
+Three things that will otherwise be re-discovered:
+
+1. **`TestClient` without `with` gets a fresh event loop per request.** A task
+   created by one request is finished by the time the next arrives. Pull
+   tests need the context-manager form, with the lifespan's workers stubbed and
+   the repository swapped for a throwaway one so the session connection is not
+   closed.
+2. **`asyncio.Event` binds to the loop that first waits on it.** A fake built on
+   the test thread and awaited on the portal loop must use a plain flag, not an
+   `Event`.
+3. **Comparing two live free-space readings is a race.** Two resource tests did
+   exactly that and failed whenever anything else wrote to disk between the
+   reads. Both are pinned now, with the real-machine path covered separately by
+   a test that only asserts well-formed output.
+
+---
+
 ## REMAINING WORK
 
 **UI (this phase):**
@@ -766,6 +866,11 @@ single invocation kept it alive throughout. Do not read this as an app fault.
 
 ## GATE STATUS
 
+**Gate 2: PARTIAL** (implemented 2026-10-11). Nine of fourteen criteria are met
+with automated evidence; five need a real Ollama on a clean machine and are
+recorded as **NOT VERIFIED** in `docs/Phases.md` §Gate 2. D15, D17 and D18 are
+closed. Gate 1's criterion 13 remains unresolved and was not touched.
+
 **Gate 1: PASS** (2026-10-04). Verified against the packaged artifact built from the
 defect-closure work, with faults injected using OS primitives only.
 
@@ -819,10 +924,21 @@ Accounts — are **not Gate 1 items**. They are open Phase 3 / Gate 3 QA, preser
 
 ## NEXT TASK
 
-**Finish the visual pass.** See `docs/VISUAL-QA-PHASE1.md` for the full record, the
-capture hazards, and the exact outstanding list.
+**Two things, in this order.**
 
-Three environment lessons, each of which cost real time:
+1. **Close the five unverified Gate 2 criteria** on a clean Windows machine with
+   Ollama installed and stopped, then a model pulled. They need a live runtime,
+   not more code: Ollama stopped → auto-start, real required size, progress
+   cross-checked against `ollama list`, cancel leaving a clean model, interrupted
+   download restarting cleanly, and the consent screen opening in the system
+   browser. Record the outcome against the ticks in `docs/Phases.md` §Gate 2 —
+   do not tick them on the strength of the implementation alone.
+2. **The visual pass.** See `docs/VISUAL-QA-PHASE1.md` for the full record, the
+   capture hazards, and the exact outstanding list. Phase 2 added three new
+   surfaces that visual QA has never seen: the first-run checklist, the Settings
+   model section, and the download progress bar.
+
+Three environment lessons from the last visual pass, each of which cost real time:
 
 1. **A DPI-unaware capture produces convincing false defects.** `GetWindowRect` returns
    logical pixels while `CopyFromScreen` reads physical ones. Call

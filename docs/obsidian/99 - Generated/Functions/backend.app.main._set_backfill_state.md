@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._set_backfill_state
 source: backend/app/main.py
-line: 176
+line: 219
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_set_backfill_state` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:176`
+`backend/app/main.py:219`
 
 ## Signature
 

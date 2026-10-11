@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client.InferenceMetrics
 qualified_name: backend.app.ai.ollama_client.InferenceMetrics.__init__
 source: backend/app/ai/ollama_client.py
-line: 29
+line: 196
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/app/ai/ollama_client.py`.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:29`
+`backend/app/ai/ollama_client.py:196`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._broadcast_progress
 source: backend/app/main.py
-line: 58
+line: 101
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Send a progress event to all SSE subscribers.
 
 ## Location
 
-`backend/app/main.py:58`
+`backend/app/main.py:101`
 
 ## Signature
 

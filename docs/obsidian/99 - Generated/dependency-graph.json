@@ -41,6 +41,11 @@
       "source": null
     },
     {
+      "id": "asyncio.current_task",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "asyncio.get_running_loop",
       "type": "external",
       "source": null
@@ -71,6 +76,56 @@
       "source": "backend/app/ai/ollama_client.py"
     },
     {
+      "id": "backend.app.ai.ollama_client.LayerProgressAggregator",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.LayerProgressAggregator.__init__",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.LayerProgressAggregator.announced_total",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.LayerProgressAggregator.observe",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.NdjsonStreamDecoder",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.NdjsonStreamDecoder.__init__",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.NdjsonStreamDecoder._drain",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.NdjsonStreamDecoder.feed",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.NdjsonStreamDecoder.flush",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.NdjsonStreamDecoder.malformed_count",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
       "id": "backend.app.ai.ollama_client.OllamaClient",
       "type": "class",
       "source": "backend/app/ai/ollama_client.py"
@@ -91,7 +146,37 @@
       "source": "backend/app/ai/ollama_client.py"
     },
     {
+      "id": "backend.app.ai.ollama_client.OllamaClient.list_models",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaClient.model_size",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
       "id": "backend.app.ai.ollama_client.OllamaClient.preload_model",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaClient.pull_model",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaClient.pull_model.handle",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaInsufficientSpace",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.OllamaInsufficientSpace.__init__",
       "type": "function",
       "source": "backend/app/ai/ollama_client.py"
     },
@@ -106,6 +191,11 @@
       "source": "backend/app/ai/ollama_client.py"
     },
     {
+      "id": "backend.app.ai.ollama_client.OllamaPullFailed",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
       "id": "backend.app.ai.ollama_client.OllamaTimeout",
       "type": "class",
       "source": "backend/app/ai/ollama_client.py"
@@ -114,6 +204,66 @@
       "id": "backend.app.ai.ollama_client.OllamaUnavailable",
       "type": "class",
       "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.PullProgress",
+      "type": "class",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.PullProgress.fraction",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client._parse_record",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.ollama_client.iter_ndjson_records",
+      "type": "function",
+      "source": "backend/app/ai/ollama_client.py"
+    },
+    {
+      "id": "backend.app.ai.resources.DiskStatus",
+      "type": "class",
+      "source": "backend/app/ai/resources.py"
+    },
+    {
+      "id": "backend.app.ai.resources.DiskStatus.available",
+      "type": "function",
+      "source": "backend/app/ai/resources.py"
+    },
+    {
+      "id": "backend.app.ai.resources.ResourceCheck",
+      "type": "class",
+      "source": "backend/app/ai/resources.py"
+    },
+    {
+      "id": "backend.app.ai.resources.check_for_model_download",
+      "type": "function",
+      "source": "backend/app/ai/resources.py"
+    },
+    {
+      "id": "backend.app.ai.resources.disk_status",
+      "type": "function",
+      "source": "backend/app/ai/resources.py"
+    },
+    {
+      "id": "backend.app.ai.resources.human_bytes",
+      "type": "function",
+      "source": "backend/app/ai/resources.py"
+    },
+    {
+      "id": "backend.app.ai.resources.installed_ram_bytes",
+      "type": "function",
+      "source": "backend/app/ai/resources.py"
+    },
+    {
+      "id": "backend.app.ai.resources.ollama_models_dir",
+      "type": "function",
+      "source": "backend/app/ai/resources.py"
     },
     {
       "id": "backend.app.ai.service.AIService",
@@ -176,6 +326,26 @@
       "source": "backend/app/ai/supervisor.py"
     },
     {
+      "id": "backend.app.ai.supervisor.AISupervisor._pull_owns_state",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor._run_pull",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor._run_pull.check_space",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor._run_pull.on_progress",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
       "id": "backend.app.ai.supervisor.AISupervisor._set_state",
       "type": "function",
       "source": "backend/app/ai/supervisor.py"
@@ -196,6 +366,11 @@
       "source": "backend/app/ai/supervisor.py"
     },
     {
+      "id": "backend.app.ai.supervisor.AISupervisor.cancel_pull",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
       "id": "backend.app.ai.supervisor.AISupervisor.next_backoff_seconds",
       "type": "function",
       "source": "backend/app/ai/supervisor.py"
@@ -211,6 +386,16 @@
       "source": "backend/app/ai/supervisor.py"
     },
     {
+      "id": "backend.app.ai.supervisor.AISupervisor.pull_payload",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.pulling",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
       "id": "backend.app.ai.supervisor.AISupervisor.queue_paused",
       "type": "function",
       "source": "backend/app/ai/supervisor.py"
@@ -222,6 +407,16 @@
     },
     {
       "id": "backend.app.ai.supervisor.AISupervisor.reset_backoff",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.set_model",
+      "type": "function",
+      "source": "backend/app/ai/supervisor.py"
+    },
+    {
+      "id": "backend.app.ai.supervisor.AISupervisor.start_pull",
       "type": "function",
       "source": "backend/app/ai/supervisor.py"
     },
@@ -1001,6 +1196,16 @@
       "source": "backend/app/mail/providers/gmail.py"
     },
     {
+      "id": "backend.app.main.OAUTH_STATES.clear",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "backend.app.main.OAUTH_STATES.update",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "backend.app.main._analysis_worker",
       "type": "function",
       "source": "backend/app/main.py"
@@ -1056,12 +1261,42 @@
       "source": "backend/app/main.py"
     },
     {
+      "id": "backend.app.main._purge_expired_oauth_states",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main._register_oauth_state",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
       "id": "backend.app.main._set_backfill_state",
       "type": "function",
       "source": "backend/app/main.py"
     },
     {
       "id": "backend.app.main._startup_background",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.ai_model",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.ai_model_cancel",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.ai_model_pull",
+      "type": "function",
+      "source": "backend/app/main.py"
+    },
+    {
+      "id": "backend.app.main.ai_model_select",
       "type": "function",
       "source": "backend/app/main.py"
     },
@@ -1319,6 +1554,16 @@
       "id": "backend.app.schemas.InboxBriefing.model_validate_json",
       "type": "external",
       "source": null
+    },
+    {
+      "id": "backend.app.schemas.ModelPullRequest",
+      "type": "class",
+      "source": "backend/app/schemas.py"
+    },
+    {
+      "id": "backend.app.schemas.ModelSelectRequest",
+      "type": "class",
+      "source": "backend/app/schemas.py"
     },
     {
       "id": "backend.app.schemas.Priority",
@@ -2341,6 +2586,626 @@
       "source": "backend/tests/test_identity_migration.py"
     },
     {
+      "id": "backend.tests.test_model_endpoints._await_pull",
+      "type": "function",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints._state",
+      "type": "function",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints._wire",
+      "type": "function",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.client",
+      "type": "function",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.client._noop",
+      "type": "function",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.oauth_states",
+      "type": "function",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_a_denied_callback_releases_its_state_immediately",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_a_pull_that_will_not_fit_the_disk_fails_with_a_real_shortfall",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_an_abandoned_state_is_purged_once_the_ttl_passes",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_an_expired_state_is_rejected_even_before_a_purge_runs",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_cancelling_a_download_is_idempotent",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_cap_eviction_drops_the_oldest_not_an_arbitrary_flow",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_model_status_populates_the_preflight_from_this_machine",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_model_status_reports_a_real_size_and_a_real_disk_free",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_model_status_survives_an_offline_ollama",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_pull_is_idempotent_while_running",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_pull_returns_live_progress_on_the_status_endpoint",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_purging_keeps_concurrent_recent_flows_alive",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_selecting_a_model_re_runs_the_readiness_check",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_selecting_an_empty_model_is_rejected",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_the_model_cannot_be_changed_while_a_download_runs",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_endpoints.test_the_state_dict_never_exceeds_its_cap",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._ChunkStream",
+      "type": "class",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._ChunkStream.__aiter__",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._ChunkStream.__init__",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._ChunkStream.aclose",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._StreamTransport",
+      "type": "class",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._StreamTransport.__init__",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._StreamTransport.handle_async_request",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._client_for",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull._lines",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_blank_lines_are_ignored",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream.run",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_disk_status_reports_real_free_space",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_disk_status_walks_up_to_an_existing_ancestor",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_fraction_is_capped_at_one",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_fraction_is_none_until_a_total_is_announced",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_fraction_reflects_real_bytes",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_human_bytes_formats_consistently",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_incomplete_final_record_is_not_emitted_until_flush",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_incomplete_final_record_without_newline_is_emitted_by_flush",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_installed_ram_is_reported_as_a_real_value",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_insufficient_disk_space_blocks_with_an_actionable_message",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_list_models_reports_names_and_sizes_without_invention",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_list_models_reports_names_and_sizes_without_invention.tags",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_low_ram_blocks_before_a_download_starts",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_malformed_record_is_dropped_without_losing_neighbours",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_model_size_uses_the_real_reported_size",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_model_size_uses_the_real_reported_size.tags",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_models_dir_is_a_real_path_on_this_machine",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_multi_byte_utf8_split_across_chunks",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_multiple_layers_are_summed_once_each",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_non_object_record_is_dropped",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_error_record_raises_and_is_not_reported_as_success",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_error_record_raises_and_is_not_reported_as_success.run",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_http_error_status_raises",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_http_error_status_raises.run",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_non_success_terminal_status_raises",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_non_success_terminal_status_raises.run",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_reports_real_progress_and_completes",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_reports_real_progress_and_completes.run",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_splits_records_across_chunks_while_streaming",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_pull_splits_records_across_chunks_while_streaming.run",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_records_split_across_network_chunks_are_reassembled",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_repeated_updates_for_one_digest_do_not_double_count",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_space_check_aborts_the_download_before_it_fills_the_disk",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_space_check_aborts_the_download_before_it_fills_the_disk.check",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_space_check_aborts_the_download_before_it_fills_the_disk.run",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_space_check_runs_once_with_the_announced_total_before_progress",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_space_check_runs_once_with_the_announced_total_before_progress.check",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_space_check_runs_once_with_the_announced_total_before_progress.run",
+      "type": "function",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_status_is_retained_across_layer_records",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_status_records_without_bytes_do_not_invent_a_total",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_sufficient_space_and_ram_do_not_block",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_the_preflight_runs_against_this_machine",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_unknown_required_size_does_not_block",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_unparseable_incomplete_tail_is_dropped_not_invented",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_unreadable_disk_is_blocking",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_pull.test_unreadable_ram_is_reported_as_uncertain_not_as_failure",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.FakePullClient",
+      "type": "class",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.FakePullClient.__init__",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.FakePullClient.generate",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.FakePullClient.health",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.FakePullClient.list_models",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.FakePullClient.model_size",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.FakePullClient.pull_model",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor._start",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.make_supervisor",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_a_superseded_pull_cannot_overwrite_newer_state",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_a_superseded_pull_cannot_overwrite_newer_state.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_analysis_failure_does_not_clobber_an_active_download",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_analysis_failure_does_not_clobber_an_active_download.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_cancel_clears_progress_and_does_not_leave_a_stale_download_state",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_cancel_clears_progress_and_does_not_leave_a_stale_download_state.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_cancel_is_idempotent",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_cancel_is_idempotent.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_insufficient_space_fails_the_pull_with_a_specific_code",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_insufficient_space_fails_the_pull_with_a_specific_code.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_pull_failure_is_reported_as_model_failed",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_pull_failure_is_reported_as_model_failed.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_pull_payload_is_none_before_any_pull",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_pull_payload_reports_null_fraction_until_a_total_is_announced",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_pull_payload_reports_null_fraction_until_a_total_is_announced.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_queue_is_paused_while_downloading_and_after_failure",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_queue_is_paused_while_downloading_and_after_failure.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_queue_is_paused_while_downloading_and_after_failure.run2",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_refresh_does_not_clobber_an_active_download",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_refresh_does_not_clobber_an_active_download.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_second_start_while_downloading_is_idempotent",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_second_start_while_downloading_is_idempotent.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_set_model_applies_when_idle",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_set_model_refuses_while_a_download_is_running",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_set_model_refuses_while_a_download_is_running.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_set_model_rejects_an_empty_name",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_start_pull_enters_downloading_and_publishes_real_bytes",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_start_pull_enters_downloading_and_publishes_real_bytes.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_successful_pull_runs_the_readiness_check_before_ready",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_successful_pull_runs_the_readiness_check_before_ready.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_the_only_resource_constant_is_the_documented_ram_floor",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_unreachable_server_is_reported_before_a_pull_starts",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_unreachable_server_is_reported_before_a_pull_starts.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
       "id": "backend.tests.test_multi_account.make_analysis",
       "type": "function",
       "source": "backend/tests/test_multi_account.py"
@@ -3171,7 +4036,27 @@
       "source": null
     },
     {
+      "id": "codecs.getincrementaldecoder",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "csv.DictReader",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "ctypes.byref",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "ctypes.c_ulonglong",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "ctypes.windll.kernel32.GetPhysicallyInstalledSystemMemory",
       "type": "external",
       "source": null
     },
@@ -3746,6 +4631,16 @@
       "source": null
     },
     {
+      "id": "httpx.Response",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "httpx.Timeout",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "httpx.URL",
       "type": "external",
       "source": null
@@ -3796,7 +4691,17 @@
       "source": null
     },
     {
+      "id": "os.path.dirname",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "os.path.exists",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "os.path.expanduser",
       "type": "external",
       "source": null
     },
@@ -3816,7 +4721,17 @@
       "source": null
     },
     {
+      "id": "os.sysconf",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "pathlib.Path",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "pytest.approx",
       "type": "external",
       "source": null
     },
@@ -3852,6 +4767,11 @@
     },
     {
       "id": "shutil.copy2",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "shutil.disk_usage",
       "type": "external",
       "source": null
     },
@@ -3962,6 +4882,16 @@
     },
     {
       "id": "time.perf_counter",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "time.sleep",
+      "type": "external",
+      "source": null
+    },
+    {
+      "id": "time.time",
       "type": "external",
       "source": null
     },
@@ -4103,6 +5033,11 @@
   ],
   "edges": [
     {
+      "from": "backend.app.ai.ollama_client.NdjsonStreamDecoder.__init__",
+      "to": "codecs.getincrementaldecoder",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.ai.ollama_client.OllamaClient.__init__",
       "to": "httpx.AsyncClient",
       "relation": "calls-inferred"
@@ -4110,6 +5045,66 @@
     {
       "from": "backend.app.ai.ollama_client.OllamaClient.generate",
       "to": "re.sub",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.ollama_client.OllamaClient.pull_model",
+      "to": "httpx.Timeout",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.ollama_client._parse_record",
+      "to": "json.loads",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.disk_status",
+      "to": "os.path.dirname",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.disk_status",
+      "to": "os.path.exists",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.disk_status",
+      "to": "shutil.disk_usage",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.installed_ram_bytes",
+      "to": "ctypes.byref",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.installed_ram_bytes",
+      "to": "ctypes.c_ulonglong",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.installed_ram_bytes",
+      "to": "ctypes.windll.kernel32.GetPhysicallyInstalledSystemMemory",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.installed_ram_bytes",
+      "to": "os.sysconf",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.ollama_models_dir",
+      "to": "os.environ.get",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.ollama_models_dir",
+      "to": "os.path.expanduser",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.ollama_models_dir",
+      "to": "os.path.join",
       "relation": "calls-inferred"
     },
     {
@@ -4168,6 +5163,36 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.ai.supervisor.AISupervisor._pull_owns_state",
+      "to": "asyncio.current_task",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor._run_pull",
+      "to": "backend.app.ai.ollama_client.OllamaInsufficientSpace",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor._run_pull",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor._run_pull",
+      "to": "backend.app.ai.resources.human_bytes",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor._run_pull.check_space",
+      "to": "backend.app.ai.ollama_client.OllamaInsufficientSpace",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor._run_pull.check_space",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
       "from": "backend.app.ai.supervisor.AISupervisor._try_auto_start",
       "to": "asyncio.sleep",
       "relation": "calls-inferred"
@@ -4175,6 +5200,16 @@
     {
       "from": "backend.app.ai.supervisor.AISupervisor._try_auto_start",
       "to": "subprocess.Popen",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor.pull_payload",
+      "to": "backend.app.ai.resources.human_bytes",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.ai.supervisor.AISupervisor.start_pull",
+      "to": "asyncio.create_task",
       "relation": "calls-inferred"
     },
     {
@@ -4853,6 +5888,16 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.app.main._purge_expired_oauth_states",
+      "to": "time.time",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main._register_oauth_state",
+      "to": "time.time",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.app.main._set_backfill_state",
       "to": "backend.app.mail.backfill.dump_cursor",
       "relation": "calls"
@@ -4876,6 +5921,26 @@
       "from": "backend.app.main._startup_background",
       "to": "backend.app.services.task_derivation.rebuild_tasks_from_analyses",
       "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.ai_model",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.ai_model",
+      "to": "backend.app.ai.resources.human_bytes",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.app.main.ai_model_pull",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.ai_model_select",
+      "to": "fastapi.HTTPException",
+      "relation": "calls-inferred"
     },
     {
       "from": "backend.app.main.analysis_progress",
@@ -5075,6 +6140,11 @@
     {
       "from": "backend.app.main.gmail_callback",
       "to": "datetime.timedelta",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.main.gmail_callback",
+      "to": "time.time",
       "relation": "calls-inferred"
     },
     {
@@ -7080,6 +8150,591 @@
     {
       "from": "backend.tests.test_identity_migration.test_provider_uniqueness_enforced",
       "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints._await_pull",
+      "to": "time.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints._await_pull",
+      "to": "time.time",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints._wire",
+      "to": "backend.app.ai.supervisor.AISupervisor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints._wire",
+      "to": "backend.tests.test_model_supervisor.FakePullClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.client",
+      "to": "backend.app.db.repositories.Repository",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.client",
+      "to": "fastapi.testclient.TestClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.oauth_states",
+      "to": "backend.app.main.OAUTH_STATES.clear",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.oauth_states",
+      "to": "backend.app.main.OAUTH_STATES.update",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_a_denied_callback_releases_its_state_immediately",
+      "to": "time.time",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_an_abandoned_state_is_purged_once_the_ttl_passes",
+      "to": "backend.app.main._purge_expired_oauth_states",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_an_abandoned_state_is_purged_once_the_ttl_passes",
+      "to": "time.time",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_an_expired_state_is_rejected_even_before_a_purge_runs",
+      "to": "time.time",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_cap_eviction_drops_the_oldest_not_an_arbitrary_flow",
+      "to": "backend.app.main._register_oauth_state",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_cap_eviction_drops_the_oldest_not_an_arbitrary_flow",
+      "to": "time.time",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_purging_keeps_concurrent_recent_flows_alive",
+      "to": "backend.app.main._purge_expired_oauth_states",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_purging_keeps_concurrent_recent_flows_alive",
+      "to": "time.time",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_endpoints.test_the_state_dict_never_exceeds_its_cap",
+      "to": "backend.app.main._register_oauth_state",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull._StreamTransport.handle_async_request",
+      "to": "httpx.Response",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull._client_for",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull._client_for",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_blank_lines_are_ignored",
+      "to": "backend.app.ai.ollama_client.iter_ndjson_records",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream.run",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_disk_status_reports_real_free_space",
+      "to": "backend.app.ai.resources.disk_status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_disk_status_walks_up_to_an_existing_ancestor",
+      "to": "backend.app.ai.resources.disk_status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_disk_status_walks_up_to_an_existing_ancestor",
+      "to": "backend.app.ai.resources.ollama_models_dir",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_fraction_is_capped_at_one",
+      "to": "backend.app.ai.ollama_client.PullProgress",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_fraction_is_none_until_a_total_is_announced",
+      "to": "backend.app.ai.ollama_client.PullProgress",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_fraction_reflects_real_bytes",
+      "to": "backend.app.ai.ollama_client.PullProgress",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_human_bytes_formats_consistently",
+      "to": "backend.app.ai.resources.human_bytes",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_incomplete_final_record_is_not_emitted_until_flush",
+      "to": "backend.app.ai.ollama_client.NdjsonStreamDecoder",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_incomplete_final_record_without_newline_is_emitted_by_flush",
+      "to": "backend.app.ai.ollama_client.NdjsonStreamDecoder",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_installed_ram_is_reported_as_a_real_value",
+      "to": "backend.app.ai.resources.installed_ram_bytes",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_insufficient_disk_space_blocks_with_an_actionable_message",
+      "to": "backend.app.ai.resources.DiskStatus",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_insufficient_disk_space_blocks_with_an_actionable_message",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_list_models_reports_names_and_sizes_without_invention",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_list_models_reports_names_and_sizes_without_invention",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_low_ram_blocks_before_a_download_starts",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_malformed_record_is_dropped_without_losing_neighbours",
+      "to": "backend.app.ai.ollama_client.NdjsonStreamDecoder",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_malformed_record_is_dropped_without_losing_neighbours",
+      "to": "backend.app.ai.ollama_client.iter_ndjson_records",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_model_size_uses_the_real_reported_size",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_model_size_uses_the_real_reported_size",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_models_dir_is_a_real_path_on_this_machine",
+      "to": "backend.app.ai.resources.ollama_models_dir",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_multi_byte_utf8_split_across_chunks",
+      "to": "backend.app.ai.ollama_client.iter_ndjson_records",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_multiple_layers_are_summed_once_each",
+      "to": "backend.app.ai.ollama_client.LayerProgressAggregator",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_non_object_record_is_dropped",
+      "to": "backend.app.ai.ollama_client.iter_ndjson_records",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_error_record_raises_and_is_not_reported_as_success",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_error_record_raises_and_is_not_reported_as_success",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_http_error_status_raises",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_http_error_status_raises",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_non_success_terminal_status_raises",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_non_success_terminal_status_raises",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_reports_real_progress_and_completes",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_splits_records_across_chunks_while_streaming",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_splits_records_across_chunks_while_streaming",
+      "to": "backend.app.ai.ollama_client.OllamaClient",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_pull_splits_records_across_chunks_while_streaming",
+      "to": "httpx.AsyncClient",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_records_split_across_network_chunks_are_reassembled",
+      "to": "backend.app.ai.ollama_client.iter_ndjson_records",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_repeated_updates_for_one_digest_do_not_double_count",
+      "to": "backend.app.ai.ollama_client.LayerProgressAggregator",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_space_check_aborts_the_download_before_it_fills_the_disk",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_space_check_aborts_the_download_before_it_fills_the_disk",
+      "to": "backend.app.ai.ollama_client.OllamaInsufficientSpace",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_space_check_aborts_the_download_before_it_fills_the_disk",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_space_check_aborts_the_download_before_it_fills_the_disk.check",
+      "to": "backend.app.ai.ollama_client.OllamaInsufficientSpace",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_space_check_runs_once_with_the_announced_total_before_progress",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_status_is_retained_across_layer_records",
+      "to": "backend.app.ai.ollama_client.LayerProgressAggregator",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_status_records_without_bytes_do_not_invent_a_total",
+      "to": "backend.app.ai.ollama_client.LayerProgressAggregator",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_sufficient_space_and_ram_do_not_block",
+      "to": "backend.app.ai.resources.DiskStatus",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_sufficient_space_and_ram_do_not_block",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_the_preflight_runs_against_this_machine",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_the_preflight_runs_against_this_machine",
+      "to": "backend.app.ai.resources.disk_status",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_the_preflight_runs_against_this_machine",
+      "to": "backend.app.ai.resources.installed_ram_bytes",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_unknown_required_size_does_not_block",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_unparseable_incomplete_tail_is_dropped_not_invented",
+      "to": "backend.app.ai.ollama_client.NdjsonStreamDecoder",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_unreadable_disk_is_blocking",
+      "to": "backend.app.ai.resources.DiskStatus",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_unreadable_disk_is_blocking",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_pull.test_unreadable_ram_is_reported_as_uncertain_not_as_failure",
+      "to": "backend.app.ai.resources.check_for_model_download",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.FakePullClient.pull_model",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.FakePullClient.pull_model",
+      "to": "backend.app.ai.ollama_client.OllamaInsufficientSpace",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.FakePullClient.pull_model",
+      "to": "backend.app.ai.ollama_client.OllamaPullFailed",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.FakePullClient.pull_model",
+      "to": "backend.app.ai.ollama_client.PullProgress",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor._start",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.make_supervisor",
+      "to": "backend.app.ai.supervisor.AISupervisor",
+      "relation": "calls"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_a_superseded_pull_cannot_overwrite_newer_state",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_analysis_failure_does_not_clobber_an_active_download",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_analysis_failure_does_not_clobber_an_active_download",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_analysis_failure_does_not_clobber_an_active_download.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_cancel_clears_progress_and_does_not_leave_a_stale_download_state",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_cancel_clears_progress_and_does_not_leave_a_stale_download_state",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_cancel_clears_progress_and_does_not_leave_a_stale_download_state.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_cancel_is_idempotent",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_insufficient_space_fails_the_pull_with_a_specific_code",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_pull_failure_is_reported_as_model_failed",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly",
+      "to": "pytest.approx",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_pull_payload_reports_null_fraction_until_a_total_is_announced",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_pull_payload_reports_null_fraction_until_a_total_is_announced",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_pull_payload_reports_null_fraction_until_a_total_is_announced.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_queue_is_paused_while_downloading_and_after_failure",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_queue_is_paused_while_downloading_and_after_failure",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_queue_is_paused_while_downloading_and_after_failure.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_refresh_does_not_clobber_an_active_download",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_refresh_does_not_clobber_an_active_download",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_refresh_does_not_clobber_an_active_download.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_second_start_while_downloading_is_idempotent",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_second_start_while_downloading_is_idempotent",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_second_start_while_downloading_is_idempotent.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_set_model_refuses_while_a_download_is_running",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_set_model_refuses_while_a_download_is_running",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_set_model_refuses_while_a_download_is_running.run",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_set_model_rejects_an_empty_name",
+      "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_start_pull_enters_downloading_and_publishes_real_bytes",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_successful_pull_runs_the_readiness_check_before_ready",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_unreachable_server_is_reported_before_a_pull_starts",
+      "to": "asyncio.run",
       "relation": "calls-inferred"
     },
     {

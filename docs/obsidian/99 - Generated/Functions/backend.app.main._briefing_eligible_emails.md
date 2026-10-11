@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main._briefing_eligible_emails
 source: backend/app/main.py
-line: 1087
+line: 1235
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ One authoritative briefing candidate set: active inbox, not spam/
 
 ## Location
 
-`backend/app/main.py:1087`
+`backend/app/main.py:1235`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client
 qualified_name: backend.app.ai.ollama_client.OllamaModelMissing
 source: backend/app/ai/ollama_client.py
-line: 19
+line: 27
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ Requested model is not available in Ollama.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:19`
+`backend/app/ai/ollama_client.py:27`
 
 ## Bases
 

@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.backfill_status
 source: backend/app/main.py
-line: 881
+line: 930
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Observer-facing backfill status (typed state, counters, estimate).
 
 ## Location
 
-`backend/app/main.py:881`
+`backend/app/main.py:930`
 
 ## Parameters
 

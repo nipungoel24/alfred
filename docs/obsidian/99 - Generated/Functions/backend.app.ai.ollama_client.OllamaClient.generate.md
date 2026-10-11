@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client.OllamaClient
 qualified_name: backend.app.ai.ollama_client.OllamaClient.generate
 source: backend/app/ai/ollama_client.py
-line: 80
+line: 368
 status: active
 tags: [ai, function, critical-path]
 ---
@@ -21,7 +21,7 @@ Generate a response from Ollama.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:80`
+`backend/app/ai/ollama_client.py:368`
 
 ## Signature
 

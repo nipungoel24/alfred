@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.queue_paused
 source: backend/app/ai/supervisor.py
-line: 122
+line: 154
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ True when inference consumption must pause.
 
 ## Location
 
-`backend/app/ai/supervisor.py:122`
+`backend/app/ai/supervisor.py:154`
 
 ## Signature
 

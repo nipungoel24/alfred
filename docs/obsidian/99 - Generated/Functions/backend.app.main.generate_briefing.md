@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.generate_briefing
 source: backend/app/main.py
-line: 1110
+line: 1258
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `generate_briefing` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:1110`
+`backend/app/main.py:1258`
 
 ## Signature
 

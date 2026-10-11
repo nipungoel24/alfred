@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client.OllamaClient
 qualified_name: backend.app.ai.ollama_client.OllamaClient.preload_model
 source: backend/app/ai/ollama_client.py
-line: 67
+line: 355
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Preload a model into VRAM/RAM to avoid cold-start latency on first inference.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:67`
+`backend/app/ai/ollama_client.py:355`
 
 ## Signature
 

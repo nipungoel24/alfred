@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.gmail_callback
 source: backend/app/main.py
-line: 707
+line: 747
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `gmail_callback` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:707`
+`backend/app/main.py:747`
 
 ## Signature
 
@@ -46,6 +46,7 @@ Purpose inferred from usage: `gmail_callback` in `backend/app/main.py`.
 - [[backend.app.schemas.EmailAccount|EmailAccount]] (calls)
 - `now` (`datetime.datetime.now`, calls-inferred)
 - `timedelta` (`datetime.timedelta`, calls-inferred)
+- `time` (`time.time`, calls-inferred)
 
 ## Side Effects
 

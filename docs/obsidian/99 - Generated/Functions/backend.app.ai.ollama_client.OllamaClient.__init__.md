@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.ollama_client.OllamaClient
 qualified_name: backend.app.ai.ollama_client.OllamaClient.__init__
 source: backend/app/ai/ollama_client.py
-line: 49
+line: 216
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/app/ai/ollama_client.py`.
 
 ## Location
 
-`backend/app/ai/ollama_client.py:49`
+`backend/app/ai/ollama_client.py:216`
 
 ## Signature
 

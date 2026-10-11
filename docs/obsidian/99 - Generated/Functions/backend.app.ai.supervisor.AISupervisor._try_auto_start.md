@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor._try_auto_start
 source: backend/app/ai/supervisor.py
-line: 203
+line: 455
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Start the Ollama server once if installed and not running.
 
 ## Location
 
-`backend/app/ai/supervisor.py:203`
+`backend/app/ai/supervisor.py:455`
 
 ## Signature
 

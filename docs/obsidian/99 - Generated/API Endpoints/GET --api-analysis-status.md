@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.analysis_status
 source: backend/app/main.py
-line: 915
+line: 964
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,4 +23,4 @@ AI state machine + analysis queue status (observer-facing).
 
 ## Location
 
-`backend/app/main.py:915`
+`backend/app/main.py:964`

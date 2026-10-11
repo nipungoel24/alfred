@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.next_backoff_seconds
 source: backend/app/ai/supervisor.py
-line: 284
+line: 540
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Next pause duration from the bounded backoff schedule.
 
 ## Location
 
-`backend/app/ai/supervisor.py:284`
+`backend/app/ai/supervisor.py:540`
 
 ## Signature
 
