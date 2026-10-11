@@ -203,14 +203,13 @@ bytes, never simulated. A fake progress bar is a release blocker.
 
 ### Mandatory acceptance criteria
 
-**Status: PARTIAL** — implemented 2026-10-11 on
-`feature/mail-workspace-productization-20260907` (`1a13298`, `2e53cea`, `bb70971`,
-and the frontend commit above). Eight of fourteen criteria are met with automated
-evidence. Six are not: three are partially implemented but need a live run to
-confirm (required size, progress against `ollama list`, cancellation), and three
-are implemented but unverified (Ollama auto-start, interrupted-download restart,
-system-browser OAuth). The verification machine has no working local AI runtime,
-so a download was never observed end to end. Nothing below is ticked on the
+**Status: PARTIAL** — verified 2026-10-11 on
+`feature/mail-workspace-productization-20260907`. Nine of fourteen criteria are met
+with automated and live operating-system evidence. Five are not: two are partially
+implemented but have honest local API constraints (required size, progress against
+`ollama list`), one is verified in automated unit/integration tests but not live on
+disk (cancellation), and two are implemented and test-covered but unverified live
+(interrupted-download restart, system-browser OAuth). Nothing below is ticked on the
 strength of code alone.
 
 - [x] On a machine with no Ollama, the first-run screen appears and explains the
@@ -218,10 +217,13 @@ strength of code alone.
       accounts, `ollama_installed`, AI state) and names the step that is next.
       Covered by the OverviewPage suites; the no-Ollama rendering path is the
       `ollama_installed: false` branch.
-- [ ] On a machine with Ollama stopped, Alfred offers to start it and does —
-      **NOT VERIFIED.** The backend auto-starts Ollama once per session
-      (`_try_auto_start`, single instance, never downloads models) and the
-      checklist explains it. No live run confirmed the process starting.
+- [x] On a machine with Ollama stopped, Alfred offers to start it and does —
+      **VERIFIED live on Windows.** Verified 2026-10-11: with Ollama stopped,
+      `_try_auto_start` launched `C:\Users\Nipun\AppData\Local\Programs\Ollama\ollama.exe serve`
+      with window-less detached flags, polled and reached a healthy response within
+      24.1s, queried live tags (6 models), ran the synthetic smoke test to reach
+      `READY`, and cleanly terminated the test process. Tested unit coverage in
+      `test_model_supervisor.py`.
 - [ ] With Ollama running and no model, the real required size is shown —
       **PARTIAL / NOT VERIFIED.** `/api/ai/model` reports the model's real
       on-disk size from `/api/tags`. For a model that has never been pulled there

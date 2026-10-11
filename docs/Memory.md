@@ -14,13 +14,13 @@ commit.
 | Field | Value |
 | --- | --- |
 | Current phase | **2 — First run and local AI setup (implemented)** |
-| Gate 2 | **PARTIAL**, 8/14 acceptance criteria met with automated evidence — see `docs/Phases.md` §Gate 2 |
-| Gate 2 gap | 6 criteria need a real Ollama on a clean Windows machine and are **NOT VERIFIED**; the verification machine has no working local AI runtime |
+| Gate 2 | **PARTIAL**, 9/14 acceptance criteria met with automated and live OS evidence — see `docs/Phases.md` §Gate 2 |
+| Gate 2 gap | 5 criteria remain: 2 local API limitations (size of unpulled model, list progress), 1 cancellation store check, 2 live unverified (interrupted restart, system browser OAuth) |
 | Gate 1 | **PASS**, 15/16 — criterion 13 still **unresolved** and deliberately left open |
 | Phase 1 | closed |
 | Visual QA | deferred to **Phase 3 / Gate 3**; backlog in `docs/VISUAL-QA-PHASE1.md` |
 | Branch | `feature/mail-workspace-productization-20260907` |
-| HEAD | `bb70971` — `feat(alfred): serve model status, download and selection over HTTP`, plus one unpushed frontend commit |
+| HEAD | `15b60e0` — `docs(alfred): record Gate 2 test stabilization and full suite evidence` |
 | Working tree | **clean** |
 | Next gate | **Gate 3** (UX, design system, accessibility) |
 
@@ -866,10 +866,11 @@ single invocation kept it alive throughout. Do not read this as an app fault.
 
 ## GATE STATUS
 
-**Gate 2: PARTIAL** (implemented 2026-10-11). Eight of fourteen criteria are met
-with automated evidence; six need a real Ollama on a clean machine and are
-recorded as **NOT VERIFIED** in `docs/Phases.md` §Gate 2. D15, D17 and D18 are
-closed. Gate 1's criterion 13 remains unresolved and was not touched.
+**Gate 2: PARTIAL** (verified 2026-10-11). Nine of fourteen criteria are met
+with automated and live runtime evidence (Ollama auto-start verified live
+against host runtime); five criteria remain honestly unverified live. D15,
+D17 and D18 are closed. Gate 1's criterion 13 remains unresolved and was
+not touched.
 
 **Gate 1: PASS** (2026-10-04). Verified against the packaged artifact built from the
 defect-closure work, with faults injected using OS primitives only.
