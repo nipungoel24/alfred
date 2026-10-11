@@ -64,13 +64,18 @@ export function useRetryPreservingFocus(
 ): () => void {
   const { requestFocus } = useFocusIntent();
   return useCallback(() => {
-    void Promise.resolve(refetch()).then((result) => {
-      const failed =
-        typeof result === 'object' &&
-        result !== null &&
-        'isError' in result &&
-        (result as { isError?: boolean }).isError === true;
-      if (!failed) requestFocus('view');
-    });
+    void Promise.resolve()
+      .then(() => refetch())
+      .then((result) => {
+        const failed =
+          typeof result === 'object' &&
+          result !== null &&
+          'isError' in result &&
+          (result as { isError?: boolean }).isError === true;
+        if (!failed) requestFocus('view');
+      })
+      .catch(() => {
+        // A rejected refetch is a failed retry; leave focus where it is.
+      });
   }, [refetch, requestFocus]);
 }
