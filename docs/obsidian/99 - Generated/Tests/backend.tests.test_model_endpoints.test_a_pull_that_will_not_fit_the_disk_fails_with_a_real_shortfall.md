@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_a_pull_that_will_not_fit_the_disk_fails_with_a_real_shortfall
 source: backend/tests/test_model_endpoints.py
-line: 314
+line: 334
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_a_pull_that_will_not_fit_the_disk_fails_with_
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:314`
+`backend/tests/test_model_endpoints.py:334`
 
 ## Signature
 

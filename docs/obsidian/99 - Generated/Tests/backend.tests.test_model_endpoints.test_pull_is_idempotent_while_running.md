@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_pull_is_idempotent_while_running
 source: backend/tests/test_model_endpoints.py
-line: 286
+line: 306
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_is_idempotent_while_running` in `backend
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:286`
+`backend/tests/test_model_endpoints.py:306`
 
 ## Signature
 

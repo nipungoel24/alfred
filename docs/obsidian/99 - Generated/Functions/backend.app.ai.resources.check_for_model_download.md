@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.resources
 qualified_name: backend.app.ai.resources.check_for_model_download
 source: backend/app/ai/resources.py
-line: 134
+line: 137
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Decide whether a model download may start on this machine.
 
 ## Location
 
-`backend/app/ai/resources.py:134`
+`backend/app/ai/resources.py:137`
 
 ## Signature
 

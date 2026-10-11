@@ -36,6 +36,7 @@ The directory Ollama stores model layers in, on this machine.
 ## Calls
 
 - `get` (`os.environ.get`, calls-inferred)
+- `exists` (`os.path.exists`, calls-inferred)
 - `expanduser` (`os.path.expanduser`, calls-inferred)
 - `join` (`os.path.join`, calls-inferred)
 

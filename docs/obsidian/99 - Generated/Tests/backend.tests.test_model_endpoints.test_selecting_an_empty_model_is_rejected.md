@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_selecting_an_empty_model_is_rejected
 source: backend/tests/test_model_endpoints.py
-line: 233
+line: 253
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_selecting_an_empty_model_is_rejected` in `bac
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:233`
+`backend/tests/test_model_endpoints.py:253`
 
 ## Signature
 

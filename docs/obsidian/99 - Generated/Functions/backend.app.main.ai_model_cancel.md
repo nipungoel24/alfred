@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.ai_model_cancel
 source: backend/app/main.py
-line: 1079
+line: 1084
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Cancel a running download, or report that none is running.
 
 ## Location
 
-`backend/app/main.py:1079`
+`backend/app/main.py:1084`
 
 ## Signature
 

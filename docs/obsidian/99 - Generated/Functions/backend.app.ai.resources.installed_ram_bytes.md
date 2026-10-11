@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.resources
 qualified_name: backend.app.ai.resources.installed_ram_bytes
 source: backend/app/ai/resources.py
-line: 84
+line: 87
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Physically installed RAM in bytes, or None when it cannot be read.
 
 ## Location
 
-`backend/app/ai/resources.py:84`
+`backend/app/ai/resources.py:87`
 
 ## Signature
 

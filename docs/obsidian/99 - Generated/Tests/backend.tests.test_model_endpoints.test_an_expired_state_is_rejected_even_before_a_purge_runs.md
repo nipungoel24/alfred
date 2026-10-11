@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_an_expired_state_is_rejected_even_before_a_purge_runs
 source: backend/tests/test_model_endpoints.py
-line: 115
+line: 117
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_an_expired_state_is_rejected_even_before_a_pu
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:115`
+`backend/tests/test_model_endpoints.py:117`
 
 ## Signature
 

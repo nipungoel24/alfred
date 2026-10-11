@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.delete_task
 source: backend/app/main.py
-line: 1286
+line: 1291
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `delete_task` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:1286`
+`backend/app/main.py:1291`
 
 ## Signature
 

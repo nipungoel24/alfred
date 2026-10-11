@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.ai_model_pull
 source: backend/app/main.py
-line: 1058
+line: 1060
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Start downloading a model. Idempotent — returns live progress.
 
 ## Location
 
-`backend/app/main.py:1058`
+`backend/app/main.py:1060`
 
 ## Signature
 

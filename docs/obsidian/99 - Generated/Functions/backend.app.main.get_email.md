@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.main
 qualified_name: backend.app.main.get_email
 source: backend/app/main.py
-line: 1149
+line: 1154
 status: active
 tags: [backend, function, endpoint]
 ---
@@ -25,7 +25,7 @@ Purpose inferred from usage: `get_email` in `backend/app/main.py`.
 
 ## Location
 
-`backend/app/main.py:1149`
+`backend/app/main.py:1154`
 
 ## Signature
 

@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.dismiss_task
 source: backend/app/main.py
-line: 1294
+line: 1299
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Durable "Not a task": hides the task and suppresses re-derivation.
 
 ## Location
 
-`backend/app/main.py:1294`
+`backend/app/main.py:1299`
 
 ## Parameters
 

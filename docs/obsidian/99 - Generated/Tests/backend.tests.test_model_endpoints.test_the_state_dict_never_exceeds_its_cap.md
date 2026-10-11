@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_the_state_dict_never_exceeds_its_cap
 source: backend/tests/test_model_endpoints.py
-line: 129
+line: 131
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_the_state_dict_never_exceeds_its_cap` in `bac
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:129`
+`backend/tests/test_model_endpoints.py:131`
 
 ## Signature
 

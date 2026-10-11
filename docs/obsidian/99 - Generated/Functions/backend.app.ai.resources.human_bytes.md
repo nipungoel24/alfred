@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.resources
 qualified_name: backend.app.ai.resources.human_bytes
 source: backend/app/ai/resources.py
-line: 190
+line: 193
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Format bytes with binary units, consistently across every surface.
 
 ## Location
 
-`backend/app/ai/resources.py:190`
+`backend/app/ai/resources.py:193`
 
 ## Signature
 

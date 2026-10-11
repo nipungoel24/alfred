@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_model_status_survives_an_offline_ollama
 source: backend/tests/test_model_endpoints.py
-line: 186
+line: 188
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_model_status_survives_an_offline_ollama` in `
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:186`
+`backend/tests/test_model_endpoints.py:188`
 
 ## Signature
 

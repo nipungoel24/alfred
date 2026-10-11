@@ -257,8 +257,10 @@ strength of code alone.
 - [x] The model is selectable in Settings and the change is applied without a
       restart — `POST /api/ai/model` calls `set_model` and re-runs the readiness
       check, so the UI drops from a stale `ready` to `model_missing`. A 409 is
-      returned while a download is running. Covered in `test_model_endpoints.py`;
-      the Settings picker renders the installed list.
+      returned while a download is running. Selection and pull now synchronize
+      `settings.ollama_model` and `ai.model` alongside `ai_supervisor`, keeping
+      `/api/config`, background queues, and cache lookups in sync. Covered in
+      `test_model_endpoints.py`; the Settings picker renders the installed list.
 - [ ] OAuth consent opens in the system browser — **NOT VERIFIED live.**
       Implemented via `@tauri-apps/plugin-opener` (`openExternalUrl`), with a
       browser-only fallback. No packaged run confirmed the system browser opening.
@@ -277,10 +279,11 @@ strength of code alone.
       redemption checks the age itself rather than trusting the next purge. Five
       tests cover purge, expiry-at-redemption, cap, oldest-first eviction and
       concurrent flows surviving the TTL.
-- [x] Full existing suite still passes — verified 2026-10-11: **374 backend, 392
-      frontend across 32/32 test files**. The Gate 1 floors were 298 and 391; both
-      grew. Auto-start path now has dedicated mock and timeout test coverage in
-      `test_model_supervisor.py`.
+- [x] Full existing suite still passes — verified 2026-10-11: **375 backend, 392
+      frontend across 32/32 test files, 17 tools (1 skipped), 44 Rust**. The Gate 1 floors
+      were 298 and 391; both grew. Auto-start path now has dedicated mock and timeout
+      test coverage in `test_model_supervisor.py`, and model selection synchronization is
+      asserted in `test_model_endpoints.py`.
 
 ### Defects closed in this gate
 

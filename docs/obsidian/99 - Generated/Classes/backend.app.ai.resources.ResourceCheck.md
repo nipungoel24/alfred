@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.resources
 qualified_name: backend.app.ai.resources.ResourceCheck
 source: backend/app/ai/resources.py
-line: 123
+line: 126
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ Result of the pre-download system check.
 
 ## Location
 
-`backend/app/ai/resources.py:123`
+`backend/app/ai/resources.py:126`
 
 ## Side Effects
 

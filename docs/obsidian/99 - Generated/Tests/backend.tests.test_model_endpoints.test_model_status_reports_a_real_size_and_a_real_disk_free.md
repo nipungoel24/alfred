@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_model_status_reports_a_real_size_and_a_real_disk_free
 source: backend/tests/test_model_endpoints.py
-line: 167
+line: 169
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_model_status_reports_a_real_size_and_a_real_d
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:167`
+`backend/tests/test_model_endpoints.py:169`
 
 ## Signature
 

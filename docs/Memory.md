@@ -57,7 +57,7 @@ from `desktop/src-tauri`.
 
 | Suite | Command | Result |
 | --- | --- | --- |
-| Backend | `py -3.12 -m pytest backend/app backend/tests -q` | **374 passed** (was 298 at Gate 1, 370 prior) |
+| Backend | `py -3.12 -m pytest backend/app backend/tests -q` | **375 passed** (was 298 at Gate 1, 374 prior) |
 | Tools | `py -3.12 -m pytest tools -q` | **17 passed, 1 skipped** |
 | Frontend | `npm --prefix frontend test` | **392 passed / 32 files** (0 failures, 0 unhandled errors) |
 | Rust | `cargo test` (from `desktop/src-tauri`) | **44 passed, 0 failed** |
@@ -66,9 +66,9 @@ from `desktop/src-tauri`.
 | Build | `npm --prefix frontend run build` | exit 0 |
 | Secret scan | `py -3.12 tools\release\scan_release_secrets.py` | **exit 0 (clean)** |
 
-**Total: 827 tests, 0 failures** (1 skipped). The unhandled promise rejection
-originating from `useRetryPreservingFocus` (`focus.ts`) on rejected refetch
-operations has been caught and resolved; the full test suite runs cleanly.
+**Total: 828 tests, 0 failures** (1 skipped). Model selection synchronization
+defect resolved and tested; unhandled promise rejections resolved; the full test
+suite runs cleanly.
 
 ### Production bundle
 
@@ -927,13 +927,13 @@ Accounts — are **not Gate 1 items**. They are open Phase 3 / Gate 3 QA, preser
 
 **Two things, in this order.**
 
-1. **Close the six unverified Gate 2 criteria** on a clean Windows machine with
-   Ollama installed and stopped, then a model pulled. They need a live runtime,
-   not more code: Ollama stopped → auto-start, real required size, progress
-   cross-checked against `ollama list`, cancel leaving a clean model, interrupted
-   download restarting cleanly, and the consent screen opening in the system
-   browser. Record the outcome against the ticks in `docs/Phases.md` §Gate 2 —
-   do not tick them on the strength of the implementation alone.
+1. **Gate 2 Remaining Criteria & Reproducible Runtime Procedures.**
+   Five criteria remain unverified or partially verified with honest local API/manual boundaries:
+   - *Required size of unpulled model:* Ollama local API (`127.0.0.1:11434`) does not expose remote registry manifests; sizes are honestly reported as unknown prior to download initiation, and preflight dynamically evaluates the first announced total.
+   - *Download progress against `ollama list`:* Reproducible procedure prepared using a small model (`smollm:135m`, ~270 MB) rather than default `qwen3:4b` (2.5 GB) to avoid unauthorized bandwidth consumption.
+   - *Cancellation integrity:* Procedure verifies closing the stream causes Ollama to abandon the pull and restores supervisor state without corrupt model entries in `ollama list`.
+   - *Interrupted download recovery:* Procedure verifies killing Ollama mid-pull and resuming with subsequent pull correctly reuses existing layer blobs in `~/.ollama/models/blobs`.
+   - *System browser OAuth consent:* Automated opener and callback validation verified; full end-to-end OS browser launch and consent requires real user Google credentials.
 2. **The visual pass.** See `docs/VISUAL-QA-PHASE1.md` for the full record, the
    capture hazards, and the exact outstanding list. Phase 2 added three new
    surfaces that visual QA has never seen: the first-run checklist, the Settings
@@ -963,7 +963,7 @@ intelligence panel with real content, the Tasks page, error and empty states, an
 were still on screen - whether the empty state replaces the skeleton promptly was never
 rechecked.
 
-**Automated verification status: PASS** (827 tests across Rust, backend, tools,
-and frontend; 0 failures, 1 skipped). The previous unhandled rejection in
-`useRetryPreservingFocus` (`src/lib/focus.ts`) was identified and fixed so the
-frontend test runner exits 0 with all 32 test files passing cleanly.
+**Automated verification status: PASS** (828 tests across Rust, backend, tools,
+and frontend; 0 failures, 1 skipped). Model selection synchronization defect
+resolved, verified with regression assertions in `test_model_endpoints.py`, and
+the full test suite runs cleanly.

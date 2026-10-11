@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_an_abandoned_state_is_purged_once_the_ttl_passes
 source: backend/tests/test_model_endpoints.py
-line: 102
+line: 104
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_an_abandoned_state_is_purged_once_the_ttl_pas
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:102`
+`backend/tests/test_model_endpoints.py:104`
 
 ## Signature
 

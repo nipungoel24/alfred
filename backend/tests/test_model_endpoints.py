@@ -60,6 +60,8 @@ def _wire(monkeypatch, pull_client=None):
     supervisor = AISupervisor(pull_client, "qwen3:4b")
     monkeypatch.setattr(main_mod, "ai_supervisor", supervisor)
     monkeypatch.setattr(main_mod, "ollama_client", pull_client)
+    monkeypatch.setattr(main_mod.settings, "ollama_model", "qwen3:4b")
+    monkeypatch.setattr(main_mod.ai, "model", "qwen3:4b")
     return supervisor, pull_client
 
 
@@ -228,6 +230,24 @@ def test_selecting_a_model_re_runs_the_readiness_check(client, monkeypatch):
     # is model_missing, not a stale ready.
     assert r.json()["state"] == AIState.MODEL_MISSING
     assert sup.model == "llama3.2:3b"
+    assert main_mod.settings.ollama_model == "llama3.2:3b"
+    assert main_mod.ai.model == "llama3.2:3b"
+    assert client.get("/api/config").json()["ollama_model"] == "llama3.2:3b"
+
+
+def test_pulling_a_new_model_synchronizes_settings_and_service(client, monkeypatch):
+    sup, pull_client = _wire(monkeypatch)
+    pull_client.steps = 1
+    pull_client.pull_behaviour = "hang"
+
+    r = client.post("/api/ai/model/pull", json={"model": "llama3.2:1b"})
+    assert r.status_code == 200
+    assert sup.model == "llama3.2:1b"
+    assert main_mod.settings.ollama_model == "llama3.2:1b"
+    assert main_mod.ai.model == "llama3.2:1b"
+    assert client.get("/api/config").json()["ollama_model"] == "llama3.2:1b"
+
+    pull_client.release = True
 
 
 def test_selecting_an_empty_model_is_rejected(client, monkeypatch):

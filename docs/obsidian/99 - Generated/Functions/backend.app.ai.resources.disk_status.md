@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.resources
 qualified_name: backend.app.ai.resources.disk_status
 source: backend/app/ai/resources.py
-line: 55
+line: 58
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Read real free/total bytes for the filesystem holding `path`.
 
 ## Location
 
-`backend/app/ai/resources.py:55`
+`backend/app/ai/resources.py:58`
 
 ## Signature
 

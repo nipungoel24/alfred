@@ -2671,6 +2671,11 @@
       "source": "backend/tests/test_model_endpoints.py"
     },
     {
+      "id": "backend.tests.test_model_endpoints.test_pulling_a_new_model_synchronizes_settings_and_service",
+      "type": "test",
+      "source": "backend/tests/test_model_endpoints.py"
+    },
+    {
       "id": "backend.tests.test_model_endpoints.test_purging_keeps_concurrent_recent_flows_alive",
       "type": "test",
       "source": "backend/tests/test_model_endpoints.py"
@@ -3051,6 +3056,31 @@
       "source": "backend/tests/test_model_supervisor.py"
     },
     {
+      "id": "backend.tests.test_model_supervisor.test_auto_start_skipped_when_exe_not_found",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_auto_start_spawns_process_and_polls_until_reachable",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_auto_start_spawns_process_and_polls_until_reachable.mock_tags",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_auto_start_timeout_bounded",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_auto_start_timeout_bounded.mock_tags",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
       "id": "backend.tests.test_model_supervisor.test_cancel_clears_progress_and_does_not_leave_a_stale_download_state",
       "type": "test",
       "source": "backend/tests/test_model_supervisor.py"
@@ -3168,6 +3198,21 @@
     {
       "id": "backend.tests.test_model_supervisor.test_set_model_rejects_an_empty_name",
       "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_start_pull_attempts_auto_start_when_offline",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_start_pull_attempts_auto_start_when_offline.mock_auto_start",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_start_pull_attempts_auto_start_when_offline.mock_tags",
+      "type": "function",
       "source": "backend/tests/test_model_supervisor.py"
     },
     {
@@ -5095,6 +5140,11 @@
     {
       "from": "backend.app.ai.resources.ollama_models_dir",
       "to": "os.environ.get",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.app.ai.resources.ollama_models_dir",
+      "to": "os.path.exists",
       "relation": "calls-inferred"
     },
     {
@@ -8593,6 +8643,21 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_model_supervisor.test_auto_start_skipped_when_exe_not_found",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_auto_start_spawns_process_and_polls_until_reachable",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_auto_start_timeout_bounded",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.tests.test_model_supervisor.test_cancel_clears_progress_and_does_not_leave_a_stale_download_state",
       "to": "asyncio.run",
       "relation": "calls-inferred"
@@ -8720,6 +8785,11 @@
     {
       "from": "backend.tests.test_model_supervisor.test_set_model_rejects_an_empty_name",
       "to": "pytest.raises",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_start_pull_attempts_auto_start_when_offline",
+      "to": "asyncio.run",
       "relation": "calls-inferred"
     },
     {

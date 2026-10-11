@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints._await_pull
 source: backend/tests/test_model_endpoints.py
-line: 70
+line: 72
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Wait for a download to settle, without touching its event loop.
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:70`
+`backend/tests/test_model_endpoints.py:72`
 
 ## Signature
 

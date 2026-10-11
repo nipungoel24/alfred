@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.resources.DiskStatus
 qualified_name: backend.app.ai.resources.DiskStatus.available
 source: backend/app/ai/resources.py
-line: 51
+line: 54
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `available` in `backend/app/ai/resources.py`.
 
 ## Location
 
-`backend/app/ai/resources.py:51`
+`backend/app/ai/resources.py:54`
 
 ## Signature
 

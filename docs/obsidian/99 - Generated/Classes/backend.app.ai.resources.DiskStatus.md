@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.resources
 qualified_name: backend.app.ai.resources.DiskStatus
 source: backend/app/ai/resources.py
-line: 38
+line: 41
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ Filesystem state at the Ollama model store.
 
 ## Location
 
-`backend/app/ai/resources.py:38`
+`backend/app/ai/resources.py:41`
 
 ## Called By
 

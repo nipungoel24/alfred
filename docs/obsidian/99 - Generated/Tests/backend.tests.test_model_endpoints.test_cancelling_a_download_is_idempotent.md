@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_cancelling_a_download_is_idempotent
 source: backend/tests/test_model_endpoints.py
-line: 300
+line: 320
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_cancelling_a_download_is_idempotent` in `back
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:300`
+`backend/tests/test_model_endpoints.py:320`
 
 ## Signature
 

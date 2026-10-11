@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_selecting_a_model_re_runs_the_readiness_check
 source: backend/tests/test_model_endpoints.py
-line: 223
+line: 225
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_selecting_a_model_re_runs_the_readiness_check
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:223`
+`backend/tests/test_model_endpoints.py:225`
 
 ## Signature
 

@@ -1039,6 +1039,8 @@ async def ai_model_select(body: ModelSelectRequest):
     """Select the model Alfred analyses with (Settings, criterion 2.7)."""
     try:
         model = ai_supervisor.set_model(body.model)
+        settings.ollama_model = model
+        ai.model = model
     except RuntimeError as exc:
         # Only reachable while a download is running.
         raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -1066,6 +1068,9 @@ async def ai_model_pull(body: ModelPullRequest | None = None):
     model = body.model if body else None
     try:
         payload = await ai_supervisor.start_pull(model)
+        if model:
+            settings.ollama_model = ai_supervisor.model
+            ai.model = ai_supervisor.model
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     _broadcast_progress({

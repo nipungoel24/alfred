@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints._state
 source: backend/tests/test_model_endpoints.py
-line: 66
+line: 68
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_state` in `backend/tests/test_model_endpoints.py`
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:66`
+`backend/tests/test_model_endpoints.py:68`
 
 ## Signature
 

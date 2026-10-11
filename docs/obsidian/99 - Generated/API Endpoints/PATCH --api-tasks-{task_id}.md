@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.patch_task
 source: backend/app/main.py
-line: 1307
+line: 1312
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Explicit user priority edit (task only — never rewrites the source
 
 ## Location
 
-`backend/app/main.py:1307`
+`backend/app/main.py:1312`
 
 ## Parameters
 

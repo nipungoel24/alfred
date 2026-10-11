@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_cap_eviction_drops_the_oldest_not_an_arbitrary_flow
 source: backend/tests/test_model_endpoints.py
-line: 141
+line: 143
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_cap_eviction_drops_the_oldest_not_an_arbitrar
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:141`
+`backend/tests/test_model_endpoints.py:143`
 
 ## Signature
 

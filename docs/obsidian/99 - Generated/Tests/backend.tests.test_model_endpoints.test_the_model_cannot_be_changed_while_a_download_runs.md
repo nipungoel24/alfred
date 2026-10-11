@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_the_model_cannot_be_changed_while_a_download_runs
 source: backend/tests/test_model_endpoints.py
-line: 239
+line: 259
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_the_model_cannot_be_changed_while_a_download_
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:239`
+`backend/tests/test_model_endpoints.py:259`
 
 ## Signature
 

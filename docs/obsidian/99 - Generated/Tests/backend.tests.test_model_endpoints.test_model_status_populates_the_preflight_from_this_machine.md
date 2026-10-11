@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_model_status_populates_the_preflight_from_this_machine
 source: backend/tests/test_model_endpoints.py
-line: 204
+line: 206
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_model_status_populates_the_preflight_from_thi
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:204`
+`backend/tests/test_model_endpoints.py:206`
 
 ## Signature
 

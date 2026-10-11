@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_a_denied_callback_releases_its_state_immediately
 source: backend/tests/test_model_endpoints.py
-line: 88
+line: 90
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_a_denied_callback_releases_its_state_immediat
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:88`
+`backend/tests/test_model_endpoints.py:90`
 
 ## Signature
 

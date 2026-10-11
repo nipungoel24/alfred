@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_endpoints
 qualified_name: backend.tests.test_model_endpoints.test_pull_returns_live_progress_on_the_status_endpoint
 source: backend/tests/test_model_endpoints.py
-line: 257
+line: 277
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_returns_live_progress_on_the_status_endp
 
 ## Location
 
-`backend/tests/test_model_endpoints.py:257`
+`backend/tests/test_model_endpoints.py:277`
 
 ## Signature
 

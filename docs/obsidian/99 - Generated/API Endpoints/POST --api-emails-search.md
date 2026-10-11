@@ -4,7 +4,7 @@ generated: true
 layer: backend
 qualified_name: backend.app.main.search_emails_structured
 source: backend/app/main.py
-line: 1133
+line: 1138
 status: active
 tags: [backend, function, endpoint, endpoint]
 ---
@@ -23,7 +23,7 @@ Structured search with filters applied at the database level.
 
 ## Location
 
-`backend/app/main.py:1133`
+`backend/app/main.py:1138`
 
 ## Parameters
 
