@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_human_bytes_formats_consistently
 source: backend/tests/test_model_pull.py
-line: 477
+line: 491
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_human_bytes_formats_consistently` in `backend
 
 ## Location
 
-`backend/tests/test_model_pull.py:477`
+`backend/tests/test_model_pull.py:491`
 
 ## Signature
 

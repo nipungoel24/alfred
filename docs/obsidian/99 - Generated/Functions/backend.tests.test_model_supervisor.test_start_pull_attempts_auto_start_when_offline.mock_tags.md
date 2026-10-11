@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor.test_start_pull_attempts_auto_start_when_offline
 qualified_name: backend.tests.test_model_supervisor.test_start_pull_attempts_auto_start_when_offline.mock_tags
 source: backend/tests/test_model_supervisor.py
-line: 470
+line: 473
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `mock_tags` in `backend/tests/test_model_supervisor
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:470`
+`backend/tests/test_model_supervisor.py:473`
 
 ## Signature
 

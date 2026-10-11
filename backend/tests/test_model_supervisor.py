@@ -99,6 +99,9 @@ class FakePullClient:
                     await asyncio.sleep(0.005)
             elif self.pull_behaviour == "space":
                 raise OllamaInsufficientSpace(required_bytes=total, free_bytes=1)
+            elif self.pull_behaviour == "disconnect" and i == 1:
+                from backend.app.ai.ollama_client import OllamaUnavailable
+                raise OllamaUnavailable("connection broken mid-stream")
             elif self.pull_behaviour == "fail" and i == self.steps:
                 raise OllamaPullFailed("registry refused")
         if self.pull_behaviour == "success":
@@ -475,3 +478,100 @@ def test_start_pull_attempts_auto_start_when_offline(monkeypatch):
     payload = asyncio.run(sup.start_pull())
     assert auto_start_called is True
     assert payload["state"] == AIState.OLLAMA_NOT_RUNNING
+
+
+def test_interrupted_download_transitions_to_model_failed_and_cleans_up():
+    sup, client = make_supervisor()
+    client.pull_behaviour = "disconnect"
+
+    async def run():
+        _, task = await _start(sup)
+        await task
+
+    asyncio.run(run())
+    assert sup.state == AIState.MODEL_FAILED
+    assert sup.pulling is False
+    assert sup.pull_error_code == "MODEL_PULL_FAILED"
+    assert sup.pull_progress is None
+    assert sup.model_installed is not True
+
+
+def test_restart_and_retry_after_interrupted_download():
+    sup, client = make_supervisor()
+    client.pull_behaviour = "disconnect"
+
+    async def run():
+        _, task = await _start(sup)
+        await task
+        assert sup.state == AIState.MODEL_FAILED
+
+        # Simulate server reconnect and successful retry
+        client.pull_behaviour = "success"
+        client.models = ["qwen3:4b"]
+        _, retry_task = await _start(sup)
+        await retry_task
+        return sup.payload()
+
+    payload = asyncio.run(run())
+    assert payload["state"] == AIState.READY
+    assert sup.pulling is False
+    assert sup.model_installed is True
+    assert sup.pull_progress is None
+
+
+def test_cancellation_during_active_transfer_with_concurrent_calls():
+    sup, client = make_supervisor()
+    client.pull_behaviour = "hang"
+    client.models = []
+
+    async def run():
+        await sup.refresh()
+        assert sup.state == AIState.MODEL_MISSING
+
+        await sup.start_pull()
+        await asyncio.sleep(0.01)
+        assert sup.state == AIState.MODEL_DOWNLOADING
+        assert sup.pulling is True
+
+        # Concurrently issue multiple cancel calls
+        results = await asyncio.gather(
+            sup.cancel_pull(),
+            sup.cancel_pull(),
+            sup.cancel_pull(),
+        )
+        return results
+
+    results = asyncio.run(run())
+    assert all(r["state"] == AIState.MODEL_MISSING for r in results)
+    assert sup.state == AIState.MODEL_MISSING
+    assert sup.pulling is False
+    assert sup.pull_progress is None
+    assert sup.model_installed is False
+
+
+def test_retry_after_cancelled_pull_succeeds_to_ready():
+    sup, client = make_supervisor()
+    client.pull_behaviour = "hang"
+    client.models = []
+
+    async def run():
+        await sup.refresh()
+        assert sup.state == AIState.MODEL_MISSING
+
+        await sup.start_pull()
+        await asyncio.sleep(0.01)
+        await sup.cancel_pull()
+        assert sup.state == AIState.MODEL_MISSING
+
+        # Now user restarts and completes the pull
+        client.pull_behaviour = "success"
+        client.release = True
+        client.models = ["qwen3:4b"]
+        _, task = await _start(sup)
+        await task
+        return sup.payload()
+
+    payload = asyncio.run(run())
+    assert payload["state"] == AIState.READY
+    assert sup.pulling is False
+    assert sup.model_installed is True

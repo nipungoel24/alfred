@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_refresh_does_not_clobber_an_active_download
 source: backend/tests/test_model_supervisor.py
-line: 324
+line: 327
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_refresh_does_not_clobber_an_active_download` 
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:324`
+`backend/tests/test_model_supervisor.py:327`
 
 ## Signature
 

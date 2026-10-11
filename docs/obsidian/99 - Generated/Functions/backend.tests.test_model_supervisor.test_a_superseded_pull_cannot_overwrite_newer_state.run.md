@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor.test_a_superseded_pull_cannot_overwrite_newer_state
 qualified_name: backend.tests.test_model_supervisor.test_a_superseded_pull_cannot_overwrite_newer_state.run
 source: backend/tests/test_model_supervisor.py
-line: 259
+line: 262
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `run` in `backend/tests/test_model_supervisor.py`.
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:259`
+`backend/tests/test_model_supervisor.py:262`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_space_check_aborts_the_download_before_it_fills_the_disk
 source: backend/tests/test_model_pull.py
-line: 305
+line: 319
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_space_check_aborts_the_download_before_it_fil
 
 ## Location
 
-`backend/tests/test_model_pull.py:305`
+`backend/tests/test_model_pull.py:319`
 
 ## Signature
 

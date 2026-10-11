@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_disk_status_walks_up_to_an_existing_ancestor
 source: backend/tests/test_model_pull.py
-line: 375
+line: 389
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_disk_status_walks_up_to_an_existing_ancestor`
 
 ## Location
 
-`backend/tests/test_model_pull.py:375`
+`backend/tests/test_model_pull.py:389`
 
 ## Signature
 

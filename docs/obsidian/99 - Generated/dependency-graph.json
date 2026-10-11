@@ -46,6 +46,11 @@
       "source": null
     },
     {
+      "id": "asyncio.gather",
+      "type": "external",
+      "source": null
+    },
+    {
       "id": "asyncio.get_running_loop",
       "type": "external",
       "source": null
@@ -2811,6 +2816,11 @@
       "source": "backend/tests/test_model_pull.py"
     },
     {
+      "id": "backend.tests.test_model_pull.test_layer_aggregation_handles_already_verified_resumed_layers",
+      "type": "test",
+      "source": "backend/tests/test_model_pull.py"
+    },
+    {
       "id": "backend.tests.test_model_pull.test_list_models_reports_names_and_sizes_without_invention",
       "type": "test",
       "source": "backend/tests/test_model_pull.py"
@@ -3101,12 +3111,32 @@
       "source": "backend/tests/test_model_supervisor.py"
     },
     {
+      "id": "backend.tests.test_model_supervisor.test_cancellation_during_active_transfer_with_concurrent_calls",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_cancellation_during_active_transfer_with_concurrent_calls.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
       "id": "backend.tests.test_model_supervisor.test_insufficient_space_fails_the_pull_with_a_specific_code",
       "type": "test",
       "source": "backend/tests/test_model_supervisor.py"
     },
     {
       "id": "backend.tests.test_model_supervisor.test_insufficient_space_fails_the_pull_with_a_specific_code.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_interrupted_download_transitions_to_model_failed_and_cleans_up",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_interrupted_download_transitions_to_model_failed_and_cleans_up.run",
       "type": "function",
       "source": "backend/tests/test_model_supervisor.py"
     },
@@ -3167,6 +3197,26 @@
     },
     {
       "id": "backend.tests.test_model_supervisor.test_refresh_does_not_clobber_an_active_download.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_restart_and_retry_after_interrupted_download",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_restart_and_retry_after_interrupted_download.run",
+      "type": "function",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_retry_after_cancelled_pull_succeeds_to_ready",
+      "type": "test",
+      "source": "backend/tests/test_model_supervisor.py"
+    },
+    {
+      "id": "backend.tests.test_model_supervisor.test_retry_after_cancelled_pull_succeeds_to_ready.run",
       "type": "function",
       "source": "backend/tests/test_model_supervisor.py"
     },
@@ -8393,6 +8443,11 @@
       "relation": "calls"
     },
     {
+      "from": "backend.tests.test_model_pull.test_layer_aggregation_handles_already_verified_resumed_layers",
+      "to": "backend.app.ai.ollama_client.LayerProgressAggregator",
+      "relation": "calls"
+    },
+    {
       "from": "backend.tests.test_model_pull.test_list_models_reports_names_and_sizes_without_invention",
       "to": "asyncio.run",
       "relation": "calls-inferred"
@@ -8678,7 +8733,37 @@
       "relation": "calls-inferred"
     },
     {
+      "from": "backend.tests.test_model_supervisor.test_cancellation_during_active_transfer_with_concurrent_calls",
+      "to": "asyncio.gather",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_cancellation_during_active_transfer_with_concurrent_calls",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_cancellation_during_active_transfer_with_concurrent_calls",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_cancellation_during_active_transfer_with_concurrent_calls.run",
+      "to": "asyncio.gather",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_cancellation_during_active_transfer_with_concurrent_calls.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
       "from": "backend.tests.test_model_supervisor.test_insufficient_space_fails_the_pull_with_a_specific_code",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_interrupted_download_transitions_to_model_failed_and_cleans_up",
       "to": "asyncio.run",
       "relation": "calls-inferred"
     },
@@ -8749,6 +8834,26 @@
     },
     {
       "from": "backend.tests.test_model_supervisor.test_refresh_does_not_clobber_an_active_download.run",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_restart_and_retry_after_interrupted_download",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_retry_after_cancelled_pull_succeeds_to_ready",
+      "to": "asyncio.run",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_retry_after_cancelled_pull_succeeds_to_ready",
+      "to": "asyncio.sleep",
+      "relation": "calls-inferred"
+    },
+    {
+      "from": "backend.tests.test_model_supervisor.test_retry_after_cancelled_pull_succeeds_to_ready.run",
       "to": "asyncio.sleep",
       "relation": "calls-inferred"
     },

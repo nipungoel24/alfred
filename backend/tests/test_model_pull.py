@@ -140,6 +140,20 @@ def test_fraction_reflects_real_bytes():
     assert PullProgress("x", 250, 1000, None, None, None).fraction == 0.25
 
 
+def test_layer_aggregation_handles_already_verified_resumed_layers():
+    agg = LayerProgressAggregator()
+    # On reconnect/resumption, Ollama announces previously downloaded layers as already verified:
+    agg.observe({"status": "already verified", "digest": "sha256:layer1", "total": 2000, "completed": 2000})
+    # Then proceeds with the in-flight remaining layer:
+    progress = agg.observe({"status": "downloading", "digest": "sha256:layer2", "total": 1000, "completed": 250})
+    assert progress.total_bytes == 3000
+    assert progress.completed_bytes == 2250
+    assert progress.fraction == 0.75
+    assert progress.layer_total == 1000
+    assert progress.layer_completed == 250
+    assert progress.status == "downloading"
+
+
 # ── Streaming pull through a real transport ──────────────────────────
 
 

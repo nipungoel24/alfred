@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_set_model_applies_when_idle
 source: backend/tests/test_model_supervisor.py
-line: 318
+line: 321
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_set_model_applies_when_idle` in `backend/test
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:318`
+`backend/tests/test_model_supervisor.py:321`
 
 ## Signature
 

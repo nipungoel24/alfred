@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_cancel_is_idempotent
 source: backend/tests/test_model_supervisor.py
-line: 198
+line: 201
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_cancel_is_idempotent` in `backend/tests/test_
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:198`
+`backend/tests/test_model_supervisor.py:201`
 
 ## Signature
 

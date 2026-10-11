@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_pull_payload_is_none_before_any_pull
 source: backend/tests/test_model_supervisor.py
-line: 354
+line: 357
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_payload_is_none_before_any_pull` in `bac
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:354`
+`backend/tests/test_model_supervisor.py:357`
 
 ## Signature
 

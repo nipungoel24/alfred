@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_start_pull_enters_downloading_and_publishes_real_bytes
 source: backend/tests/test_model_supervisor.py
-line: 118
+line: 121
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_start_pull_enters_downloading_and_publishes_r
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:118`
+`backend/tests/test_model_supervisor.py:121`
 
 ## Signature
 

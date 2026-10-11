@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor.test_analysis_failure_does_not_clobber_an_active_download
 qualified_name: backend.tests.test_model_supervisor.test_analysis_failure_does_not_clobber_an_active_download.run
 source: backend/tests/test_model_supervisor.py
-line: 344
+line: 347
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `run` in `backend/tests/test_model_supervisor.py`.
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:344`
+`backend/tests/test_model_supervisor.py:347`
 
 ## Signature
 

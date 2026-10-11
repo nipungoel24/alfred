@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly
 source: backend/tests/test_model_supervisor.py
-line: 378
+line: 381
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_payload_formats_bytes_honestly` in `back
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:378`
+`backend/tests/test_model_supervisor.py:381`
 
 ## Signature
 

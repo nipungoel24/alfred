@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_second_start_while_downloading_is_idempotent
 source: backend/tests/test_model_supervisor.py
-line: 161
+line: 164
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_second_start_while_downloading_is_idempotent`
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:161`
+`backend/tests/test_model_supervisor.py:164`
 
 ## Signature
 

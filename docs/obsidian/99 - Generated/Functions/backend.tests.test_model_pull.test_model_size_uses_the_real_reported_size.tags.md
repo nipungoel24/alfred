@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull.test_model_size_uses_the_real_reported_size
 qualified_name: backend.tests.test_model_pull.test_model_size_uses_the_real_reported_size.tags
 source: backend/tests/test_model_pull.py
-line: 486
+line: 500
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `tags` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:486`
+`backend/tests/test_model_pull.py:500`
 
 ## Signature
 

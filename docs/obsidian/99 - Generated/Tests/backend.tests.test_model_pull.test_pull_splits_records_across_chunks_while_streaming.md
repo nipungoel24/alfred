@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_pull_splits_records_across_chunks_while_streaming
 source: backend/tests/test_model_pull.py
-line: 226
+line: 240
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_splits_records_across_chunks_while_strea
 
 ## Location
 
-`backend/tests/test_model_pull.py:226`
+`backend/tests/test_model_pull.py:240`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull._ChunkStream
 qualified_name: backend.tests.test_model_pull._ChunkStream.__init__
 source: backend/tests/test_model_pull.py
-line: 153
+line: 167
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:153`
+`backend/tests/test_model_pull.py:167`
 
 ## Signature
 

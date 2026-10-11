@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_unreadable_ram_is_reported_as_uncertain_not_as_failure
 source: backend/tests/test_model_pull.py
-line: 462
+line: 476
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_unreadable_ram_is_reported_as_uncertain_not_a
 
 ## Location
 
-`backend/tests/test_model_pull.py:462`
+`backend/tests/test_model_pull.py:476`
 
 ## Signature
 

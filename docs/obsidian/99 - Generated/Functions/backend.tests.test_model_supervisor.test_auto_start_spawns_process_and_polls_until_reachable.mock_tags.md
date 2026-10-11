@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor.test_auto_start_spawns_process_and_polls_until_reachable
 qualified_name: backend.tests.test_model_supervisor.test_auto_start_spawns_process_and_polls_until_reachable.mock_tags
 source: backend/tests/test_model_supervisor.py
-line: 426
+line: 429
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `mock_tags` in `backend/tests/test_model_supervisor
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:426`
+`backend/tests/test_model_supervisor.py:429`
 
 ## Signature
 

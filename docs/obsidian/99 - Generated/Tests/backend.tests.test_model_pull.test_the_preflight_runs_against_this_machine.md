@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_the_preflight_runs_against_this_machine
 source: backend/tests/test_model_pull.py
-line: 435
+line: 449
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_the_preflight_runs_against_this_machine` in `
 
 ## Location
 
-`backend/tests/test_model_pull.py:435`
+`backend/tests/test_model_pull.py:449`
 
 ## Signature
 

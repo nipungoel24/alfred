@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_space_check_runs_once_with_the_announced_total_before_progress
 source: backend/tests/test_model_pull.py
-line: 281
+line: 295
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_space_check_runs_once_with_the_announced_tota
 
 ## Location
 
-`backend/tests/test_model_pull.py:281`
+`backend/tests/test_model_pull.py:295`
 
 ## Signature
 

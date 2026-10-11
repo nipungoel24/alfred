@@ -57,18 +57,18 @@ from `desktop/src-tauri`.
 
 | Suite | Command | Result |
 | --- | --- | --- |
-| Backend | `py -3.12 -m pytest backend/app backend/tests -q` | **375 passed** (was 298 at Gate 1, 374 prior) |
+| Backend | `py -3.12 -m pytest backend/app backend/tests -q` | **380 passed** (was 298 at Gate 1, 375 prior) |
 | Tools | `py -3.12 -m pytest tools -q` | **17 passed, 1 skipped** |
-| Frontend | `npm --prefix frontend test` | **392 passed / 32 files** (0 failures, 0 unhandled errors) |
+| Frontend | `npm --prefix frontend test` | **395 passed / 33 files** (0 failures, 0 unhandled errors) |
 | Rust | `cargo test` (from `desktop/src-tauri`) | **44 passed, 0 failed** |
 | Lint | `npm --prefix frontend run lint` | exit 0 |
 | Typecheck | `tsc -b` | exit 0 |
 | Build | `npm --prefix frontend run build` | exit 0 |
 | Secret scan | `py -3.12 tools\release\scan_release_secrets.py` | **exit 0 (clean)** |
 
-**Total: 828 tests, 0 failures** (1 skipped). Model selection synchronization
-defect resolved and tested; unhandled promise rejections resolved; the full test
-suite runs cleanly.
+**Total: 836 tests, 0 failures** (1 skipped). Interrupted download recovery,
+concurrent cancellation, layer aggregation resumption, and system-browser opener
+unit tests added and verified; the full test suite runs cleanly.
 
 ### Production bundle
 
@@ -963,7 +963,7 @@ intelligence panel with real content, the Tasks page, error and empty states, an
 were still on screen - whether the empty state replaces the skeleton promptly was never
 rechecked.
 
-**Automated verification status: PASS** (828 tests across Rust, backend, tools,
-and frontend; 0 failures, 1 skipped). Model selection synchronization defect
-resolved, verified with regression assertions in `test_model_endpoints.py`, and
-the full test suite runs cleanly.
+**Automated verification status: PASS** (836 tests across Rust, backend, tools,
+and frontend; 0 failures, 1 skipped). Interrupted download recovery, cancellation
+races, layer resumption, and system-browser opener unit tests verified; model
+selection synchronization verified; full test suite runs cleanly.

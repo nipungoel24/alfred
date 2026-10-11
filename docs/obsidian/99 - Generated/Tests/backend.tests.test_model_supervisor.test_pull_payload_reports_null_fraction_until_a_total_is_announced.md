@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_pull_payload_reports_null_fraction_until_a_total_is_announced
 source: backend/tests/test_model_supervisor.py
-line: 360
+line: 363
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_payload_reports_null_fraction_until_a_to
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:360`
+`backend/tests/test_model_supervisor.py:363`
 
 ## Signature
 

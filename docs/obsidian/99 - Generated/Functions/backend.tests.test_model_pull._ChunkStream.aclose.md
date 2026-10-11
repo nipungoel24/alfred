@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull._ChunkStream
 qualified_name: backend.tests.test_model_pull._ChunkStream.aclose
 source: backend/tests/test_model_pull.py
-line: 167
+line: 181
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `aclose` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:167`
+`backend/tests/test_model_pull.py:181`
 
 ## Signature
 

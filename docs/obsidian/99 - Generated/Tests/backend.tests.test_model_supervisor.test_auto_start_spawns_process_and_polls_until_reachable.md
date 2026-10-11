@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_auto_start_spawns_process_and_polls_until_reachable
 source: backend/tests/test_model_supervisor.py
-line: 409
+line: 412
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_auto_start_spawns_process_and_polls_until_rea
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:409`
+`backend/tests/test_model_supervisor.py:412`
 
 ## Signature
 

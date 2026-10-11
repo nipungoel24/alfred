@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_disk_status_reports_real_free_space
 source: backend/tests/test_model_pull.py
-line: 368
+line: 382
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_disk_status_reports_real_free_space` in `back
 
 ## Location
 
-`backend/tests/test_model_pull.py:368`
+`backend/tests/test_model_pull.py:382`
 
 ## Signature
 

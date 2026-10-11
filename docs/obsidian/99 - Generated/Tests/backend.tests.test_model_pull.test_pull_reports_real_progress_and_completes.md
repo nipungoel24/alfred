@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_pull_reports_real_progress_and_completes
 source: backend/tests/test_model_pull.py
-line: 198
+line: 212
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_reports_real_progress_and_completes` in 
 
 ## Location
 
-`backend/tests/test_model_pull.py:198`
+`backend/tests/test_model_pull.py:212`
 
 ## Signature
 

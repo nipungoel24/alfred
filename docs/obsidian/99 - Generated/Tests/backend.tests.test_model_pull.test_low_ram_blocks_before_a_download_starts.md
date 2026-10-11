@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_low_ram_blocks_before_a_download_starts
 source: backend/tests/test_model_pull.py
-line: 451
+line: 465
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_low_ram_blocks_before_a_download_starts` in `
 
 ## Location
 
-`backend/tests/test_model_pull.py:451`
+`backend/tests/test_model_pull.py:465`
 
 ## Signature
 

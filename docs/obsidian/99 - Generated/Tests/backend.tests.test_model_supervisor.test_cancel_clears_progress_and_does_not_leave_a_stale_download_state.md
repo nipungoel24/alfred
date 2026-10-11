@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_cancel_clears_progress_and_does_not_leave_a_stale_download_state
 source: backend/tests/test_model_supervisor.py
-line: 177
+line: 180
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_cancel_clears_progress_and_does_not_leave_a_s
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:177`
+`backend/tests/test_model_supervisor.py:180`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_pull_http_error_status_raises
 source: backend/tests/test_model_pull.py
-line: 270
+line: 284
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_http_error_status_raises` in `backend/te
 
 ## Location
 
-`backend/tests/test_model_pull.py:270`
+`backend/tests/test_model_pull.py:284`
 
 ## Signature
 

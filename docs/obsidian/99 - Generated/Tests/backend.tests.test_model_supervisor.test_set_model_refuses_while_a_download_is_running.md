@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_set_model_refuses_while_a_download_is_running
 source: backend/tests/test_model_supervisor.py
-line: 298
+line: 301
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_set_model_refuses_while_a_download_is_running
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:298`
+`backend/tests/test_model_supervisor.py:301`
 
 ## Signature
 

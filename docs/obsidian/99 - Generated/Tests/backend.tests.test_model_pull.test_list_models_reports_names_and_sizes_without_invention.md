@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_list_models_reports_names_and_sizes_without_invention
 source: backend/tests/test_model_pull.py
-line: 499
+line: 513
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_list_models_reports_names_and_sizes_without_i
 
 ## Location
 
-`backend/tests/test_model_pull.py:499`
+`backend/tests/test_model_pull.py:513`
 
 ## Signature
 

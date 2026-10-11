@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_start_pull_attempts_auto_start_when_offline
 source: backend/tests/test_model_supervisor.py
-line: 459
+line: 462
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_start_pull_attempts_auto_start_when_offline` 
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:459`
+`backend/tests/test_model_supervisor.py:462`
 
 ## Signature
 

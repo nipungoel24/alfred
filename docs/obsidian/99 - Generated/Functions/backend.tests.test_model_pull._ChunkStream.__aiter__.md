@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull._ChunkStream
 qualified_name: backend.tests.test_model_pull._ChunkStream.__aiter__
 source: backend/tests/test_model_pull.py
-line: 159
+line: 173
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__aiter__` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:159`
+`backend/tests/test_model_pull.py:173`
 
 ## Signature
 

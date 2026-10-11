@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly
 qualified_name: backend.tests.test_model_supervisor.test_pull_payload_formats_bytes_honestly.run
 source: backend/tests/test_model_supervisor.py
-line: 384
+line: 387
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `run` in `backend/tests/test_model_supervisor.py`.
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:384`
+`backend/tests/test_model_supervisor.py:387`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor.test_auto_start_timeout_bounded
 qualified_name: backend.tests.test_model_supervisor.test_auto_start_timeout_bounded.mock_tags
 source: backend/tests/test_model_supervisor.py
-line: 450
+line: 453
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `mock_tags` in `backend/tests/test_model_supervisor
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:450`
+`backend/tests/test_model_supervisor.py:453`
 
 ## Signature
 

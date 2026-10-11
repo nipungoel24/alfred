@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_unreadable_disk_is_blocking
 source: backend/tests/test_model_pull.py
-line: 469
+line: 483
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_unreadable_disk_is_blocking` in `backend/test
 
 ## Location
 
-`backend/tests/test_model_pull.py:469`
+`backend/tests/test_model_pull.py:483`
 
 ## Signature
 

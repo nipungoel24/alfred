@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_insufficient_space_fails_the_pull_with_a_specific_code
 source: backend/tests/test_model_supervisor.py
-line: 213
+line: 216
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_insufficient_space_fails_the_pull_with_a_spec
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:213`
+`backend/tests/test_model_supervisor.py:216`
 
 ## Signature
 

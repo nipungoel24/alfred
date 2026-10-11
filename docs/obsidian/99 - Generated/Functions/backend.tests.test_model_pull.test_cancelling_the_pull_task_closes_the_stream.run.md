@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream
 qualified_name: backend.tests.test_model_pull.test_cancelling_the_pull_task_closes_the_stream.run
 source: backend/tests/test_model_pull.py
-line: 342
+line: 356
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `run` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:342`
+`backend/tests/test_model_pull.py:356`
 
 ## Signature
 

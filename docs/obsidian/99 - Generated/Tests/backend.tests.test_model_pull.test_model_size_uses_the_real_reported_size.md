@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_model_size_uses_the_real_reported_size
 source: backend/tests/test_model_pull.py
-line: 485
+line: 499
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_model_size_uses_the_real_reported_size` in `b
 
 ## Location
 
-`backend/tests/test_model_pull.py:485`
+`backend/tests/test_model_pull.py:499`
 
 ## Signature
 

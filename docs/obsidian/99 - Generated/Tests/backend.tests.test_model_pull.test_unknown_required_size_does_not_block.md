@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_unknown_required_size_does_not_block
 source: backend/tests/test_model_pull.py
-line: 445
+line: 459
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_unknown_required_size_does_not_block` in `bac
 
 ## Location
 
-`backend/tests/test_model_pull.py:445`
+`backend/tests/test_model_pull.py:459`
 
 ## Signature
 

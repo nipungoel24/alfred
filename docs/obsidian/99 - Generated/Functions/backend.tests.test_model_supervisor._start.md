@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor._start
 source: backend/tests/test_model_supervisor.py
-line: 150
+line: 153
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Start a pull and yield so the task actually begins executing.
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:150`
+`backend/tests/test_model_supervisor.py:153`
 
 ## Signature
 

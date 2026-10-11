@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_auto_start_timeout_bounded
 source: backend/tests/test_model_supervisor.py
-line: 439
+line: 442
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_auto_start_timeout_bounded` in `backend/tests
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:439`
+`backend/tests/test_model_supervisor.py:442`
 
 ## Signature
 

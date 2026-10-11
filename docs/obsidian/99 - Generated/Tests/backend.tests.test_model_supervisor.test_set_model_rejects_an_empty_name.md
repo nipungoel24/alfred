@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_set_model_rejects_an_empty_name
 source: backend/tests/test_model_supervisor.py
-line: 312
+line: 315
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_set_model_rejects_an_empty_name` in `backend/
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:312`
+`backend/tests/test_model_supervisor.py:315`
 
 ## Signature
 

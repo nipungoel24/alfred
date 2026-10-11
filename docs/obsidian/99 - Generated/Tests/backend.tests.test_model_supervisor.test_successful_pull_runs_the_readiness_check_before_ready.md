@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_successful_pull_runs_the_readiness_check_before_ready
 source: backend/tests/test_model_supervisor.py
-line: 134
+line: 137
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_successful_pull_runs_the_readiness_check_befo
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:134`
+`backend/tests/test_model_supervisor.py:137`
 
 ## Signature
 

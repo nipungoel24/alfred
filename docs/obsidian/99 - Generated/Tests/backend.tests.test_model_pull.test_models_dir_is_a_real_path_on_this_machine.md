@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_models_dir_is_a_real_path_on_this_machine
 source: backend/tests/test_model_pull.py
-line: 362
+line: 376
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_models_dir_is_a_real_path_on_this_machine` in
 
 ## Location
 
-`backend/tests/test_model_pull.py:362`
+`backend/tests/test_model_pull.py:376`
 
 ## Signature
 

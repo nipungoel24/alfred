@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull._StreamTransport
 source: backend/tests/test_model_pull.py
-line: 171
+line: 185
 status: active
 tags: [test, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_StreamTransport` in `backend/tests/test_model_pul
 
 ## Location
 
-`backend/tests/test_model_pull.py:171`
+`backend/tests/test_model_pull.py:185`
 
 ## Bases
 

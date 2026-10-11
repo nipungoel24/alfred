@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull.test_pull_http_error_status_raises
 qualified_name: backend.tests.test_model_pull.test_pull_http_error_status_raises.run
 source: backend/tests/test_model_pull.py
-line: 273
+line: 287
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `run` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:273`
+`backend/tests/test_model_pull.py:287`
 
 ## Signature
 

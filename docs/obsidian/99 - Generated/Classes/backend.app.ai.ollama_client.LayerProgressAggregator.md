@@ -25,6 +25,7 @@ Tracks per-layer byte counts without double-counting.
 
 ## Called By
 
+- [[backend.tests.test_model_pull.test_layer_aggregation_handles_already_verified_resumed_layers|test_layer_aggregation_handles_already_verified_resumed_layers]]
 - [[backend.tests.test_model_pull.test_multiple_layers_are_summed_once_each|test_multiple_layers_are_summed_once_each]]
 - [[backend.tests.test_model_pull.test_repeated_updates_for_one_digest_do_not_double_count|test_repeated_updates_for_one_digest_do_not_double_count]]
 - [[backend.tests.test_model_pull.test_status_is_retained_across_layer_records|test_status_is_retained_across_layer_records]]

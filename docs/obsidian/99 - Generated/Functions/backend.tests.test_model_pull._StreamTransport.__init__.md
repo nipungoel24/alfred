@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull._StreamTransport
 qualified_name: backend.tests.test_model_pull._StreamTransport.__init__
 source: backend/tests/test_model_pull.py
-line: 172
+line: 186
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:172`
+`backend/tests/test_model_pull.py:186`
 
 ## Signature
 

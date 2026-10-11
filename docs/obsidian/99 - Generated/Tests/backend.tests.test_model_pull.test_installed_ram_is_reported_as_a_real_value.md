@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_installed_ram_is_reported_as_a_real_value
 source: backend/tests/test_model_pull.py
-line: 381
+line: 395
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_installed_ram_is_reported_as_a_real_value` in
 
 ## Location
 
-`backend/tests/test_model_pull.py:381`
+`backend/tests/test_model_pull.py:395`
 
 ## Signature
 

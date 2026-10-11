@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor.test_pull_failure_is_reported_as_model_failed
 qualified_name: backend.tests.test_model_supervisor.test_pull_failure_is_reported_as_model_failed.run
 source: backend/tests/test_model_supervisor.py
-line: 232
+line: 235
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `run` in `backend/tests/test_model_supervisor.py`.
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:232`
+`backend/tests/test_model_supervisor.py:235`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_unreachable_server_is_reported_before_a_pull_starts
 source: backend/tests/test_model_supervisor.py
-line: 242
+line: 245
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_unreachable_server_is_reported_before_a_pull_
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:242`
+`backend/tests/test_model_supervisor.py:245`
 
 ## Signature
 

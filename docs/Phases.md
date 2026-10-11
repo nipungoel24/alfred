@@ -225,30 +225,38 @@ strength of code alone.
       `READY`, and cleanly terminated the test process. Tested unit coverage in
       `test_model_supervisor.py`.
 - [ ] With Ollama running and no model, the real required size is shown —
-      **PARTIAL / NOT VERIFIED.** `/api/ai/model` reports the model's real
-      on-disk size from `/api/tags`. For a model that has never been pulled there
-      is no knowable size locally — Ollama does not publish registry sizes
-      through its local API — so that is reported as `null` / `"unknown size"`
-      rather than estimated, and the preflight re-checks against the first total
-      the registry announces. Showing a required size *before* the pull begins is
-      therefore not possible with the local API alone.
+      **PARTIAL / ARCHITECTURAL CONFLICT DOCUMENTED.** Ollama's local HTTP API
+      (`127.0.0.1:11434`) exposes `/api/tags` and `/api/show` for installed models
+      only. An unpulled model has no local endpoint reporting its size prior to
+      initiating `/api/pull`. Outbound WAN requests to `registry.ollama.ai` are
+      prohibited by ADR-007 and local-first network architecture; guessing or
+      hardcoding sizes is prohibited by PRD §0 and Rules §1.8. Alfred honestly
+      reports `size_bytes: null` / `"unknown size"` and evaluates disk space on
+      the first announced total in the pull stream before layer bodies move.
+      Because the literal Gate 2 criterion wording requires "the real required
+      size is shown", "unknown size" cannot be unilaterally marked as a PASS
+      without an owner criteria amendment or an ADR allowing registry egress.
 - [ ] Download progress matches actual bytes pulled, verified against
-      `ollama list` — **PARTIAL.** Progress is computed only from the
-      `completed`/`total` byte counts Ollama streams; `test_model_pull.py`
-      drives a real `_StreamTransport` and asserts the emitted byte counts, and
-      `test_model_endpoints.py` asserts the same figures over HTTP. The
-      comparison against `ollama list` is a manual step on a live machine and was
-      not performed.
+      `ollama list` — **PARTIAL.** Progress is computed strictly from the
+      `completed`/`total` byte counts Ollama streams (`test_model_pull.py`,
+      `test_model_endpoints.py`, `test_model_supervisor.py`). Live verification
+      against host `ollama list` requires pulling a live model; a controlled
+      procedure using `smollm:135m` (~270 MB, ~170 GB free on disk) is prepared
+      and awaiting explicit user authorization to avoid unauthorized network
+      transfer.
 - [ ] Download can be cancelled and leaves no corrupt model — **PARTIAL.**
-      Cancellation closes the HTTP stream, which makes Ollama abandon the pull;
-      the supervisor clears progress and restores the pre-pull state
-      (`test_model_supervisor.py`, `test_model_endpoints.py`). Whether the
-      partial model on disk is left in a state Ollama accepts on restart is
-      Ollama's layer handling and was not observed.
-- [ ] An interrupted download resumes or restarts cleanly — **NOT VERIFIED.**
-      No resume UI exists. Ollama resumes at layer granularity on a re-pull
-      (completed layers persist), so a second pull after an interruption
-      continues rather than starting over; this was not demonstrated live.
+      Automated tests verify that cancellation closes the HTTP stream,
+      supervisor handles concurrent cancellation calls safely, clears progress
+      and error states, reverts to `model_missing`, and allows subsequent retry
+      to `ready` (`test_model_supervisor.py`, `test_model_endpoints.py`). Host
+      on-disk layer cleanup verification awaits an authorized live test.
+- [ ] An interrupted download resumes or restarts cleanly — **PARTIAL / NOT VERIFIED LIVE.**
+      Automated tests verify that server connection loss mid-stream
+      (`OllamaUnavailable`) transitions to `MODEL_FAILED` without a stuck
+      downloading state, and subsequent retry recovers cleanly to `ready`
+      (`test_model_supervisor.py`). `LayerProgressAggregator` correctly preserves
+      progress for already-verified layers (`test_model_pull.py`). Live interrupted
+      transfer on host filesystem awaits user authorization.
 - [x] Insufficient disk space is detected before the download starts —
       `check_for_model_download` runs on the first announced total and raises
       `OllamaInsufficientSpace` inside the stream, so it aborts before layer
@@ -257,13 +265,18 @@ strength of code alone.
 - [x] The model is selectable in Settings and the change is applied without a
       restart — `POST /api/ai/model` calls `set_model` and re-runs the readiness
       check, so the UI drops from a stale `ready` to `model_missing`. A 409 is
-      returned while a download is running. Selection and pull now synchronize
+      returned while a download is running. Selection and pull synchronize
       `settings.ollama_model` and `ai.model` alongside `ai_supervisor`, keeping
       `/api/config`, background queues, and cache lookups in sync. Covered in
       `test_model_endpoints.py`; the Settings picker renders the installed list.
-- [ ] OAuth consent opens in the system browser — **NOT VERIFIED live.**
-      Implemented via `@tauri-apps/plugin-opener` (`openExternalUrl`), with a
-      browser-only fallback. No packaged run confirmed the system browser opening.
+- [ ] OAuth consent opens in the system browser — **NOT VERIFIED LIVE (UNIT TESTED).**
+      Implemented via `@tauri-apps/plugin-opener` (`openExternalUrl`) with a
+      browser-only fallback. Unit tested in `openExternal.test.ts` (disallowed
+      schemes rejected, browser fallback, Tauri opener invoked), `AccountsPage.test.tsx`
+      (dynamic backend callback URL), and `AccountsPage.states.test.tsx` (origin
+      verification D17, `OAUTH_STATES` bound D15). Real operating-system browser
+      launch and completing Google consent screen requires human interaction with
+      live Google credentials.
 - [x] Denied consent shows a real message and leaves Alfred usable — a denied
       flow returns the styled failure page and now releases its OAuth state
       immediately (`test_model_endpoints.py::test_a_denied_callback_releases_its_state_immediately`).
@@ -279,11 +292,9 @@ strength of code alone.
       redemption checks the age itself rather than trusting the next purge. Five
       tests cover purge, expiry-at-redemption, cap, oldest-first eviction and
       concurrent flows surviving the TTL.
-- [x] Full existing suite still passes — verified 2026-10-11: **375 backend, 392
-      frontend across 32/32 test files, 17 tools (1 skipped), 44 Rust**. The Gate 1 floors
-      were 298 and 391; both grew. Auto-start path now has dedicated mock and timeout
-      test coverage in `test_model_supervisor.py`, and model selection synchronization is
-      asserted in `test_model_endpoints.py`.
+- [x] Full existing suite still passes — verified 2026-10-11: **380 backend, 395
+      frontend across 33/33 test files, 17 tools (1 skipped), 44 Rust**. The Gate 1 floors
+      were 298 and 391; both grew. Total automated suite: **836 passed, 0 failed, 1 skipped**.
 
 ### Defects closed in this gate
 

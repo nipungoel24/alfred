@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull._lines
 source: backend/tests/test_model_pull.py
-line: 186
+line: 200
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_lines` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:186`
+`backend/tests/test_model_pull.py:200`
 
 ## Signature
 

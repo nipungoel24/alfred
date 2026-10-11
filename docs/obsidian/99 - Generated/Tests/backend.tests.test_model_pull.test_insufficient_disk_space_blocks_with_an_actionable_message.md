@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_insufficient_disk_space_blocks_with_an_actionable_message
 source: backend/tests/test_model_pull.py
-line: 403
+line: 417
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_insufficient_disk_space_blocks_with_an_action
 
 ## Location
 
-`backend/tests/test_model_pull.py:403`
+`backend/tests/test_model_pull.py:417`
 
 ## Signature
 

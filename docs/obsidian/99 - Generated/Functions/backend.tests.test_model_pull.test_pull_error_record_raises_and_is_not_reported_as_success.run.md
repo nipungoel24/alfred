@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull.test_pull_error_record_raises_and_is_not_reported_as_success
 qualified_name: backend.tests.test_model_pull.test_pull_error_record_raises_and_is_not_reported_as_success.run
 source: backend/tests/test_model_pull.py
-line: 251
+line: 265
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `run` in `backend/tests/test_model_pull.py`.
 
 ## Location
 
-`backend/tests/test_model_pull.py:251`
+`backend/tests/test_model_pull.py:265`
 
 ## Signature
 

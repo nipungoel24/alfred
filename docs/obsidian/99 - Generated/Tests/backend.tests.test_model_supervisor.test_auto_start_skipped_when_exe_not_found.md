@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_supervisor
 qualified_name: backend.tests.test_model_supervisor.test_auto_start_skipped_when_exe_not_found
 source: backend/tests/test_model_supervisor.py
-line: 401
+line: 404
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_auto_start_skipped_when_exe_not_found` in `ba
 
 ## Location
 
-`backend/tests/test_model_supervisor.py:401`
+`backend/tests/test_model_supervisor.py:404`
 
 ## Signature
 

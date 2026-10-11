@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull.test_pull_non_success_terminal_status_raises
 source: backend/tests/test_model_pull.py
-line: 259
+line: 273
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_pull_non_success_terminal_status_raises` in `
 
 ## Location
 
-`backend/tests/test_model_pull.py:259`
+`backend/tests/test_model_pull.py:273`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_model_pull
 qualified_name: backend.tests.test_model_pull._client_for
 source: backend/tests/test_model_pull.py
-line: 190
+line: 204
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_client_for` in `backend/tests/test_model_pull.py`
 
 ## Location
 
-`backend/tests/test_model_pull.py:190`
+`backend/tests/test_model_pull.py:204`
 
 ## Signature
 
