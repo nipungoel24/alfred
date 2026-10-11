@@ -110,6 +110,15 @@ export function AnalysisProgress() {
       tone = 'error';
       showRetry = true;
       break;
+    case 'model_downloading':
+      label = `Downloading ${status.model}${pending > 0 ? ` · ${pending} analyses queued` : ''}`;
+      tone = 'working';
+      break;
+    case 'model_failed':
+      label = `Model download failed${pending > 0 ? ` · ${pending} analyses queued` : ''}`;
+      tone = 'error';
+      showRetry = true;
+      break;
     default:
       label = `Local AI starting…`;
   }

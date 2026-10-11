@@ -1,12 +1,17 @@
-import { useEffect } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Mail, RefreshCw, Unplug, UserCircle, KeyRound } from 'lucide-react';
 import { accounts as fetchAccounts, connectGmail, syncAccount, deleteAccount } from '../../api/emails';
 import type { EmailAccount } from '../../api/emails';
 import { apiBase } from '../../api/client';
+import { openExternalUrl } from '../../lib/openExternal';
 import { EmptyState, ErrorState } from '../../components/ui/States';
 import { StatusIndicator } from '../../components/ui/Settings';
 import { useRetryPreservingFocus } from '../../lib/focus';
+
+/** How long to watch for a connection that completes in another window. */
+const CONSENT_WAIT_MS = 60_000;
+const CONSENT_POLL_MS = 2_000;
 
 export function AccountsPage() {
   const queryClient = useQueryClient();
@@ -17,14 +22,27 @@ export function AccountsPage() {
   });
   const accounts = accountsQuery.data ?? [];
 
+  const [awaitingConsent, setAwaitingConsent] = useState(false);
+  const [openerRefused, setOpenerRefused] = useState(false);
+  const accountsBeforeConnect = useRef(0);
+
   const connectMutation = useMutation({
     mutationFn: connectGmail,
-    onSuccess: (data) => {
-      const width = 500;
-      const height = 600;
-      const left = window.screenX + (window.outerWidth - width) / 2;
-      const top = window.screenY + (window.outerHeight - height) / 2;
-      window.open(data.url, 'Alfred Connect', `width=${width},height=${height},left=${left},top=${top}`);
+    onSuccess: async (data) => {
+      accountsBeforeConnect.current = accounts.length;
+      try {
+        // The consent screen belongs to the system browser, not to a window
+        // this app drew: it cannot be styled, positioned or scripted, and
+        // nothing here can impersonate it.
+        await openExternalUrl(data.url);
+        setOpenerRefused(false);
+        setAwaitingConsent(true);
+      } catch {
+        // The opener was refused. Say so plainly; a raw exception here
+        // would be noise the user cannot act on.
+        setAwaitingConsent(false);
+        setOpenerRefused(true);
+      }
     },
   });
 
@@ -44,13 +62,49 @@ export function AccountsPage() {
 
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
+      // Only the backend's own callback page may report a completed
+      // handshake. Without this check any page that can reach this window
+      // could claim a connection succeeded.
+      let origin: string;
+      try {
+        origin = new URL(apiBase()).origin;
+      } catch {
+        return;
+      }
+      if (event.origin !== origin) return;
       if (event.data === 'auth_success') {
+        setAwaitingConsent(false);
         queryClient.invalidateQueries({ queryKey: ['accounts'] });
       }
     };
     window.addEventListener('message', handleMessage);
     return () => window.removeEventListener('message', handleMessage);
   }, [queryClient]);
+
+  // The consent screen opens outside this window, so nothing posts back to
+  // it. Watch the account list until the connection lands, then stop.
+  useEffect(() => {
+    if (!awaitingConsent) return;
+    let cancelled = false;
+    const deadline = Date.now() + CONSENT_WAIT_MS;
+
+    const tick = async () => {
+      if (cancelled) return;
+      await queryClient.invalidateQueries({ queryKey: ['accounts'] });
+      if (cancelled) return;
+      if (accounts.length > accountsBeforeConnect.current || Date.now() >= deadline) {
+        setAwaitingConsent(false);
+        return;
+      }
+      setTimeout(tick, CONSENT_POLL_MS);
+    };
+
+    const timer = setTimeout(tick, CONSENT_POLL_MS);
+    return () => {
+      cancelled = true;
+      clearTimeout(timer);
+    };
+  }, [awaitingConsent, accounts.length, queryClient]);
 
   const startConnect = () => connectMutation.mutate(`${apiBase()}/api/accounts/gmail/callback`);
   const retryAccounts = useRetryPreservingFocus(accountsQuery.refetch);
@@ -73,6 +127,22 @@ export function AccountsPage() {
             onRetry={startConnect}
             retrying={connecting}
           />
+        )}
+
+        {openerRefused && (
+          <ErrorState
+            title="Couldn't open the browser"
+            body="Your browser or system refused to open the Google sign-in page. Open it from Settings once that is allowed, then try again."
+            onRetry={startConnect}
+            retrying={connecting}
+          />
+        )}
+
+        {awaitingConsent && (
+          <p className="account-inline-note" role="status">
+            Waiting for Google sign-in to finish. Finish it in the browser window that just
+            opened — Alfred will update on its own.
+          </p>
         )}
 
         {accountsQuery.isPending ? (

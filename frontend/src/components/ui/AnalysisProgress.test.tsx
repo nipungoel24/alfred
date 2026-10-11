@@ -29,6 +29,7 @@ const readyStatus: AnalysisStatus = {
   pending: 0,
   worker_running: true,
   queue_paused: false,
+  pull: null,
 };
 
 function renderWithStatus(status: AnalysisStatus) {
@@ -46,7 +47,7 @@ function renderWithStatus(status: AnalysisStatus) {
 describe('AnalysisProgress', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    // EventSource does not exist in jsdom — silence it.
+    // EventSource does not exist in jsdom â€” silence it.
     vi.stubGlobal('EventSource', class {
       close() {}
     });

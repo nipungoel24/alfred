@@ -6,6 +6,10 @@ import type { AnalysisStatus, Health } from '../../api/emails';
 vi.mock('../../api/emails', () => ({
   health: vi.fn(),
   analysisStatus: vi.fn(),
+  aiModel: vi.fn(),
+  selectAiModel: vi.fn(),
+  pullAiModel: vi.fn(),
+  cancelAiModelPull: vi.fn(),
 }));
 
 vi.mock('../../theme/ThemeProvider', () => ({
@@ -13,7 +17,7 @@ vi.mock('../../theme/ThemeProvider', () => ({
 }));
 
 import { SettingsPage } from './SettingsPage';
-import { health, analysisStatus } from '../../api/emails';
+import { health, analysisStatus, aiModel } from '../../api/emails';
 
 const readyStatus: AnalysisStatus = {
   state: 'ready',
@@ -26,6 +30,7 @@ const readyStatus: AnalysisStatus = {
   pending: 0,
   worker_running: true,
   queue_paused: false,
+  pull: null,
 };
 
 const okHealth: Health = { status: 'ok', ai: 'ready', build: 'backend-abc1234' };
@@ -42,11 +47,30 @@ function renderPage() {
 beforeEach(() => {
   vi.mocked(health).mockReset();
   vi.mocked(analysisStatus).mockReset();
+  vi.mocked(aiModel).mockReset();
   vi.mocked(health).mockResolvedValue(okHealth);
   vi.mocked(analysisStatus).mockResolvedValue(readyStatus);
+  vi.mocked(aiModel).mockResolvedValue({
+    model: 'qwen3:8b-instruct',
+    installed: true,
+    size_bytes: 5_000_000_000,
+    human_size: '4.7 GB',
+    local_models: [{ name: 'qwen3:8b-instruct', size_bytes: 5_000_000_000 }],
+    preflight: {
+      disk_free_bytes: 100_000_000_000,
+      human_disk_free: '93 GB',
+      disk_path: 'C:/Users/test/.ollama',
+      ram_bytes: 16_000_000_000,
+      human_ram: '14.9 GB',
+      ram_sufficient: true,
+      blocking: false,
+      code: null,
+      guidance: null,
+    },
+  });
 });
 
-describe('SettingsPage — sections', () => {
+describe('SettingsPage â€” sections', () => {
   it('groups every setting under a real heading', async () => {
     renderPage();
 
@@ -79,7 +103,7 @@ describe('SettingsPage — sections', () => {
   });
 });
 
-describe('SettingsPage — Local AI reports the real model', () => {
+describe('SettingsPage â€” Local AI reports the real model', () => {
   it('reads the model from the supervisor instead of a hardcoded name', async () => {
     vi.mocked(analysisStatus).mockResolvedValue({ ...readyStatus, model: 'llama3.1:8b' });
     renderPage();
@@ -130,7 +154,7 @@ describe('SettingsPage — Local AI reports the real model', () => {
   });
 });
 
-describe('SettingsPage — states', () => {
+describe('SettingsPage â€” states', () => {
   it('shows a skeleton, not stale or empty values, while loading', async () => {
     let resolveHealth!: (h: Health) => void;
     vi.mocked(health).mockReturnValue(new Promise((r) => { resolveHealth = r; }));
@@ -184,7 +208,7 @@ describe('SettingsPage — states', () => {
   });
 });
 
-describe('SettingsPage — accessibility', () => {
+describe('SettingsPage â€” accessibility', () => {
   it('labels every row', async () => {
     renderPage();
     await waitFor(() => expect(screen.getByText('qwen3:8b-instruct')).toBeInTheDocument());

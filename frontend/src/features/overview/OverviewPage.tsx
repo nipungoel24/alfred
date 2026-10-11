@@ -7,6 +7,7 @@ import { CheckSquare, Clock, Sparkles, ArrowUpRight } from 'lucide-react';
 import type { AppPage } from '../../layout/IconRail';
 import { SourceEmailPreview } from '../../mail/SourceEmailPreview';
 import { ErrorState } from '../../components/ui/States';
+import { FirstRunChecklist } from '../onboarding/FirstRunChecklist';
 
 interface OverviewPageProps {
   onNavigate: (page: AppPage) => void;
@@ -88,6 +89,10 @@ export function OverviewPage({ onNavigate, onOpenEmail }: OverviewPageProps) {
   return (
     <div className="page-scroll">
       <div className="overview-inner">
+        {/* First-run checklist. Renders nothing once setup is done and
+            dismissed, so it never becomes permanent furniture. */}
+        <FirstRunChecklist onNavigate={onNavigate} />
+
         {/* Editorial header */}
         <header className="reveal" style={{ ['--stagger' as string]: 0 }}>
           <h1 className="overview-greeting">{greeting}</h1>

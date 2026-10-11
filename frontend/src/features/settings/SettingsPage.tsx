@@ -6,6 +6,7 @@ import { ErrorState } from '../../components/ui/States';
 import { SettingsSection, SettingsRow, SettingsValue, StatusIndicator } from '../../components/ui/Settings';
 import { aiStateMeta } from '../../lib/aiState';
 import { useRetryPreservingFocus } from '../../lib/focus';
+import { ModelSetup } from './ModelSetup';
 
 export function SettingsPage() {
   const healthQuery = useQuery({ queryKey: ['health'], queryFn: fetchHealth, retry: 0 });
@@ -70,27 +71,14 @@ export function SettingsPage() {
             </div>
           ) : (
             <>
-              <SettingsRow label="Model">
-                {/* The supervisor reports the model it is actually using. */}
-                <SettingsValue mono>{aiStatus?.model ?? 'Unknown'}</SettingsValue>
-              </SettingsRow>
               <SettingsRow label="Runtime">
                 <SettingsValue>Ollama (local)</SettingsValue>
               </SettingsRow>
-              <SettingsRow label="Status">
-                <StatusIndicator
-                  tone={aiStateMeta(aiStatus?.state ?? health?.ai).tone}
-                  label={aiStateMeta(aiStatus?.state ?? health?.ai).word}
-                  hint={aiStateMeta(aiStatus?.state ?? health?.ai).hint}
-                />
-              </SettingsRow>
+              {/* Selection, size, preflight and download all live here so
+                  the model can be changed without a restart. */}
+              <ModelSetup />
               {aiStatus && (
                 <>
-                  <SettingsRow label="Model installed">
-                    <SettingsValue>
-                      {aiStatus.model_installed === null ? 'Unknown' : aiStatus.model_installed ? 'Yes' : 'No'}
-                    </SettingsValue>
-                  </SettingsRow>
                   <SettingsRow label="Ollama installed">
                     <SettingsValue>{aiStatus.ollama_installed ? 'Yes' : 'No'}</SettingsValue>
                   </SettingsRow>

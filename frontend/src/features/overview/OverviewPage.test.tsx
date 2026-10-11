@@ -7,6 +7,8 @@ const fetchEmailsMock = vi.fn();
 const fetchCountsMock = vi.fn();
 const regenerateMock = vi.fn();
 const fetchDetailsMock = vi.fn();
+const fetchAccountsMock = vi.fn();
+const analysisStatusMock = vi.fn();
 
 vi.mock('../../api/emails', () => ({
   briefing: (...args: unknown[]) => fetchBriefingMock(...args),
@@ -14,6 +16,9 @@ vi.mock('../../api/emails', () => ({
   emails: (...args: unknown[]) => fetchEmailsMock(...args),
   regenerateBriefing: (...args: unknown[]) => regenerateMock(...args),
   emailDetails: (...args: unknown[]) => fetchDetailsMock(...args),
+  // The first-run checklist reads these; without them the page throws.
+  accounts: (...args: unknown[]) => fetchAccountsMock(...args),
+  analysisStatus: (...args: unknown[]) => analysisStatusMock(...args),
 }));
 
 import { OverviewPage } from './OverviewPage';
@@ -34,6 +39,24 @@ describe('OverviewPage', () => {
     fetchCountsMock.mockReset();
     regenerateMock.mockReset();
     fetchDetailsMock.mockReset();
+    fetchAccountsMock.mockReset();
+    analysisStatusMock.mockReset();
+    // A fully set-up machine: the first-run checklist reports every step
+    // done, which is the state these tests were written against.
+    fetchAccountsMock.mockResolvedValue([{ id: 'gmail_a@b.c' }]);
+    analysisStatusMock.mockResolvedValue({
+      state: 'ready',
+      model: 'qwen3:4b',
+      model_installed: true,
+      ollama_installed: true,
+      ollama_running: true,
+      last_error: null,
+      detail: null,
+      pending: 0,
+      worker_running: true,
+      queue_paused: false,
+      pull: null,
+    });
   });
 
   it('renders Inbox and All Mail counts from the live counts endpoint', async () => {

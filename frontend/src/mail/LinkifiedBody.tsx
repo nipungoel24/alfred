@@ -3,7 +3,7 @@ import type { ReactNode } from 'react';
 import LinkifyIt from 'linkify-it';
 import type { Match } from 'linkify-it';
 import { isAllowedExternalUrl } from '../lib/urlSecurity';
-import { isTauriRuntime } from '../api/client';
+import { openExternalUrl } from '../lib/openExternal';
 
 const linkify = new LinkifyIt();
 
@@ -47,7 +47,9 @@ export function LinkifiedBody({ text, className }: LinkifiedBodyProps) {
           className="reader-link"
           onClick={(e) => {
             e.preventDefault();
-            openExternalLink(url);
+            // A rejected scheme throws; there is nothing to report beyond
+            // the link simply not opening, which is the safe outcome.
+            void openExternalUrl(url).catch(() => undefined);
           }}
         >
           {match.text}
@@ -65,19 +67,4 @@ export function LinkifiedBody({ text, className }: LinkifiedBodyProps) {
   }, [text]);
 
   return <div className={className}>{elements}</div>;
-}
-
-async function openExternalLink(url: string): Promise<void> {
-  if (!isAllowedExternalUrl(url)) {
-    return; // rejected schemes never open
-  }
-  if (isTauriRuntime()) {
-    // Packaged app: the system opener (never shell execution). A
-    // rejected opener permission stays rejected — no fallback.
-    const { openUrl } = await import('@tauri-apps/plugin-opener');
-    await openUrl(url);
-    return;
-  }
-  // Browser development only.
-  window.open(url, '_blank', 'noopener,noreferrer');
 }

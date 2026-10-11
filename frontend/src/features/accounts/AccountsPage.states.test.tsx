@@ -222,9 +222,33 @@ describe('AccountsPage — account needing authentication', () => {
     await screen.findByText('Authentication required');
     const before = fetchAccountsMock.mock.calls.length;
 
-    window.dispatchEvent(new MessageEvent('message', { data: 'auth_success' }));
+    // The callback page is served by the backend, so only its origin may
+    // report a completed handshake.
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: 'auth_success',
+        origin: 'http://127.0.0.1:8765',
+      }),
+    );
 
     await waitFor(() => expect(fetchAccountsMock.mock.calls.length).toBeGreaterThan(before));
+  });
+
+  it('ignores a success message from any other origin', async () => {
+    renderPage();
+    await screen.findByText('Authentication required');
+    const before = fetchAccountsMock.mock.calls.length;
+
+    window.dispatchEvent(
+      new MessageEvent('message', {
+        data: 'auth_success',
+        origin: 'https://evil.example',
+      }),
+    );
+
+    // Give the handler a chance to run before asserting it did nothing.
+    await new Promise((r) => setTimeout(r, 20));
+    expect(fetchAccountsMock.mock.calls.length).toBe(before);
   });
 });
 

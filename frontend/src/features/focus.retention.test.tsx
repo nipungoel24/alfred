@@ -31,7 +31,7 @@ import { accounts, health, analysisStatus, tasks, briefing } from '../api/emails
 
 /**
  * Mirrors how App consumes focus intent: a provider plus an effect that moves
- * focus to the view heading when — and only when — intent was requested. Without
+ * focus to the view heading when â€” and only when â€” intent was requested. Without
  * this the pages under test would fall back to the no-op default context and the
  * test would pass while proving nothing.
  */
@@ -83,7 +83,7 @@ beforeEach(() => {
   vi.clearAllMocks();
 });
 
-describe('Accounts — retry keeps focus somewhere real', () => {
+describe('Accounts â€” retry keeps focus somewhere real', () => {
   it('focusing the retry button and recovering leaves a valid focus target', async () => {
     vi.mocked(accounts).mockRejectedValueOnce(new Error('down'));
     wrap(<AccountsPage />);
@@ -152,13 +152,14 @@ describe('Accounts — retry keeps focus somewhere real', () => {
   });
 });
 
-describe('Settings — retry and background status polls', () => {
+describe('Settings â€” retry and background status polls', () => {
   it('a background AI status poll does not steal focus', async () => {
     vi.mocked(health).mockResolvedValue({ status: 'ok', ai: 'ready', build: 'b1' });
     vi.mocked(analysisStatus).mockResolvedValue({
       state: 'ready', model: 'm1', model_installed: true, ollama_installed: true,
       ollama_running: true, last_error: null, detail: null, pending: 0,
       worker_running: true, queue_paused: false,
+  pull: null,
     });
     wrap(<SettingsPage />);
 
@@ -171,6 +172,7 @@ describe('Settings — retry and background status polls', () => {
       state: 'recovering', model: 'm1', model_installed: true, ollama_installed: true,
       ollama_running: false, last_error: null, detail: null, pending: 3,
       worker_running: false, queue_paused: false,
+  pull: null,
     });
     await new Promise((r) => setTimeout(r, 40));
     expect(document.activeElement).toBe(theme);
@@ -182,6 +184,7 @@ describe('Settings — retry and background status polls', () => {
       state: 'ready', model: 'm1', model_installed: true, ollama_installed: true,
       ollama_running: true, last_error: null, detail: null, pending: 0,
       worker_running: true, queue_paused: false,
+  pull: null,
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     render(
@@ -211,6 +214,7 @@ describe('Settings — retry and background status polls', () => {
       state: 'ready', model: 'm1', model_installed: true, ollama_installed: true,
       ollama_running: true, last_error: null, detail: null, pending: 0,
       worker_running: true, queue_paused: false,
+  pull: null,
     });
     wrap(<SettingsPage />);
 
@@ -224,7 +228,7 @@ describe('Settings — retry and background status polls', () => {
   });
 });
 
-describe('Tasks and Deadlines — error and empty states hold focus still', () => {
+describe('Tasks and Deadlines â€” error and empty states hold focus still', () => {
   it('a background failure does not move focus off the page', async () => {
     vi.mocked(tasks).mockRejectedValue(new Error('down'));
     const { container } = wrap(

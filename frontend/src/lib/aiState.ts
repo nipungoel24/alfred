@@ -84,6 +84,22 @@ const META: Record<AIState, Omit<AiStateMeta, 'known'>> = {
     tone: 'danger',
     retryable: true,
   },
+  model_downloading: {
+    chip: 'Downloading model',
+    word: 'Downloading',
+    hint: 'The local model is downloading. Progress is shown in Settings.',
+    sentence: 'The local model is downloading.',
+    tone: 'working',
+    retryable: false,
+  },
+  model_failed: {
+    chip: 'Download failed',
+    word: 'Download failed',
+    hint: 'The model download did not finish. Your mailbox still works.',
+    sentence: 'The model download did not finish.',
+    tone: 'danger',
+    retryable: true,
+  },
 };
 
 const UNKNOWN: Omit<AiStateMeta, 'known'> = {

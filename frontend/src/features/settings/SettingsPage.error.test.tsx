@@ -7,7 +7,15 @@ import * as api from '../../api/emails';
 
 vi.mock('../../api/emails', async (importOriginal) => {
   const actual = await importOriginal<typeof import('../../api/emails')>();
-  return { ...actual, health: vi.fn(), analysisStatus: vi.fn() };
+  return {
+    ...actual,
+    health: vi.fn(),
+    analysisStatus: vi.fn(),
+    aiModel: vi.fn(),
+    selectAiModel: vi.fn(),
+    pullAiModel: vi.fn(),
+    cancelAiModelPull: vi.fn(),
+  };
 });
 
 function renderPage() {
@@ -24,7 +32,7 @@ function renderPage() {
   );
 }
 
-describe('SettingsPage — state distinction', () => {
+describe('SettingsPage â€” state distinction', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     vi.mocked(api.health).mockResolvedValue({
@@ -43,6 +51,25 @@ describe('SettingsPage — state distinction', () => {
       pending: 0,
       worker_running: true,
       queue_paused: false,
+      pull: null,
+    });
+    vi.mocked(api.aiModel).mockResolvedValue({
+      model: 'qwen3:4b',
+      installed: true,
+      size_bytes: 3_000_000_000,
+      human_size: '2.8 GB',
+      local_models: [{ name: 'qwen3:4b', size_bytes: 3_000_000_000 }],
+      preflight: {
+        disk_free_bytes: 50_000_000_000,
+        human_disk_free: '46 GB',
+        disk_path: 'C:/Users/test/.ollama',
+        ram_bytes: 16_000_000_000,
+        human_ram: '14.9 GB',
+        ram_sufficient: true,
+        blocking: false,
+        code: null,
+        guidance: null,
+      },
     });
   });
 
@@ -51,7 +78,11 @@ describe('SettingsPage — state distinction', () => {
     await waitFor(() => {
       expect(screen.getByText('Ready')).toBeInTheDocument();
     });
-    expect(screen.getByText('Model installed')).toBeInTheDocument();
+    // Replaced the old "Model installed" flag with the real figures the
+    // model section now reports.
+    expect(screen.getByText('Installed size')).toBeInTheDocument();
+    expect(screen.getByText('Free disk space')).toBeInTheDocument();
+    expect(screen.getByText('Memory')).toBeInTheDocument();
     expect(screen.queryByRole('alert')).not.toBeInTheDocument();
   });
 

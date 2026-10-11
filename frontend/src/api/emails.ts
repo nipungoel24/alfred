@@ -162,7 +162,24 @@ export type AIState =
   | 'model_missing'
   | 'temporarily_unavailable'
   | 'recovering'
-  | 'error';
+  | 'error'
+  | 'model_downloading'
+  | 'model_failed';
+
+/** Live download progress. Every byte figure comes from Ollama's stream. */
+export type ModelPullProgress = {
+  model: string;
+  status: string | null;
+  completed_bytes: number | null;
+  total_bytes: number | null;
+  /** Null until Ollama announces a total; never an estimate. */
+  fraction: number | null;
+  human_completed: string | null;
+  human_total: string | null;
+  running: boolean;
+  code: string | null;
+  error: string | null;
+};
 
 export type AnalysisStatus = {
   state: AIState;
@@ -175,10 +192,48 @@ export type AnalysisStatus = {
   pending: number;
   worker_running: boolean;
   queue_paused: boolean;
+  pull: ModelPullProgress | null;
+};
+
+/** What is installed locally, and whether this machine can take a download. */
+export type AiModelInfo = {
+  model: string;
+  installed: boolean | null;
+  size_bytes: number | null;
+  human_size: string;
+  local_models: { name: string; size_bytes: number | null }[];
+  preflight: {
+    disk_free_bytes: number;
+    human_disk_free: string;
+    disk_path: string;
+    ram_bytes: number | null;
+    human_ram: string | null;
+    ram_sufficient: boolean | null;
+    blocking: boolean;
+    code: string | null;
+    guidance: string | null;
+  };
 };
 
 export const analysisStatus = () => api<AnalysisStatus>('/api/analysis/status');
 export const analysisRetry = () => api<AnalysisStatus>('/api/analysis/retry', { method: 'POST' });
+
+// Local model: status, selection and download
+export const aiModel = () => api<AiModelInfo>('/api/ai/model');
+export const selectAiModel = (model: string) =>
+  api<AnalysisStatus>('/api/ai/model', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ model }),
+  });
+export const pullAiModel = (model?: string) =>
+  api<AnalysisStatus>('/api/ai/model/pull', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(model ? { model } : {}),
+  });
+export const cancelAiModelPull = () =>
+  api<AnalysisStatus>('/api/ai/model/cancel', { method: 'POST' });
 
 // Account management
 export const accounts = () => api<EmailAccount[]>('/api/accounts');

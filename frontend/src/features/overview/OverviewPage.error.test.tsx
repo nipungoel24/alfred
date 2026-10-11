@@ -12,6 +12,21 @@ vi.mock('../../api/emails', async (importOriginal) => {
     emails: vi.fn(),
     emailCounts: vi.fn(),
     regenerateBriefing: vi.fn(),
+    // The first-run checklist would otherwise reach the network.
+    accounts: vi.fn().mockResolvedValue([]),
+    analysisStatus: vi.fn().mockResolvedValue({
+      state: 'ready',
+      model: 'qwen3:4b',
+      model_installed: true,
+      ollama_installed: true,
+      ollama_running: true,
+      last_error: null,
+      detail: null,
+      pending: 0,
+      worker_running: true,
+      queue_paused: false,
+      pull: null,
+    }),
   };
 });
 
