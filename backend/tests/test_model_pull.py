@@ -384,22 +384,62 @@ def test_installed_ram_is_reported_as_a_real_value():
     assert ram > 0
 
 
-def test_sufficient_space_and_ram_do_not_block():
-    status = disk_status()
-    result = check_for_model_download(status.free_bytes - 1024)
+def test_sufficient_space_and_ram_do_not_block(monkeypatch):
+    # Free space is re-read on every call, so a test that compares two live
+    # readings races with anything else writing to the disk. Pin both.
+    monkeypatch.setattr(
+        "backend.app.ai.resources.disk_status",
+        lambda path=None: DiskStatus(path="C:/fake", total_bytes=10**12, free_bytes=10**11),
+    )
+    monkeypatch.setattr(
+        "backend.app.ai.resources.installed_ram_bytes", lambda: 16 * 1024**3,
+    )
+    result = check_for_model_download(10**10)
     assert result.blocking is False
     assert result.code is None
     assert result.guidance is None
 
 
-def test_insufficient_disk_space_blocks_with_an_actionable_message():
-    status = disk_status()
-    required = status.free_bytes + 1024 * 1024 * 1024
+def test_insufficient_disk_space_blocks_with_an_actionable_message(monkeypatch):
+    monkeypatch.setattr(
+        "backend.app.ai.resources.disk_status",
+        lambda path=None: DiskStatus(path="C:/fake", total_bytes=10**12, free_bytes=5 * 1024**3),
+    )
+    monkeypatch.setattr(
+        "backend.app.ai.resources.installed_ram_bytes", lambda: 16 * 1024**3,
+    )
+    required = 10 * 1024**3   # 10 GiB wanted, 5 GiB free
     result = check_for_model_download(required)
     assert result.blocking is True
     assert result.code == "INSUFFICIENT_DISK_SPACE"
     assert "free space" in result.guidance
-    assert status.path in result.guidance
+    assert "C:/fake" in result.guidance
+    # The shortfall is a real figure, not a placeholder.
+    assert "5.0 GB" in result.guidance
+
+
+def test_low_ram_blocks_before_a_download_starts(monkeypatch):
+    monkeypatch.setattr(
+        "backend.app.ai.resources.disk_status",
+        lambda path=None: DiskStatus(path="C:/fake", total_bytes=10**12, free_bytes=10**11),
+    )
+    monkeypatch.setattr(
+        "backend.app.ai.resources.installed_ram_bytes", lambda: 2 * 1024**3,
+    )
+    result = check_for_model_download(10**10)
+    assert result.blocking is True
+    assert result.code == "INSUFFICIENT_MEMORY"
+    assert MIN_DOWNLOAD_RAM_BYTES == 4 * 1024**3
+
+
+def test_the_preflight_runs_against_this_machine():
+    # No mocking: whatever this host reports must come back well-formed,
+    # and a size that fits in free space must never be rejected.
+    status = disk_status()
+    result = check_for_model_download(1)
+    assert result.disk.path == status.path
+    assert result.ram_bytes == installed_ram_bytes()
+    assert result.blocking is False
 
 
 def test_unknown_required_size_does_not_block():

@@ -158,7 +158,17 @@ class Task(BaseModel):
 
 
 class TaskPriorityPatch(BaseModel):
-    """Validated priority edit for one task (task only â€” never rewrites
+    """Validated priority edit for one task (task only — never rewrites
     the source email's AI analysis)."""
     priority: Priority
+
+
+class ModelSelectRequest(BaseModel):
+    """Which local model Alfred should use for analysis."""
+    model: str = Field(..., min_length=1, description="Ollama model tag, e.g. qwen3:4b")
+
+
+class ModelPullRequest(BaseModel):
+    """A download target. Omitted means the currently configured model."""
+    model: str | None = Field(None, min_length=1, description="Ollama model tag to download")
 

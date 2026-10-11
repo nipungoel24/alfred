@@ -6,7 +6,7 @@ Routes are organized here for simplicity. The architecture separates:
 - Infrastructure: External system clients (Ollama, Gmail)
 - Repository: Data access layer
 """
-import csv, io, uuid, secrets, hashlib, base64, json, asyncio, logging
+import csv, io, uuid, secrets, hashlib, base64, json, asyncio, logging, time
 from contextlib import asynccontextmanager
 from datetime import datetime, timezone, timedelta
 import httpx
@@ -37,8 +37,9 @@ from .mail.backfill import (
 from .ai.ollama_client import OllamaClient, OllamaUnavailable, OllamaTimeout, OllamaInvalidResponse, OllamaModelMissing
 from .ai.service import AIService
 from .ai.supervisor import AISupervisor, AIState
+from .ai.resources import check_for_model_download, human_bytes
 from .services.task_derivation import derive_tasks, rebuild_tasks_from_analyses, DERIVATION_VERSION
-from .schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task, SearchFilters, TaskPriorityPatch
+from .schemas import Email, EmailAnalysis, InboxBriefing, EmailAccount, Task, SearchFilters, TaskPriorityPatch, ModelSelectRequest, ModelPullRequest
 
 settings = get_settings()
 logger = logging.getLogger("alfred.oauth")
@@ -50,7 +51,49 @@ ai = AIService(ollama_client, settings.ollama_model)
 ai_supervisor = AISupervisor(ollama_client, settings.ollama_model)
 gmail_provider = GmailProvider(settings.gmail_client_id, settings.gmail_client_secret)
 
-OAUTH_STATES = {}  # state -> {"verifier": verifier, "redirect_uri": redirect_uri}
+# Pending OAuth handshakes: state -> {verifier, redirect_uri, created_at}.
+# Bounded on both axes. Without a TTL and a cap this dict grew by one entry
+# for every connect attempt ever made and was never reclaimed, because a
+# callback only arrives on success — an abandoned or denied flow leaked
+# permanently. The cap bounds a hostile client that spams connect, and the
+# TTL bounds ordinary abandonment. 10 minutes tracks Google's own short-lived
+# authorisation code; a state older than that could not be redeemed anyway.
+OAUTH_STATES = {}
+OAUTH_STATE_TTL_SECONDS = 600
+OAUTH_STATE_MAX = 32
+
+
+def _purge_expired_oauth_states(now: float | None = None) -> None:
+    """Drop states whose redemption window has closed."""
+    now = time.time() if now is None else now
+    expired = [
+        key for key, value in OAUTH_STATES.items()
+        # A missing timestamp is treated as just-registered, not as
+        # ancient: defaulting to 0 would discard live handshakes.
+        if now - value.get("created_at", now) > OAUTH_STATE_TTL_SECONDS
+    ]
+    for key in expired:
+        OAUTH_STATES.pop(key, None)
+    if expired:
+        logger.warning("oauth_states_purged_expired count=%d", len(expired))
+
+
+def _register_oauth_state(state: str, verifier: str, redirect_uri: str) -> None:
+    """Record a pending handshake under the size bound."""
+    now = time.time()
+    _purge_expired_oauth_states(now)
+    while len(OAUTH_STATES) >= OAUTH_STATE_MAX:
+        # Evict the oldest entry, not an arbitrary one: concurrent flows
+        # from one user are all recent, so this drops abandoned ones and
+        # never a live handshake.
+        oldest = min(OAUTH_STATES, key=lambda k: OAUTH_STATES[k].get("created_at", 0))
+        OAUTH_STATES.pop(oldest, None)
+        logger.warning("oauth_state_evicted_oldest")
+    OAUTH_STATES[state] = {
+        "verifier": verifier,
+        "redirect_uri": redirect_uri,
+        "created_at": now,
+    }
 
 # ── Analysis progress events (SSE) ──
 progress_subscribers: list[asyncio.Queue] = []
@@ -682,10 +725,7 @@ async def connect_gmail(redirect_uri: str = Query(...)):
         )
     state = uuid.uuid4().hex
     verifier, challenge = generate_pkce_pair()
-    OAUTH_STATES[state] = {
-        "verifier": verifier,
-        "redirect_uri": redirect_uri
-    }
+    _register_oauth_state(state, verifier, redirect_uri)
     auth_url = await gmail_provider.get_auth_url(redirect_uri, state, challenge)
     return {"url": auth_url}
 
@@ -706,6 +746,10 @@ def _oauth_callback_page(success: bool) -> HTMLResponse:
 @app.get('/api/accounts/gmail/callback')
 async def gmail_callback(code: str | None = Query(None), state: str | None = Query(None), redirect_uri: str | None = Query(None), error: str | None = Query(None)):
     if error:
+        # The user declined, so this handshake is finished. Release the
+        # state now instead of letting it sit until the TTL expires.
+        if state:
+            OAUTH_STATES.pop(state, None)
         logger.warning("oauth_authorization_denied")
         return _oauth_callback_page(False)
     if not code or not state:
@@ -714,6 +758,11 @@ async def gmail_callback(code: str | None = Query(None), state: str | None = Que
     state_data = OAUTH_STATES.pop(state, None)
     if not state_data:
         logger.warning("oauth_state_invalid")
+        return _oauth_callback_page(False)
+    if time.time() - state_data.get("created_at", time.time()) > OAUTH_STATE_TTL_SECONDS:
+        # Defence in depth: the purge runs on the next connect, so a state
+        # that expired between purges would otherwise still be redeemed.
+        logger.warning("oauth_state_expired")
         return _oauth_callback_page(False)
     actual_redirect = redirect_uri or state_data["redirect_uri"]
     verifier = state_data["verifier"]
@@ -938,6 +987,105 @@ async def analysis_retry():
         "pending": repo.pending_job_count('analyze_email'),
         "worker_running": _worker_running,
         "queue_paused": ai_supervisor.queue_paused(),
+    })
+    return payload
+
+
+# ── Local AI model ──
+
+@app.get('/api/ai/model')
+async def ai_model():
+    """The configured model, the models really installed, and a preflight.
+
+    Sizes come from Ollama's `/api/tags` and disk usage from the volume
+    that holds them. A model that has never been pulled has no knowable
+    size here - Ollama does not publish registry sizes through its local
+    API - so that is reported as None rather than an estimate. The pull
+    itself re-checks space against the first total the registry announces.
+    """
+    supervisor = ai_supervisor.payload()
+    installed: list[dict] = []
+    size_bytes: int | None = None
+    try:
+        installed = await ollama_client.list_models()
+        size_bytes = await ollama_client.model_size(ai_supervisor.model)
+    except OllamaUnavailable:
+        # Offline is a legitimate state; the payload below says so.
+        pass
+
+    check = check_for_model_download(size_bytes)
+    return {
+        "model": ai_supervisor.model,
+        "installed": supervisor.get("model_installed"),
+        "size_bytes": size_bytes,
+        "human_size": human_bytes(size_bytes),
+        "local_models": installed,
+        "preflight": {
+            "disk_free_bytes": check.disk.free_bytes,
+            "human_disk_free": human_bytes(check.disk.free_bytes),
+            "disk_path": check.disk.path,
+            "ram_bytes": check.ram_bytes,
+            "human_ram": human_bytes(check.ram_bytes),
+            "ram_sufficient": check.ram_sufficient,
+            "blocking": check.blocking,
+            "code": check.code,
+            "guidance": check.guidance,
+        },
+    }
+
+
+@app.post('/api/ai/model')
+async def ai_model_select(body: ModelSelectRequest):
+    """Select the model Alfred analyses with (Settings, criterion 2.7)."""
+    try:
+        model = ai_supervisor.set_model(body.model)
+    except RuntimeError as exc:
+        # Only reachable while a download is running.
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    # The new target is usually not installed yet; re-run the readiness
+    # check so the UI reports model_missing rather than a stale ready.
+    payload = await ai_supervisor.refresh()
+    _broadcast_progress({
+        "type": "ai_state", "state": payload["state"],
+        "pending": repo.pending_job_count('analyze_email'),
+    })
+    return payload
+
+
+@app.post('/api/ai/model/pull')
+async def ai_model_pull(body: ModelPullRequest | None = None):
+    """Start downloading a model. Idempotent — returns live progress.
+
+    Progress is observed on /api/analysis/status under "pull". Disk space
+    is checked against the first total the registry announces; if it will
+    not fit, the request fails with INSUFFICIENT_DISK_SPACE and a real
+    shortfall figure before any layer body is transferred.
+    """
+    model = body.model if body else None
+    try:
+        payload = await ai_supervisor.start_pull(model)
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    _broadcast_progress({
+        "type": "ai_state", "state": payload["state"],
+        "pending": repo.pending_job_count('analyze_email'),
+    })
+    return payload
+
+
+@app.post('/api/ai/model/cancel')
+async def ai_model_cancel():
+    """Cancel a running download, or report that none is running.
+
+    Idempotent: cancelling when nothing is running is a no-op, so the
+    client can call it on unmount without a race.
+    """
+    payload = await ai_supervisor.cancel_pull()
+    _broadcast_progress({
+        "type": "ai_state", "state": payload["state"],
+        "pending": repo.pending_job_count('analyze_email'),
     })
     return payload
 

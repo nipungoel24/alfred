@@ -25,6 +25,8 @@ class FakePullClient:
     def __init__(self):
         self.reachable = True
         self.models: list[str] = []
+        # Real on-disk size per model, as /api/tags would report it.
+        self.model_sizes: dict[str, int] = {}
         self.smoke_ok = True
         self.smoke_calls = 0
         self.health_calls = 0
@@ -33,7 +35,10 @@ class FakePullClient:
         self.progress_seen: list[PullProgress] = []
         self.announce = (1000, 500)        # (total, completed) per step
         self.steps = 3
-        self.release = asyncio.Event()
+        # A plain flag, not asyncio.Event: the fake is constructed on the
+        # test thread but awaited on another loop, and Event binds to the
+        # loop that first waits on it.
+        self.release = False
         self.checked_total = None
 
     async def health(self) -> dict:
@@ -41,7 +46,12 @@ class FakePullClient:
         if not self.reachable:
             from backend.app.ai.ollama_client import OllamaUnavailable
             raise OllamaUnavailable("not reachable")
-        return {"models": [{"name": m} for m in self.models]}
+        return {
+            "models": [
+                {"name": m, "size": self.model_sizes.get(m)}
+                for m in self.models
+            ]
+        }
 
     async def generate(self, model, prompt, schema=None, temperature=0.0):
         self.smoke_calls += 1
@@ -49,6 +59,22 @@ class FakePullClient:
             from backend.app.ai.ollama_client import OllamaTimeout
             raise OllamaTimeout("smoke timed out")
         return "ok", None
+
+    async def list_models(self) -> list[dict]:
+        """Local models with real sizes, mirroring OllamaClient.list_models."""
+        await self.health()
+        return [
+            {
+                "name": m,
+                "size_bytes": self.model_sizes.get(m),
+                "parameter_size": None,
+                "quantization": None,
+            }
+            for m in self.models
+        ]
+
+    async def model_size(self, model: str) -> int | None:
+        return self.model_sizes.get(model)
 
     async def pull_model(self, model, on_progress=None, check_space=None):
         self.pull_calls += 1
@@ -69,7 +95,8 @@ class FakePullClient:
                 self.checked_total = total
                 check_space(total)
             if self.pull_behaviour == "hang":
-                await self.release.wait()
+                while not self.release:
+                    await asyncio.sleep(0.005)
             elif self.pull_behaviour == "space":
                 raise OllamaInsufficientSpace(required_bytes=total, free_bytes=1)
             elif self.pull_behaviour == "fail" and i == self.steps:
