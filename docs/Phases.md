@@ -275,9 +275,10 @@ strength of code alone.
       redemption checks the age itself rather than trusting the next purge. Five
       tests cover purge, expiry-at-redemption, cap, oldest-first eviction and
       concurrent flows surviving the TTL.
-- [x] Full existing suite still passes — verified 2026-10-11: **370 backend, 392
+- [x] Full existing suite still passes — verified 2026-10-11: **374 backend, 392
       frontend across 32/32 test files**. The Gate 1 floors were 298 and 391; both
-      grew.
+      grew. Auto-start path now has dedicated mock and timeout test coverage in
+      `test_model_supervisor.py`.
 
 ### Defects closed in this gate
 

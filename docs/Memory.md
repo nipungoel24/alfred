@@ -57,18 +57,18 @@ from `desktop/src-tauri`.
 
 | Suite | Command | Result |
 | --- | --- | --- |
-| Backend | `py -3.12 -m pytest backend/tests -q` | **370 passed** (was 298 at Gate 1) |
+| Backend | `py -3.12 -m pytest backend/app backend/tests -q` | **374 passed** (was 298 at Gate 1, 370 prior) |
 | Tools | `py -3.12 -m pytest tools -q` | **17 passed, 1 skipped** |
-| Frontend | `npm --prefix frontend test -- --run` | **392 passed / 32 files** (was 391/32) |
-| Rust | not run | **untouched this phase** — `git diff 608e72b..HEAD -- desktop/` is empty |
+| Frontend | `npm --prefix frontend test` | **392 passed / 32 files** (0 failures, 0 unhandled errors) |
+| Rust | `cargo test` (from `desktop/src-tauri`) | **44 passed, 0 failed** |
 | Lint | `npm --prefix frontend run lint` | exit 0 |
 | Typecheck | `tsc -b` | exit 0 |
 | Build | `npm --prefix frontend run build` | exit 0 |
 | Secret scan | `py -3.12 tools\release\scan_release_secrets.py` | **exit 0 (clean)** |
 
-**Total: 779 tests, 0 failures** (1 skipped). The frontend run reports one
-pre-existing unhandled rejection from `focus.retry.test.tsx` — a deliberately
-rejected promise the test asserts is handled; it is not a failure.
+**Total: 827 tests, 0 failures** (1 skipped). The unhandled promise rejection
+originating from `useRetryPreservingFocus` (`focus.ts`) on rejected refetch
+operations has been caught and resolved; the full test suite runs cleanly.
 
 ### Production bundle
 
@@ -962,8 +962,7 @@ intelligence panel with real content, the Tasks page, error and empty states, an
 were still on screen - whether the empty state replaces the skeleton promptly was never
 rechecked.
 
-**Automated verification status: PASS** (657 tests, 0 failures). The frontend runner
-reports 31/31 files passing but exits non-zero on a pre-existing unhandled `boom`
-rejection in `src/features/focus.retry.test.tsx`, which this work does not touch.
-
-
+**Automated verification status: PASS** (827 tests across Rust, backend, tools,
+and frontend; 0 failures, 1 skipped). The previous unhandled rejection in
+`useRetryPreservingFocus` (`src/lib/focus.ts`) was identified and fixed so the
+frontend test runner exits 0 with all 32 test files passing cleanly.
