@@ -205,11 +205,13 @@ bytes, never simulated. A fake progress bar is a release blocker.
 
 **Status: PARTIAL** — implemented 2026-10-11 on
 `feature/mail-workspace-productization-20260907` (`1a13298`, `2e53cea`, `bb70971`,
-and the frontend commit above). Nine of fourteen criteria are met with automated
-evidence. Five require a real Ollama on a clean Windows machine and are **NOT
-VERIFIED** here: the verification machine has no working local AI runtime, so a
-download was never observed end to end. Nothing below is ticked on the strength of
-code alone.
+and the frontend commit above). Eight of fourteen criteria are met with automated
+evidence. Six are not: three are partially implemented but need a live run to
+confirm (required size, progress against `ollama list`, cancellation), and three
+are implemented but unverified (Ollama auto-start, interrupted-download restart,
+system-browser OAuth). The verification machine has no working local AI runtime,
+so a download was never observed end to end. Nothing below is ticked on the
+strength of code alone.
 
 - [x] On a machine with no Ollama, the first-run screen appears and explains the
       next step — `FirstRunChecklist` renders from live state only (connected

@@ -14,8 +14,8 @@ commit.
 | Field | Value |
 | --- | --- |
 | Current phase | **2 — First run and local AI setup (implemented)** |
-| Gate 2 | **PARTIAL**, 9/14 acceptance criteria met with automated evidence — see `docs/Phases.md` §Gate 2 |
-| Gate 2 gap | 5 criteria need a real Ollama on a clean Windows machine and are **NOT VERIFIED**; the verification machine has no working local AI runtime |
+| Gate 2 | **PARTIAL**, 8/14 acceptance criteria met with automated evidence — see `docs/Phases.md` §Gate 2 |
+| Gate 2 gap | 6 criteria need a real Ollama on a clean Windows machine and are **NOT VERIFIED**; the verification machine has no working local AI runtime |
 | Gate 1 | **PASS**, 15/16 — criterion 13 still **unresolved** and deliberately left open |
 | Phase 1 | closed |
 | Visual QA | deferred to **Phase 3 / Gate 3**; backlog in `docs/VISUAL-QA-PHASE1.md` |
@@ -866,8 +866,8 @@ single invocation kept it alive throughout. Do not read this as an app fault.
 
 ## GATE STATUS
 
-**Gate 2: PARTIAL** (implemented 2026-10-11). Nine of fourteen criteria are met
-with automated evidence; five need a real Ollama on a clean machine and are
+**Gate 2: PARTIAL** (implemented 2026-10-11). Eight of fourteen criteria are met
+with automated evidence; six need a real Ollama on a clean machine and are
 recorded as **NOT VERIFIED** in `docs/Phases.md` §Gate 2. D15, D17 and D18 are
 closed. Gate 1's criterion 13 remains unresolved and was not touched.
 
@@ -926,7 +926,7 @@ Accounts — are **not Gate 1 items**. They are open Phase 3 / Gate 3 QA, preser
 
 **Two things, in this order.**
 
-1. **Close the five unverified Gate 2 criteria** on a clean Windows machine with
+1. **Close the six unverified Gate 2 criteria** on a clean Windows machine with
    Ollama installed and stopped, then a model pulled. They need a live runtime,
    not more code: Ollama stopped → auto-start, real required size, progress
    cross-checked against `ollama list`, cancel leaving a clean model, interrupted
