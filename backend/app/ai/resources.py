@@ -28,10 +28,13 @@ def ollama_models_dir() -> str:
     override = os.environ.get("OLLAMA_MODELS", "").strip()
     if override:
         return override
+    user_models = os.path.join(os.path.expanduser("~"), ".ollama", "models")
+    if os.path.exists(user_models):
+        return user_models
     if sys.platform == "win32":
         base = os.environ.get("LOCALAPPDATA", "") or os.path.expanduser("~")
         return os.path.join(base, "Ollama", "models")
-    return os.path.join(os.path.expanduser("~"), ".ollama", "models")
+    return user_models
 
 
 @dataclass(frozen=True)

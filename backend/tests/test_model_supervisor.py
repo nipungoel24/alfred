@@ -396,3 +396,82 @@ def test_the_only_resource_constant_is_the_documented_ram_floor():
     """No fabricated model size may appear anywhere in the download path."""
     from backend.app.ai.resources import MIN_DOWNLOAD_RAM_BYTES
     assert MIN_DOWNLOAD_RAM_BYTES == 4 * 1024 ** 3
+
+
+def test_auto_start_skipped_when_exe_not_found(monkeypatch):
+    sup, _ = make_supervisor()
+    monkeypatch.setattr("backend.app.ai.supervisor.find_ollama_executable", lambda: None)
+    asyncio.run(sup._try_auto_start())
+    assert sup._auto_start_attempted is True
+    assert sup._start_handle is None
+
+
+def test_auto_start_spawns_process_and_polls_until_reachable(monkeypatch):
+    sup, _ = make_supervisor()
+    monkeypatch.setattr("backend.app.ai.supervisor.find_ollama_executable", lambda: "C:\\dummy\\ollama.exe")
+    monkeypatch.setattr("backend.app.ai.supervisor._AUTOSTART_POLL_SECONDS", 3)
+
+    spawned_cmd = []
+    spawned_flags = []
+
+    class DummyPopen:
+        def __init__(self, cmd, **kwargs):
+            spawned_cmd.append(cmd)
+            spawned_flags.append(kwargs.get("creationflags"))
+
+    monkeypatch.setattr("subprocess.Popen", DummyPopen)
+
+    poll_count = 0
+
+    async def mock_tags():
+        nonlocal poll_count
+        poll_count += 1
+        return (poll_count >= 2), ["qwen3:4b"]
+
+    monkeypatch.setattr(sup, "_tags", mock_tags)
+
+    asyncio.run(sup._try_auto_start())
+    assert sup._auto_start_attempted is True
+    assert spawned_cmd == [["C:\\dummy\\ollama.exe", "serve"]]
+    assert poll_count == 2
+
+
+def test_auto_start_timeout_bounded(monkeypatch):
+    sup, _ = make_supervisor()
+    monkeypatch.setattr("backend.app.ai.supervisor.find_ollama_executable", lambda: "C:\\dummy\\ollama.exe")
+    monkeypatch.setattr("backend.app.ai.supervisor._AUTOSTART_POLL_SECONDS", 2)
+
+    class DummyPopen:
+        def __init__(self, cmd, **kwargs):
+            pass
+
+    monkeypatch.setattr("subprocess.Popen", DummyPopen)
+
+    async def mock_tags():
+        return False, []
+
+    monkeypatch.setattr(sup, "_tags", mock_tags)
+
+    asyncio.run(sup._try_auto_start())
+    assert sup._auto_start_attempted is True
+
+
+def test_start_pull_attempts_auto_start_when_offline(monkeypatch):
+    sup, _ = make_supervisor()
+    auto_start_called = False
+
+    async def mock_auto_start():
+        nonlocal auto_start_called
+        auto_start_called = True
+        sup._auto_start_attempted = True
+
+    monkeypatch.setattr(sup, "_try_auto_start", mock_auto_start)
+
+    async def mock_tags():
+        return False, []
+
+    monkeypatch.setattr(sup, "_tags", mock_tags)
+
+    payload = asyncio.run(sup.start_pull())
+    assert auto_start_called is True
+    assert payload["state"] == AIState.OLLAMA_NOT_RUNNING
