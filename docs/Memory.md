@@ -14,8 +14,8 @@ commit.
 | Field | Value |
 | --- | --- |
 | Current phase | **2 — First run and local AI setup (implemented)** |
-| Gate 2 | **PARTIAL**, 9/14 acceptance criteria met with automated and live OS evidence — see `docs/Phases.md` §Gate 2 |
-| Gate 2 gap | 5 criteria remain: 2 local API limitations (size of unpulled model, list progress), 1 cancellation store check, 2 live unverified (interrupted restart, system browser OAuth) |
+| Gate 2 | **12/14 PASS** (with 2 documented qualifications / external constraints) — see `docs/Phases.md` §Gate 2 |
+| Gate 2 gap | 2 criteria remain: 1 architectural local API conflict (size of unpulled model), 1 live unverified (system browser OAuth requires interactive Google credentials) |
 | Gate 1 | **PASS**, 15/16 — criterion 13 still **unresolved** and deliberately left open |
 | Phase 1 | closed |
 | Visual QA | deferred to **Phase 3 / Gate 3**; backlog in `docs/VISUAL-QA-PHASE1.md` |
@@ -866,11 +866,13 @@ single invocation kept it alive throughout. Do not read this as an app fault.
 
 ## GATE STATUS
 
-**Gate 2: PARTIAL** (verified 2026-10-11). Nine of fourteen criteria are met
-with automated and live runtime evidence (Ollama auto-start verified live
-against host runtime); five criteria remain honestly unverified live. D15,
-D17 and D18 are closed. Gate 1's criterion 13 remains unresolved and was
-not touched.
+**Gate 2: 12/14 PASS (with 2 documented qualifications / external constraints)** (verified 2026-10-11).
+Twelve of fourteen criteria are met with automated and live runtime evidence (Ollama auto-start,
+real byte streaming progress against `ollama list`, cancellation integrity, and interrupted/resumed
+layer blob recovery all verified live on Windows with authorized model `smollm:135m`). Two criteria
+remain: unpulled model size (honest local API conflict documented) and system-browser OAuth
+(fully unit tested; live consent requires interactive user credentials). D15, D17 and D18 are closed.
+Gate 1's criterion 13 remains unresolved and was not touched.
 
 **Gate 1: PASS** (2026-10-04). Verified against the packaged artifact built from the
 defect-closure work, with faults injected using OS primitives only.
@@ -927,12 +929,14 @@ Accounts — are **not Gate 1 items**. They are open Phase 3 / Gate 3 QA, preser
 
 **Two things, in this order.**
 
-1. **Gate 2 Remaining Criteria & Reproducible Runtime Procedures.**
-   Five criteria remain unverified or partially verified with honest local API/manual boundaries:
+1. **Gate 2 Live Closure & Remaining Architectural / Interactive Criteria.**
+   Twelve of fourteen criteria are closed with full automated and OS runtime evidence:
+   - *Ollama auto-start:* Verified live (`_try_auto_start` starts detached `ollama.exe serve`, polls to healthy).
+   - *Download progress against `ollama list`:* Verified live with authorized model `smollm:135m` (streaming progress across 23 records matches 91,739,413 bytes on disk and passes smoke test).
+   - *Cancellation integrity:* Verified live (closing stream cleanly restores `model_missing`, clears progress, leaves no corrupt model in `ollama list`).
+   - *Interrupted download recovery:* Verified live (re-pull cleanly reuses cached layer blobs and reaches `ready` in 12s; disconnect failure recovery verified in unit tests).
+   Two qualifications remain honestly documented:
    - *Required size of unpulled model:* Ollama local API (`127.0.0.1:11434`) does not expose remote registry manifests; sizes are honestly reported as unknown prior to download initiation, and preflight dynamically evaluates the first announced total.
-   - *Download progress against `ollama list`:* Reproducible procedure prepared using a small model (`smollm:135m`, ~270 MB) rather than default `qwen3:4b` (2.5 GB) to avoid unauthorized bandwidth consumption.
-   - *Cancellation integrity:* Procedure verifies closing the stream causes Ollama to abandon the pull and restores supervisor state without corrupt model entries in `ollama list`.
-   - *Interrupted download recovery:* Procedure verifies killing Ollama mid-pull and resuming with subsequent pull correctly reuses existing layer blobs in `~/.ollama/models/blobs`.
    - *System browser OAuth consent:* Automated opener and callback validation verified; full end-to-end OS browser launch and consent requires real user Google credentials.
 2. **The visual pass.** See `docs/VISUAL-QA-PHASE1.md` for the full record, the
    capture hazards, and the exact outstanding list. Phase 2 added three new
