@@ -29,6 +29,18 @@ tokio = { version = "1", features = ["sync", "time"] }
 [dev-dependencies]
 tauri-cli = { version = "2", features = [] }
 
+# `tauri` derives `cfg(dev)` as `!custom-protocol` (tauri 2.11.5 build.rs:257).
+# Under `cfg(dev)` the webview navigates to `build.devUrl`
+# (http://localhost:5173) instead of serving the embedded frontend, so a build
+# without this feature produces a release binary that shows
+# ERR_CONNECTION_REFUSED unless a Vite server happens to be running. That is
+# what shipped on 2026-10-11.
+#
+# `cargo tauri build` passes `tauri/custom-protocol` on its own, so this
+# default exists to protect the plain `cargo build --release` path. It does not
+# break `tauri dev`: the CLI strips any default feature that enables
+# `tauri/custom-protocol` and passes `--no-default-features`
+# (tauri-cli 2.11.4 src/interface/rust.rs:434-450).
 [features]
 default = ["custom-protocol"]
 custom-protocol = ["tauri/custom-protocol"]

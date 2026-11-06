@@ -453,7 +453,7 @@ impl BackendSupervisor {
             format!("SIDECAR_SPAWN_FAILED: {e}")
         })?;
 
-        kill_orphaned_backends(port);
+        kill_orphaned_backends();
         self.registry.clear();
 
         let mut cmd = match self.app.shell().sidecar("alfred-backend") {
@@ -1055,74 +1055,105 @@ fn process_is_alive(pid: u32) -> bool {
         .unwrap_or(false)
 }
 
-fn kill_orphaned_backends(own_port: u16) {
-    let mut orphans: Vec<u32> = Vec::new();
+/// Extract PIDs from `tasklist /FO CSV /NH` output.
+///
+/// A filter that matches nothing is reported as an `INFO:` line on stdout
+/// with exit code 0, not as a failure, so that case is detected here.
+fn parse_tasklist_pids(csv: &str) -> Vec<u32> {
+    let mut pids: Vec<u32> = Vec::new();
+    for line in csv.lines() {
+        let line = line.trim();
+        if line.is_empty() || line.to_lowercase().starts_with("info:") {
+            continue;
+        }
+        let Some(field) = line.split(',').nth(1) else {
+            continue;
+        };
+        if let Ok(pid) = field.trim().trim_matches('"').parse::<u32>() {
+            pids.push(pid);
+        }
+    }
+    pids.sort_unstable();
+    pids.dedup();
+    pids
+}
 
-    // Query running alfred-backend processes in a single silent call
-    // to avoid repeatedly popping up command windows or running tasklist
-    // in an N-iteration loop during application startup.
-    if let Ok(ps_out) = silent_command("tasklist")
-        .args(["/FI", "IMAGENAME eq alfred-backend*", "/FO", "CSV", "/NH"])
+/// Live PIDs whose image name matches a `tasklist` IMAGENAME filter.
+///
+/// One process spawn regardless of how many processes match. The previous
+/// implementation ran `netstat` plus one `tasklist` per loopback socket;
+/// from a `windows_subsystem = "windows"` process each of those allocated a
+/// console window, which is the flashing the user reported.
+fn live_pids_for_image(pattern: &str) -> Vec<u32> {
+    silent_command("tasklist")
+        .args([
+            "/FI",
+            &format!("IMAGENAME eq {pattern}"),
+            "/FO",
+            "CSV",
+            "/NH",
+        ])
         .output()
-    {
-        let ps = String::from_utf8_lossy(&ps_out.stdout);
-        for line in ps.lines() {
-            let line = line.trim();
-            if line.is_empty() || line.to_lowercase().contains("info:") {
-                continue;
-            }
-            let parts: Vec<&str> = line.split(',').collect();
-            if parts.len() >= 2 {
-                let pid_str = parts[1].trim().trim_matches('"');
-                if let Ok(pid) = pid_str.parse::<u32>() {
-                    orphans.push(pid);
-                }
-            }
-        }
+        .map(|out| parse_tasklist_pids(&String::from_utf8_lossy(&out.stdout)))
+        .unwrap_or_default()
+}
+
+/// The image name this executable runs under, e.g. `alfred-desktop.exe`.
+///
+/// Read from the running binary rather than hard-coded, so renaming the
+/// product cannot silently turn the sweep into a no-op.
+fn own_image_name() -> String {
+    std::env::current_exe()
+        .ok()
+        .and_then(|p| p.file_name().map(|n| n.to_string_lossy().into_owned()))
+        .unwrap_or_else(|| "alfred-desktop.exe".to_string())
+}
+
+/// Decide which sidecars are genuinely orphaned.
+///
+/// A sidecar belongs to the Alfred instance that spawned it. This process
+/// sweeps only when it is the **only** live Alfred, which is the single
+/// condition under which every running sidecar must be an orphan: our own
+/// child is either not spawned yet (cold start) or has already been stopped
+/// by `stop_child` (restart).
+///
+/// When another Alfred is alive the sweep does nothing. The previous
+/// implementation killed every `alfred-backend` process it could see, so
+/// concurrent instances destroyed each other's healthy children and drove a
+/// respawn loop — recorded in `desktop.log` at 2026-10-12T10:26Z, where five
+/// instances logged interleaved `backend.killing_orphan` and
+/// `sidecar.exited` within three seconds.
+fn orphan_sweep_plan(backends: &[u32], other_desktops: &[u32]) -> Vec<u32> {
+    if !other_desktops.is_empty() {
+        return Vec::new();
+    }
+    backends.to_vec()
+}
+
+/// Kill sidecars left behind by an Alfred that did not shut down cleanly.
+fn kill_orphaned_backends() {
+    let backends = live_pids_for_image("alfred-backend*");
+    if backends.is_empty() {
+        return;
     }
 
-    if let Ok(output) = silent_command("netstat").args(["-ano", "-p", "TCP"]).output() {
-        let stdout = String::from_utf8_lossy(&output.stdout);
-        for line in stdout.lines() {
-            if !line.contains("127.0.0.1") || !line.contains("LISTENING") {
-                continue;
-            }
-            let parts: Vec<&str> = line.split_whitespace().collect();
-            if parts.len() < 5 {
-                continue;
-            }
-            let addr = parts[1];
-            let pid_str = parts[parts.len() - 1];
-            let Ok(pid) = pid_str.parse::<u32>() else {
-                continue;
-            };
-            let Some(port_str) = addr.rsplit(':').next() else {
-                continue;
-            };
-            let Ok(port) = port_str.parse::<u16>() else {
-                continue;
-            };
-            if port == own_port {
-                orphans.retain(|&p| p != pid);
-                continue;
-            }
-            if !orphans.contains(&pid) {
-                if let Ok(ps_out) = silent_command("tasklist")
-                    .args(["/FI", &format!("PID eq {pid}"), "/FO", "CSV", "/NH"])
-                    .output()
-                {
-                    let ps = String::from_utf8_lossy(&ps_out.stdout);
-                    if ps.to_lowercase().contains("alfred-backend") {
-                        orphans.push(pid);
-                    }
-                }
-            }
-        }
+    let own_pid = std::process::id();
+    let other_desktops: Vec<u32> = live_pids_for_image(&own_image_name())
+        .into_iter()
+        .filter(|&pid| pid != own_pid)
+        .collect();
+
+    let plan = orphan_sweep_plan(&backends, &other_desktops);
+    if plan.is_empty() {
+        log::info!(
+            "backend.orphan_sweep_skipped backends={} other_instances={}",
+            backends.len(),
+            other_desktops.len()
+        );
+        return;
     }
 
-    orphans.sort_unstable();
-    orphans.dedup();
-    for pid in orphans {
+    for pid in plan {
         log::warn!("backend.killing_orphan pid={pid}");
         kill_pid(pid);
     }
@@ -2383,8 +2414,63 @@ mod tests {
     }
 
     #[test]
-    fn kill_orphaned_backends_executes_safely() {
-        // Must run silently and safely without panicking or modifying the current port
-        kill_orphaned_backends(54321);
+    fn tasklist_pids_are_parsed_from_csv() {
+        let csv = "\"alfred-backend.exe\",\"4280\",\"Console\",\"3\",\"25,733 K\"\r\n\
+                   \"alfred-backend-x86_64-pc-windows-msvc.exe\",\"18576\",\"Console\",\"3\",\"25,700 K\"\r\n";
+        assert_eq!(parse_tasklist_pids(csv), vec![4280, 18576]);
+    }
+
+    #[test]
+    fn a_filter_that_matches_nothing_yields_no_pids() {
+        // tasklist reports an empty result on stdout with exit code 0, so the
+        // INFO line must never be mistaken for a process record.
+        let csv = "INFO: No tasks are running which match the specified criteria.\r\n";
+        assert!(parse_tasklist_pids(csv).is_empty());
+    }
+
+    #[test]
+    fn duplicate_and_malformed_tasklist_rows_are_discarded() {
+        let csv = "\"alfred-backend.exe\",\"4280\",\"Console\"\r\n\
+                   \"alfred-backend.exe\",\"4280\",\"Console\"\r\n\
+                   \r\n\
+                   garbage-without-a-comma\r\n\
+                   \"alfred-backend.exe\",\"not-a-pid\",\"Console\"\r\n";
+        assert_eq!(parse_tasklist_pids(csv), vec![4280]);
+    }
+
+    #[test]
+    fn every_sidecar_is_an_orphan_when_this_is_the_only_alfred() {
+        // Cold start and post-`stop_child` restart both reach the sweep with
+        // no child of our own running, so anything still alive is left over.
+        assert_eq!(orphan_sweep_plan(&[4280, 18576], &[]), vec![4280, 18576]);
+    }
+
+    #[test]
+    fn a_live_sibling_instance_makes_the_sweep_a_no_op() {
+        // The 2026-10-12 incident: concurrent instances killed each other's
+        // healthy children. A sweep must never cross an instance boundary,
+        // however many sidecars it can see.
+        assert!(
+            orphan_sweep_plan(&[4280, 18576, 23392], &[44780]).is_empty(),
+            "a sweep that can see another live Alfred must kill nothing"
+        );
+    }
+
+    #[test]
+    fn nothing_running_means_nothing_to_kill() {
+        assert!(orphan_sweep_plan(&[], &[]).is_empty());
+        assert!(orphan_sweep_plan(&[], &[44780]).is_empty());
+    }
+
+    #[test]
+    fn the_sweep_identifies_this_process_by_its_real_image_name() {
+        // Hard-coding the name would silently disable sibling detection if the
+        // binary were ever renamed.
+        let name = own_image_name();
+        assert!(!name.is_empty());
+        assert!(
+            name.to_lowercase().ends_with(".exe") || !cfg!(windows),
+            "unexpected image name: {name}"
+        );
     }
 }
