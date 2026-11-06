@@ -4,6 +4,8 @@ All tests use a fake Ollama client — no network, no real model, and
 absolutely no user email content.
 """
 import asyncio
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
@@ -174,3 +176,26 @@ def test_smoke_prompt_never_contains_user_data():
     from backend.app.ai import supervisor as sup
     assert "email" not in sup._SMOKE_PROMPT.lower()
     assert len(sup._SMOKE_PROMPT) < 100
+
+
+@pytest.mark.skipif(sys.platform != "win32", reason="Windows creation flags")
+def test_ollama_autostart_gives_the_server_a_hidden_console():
+    """`ollama serve` must get a hidden console, not no console at all.
+
+    Windows ignores CREATE_NO_WINDOW when DETACHED_PROCESS is set, leaving the
+    server with no console. `ollama serve` then spawns `llama-server.exe`,
+    which allocates its own *visible* console — observed on 2026-11-06 as a
+    Windows Terminal window appearing a few seconds after every Alfred launch.
+    A hidden console is inherited by the grandchild; no console is not.
+    """
+    from backend.app.ai import supervisor as sup
+
+    flags = sup._WINDOWS_AUTOSTART_FLAGS
+    assert flags & subprocess.CREATE_NO_WINDOW, "the server's console must be hidden"
+    assert not (flags & subprocess.DETACHED_PROCESS), (
+        "DETACHED_PROCESS suppresses CREATE_NO_WINDOW and makes llama-server.exe "
+        "allocate a visible console"
+    )
+    assert flags & subprocess.CREATE_NEW_PROCESS_GROUP, (
+        "a console signal to Alfred must not reach the shared Ollama server"
+    )

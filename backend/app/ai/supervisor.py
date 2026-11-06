@@ -56,6 +56,27 @@ _BACKOFF_SCHEDULE = (5, 10, 20, 30, 30)
 # Ollama server before giving up.
 _AUTOSTART_POLL_SECONDS = 30
 
+# Creation flags for `ollama serve` on Windows.
+#
+# DETACHED_PROCESS is deliberately NOT set. Windows ignores CREATE_NO_WINDOW
+# when DETACHED_PROCESS is present and gives the child no console at all —
+# and `ollama serve` then spawns `llama-server.exe`, a console subsystem
+# program, which therefore allocates a brand new *visible* console. Measured
+# on 2026-11-06: a Windows Terminal window titled `llama-server.exe` appeared
+# ~9s after every launch, parented to ollama.exe, whose own parent was this
+# backend's uvicorn process.
+#
+# CREATE_NO_WINDOW alone gives `ollama serve` a real but hidden console, which
+# llama-server.exe inherits instead of creating one. CREATE_NEW_PROCESS_GROUP
+# keeps a console signal sent to Alfred from reaching the shared Ollama
+# server, which Alfred does not own exclusively.
+if sys.platform == "win32":  # pragma: no cover - platform constant
+    _WINDOWS_AUTOSTART_FLAGS = (
+        subprocess.CREATE_NEW_PROCESS_GROUP | subprocess.CREATE_NO_WINDOW
+    )
+else:  # pragma: no cover - platform constant
+    _WINDOWS_AUTOSTART_FLAGS = 0
+
 # The smoke test is a fixed synthetic prompt. It never contains user
 # email content, and it proves the model can actually produce output.
 _SMOKE_PROMPT = "Reply with exactly the word: ok"
@@ -466,14 +487,9 @@ class AISupervisor:
         logger.info("ollama_auto_start_attempt exe=%s", exe)
         try:
             if sys.platform == "win32":
-                flags = (
-                    subprocess.CREATE_NEW_PROCESS_GROUP
-                    | subprocess.DETACHED_PROCESS
-                    | subprocess.CREATE_NO_WINDOW
-                )
                 self._start_handle = subprocess.Popen(
                     [exe, "serve"],
-                    creationflags=flags,
+                    creationflags=_WINDOWS_AUTOSTART_FLAGS,
                     stdout=subprocess.DEVNULL,
                     stderr=subprocess.DEVNULL,
                     close_fds=True,
