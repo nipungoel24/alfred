@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.a_terminal_failure_keeps_ownership_of_a_live_child
 source: desktop/src-tauri/src/main.rs
-line: 1978
+line: 2050
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `a_terminal_failure_keeps_ownership_of_a_live_child
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1978`
+`desktop/src-tauri/src/main.rs:2050`
 
 ## Signature
 

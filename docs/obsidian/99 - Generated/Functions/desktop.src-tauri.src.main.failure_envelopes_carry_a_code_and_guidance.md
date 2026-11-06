@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.failure_envelopes_carry_a_code_and_guidance
 source: desktop/src-tauri/src/main.rs
-line: 2219
+line: 2291
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `failure_envelopes_carry_a_code_and_guidance` in `d
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2219`
+`desktop/src-tauri/src/main.rs:2291`
 
 ## Signature
 

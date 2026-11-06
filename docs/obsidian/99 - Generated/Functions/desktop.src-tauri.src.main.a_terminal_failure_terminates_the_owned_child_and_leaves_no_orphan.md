@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.a_terminal_failure_terminates_the_owned_child_and_leaves_no_orphan
 source: desktop/src-tauri/src/main.rs
-line: 2011
+line: 2083
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `a_terminal_failure_terminates_the_owned_child_and_
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2011`
+`desktop/src-tauri/src/main.rs:2083`
 
 ## Signature
 

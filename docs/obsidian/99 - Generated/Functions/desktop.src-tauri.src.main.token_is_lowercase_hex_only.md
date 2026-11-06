@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.token_is_lowercase_hex_only
 source: desktop/src-tauri/src/main.rs
-line: 1593
+line: 1665
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `token_is_lowercase_hex_only` in `desktop/src-tauri
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1593`
+`desktop/src-tauri/src/main.rs:1665`
 
 ## Signature
 

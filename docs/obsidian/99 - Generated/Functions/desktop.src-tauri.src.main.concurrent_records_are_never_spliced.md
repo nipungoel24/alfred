@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.concurrent_records_are_never_spliced
 source: desktop/src-tauri/src/main.rs
-line: 2123
+line: 2195
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `concurrent_records_are_never_spliced` in `desktop/
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2123`
+`desktop/src-tauri/src/main.rs:2195`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.a_healthy_poll_keeps_the_connection
 source: desktop/src-tauri/src/main.rs
-line: 2003
+line: 2075
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `a_healthy_poll_keeps_the_connection` in `desktop/s
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2003`
+`desktop/src-tauri/src/main.rs:2075`
 
 ## Signature
 

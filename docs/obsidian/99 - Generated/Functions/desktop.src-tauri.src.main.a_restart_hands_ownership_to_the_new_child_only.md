@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.a_restart_hands_ownership_to_the_new_child_only
 source: desktop/src-tauri/src/main.rs
-line: 2045
+line: 2117
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `a_restart_hands_ownership_to_the_new_child_only` i
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2045`
+`desktop/src-tauri/src/main.rs:2117`
 
 ## Signature
 

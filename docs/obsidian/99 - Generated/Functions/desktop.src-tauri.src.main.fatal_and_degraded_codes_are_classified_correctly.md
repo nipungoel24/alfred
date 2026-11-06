@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.fatal_and_degraded_codes_are_classified_correctly
 source: desktop/src-tauri/src/main.rs
-line: 2228
+line: 2300
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `fatal_and_degraded_codes_are_classified_correctly`
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2228`
+`desktop/src-tauri/src/main.rs:2300`
 
 ## Signature
 

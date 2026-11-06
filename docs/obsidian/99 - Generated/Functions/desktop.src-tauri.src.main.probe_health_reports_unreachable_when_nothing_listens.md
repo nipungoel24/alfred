@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.probe_health_reports_unreachable_when_nothing_listens
 source: desktop/src-tauri/src/main.rs
-line: 1746
+line: 1818
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `probe_health_reports_unreachable_when_nothing_list
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1746`
+`desktop/src-tauri/src/main.rs:1818`
 
 ## Signature
 

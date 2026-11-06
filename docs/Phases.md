@@ -89,7 +89,22 @@ belongs to Phase 3 / Gate 3.
 - [x] A single launch from the Start Menu produces exactly one visible window
 - [x] A second launch focuses the existing window and starts no second backend
   (focus is sampled — see qualifications)
-- [x] Zero console windows in a release build
+- [x] Zero console windows in a release build — **re-verified 2026-11-06 after
+      this tick was found to be unsupported by the code.** At the time it was
+      first recorded, `kill_orphaned_backends` spawned `netstat`, one
+      `tasklist` per loopback socket, and a `taskkill` per match through a bare
+      `std::process::Command`. From a `windows_subsystem = "windows"` process
+      each of those allocates a console window, so the criterion could not have
+      been met; the original check did not sample fast enough to see them.
+      Every spawn now goes through `silent_command()` (CREATE_NO_WINDOW), and
+      a second source was found outside the shell: `ollama serve` was started
+      with `DETACHED_PROCESS`, which makes Windows ignore `CREATE_NO_WINDOW`
+      and leaves the server with no console, so its own `llama-server.exe`
+      child allocated a visible one. Measured on a real launch with a
+      120 ms-interval `EnumWindows` sampler: zero `ConsoleWindowClass` and zero
+      console-hosting windows owned by any Alfred process, including during an
+      orphan sweep that ran two `tasklist` and two `taskkill` calls. See
+      `ADR-011`.
 - [x] Splash/branded loading UI is visible from first paint
 - [x] Backend reaches `Ready` and the window is shown (the window is verified; `READY`
   itself is test-covered but was not observed live — see qualifications)

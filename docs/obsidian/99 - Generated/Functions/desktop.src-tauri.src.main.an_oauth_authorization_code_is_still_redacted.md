@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.an_oauth_authorization_code_is_still_redacted
 source: desktop/src-tauri/src/main.rs
-line: 2099
+line: 2171
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `an_oauth_authorization_code_is_still_redacted` in 
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2099`
+`desktop/src-tauri/src/main.rs:2171`
 
 ## Signature
 

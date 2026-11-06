@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.the_startup_phase_diagnostic_code_is_not_redacted
 source: desktop/src-tauri/src/main.rs
-line: 2089
+line: 2161
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `the_startup_phase_diagnostic_code_is_not_redacted`
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2089`
+`desktop/src-tauri/src/main.rs:2161`
 
 ## Signature
 

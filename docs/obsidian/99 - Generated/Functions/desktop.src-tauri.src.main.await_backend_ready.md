@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.await_backend_ready
 source: desktop/src-tauri/src/main.rs
-line: 1234
+line: 1306
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `await_backend_ready` in `desktop/src-tauri/src/mai
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1234`
+`desktop/src-tauri/src/main.rs:1306`
 
 ## Signature
 

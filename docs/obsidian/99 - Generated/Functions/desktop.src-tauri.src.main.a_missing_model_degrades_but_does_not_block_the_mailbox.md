@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.a_missing_model_degrades_but_does_not_block_the_mailbox
 source: desktop/src-tauri/src/main.rs
-line: 1815
+line: 1887
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `a_missing_model_degrades_but_does_not_block_the_ma
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1815`
+`desktop/src-tauri/src/main.rs:1887`
 
 ## Signature
 

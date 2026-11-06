@@ -1,28 +1,31 @@
 # Alfred — Engineering Memory
 
 Status: active
-Last updated: 2026-10-11, Phase 2 implemented (Gate 2 recorded PARTIAL in `docs/Phases.md`)
+Last updated: 2026-11-06, packaged startup defects closed (see §STARTUP DEFECTS 2026-11-06)
 
 ---
 
 ## Current state
 
-At the Phase 2 implementation checkpoint, 2026-10-11, as of commit `bb70971` plus
-the frontend commit recorded below. These rows describe the repository at that
-commit.
-
 | Field | Value |
 | --- | --- |
-| Current phase | **2 — First run and local AI setup (implemented)** |
+| Current phase | **2 — First run and local AI setup (implemented)**; a Gate 1 regression was reopened and closed on 2026-11-06 |
 | Gate 2 | **12/14 PASS** (with 2 documented qualifications / external constraints) — see `docs/Phases.md` §Gate 2 |
 | Gate 2 gap | 2 criteria remain: 1 architectural local API conflict (size of unpulled model), 1 live unverified (system browser OAuth requires interactive Google credentials) |
-| Gate 1 | **PASS**, 15/16 — criterion 13 still **unresolved** and deliberately left open |
+| Gate 1 | **PASS**, 15/16 — criterion 13 still **unresolved**; criterion 3 ("zero console windows") was found unsupported by the code on 2026-11-06, fixed, and re-verified |
 | Phase 1 | closed |
 | Visual QA | deferred to **Phase 3 / Gate 3**; backlog in `docs/VISUAL-QA-PHASE1.md` |
-| Branch | `feature/mail-workspace-productization-20260907` |
-| HEAD | `15b60e0` — `docs(alfred): record Gate 2 test stabilization and full suite evidence` |
-| Working tree | **clean** |
+| Branch | `fix/startup-reliability`, cut from `main` |
+| Repository layout | consolidated 2026-11-06: `main` fast-forwarded to `489e0a1`; `feature/mail-workspace-productization-20260907`, `backup/pre-github-sync-20260907`, `archive/legacy-streamlit-20260118` and `sync/current-alfred-20260907` deleted. Every one was an ancestor of `489e0a1`, so no commit was lost. |
 | Next gate | **Gate 3** (UX, design system, accessibility) |
+
+### Branch history note
+
+Before 2026-11-06 the productization work lived only on
+`feature/mail-workspace-productization-20260907`; `main` sat 40 commits behind at
+`2f609e9` and did not contain `docs/PRD.md`, the ADRs, the AI supervisor, FTS5,
+multi-account support or most of the test suite. Anyone reading `main` before that
+date was reading a pre-Phase-1 repository. `main` is now the only long-lived branch.
 
 ### Defects closed in Phase 2
 
@@ -39,6 +42,125 @@ Historical, for the record only: this table previously read `HEAD at session sta
 3cea34f (unchanged — nothing committed)` / `Working tree | Source modified, nothing
 committed`. That described the working state during the Gate 0 audit session of
 2026-09-26 and has not described the repository since `cbb76e6`.
+
+## STARTUP DEFECTS 2026-11-06 (branch `fix/startup-reliability`)
+
+Two user-visible symptoms were reported: a WebView showing "localhost refused to
+connect / ERR_CONNECTION_REFUSED", and CMD windows flashing during startup. Both
+are closed. A third defect was found while verifying them.
+
+### S1 — the release build navigated to the dev server
+
+`tauri` derives `cfg(dev)` as `!custom-protocol` (tauri 2.11.5 `build.rs:257`), and
+under `cfg(dev)` the webview loads `build.devUrl` instead of the embedded frontend.
+The crate declared no `custom-protocol` feature, so a plain `cargo build --release`
+produced a release binary pointed at `http://localhost:5173`.
+
+Not inferred — Cargo's own build-script output records it:
+`target/release/build/alfred-desktop-aee8728231ba8233/output` contains
+`cargo:rustc-cfg=dev`, written 2026-10-11 22:00:05 local. `desktop.log` records a
+launch at 2026-10-11T16:31:41Z, which is 22:01 IST — one minute later.
+
+`cargo tauri build` passes `tauri/custom-protocol` itself, so the documented build
+path was never broken; only the undocumented one was. `Cargo.toml` now declares
+`default = ["custom-protocol"]` to close that path too. This does **not** break
+`tauri dev`: the CLI strips any default feature enabling `tauri/custom-protocol`
+and adds `--no-default-features` (tauri-cli 2.11.4 `src/interface/rust.rs:434-450`).
+
+### S2 — Alfred's own subprocesses allocated console windows
+
+`kill_orphaned_backends` ran `netstat`, one `tasklist` per loopback socket, and a
+`taskkill` per match, all through bare `std::process::Command`. From a
+`windows_subsystem = "windows"` process each allocates a console window.
+
+### S3 — the orphan sweep killed other instances' healthy backends
+
+Found while reading the same function. The "skip my own port" guard never fired,
+because the sweep runs before the spawn. The effective rule was *kill every
+`alfred-backend` on the machine*. `desktop.log` 2026-10-12T10:26:15–22Z shows five
+instances doing this to each other in a respawn loop. Rewritten around ownership;
+see `ADR-011`. The sweep is now two `tasklist` calls, no `netstat`, and does
+nothing at all when another Alfred is alive.
+
+### S4 — Ollama auto-start produced the flashing windows
+
+The source outside the Rust shell, and the one that actually matches "windows that
+appear and disappear". `supervisor.py` started `ollama serve` with
+`DETACHED_PROCESS | CREATE_NO_WINDOW`. Windows ignores `CREATE_NO_WINDOW` when
+`DETACHED_PROCESS` is set, so the server got **no** console — and `ollama serve`
+then spawns `llama-server.exe`, a console subsystem program, which therefore
+allocates a new **visible** console that vanishes when the model finishes loading.
+
+Proven, not assumed. `ollama.exe` was observed with `ParentPid` equal to the
+sidecar's uvicorn process, and Ollama is absent from `HKCU\...\Run`, so nothing
+else started it. A standalone experiment with the same parent/console-grandchild
+shape measured both flag sets:
+
+| creation flags | new visible console windows |
+| --- | --- |
+| `DETACHED_PROCESS \| CREATE_NO_WINDOW` | **2** |
+| `CREATE_NO_WINDOW` | **0** |
+
+`DETACHED_PROCESS` removed. `CREATE_NEW_PROCESS_GROUP` kept, so a console signal
+to Alfred cannot reach the shared Ollama server.
+
+### Packaged verification, 2026-11-06
+
+Built with `tools/release/build_release.ps1` (all four stages green, sidecar
+rebuilt after the Python change and proven newer than every backend source,
+secret scan clean). `DevCfg` on the shipped shell: **False**.
+
+Measured on real launches of the packaged binary against a scratch database, with
+an `EnumWindows` sampler at 100–120 ms:
+
+| Criterion | Result |
+| --- | --- |
+| Correct frontend assets load | **Pass** — `OPTIONS`/`GET /api/accounts`, `/api/emails`, `/api/emails/counts`, `/api/analysis/status` in `desktop.log`. Only the React app issues these; a `cfg(dev)` build issues none |
+| One launch, one window | **Pass** — exactly one visible `Tauri Window` titled `Alfred` |
+| Second launch starts no second backend | **Pass** — the second `desktop.start` is followed by `window.revealed`, and no second `backend.spawn_requested` |
+| Zero console windows from Alfred | **Pass** — 0 `ConsoleWindowClass`; 0 console-hosting windows owned by any Alfred process across two cycles |
+| Orphan sweep clears real orphans | **Pass** — two orphans killed in 1.77 s from a deliberately dirty start, 0 surviving |
+| Graceful quit leaves no sidecar | **Pass** — `POST /api/shutdown` 200 → `sidecar.exited exit=Some(0)` → `shutdown.exited_cleanly`, 0 processes after both cycles |
+| Relaunch works | **Pass** — cycle 2 identical to cycle 1 |
+
+**Not verified.** The S4 fix was not re-observed end to end. Ollama auto-start only
+fires when no server is running, and the Ollama instance started by the *first*
+test run — under the old flags, `ollama.exe` PID 32224, parent 1924 — was still
+alive; stopping it was refused by the sandbox. S4 rests on the measured experiment
+above plus `test_ollama_autostart_gives_the_server_a_hidden_console`, not on a
+packaged observation. The `llama-server` consoles still seen during the final run
+are children of that old-flags server.
+
+### Tests — all run 2026-11-06
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Rust | `cargo test` from `desktop/src-tauri` | **53 passed** (was 44) |
+| Backend | `py -3.12 -m pytest backend/app backend/tests -q` | **381 passed** (was 380) |
+| Tools | `py -3.12 -m pytest tools -q` | **18 passed** |
+| Frontend | `npm --prefix frontend test` | **395 passed / 33 files** |
+| Lint | `npm --prefix frontend run lint` | exit 0 |
+| Build | `npm --prefix frontend run build` | exit 0 — 401.35 kB JS / 121.88 kB gzip, 63.75 kB CSS / 10.98 kB gzip (unchanged from Phase 2) |
+| Format / lint | `cargo fmt --check`, `cargo clippy --all-targets` | exit 0, no warnings |
+
+**Total: 847 tests, 0 failures, 0 skipped.**
+
+### Open, found here, not fixed
+
+1. **A clean shutdown logs `phase=FATAL_ERROR diag=SIDECAR_EXITED`.** The sidecar
+   exiting on purpose during `desktop.exit_requested` still drives the fatal
+   transition. Cosmetic today because the window is closing, but it pollutes the
+   one log a startup failure is diagnosed from. Pre-existing, visible in the
+   October logs too.
+2. **`pytest tools` is not hermetic** — it regenerates the Obsidian vault into the
+   working tree as a side effect.
+3. **The TypeScript half of `generate_knowledge_graph.py` fails in a worktree**
+   with a Node path-length error. The Python and Rust halves complete.
+4. **`npm ci` reports 16 vulnerabilities (12 moderate, 4 high).** Not triaged;
+   Gate 5 material.
+5. **The single-instance race.** Five `desktop.start` lines were logged in three
+   seconds on 2026-10-12 because the line is written before `Builder::build()`
+   arbitrates. S3 removes the damage, not the race.
 
 ## Toolchain
 

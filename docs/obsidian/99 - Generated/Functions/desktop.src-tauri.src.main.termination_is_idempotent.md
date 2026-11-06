@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.termination_is_idempotent
 source: desktop/src-tauri/src/main.rs
-line: 2074
+line: 2146
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `termination_is_idempotent` in `desktop/src-tauri/s
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2074`
+`desktop/src-tauri/src/main.rs:2146`
 
 ## Signature
 

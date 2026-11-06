@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.the_process_stays_owned_until_shutdown
 source: desktop/src-tauri/src/main.rs
-line: 1951
+line: 2023
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `the_process_stays_owned_until_shutdown` in `deskto
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1951`
+`desktop/src-tauri/src/main.rs:2023`
 
 ## Signature
 

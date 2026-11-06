@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.token_draws_differ_within_a_single_nanosecond_window
 source: desktop/src-tauri/src/main.rs
-line: 1616
+line: 1688
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `token_draws_differ_within_a_single_nanosecond_wind
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1616`
+`desktop/src-tauri/src/main.rs:1688`
 
 ## Signature
 

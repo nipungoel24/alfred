@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.other_sensitive_values_are_still_redacted
 source: desktop/src-tauri/src/main.rs
-line: 2107
+line: 2179
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `other_sensitive_values_are_still_redacted` in `des
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2107`
+`desktop/src-tauri/src/main.rs:2179`
 
 ## Signature
 

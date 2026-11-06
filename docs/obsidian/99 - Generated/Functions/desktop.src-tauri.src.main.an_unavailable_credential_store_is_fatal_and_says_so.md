@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.an_unavailable_credential_store_is_fatal_and_says_so
 source: desktop/src-tauri/src/main.rs
-line: 1802
+line: 1874
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `an_unavailable_credential_store_is_fatal_and_says_
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1802`
+`desktop/src-tauri/src/main.rs:1874`
 
 ## Signature
 

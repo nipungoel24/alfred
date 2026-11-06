@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.shutdown_delivers_a_graceful_request_before_killing
 source: desktop/src-tauri/src/main.rs
-line: 2185
+line: 2257
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `shutdown_delivers_a_graceful_request_before_killin
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:2185`
+`desktop/src-tauri/src/main.rs:2257`
 
 ## Signature
 

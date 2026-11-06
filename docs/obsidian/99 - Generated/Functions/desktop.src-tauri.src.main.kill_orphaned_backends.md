@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.kill_orphaned_backends
 source: desktop/src-tauri/src/main.rs
-line: 1046
+line: 1134
 status: active
 tags: [backend, function]
 ---
@@ -21,17 +21,13 @@ Purpose inferred from usage: `kill_orphaned_backends` in `desktop/src-tauri/src/
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1046`
+`desktop/src-tauri/src/main.rs:1134`
 
 ## Signature
 
 ```rust
-fn kill_orphaned_backends(own_port: u16)
+fn kill_orphaned_backends()
 ```
-
-## Parameters
-
-- `own_port` (`u16`)
 
 ## Side Effects
 

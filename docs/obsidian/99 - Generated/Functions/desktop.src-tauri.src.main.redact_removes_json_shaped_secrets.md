@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.redact_removes_json_shaped_secrets
 source: desktop/src-tauri/src/main.rs
-line: 1663
+line: 1735
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `redact_removes_json_shaped_secrets` in `desktop/sr
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1663`
+`desktop/src-tauri/src/main.rs:1735`
 
 ## Signature
 

@@ -4181,7 +4181,17 @@
       "source": null
     },
     {
+      "id": "desktop.src-tauri.src.main.a_filter_that_matches_nothing_yields_no_pids",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.a_healthy_poll_keeps_the_connection",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.a_live_sibling_instance_makes_the_sweep_a_no_op",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -4301,12 +4311,22 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.duplicate_and_malformed_tasklist_rows_are_discarded",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.enabled",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
       "id": "desktop.src-tauri.src.main.every_diagnostic_code_has_distinct_guidance",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.every_sidecar_is_an_orphan_when_this_is_the_only_alfred",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -4406,6 +4426,11 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.live_pids_for_image",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.log",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
@@ -4441,7 +4466,27 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.nothing_running_means_nothing_to_kill",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.orphan_sweep_plan",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.other_sensitive_values_are_still_redacted",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.own_image_name",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.parse_tasklist_pids",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -4502,6 +4547,11 @@
     },
     {
       "id": "desktop.src-tauri.src.main.process_is_alive",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.process_is_alive_reports_false_for_nonexistent_pid",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },
@@ -4581,6 +4631,16 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.silent_command",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.silent_command_executes_and_captures_output",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.snapshot",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
@@ -4626,6 +4686,11 @@
       "source": "desktop/src-tauri/src/main.rs"
     },
     {
+      "id": "desktop.src-tauri.src.main.tasklist_pids_are_parsed_from_csv",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
       "id": "desktop.src-tauri.src.main.terminate",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
@@ -4642,6 +4707,11 @@
     },
     {
       "id": "desktop.src-tauri.src.main.the_startup_phase_diagnostic_code_is_not_redacted",
+      "type": "function",
+      "source": "desktop/src-tauri/src/main.rs"
+    },
+    {
+      "id": "desktop.src-tauri.src.main.the_sweep_identifies_this_process_by_its_real_image_name",
       "type": "function",
       "source": "desktop/src-tauri/src/main.rs"
     },

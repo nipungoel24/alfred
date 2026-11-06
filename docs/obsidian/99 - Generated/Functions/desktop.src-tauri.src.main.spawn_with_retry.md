@@ -6,7 +6,7 @@ layer: backend
 module: desktop.src-tauri.src.main
 qualified_name: desktop.src-tauri.src.main.spawn_with_retry
 source: desktop/src-tauri/src/main.rs
-line: 1458
+line: 1530
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `spawn_with_retry` in `desktop/src-tauri/src/main.r
 
 ## Location
 
-`desktop/src-tauri/src/main.rs:1458`
+`desktop/src-tauri/src/main.rs:1530`
 
 ## Signature
 
