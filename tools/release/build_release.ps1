@@ -29,7 +29,7 @@ function Step($n) { Write-Host "`n[$n]" -ForegroundColor Cyan }
 try {
     Step '1/4  backend sidecar'
     if ($SkipSidecar) {
-        Write-Warning 'SkipSidecar: the packaged sidecar will NOT be rebuilt."
+        Write-Warning 'SkipSidecar: the packaged sidecar will NOT be rebuilt.'
         Write-Warning 'Use only when you have already run build_sidecar.py yourself.'
     }
     else {

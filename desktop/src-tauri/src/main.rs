@@ -1023,16 +1023,28 @@ fn generate_token() -> Result<String, String> {
 
 // ── Process helpers ─────────────────────────────────────────────────
 
+#[cfg(windows)]
+fn silent_command(program: &str) -> std::process::Command {
+    use std::os::windows::process::CommandExt;
+    const CREATE_NO_WINDOW: u32 = 0x08000000;
+    let mut cmd = std::process::Command::new(program);
+    cmd.creation_flags(CREATE_NO_WINDOW);
+    cmd
+}
+
+#[cfg(not(windows))]
+fn silent_command(program: &str) -> std::process::Command {
+    std::process::Command::new(program)
+}
+
 fn kill_pid(pid: u32) {
-    use std::process::Command;
-    let _ = Command::new("taskkill")
-        .args(["/F", "/PID", &pid.to_string()])
+    let _ = silent_command("taskkill")
+        .args(["/F", "/T", "/PID", &pid.to_string()])
         .output();
 }
 
 fn process_is_alive(pid: u32) -> bool {
-    use std::process::Command;
-    Command::new("tasklist")
+    silent_command("tasklist")
         .args(["/FI", &format!("PID eq {pid}"), "/FO", "CSV", "/NH"])
         .output()
         .map(|out| {
@@ -1044,10 +1056,33 @@ fn process_is_alive(pid: u32) -> bool {
 }
 
 fn kill_orphaned_backends(own_port: u16) {
-    use std::process::Command;
-    if let Ok(output) = Command::new("netstat").args(["-ano", "-p", "TCP"]).output() {
+    let mut orphans: Vec<u32> = Vec::new();
+
+    // Query running alfred-backend processes in a single silent call
+    // to avoid repeatedly popping up command windows or running tasklist
+    // in an N-iteration loop during application startup.
+    if let Ok(ps_out) = silent_command("tasklist")
+        .args(["/FI", "IMAGENAME eq alfred-backend*", "/FO", "CSV", "/NH"])
+        .output()
+    {
+        let ps = String::from_utf8_lossy(&ps_out.stdout);
+        for line in ps.lines() {
+            let line = line.trim();
+            if line.is_empty() || line.to_lowercase().contains("info:") {
+                continue;
+            }
+            let parts: Vec<&str> = line.split(',').collect();
+            if parts.len() >= 2 {
+                let pid_str = parts[1].trim().trim_matches('"');
+                if let Ok(pid) = pid_str.parse::<u32>() {
+                    orphans.push(pid);
+                }
+            }
+        }
+    }
+
+    if let Ok(output) = silent_command("netstat").args(["-ano", "-p", "TCP"]).output() {
         let stdout = String::from_utf8_lossy(&output.stdout);
-        let mut orphans: Vec<u32> = Vec::new();
         for line in stdout.lines() {
             if !line.contains("127.0.0.1") || !line.contains("LISTENING") {
                 continue;
@@ -1068,22 +1103,28 @@ fn kill_orphaned_backends(own_port: u16) {
                 continue;
             };
             if port == own_port {
+                orphans.retain(|&p| p != pid);
                 continue;
             }
-            if let Ok(ps_out) = Command::new("tasklist")
-                .args(["/FI", &format!("PID eq {pid}"), "/FO", "CSV", "/NH"])
-                .output()
-            {
-                let ps = String::from_utf8_lossy(&ps_out.stdout);
-                if ps.to_lowercase().contains("alfred-backend") {
-                    orphans.push(pid);
+            if !orphans.contains(&pid) {
+                if let Ok(ps_out) = silent_command("tasklist")
+                    .args(["/FI", &format!("PID eq {pid}"), "/FO", "CSV", "/NH"])
+                    .output()
+                {
+                    let ps = String::from_utf8_lossy(&ps_out.stdout);
+                    if ps.to_lowercase().contains("alfred-backend") {
+                        orphans.push(pid);
+                    }
                 }
             }
         }
-        for pid in orphans {
-            log::warn!("backend.killing_orphan pid={pid}");
-            kill_pid(pid);
-        }
+    }
+
+    orphans.sort_unstable();
+    orphans.dedup();
+    for pid in orphans {
+        log::warn!("backend.killing_orphan pid={pid}");
+        kill_pid(pid);
     }
 }
 
@@ -2011,7 +2052,7 @@ mod tests {
     fn a_terminal_failure_terminates_the_owned_child_and_leaves_no_orphan() {
         // End-to-end: a real child process, the real registry, the real
         // terminate(). This is the test that would have caught the orphan.
-        let mut child = std::process::Command::new("cmd")
+        let mut child = silent_command("cmd")
             .args(["/C", "ping -n 30 127.0.0.1 > nul"])
             .spawn()
             .expect("spawn a harmless stand-in child");
@@ -2323,5 +2364,27 @@ mod tests {
         let line = format!("health.probe port=49152 token={token} state=conn");
         let safe = redact(&line);
         assert!(!safe.contains(&token), "token must never be logged: {safe}");
+    }
+
+    #[test]
+    fn silent_command_executes_and_captures_output() {
+        let output = silent_command("cmd")
+            .args(["/C", "echo alfred_silent_test"])
+            .output()
+            .expect("execute silent command");
+        let text = String::from_utf8_lossy(&output.stdout);
+        assert!(text.contains("alfred_silent_test"));
+    }
+
+    #[test]
+    fn process_is_alive_reports_false_for_nonexistent_pid() {
+        // High PID that does not exist in any system
+        assert!(!process_is_alive(999_999));
+    }
+
+    #[test]
+    fn kill_orphaned_backends_executes_safely() {
+        // Must run silently and safely without panicking or modifying the current port
+        kill_orphaned_backends(54321);
     }
 }
