@@ -1,7 +1,8 @@
 # Alfred — Engineering Memory
 
 Status: active
-Last updated: 2026-11-06, packaged startup defects closed (see §STARTUP DEFECTS 2026-11-06)
+Last updated: 2026-11-09, startup defects closed and the fixed build installed
+(see §STARTUP DEFECTS 2026-11-06, and §Installed over the October build within it)
 
 ---
 
@@ -156,6 +157,74 @@ merging source does not rebuild. A verification run must name the binary it test
 and print its timestamp; the first attempt on 2026-11-09 silently exercised the
 stale October build and reported a meaningless pass.
 
+### Installed over the October build, 2026-11-09
+
+`Alfred_0.1.0_x64-setup.exe` run with `/S` at 15:25, exit code 0 in 5 s, replacing
+the 2026-10-04 shell and 2026-09-27 sidecar at `%LOCALAPPDATA%\Alfred`.
+
+**The database lives inside the install directory.** This is a legacy install:
+`_default_database_path()` returns `%LOCALAPPDATA%\Alfred\alfred.sqlite3` when it
+exists, and that directory is also `$INSTDIR`. Read before installing, from the
+generated `nsis/x64/installer.nsi`, rather than assumed:
+
+- The uninstall section deletes three *named* files — `alfred-desktop.exe`,
+  `alfred-backend.exe`, `uninstall.exe` — then `RMDir "$INSTDIR"` with **no `/r`**,
+  which fails harmlessly while the database and its `.bak` files remain.
+- `PageReinstall` is a *page* function, so `/S` skips it: the old uninstaller is
+  never invoked and the binaries are simply overwritten. Zero deletions.
+- The uninstaller's "delete app data" checkbox wipes
+  `$LOCALAPPDATA\${BUNDLEID}` = `$LOCALAPPDATA\com.alfred.local`, **a directory
+  that does not exist**. It therefore deletes none of the user's data. The
+  inverse of the feared risk, but still wrong — see finding 6 below.
+
+The mailbox was hashed, backed up to
+`%LOCALAPPDATA%\AlfredData\alfred.sqlite3.20261109-pre-install.bak`
+(byte-identical, `dae708cc…`, no WAL — cleanly closed), and re-hashed after the
+install: **unchanged**. It changed only once the app opened it, as expected.
+
+#### The installed binary is the verified build, proved not assumed
+
+`desktop.log` reports `build=8755929a5cf4`, which is *older* than both fix commits
+(`52b5157` 20:58:06, `6ce56df` 20:58:08) because the binary was compiled at 20:53:46
+with the fixes still uncommitted in the working tree — the stamp records HEAD, not
+the tree. Three independent checks settle what is actually inside it:
+
+| Check | Result |
+| --- | --- |
+| Sidecar vs `binaries/alfred-backend-…exe` | **byte-identical**, `792fc61a…` |
+| Shell vs `target/release/alfred-desktop.exe` | **3 bytes differ**, at one offset: `__TAURI_BUNDLE_TYPE_VAR_UNK` → `…_NSS`. Tauri compiles in the `UNK` placeholder and its NSIS bundler patches the install type into the packaged copy |
+| Corrected sweep compiled in | `backend.orphan_sweep_skipped`, `backend.killing_orphan`, `other_instances=` all **present**; `netstat` and `-ano`, used only by the old destructive sweep, both **absent** |
+
+#### Acceptance on the installed build, real database, Start Menu shortcut
+
+| Criterion | Result |
+| --- | --- |
+| Frontend loads (S1) | **Pass** — real `/api/*` traffic, no `localhost:5173`, no `ERR_CONNECTION_REFUSED` |
+| Real mailbox opened | `db_path=…\Alfred\alfred.sqlite3 frozen=True config_present=True token_set=True` |
+| Visible `Tauri Window` | **1**, titled Alfred |
+| Second launch | `window.revealed` with **no** second `backend.spawn_requested` |
+| Peak processes | `alfred_desktop=1`, `alfred_backend=2` (PyInstaller bootloader + child) — no duplicate backend |
+| Console windows owned by Alfred (S2/S4) | **0** across 80 s sampled at 120 ms |
+| Graceful quit | `POST /api/shutdown` 200 → `sidecar.exited exit=Some(0)` → `shutdown.exited_cleanly` → `alfred_desktop=0 alfred_backend=0` |
+
+Two honest limits on this run:
+
+1. **Ollama auto-start did not re-fire.** The server Alfred started earlier that day
+   (`ollama.exe` pid 26476, parent pid 17860 now exited) was still alive, so the
+   precondition was absent. A `llama-server.exe` (pid 34420) *did* spawn beneath it
+   during the run and produced **0** visible consoles, so the grandchild case was
+   observed again — but the auto-start path itself rests on the 13:59 run above.
+   A `tasklist`/`netstat` precondition check run through the Bash tool returned
+   empty while `Get-Process` found the process: **use `Get-Process` for these
+   preconditions**, not `tasklist` through the sandbox.
+2. **`phase=RECOVERY diag=AI_RUNTIME_UNAVAILABLE`** at +2.2 s. The AI runtime probe
+   ran before `llama-server` was serving at +4 s. The app stayed usable throughout —
+   emails, counts and accounts all returned 200. Not caused by the startup fix, and
+   adjacent to finding 1 below.
+
+`phase=FATAL_ERROR diag=SIDECAR_EXITED` on clean quit reproduced here too, as
+finding 1 predicts.
+
 ### Tests — all run 2026-11-06
 
 | Suite | Command | Result |
@@ -186,6 +255,19 @@ stale October build and reported a meaningless pass.
 5. **The single-instance race.** Five `desktop.start` lines were logged in three
    seconds on 2026-10-12 because the line is written before `Builder::build()`
    arbitrates. S3 removes the damage, not the race.
+6. **The uninstaller's "delete app data" checkbox deletes nothing.** It targets
+   `$LOCALAPPDATA\com.alfred.local` (the bundle identifier), but Alfred's data is
+   at `%LOCALAPPDATA%\AlfredData` and, on legacy installs, at
+   `%LOCALAPPDATA%\Alfred` beside the binaries. So a user who asks for their mail
+   to be removed keeps it, and one who wants it kept is protected only by the
+   non-recursive `RMDir`. Both halves of the choice are wrong, and the install
+   directory doubling as the data directory is why. Found 2026-11-09 while reading
+   the generated NSIS script before installing; **not** fixed — it touches the
+   uninstall path and deserves its own authorized change. Fixing it means moving
+   legacy data to `AlfredData` with a migration, then pointing the checkbox at the
+   real locations. Gate 7 material, and bound by the standing rule that an upgrade
+   or uninstall must not delete user data without an explicit, clearly
+   communicated choice.
 
 ## Toolchain
 
