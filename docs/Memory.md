@@ -123,13 +123,38 @@ an `EnumWindows` sampler at 100–120 ms:
 | Graceful quit leaves no sidecar | **Pass** — `POST /api/shutdown` 200 → `sidecar.exited exit=Some(0)` → `shutdown.exited_cleanly`, 0 processes after both cycles |
 | Relaunch works | **Pass** — cycle 2 identical to cycle 1 |
 
-**Not verified.** The S4 fix was not re-observed end to end. Ollama auto-start only
-fires when no server is running, and the Ollama instance started by the *first*
-test run — under the old flags, `ollama.exe` PID 32224, parent 1924 — was still
-alive; stopping it was refused by the sandbox. S4 rests on the measured experiment
-above plus `test_ollama_autostart_gives_the_server_a_hidden_console`, not on a
-packaged observation. The `llama-server` consoles still seen during the final run
-are children of that old-flags server.
+### S4 verified end to end, 2026-11-09
+
+On 2026-11-06 this was the one open gap: Ollama auto-start only fires when no
+server is running, and the server started by that day's first test run — under the
+old flags — was still alive, so the packaged path could not be re-observed. By
+2026-11-09 nothing was running and `127.0.0.1:11434` was unreachable, so the
+auto-start path executed for real.
+
+Same packaged binary (shell 2026-11-06 20:54, sidecar 20:52), scratch database,
+`EnumWindows` sampler at 120 ms, 75-second observation window:
+
+| Observation | Result |
+| --- | --- |
+| Ollama auto-started by Alfred | **Yes** — `ollama.exe` pid 26476, parent `alfred-backend` pid 17860 |
+| `llama-server.exe` spawned | **Yes** — pid 33404, parent `ollama` pid 26476 |
+| New visible console windows | **0** |
+| `backend.log` | `ollama_auto_start_attempt` → `ollama_auto_start_success` |
+| Graceful quit | `alfred_desktop=0`, `alfred_backend=0` |
+
+The grandchild that produced the visible Windows Terminal window on 2026-11-06 at
+roughly +9 s did start, and produced no window. S4 is closed on a packaged
+observation, not only on the flag experiment and the unit test.
+
+Ollama itself is left running after Alfred quits. That is deliberate: Alfred does
+not own the shared server exclusively, which is also why
+`CREATE_NEW_PROCESS_GROUP` is kept.
+
+One process note for future runs: `C:\Kaam_Dhanda\alfred\desktop\src-tauri\target\
+release\alfred-desktop.exe` was still the 2026-10-12 build after the merge, because
+merging source does not rebuild. A verification run must name the binary it tested
+and print its timestamp; the first attempt on 2026-11-09 silently exercised the
+stale October build and reported a meaningless pass.
 
 ### Tests — all run 2026-11-06
 
