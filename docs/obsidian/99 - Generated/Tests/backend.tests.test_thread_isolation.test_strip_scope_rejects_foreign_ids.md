@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.test_strip_scope_rejects_foreign_ids
 source: backend/tests/test_thread_isolation.py
-line: 213
+line: 218
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_strip_scope_rejects_foreign_ids` in `backend/
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:213`
+`backend/tests/test_thread_isolation.py:218`
 
 ## Signature
 

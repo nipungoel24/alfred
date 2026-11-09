@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_startup
 qualified_name: backend.tests.test_desktop_startup.test_oauth_callback_exempt_under_token
 source: backend/tests/test_desktop_startup.py
-line: 79
+line: 84
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_oauth_callback_exempt_under_token` in `backen
 
 ## Location
 
-`backend/tests/test_desktop_startup.py:79`
+`backend/tests/test_desktop_startup.py:84`
 
 ## Signature
 

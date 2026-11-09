@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.gmail_detail
 source: backend/tests/test_thread_isolation.py
-line: 49
+line: 54
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `gmail_detail` in `backend/tests/test_thread_isolat
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:49`
+`backend/tests/test_thread_isolation.py:54`
 
 ## Signature
 

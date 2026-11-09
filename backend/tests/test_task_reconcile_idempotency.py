@@ -353,15 +353,33 @@ def test_source_linkage_survives(repo):
 # ── a real copy of the live database ──────────────────────────────────
 
 def _live_db() -> Path | None:
-    p = Path(os.environ.get("LOCALAPPDATA", "")) / "Alfred" / "alfred.sqlite3"
-    return p if p.exists() else None
+    """The user's mailbox, in either layout, or None.
+
+    AlfredData first: ADR-012 moves the database out of the install
+    directory, so the legacy path is the fallback, not the primary.
+    """
+    local_app_data = Path(os.environ.get("LOCALAPPDATA", ""))
+    for candidate in (
+        local_app_data / "AlfredData" / "alfred.sqlite3",
+        local_app_data / "Alfred" / "alfred.sqlite3",
+    ):
+        if candidate.exists():
+            return candidate
+    return None
 
 
-@pytest.mark.skipif(_live_db() is None, reason="no live mailbox database present")
+#: Resolved ONCE. Calling `_live_db()` again inside the test was a latent
+#: bug: the skipif ran at import and the body ran later, so anything that
+#: moved the file in between turned a skip into `shutil.copy2(None, ...)`.
+#: The ADR-012 migration did exactly that on 2026-11-09.
+LIVE_DB = _live_db()
+
+
+@pytest.mark.skipif(LIVE_DB is None, reason="no live mailbox database present")
 def test_reconcile_on_a_copy_of_the_live_database_is_idempotent(tmp_path):
-    """The real 291-row backlog, on a copy. The live file is never opened."""
+    """The real backlog, on a copy. The live file is never opened."""
     copy = tmp_path / "live-copy.sqlite3"
-    shutil.copy2(_live_db(), copy)
+    shutil.copy2(LIVE_DB, copy)
 
     con = sqlite3.connect(str(copy))
     r = Repository(copy)

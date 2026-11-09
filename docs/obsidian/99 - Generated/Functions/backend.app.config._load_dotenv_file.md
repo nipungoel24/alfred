@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.config
 qualified_name: backend.app.config._load_dotenv_file
 source: backend/app/config.py
-line: 8
+line: 9
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Best-effort dotenv load without extra dependencies.
 
 ## Location
 
-`backend/app/config.py:8`
+`backend/app/config.py:9`
 
 ## Signature
 

@@ -29,6 +29,8 @@ tags: [module, backend]
 - `asyncio` ← `asyncio`
 - `find_ollama_executable` ← `backend.app.ai.supervisor.find_ollama_executable`
 - `pytest` ← `pytest`
+- `subprocess` ← `subprocess`
+- `sys` ← `sys`
 
 ## Classes
 
@@ -49,6 +51,7 @@ tags: [module, backend]
 - [[backend.tests.test_ai_supervisor.test_failure_classification|test_failure_classification]]
 - [[backend.tests.test_ai_supervisor.test_find_ollama_executable_returns_none_when_absent|test_find_ollama_executable_returns_none_when_absent]]
 - [[backend.tests.test_ai_supervisor.test_model_missing_state|test_model_missing_state]]
+- [[backend.tests.test_ai_supervisor.test_ollama_autostart_gives_the_server_a_hidden_console|test_ollama_autostart_gives_the_server_a_hidden_console]]
 - [[backend.tests.test_ai_supervisor.test_ollama_not_running_state|test_ollama_not_running_state]]
 - [[backend.tests.test_ai_supervisor.test_ready_requires_smoke_test|test_ready_requires_smoke_test]]
 - [[backend.tests.test_ai_supervisor.test_recovery_flow_resumes_queue|test_recovery_flow_resumes_queue]]

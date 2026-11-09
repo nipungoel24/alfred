@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.pulling
 source: backend/app/ai/supervisor.py
-line: 269
+line: 290
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ True while a download task is actually in flight.
 
 ## Location
 
-`backend/app/ai/supervisor.py:269`
+`backend/app/ai/supervisor.py:290`
 
 ## Signature
 

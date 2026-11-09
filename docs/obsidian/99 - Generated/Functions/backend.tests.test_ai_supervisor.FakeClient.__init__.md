@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor.FakeClient
 qualified_name: backend.tests.test_ai_supervisor.FakeClient.__init__
 source: backend/tests/test_ai_supervisor.py
-line: 20
+line: 22
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `__init__` in `backend/tests/test_ai_supervisor.py`
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:20`
+`backend/tests/test_ai_supervisor.py:22`
 
 ## Signature
 

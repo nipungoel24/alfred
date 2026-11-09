@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_cors_preflight_passes_without_token
 source: backend/tests/test_desktop_auth.py
-line: 95
+line: 101
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Browsers never attach the session token to CORS preflights.
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:95`
+`backend/tests/test_desktop_auth.py:101`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.test_ollama_not_running_state
 source: backend/tests/test_ai_supervisor.py
-line: 61
+line: 63
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Unreachable server → ollama_not_running, queue paused.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:61`
+`backend/tests/test_ai_supervisor.py:63`
 
 ## Signature
 

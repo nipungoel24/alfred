@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_oauth_two_accounts
 qualified_name: backend.tests.test_oauth_two_accounts.isolated_app
 source: backend/tests/test_oauth_two_accounts.py
-line: 15
+line: 17
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `isolated_app` in `backend/tests/test_oauth_two_acc
 
 ## Location
 
-`backend/tests/test_oauth_two_accounts.py:15`
+`backend/tests/test_oauth_two_accounts.py:17`
 
 ## Signature
 

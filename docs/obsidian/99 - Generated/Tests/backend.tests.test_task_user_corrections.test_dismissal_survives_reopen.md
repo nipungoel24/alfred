@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_user_corrections
 qualified_name: backend.tests.test_task_user_corrections.test_dismissal_survives_reopen
 source: backend/tests/test_task_user_corrections.py
-line: 89
+line: 94
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_dismissal_survives_reopen` in `backend/tests/
 
 ## Location
 
-`backend/tests/test_task_user_corrections.py:89`
+`backend/tests/test_task_user_corrections.py:94`
 
 ## Signature
 

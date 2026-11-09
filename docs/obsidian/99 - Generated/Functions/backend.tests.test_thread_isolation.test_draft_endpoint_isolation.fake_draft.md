@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation.test_draft_endpoint_isolation
 qualified_name: backend.tests.test_thread_isolation.test_draft_endpoint_isolation.fake_draft
 source: backend/tests/test_thread_isolation.py
-line: 118
+line: 123
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `fake_draft` in `backend/tests/test_thread_isolatio
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:118`
+`backend/tests/test_thread_isolation.py:123`
 
 ## Signature
 

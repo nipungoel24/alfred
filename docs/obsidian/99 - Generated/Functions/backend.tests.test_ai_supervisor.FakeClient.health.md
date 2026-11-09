@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor.FakeClient
 qualified_name: backend.tests.test_ai_supervisor.FakeClient.health
 source: backend/tests/test_ai_supervisor.py
-line: 27
+line: 29
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `health` in `backend/tests/test_ai_supervisor.py`.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:27`
+`backend/tests/test_ai_supervisor.py:29`
 
 ## Signature
 

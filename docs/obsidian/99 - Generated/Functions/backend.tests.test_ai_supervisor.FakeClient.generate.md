@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor.FakeClient
 qualified_name: backend.tests.test_ai_supervisor.FakeClient.generate
 source: backend/tests/test_ai_supervisor.py
-line: 33
+line: 35
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `generate` in `backend/tests/test_ai_supervisor.py`
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:33`
+`backend/tests/test_ai_supervisor.py:35`
 
 ## Signature
 

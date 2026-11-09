@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_oauth_two_accounts
 qualified_name: backend.tests.test_oauth_two_accounts._complete_callback
 source: backend/tests/test_oauth_two_accounts.py
-line: 30
+line: 35
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Drive the OAuth callback with a mocked Google side.
 
 ## Location
 
-`backend/tests/test_oauth_two_accounts.py:30`
+`backend/tests/test_oauth_two_accounts.py:35`
 
 ## Signature
 

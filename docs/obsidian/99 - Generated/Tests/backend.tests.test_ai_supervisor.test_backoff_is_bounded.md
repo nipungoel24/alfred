@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.test_backoff_is_bounded
 source: backend/tests/test_ai_supervisor.py
-line: 118
+line: 120
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ The pause schedule grows and then stays bounded.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:118`
+`backend/tests/test_ai_supervisor.py:120`
 
 ## Signature
 

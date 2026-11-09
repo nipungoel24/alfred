@@ -21,9 +21,27 @@ SOURCE_GLOBS = (
     "desktop/src-tauri/src/**/*.rs",
     "desktop/src-tauri/*.nsh",
     "desktop/src-tauri/*.nsi",
+    "desktop/src-tauri/installer/**/*.nsh",
     "backend/**/*.py",
     "frontend/src/**/*",
     "tools/release/**/*",
+)
+
+#: The installer hook Alfred is allowed to register, and the only one.
+INSTALLER_HOOKS = ROOT / "desktop/src-tauri/installer/hooks.nsh"
+
+#: Shortcut management belongs to Tauri's template. `b44536a` removed a
+#: POSTINSTALL hook that recreated Start Menu and Desktop shortcuts from
+#: environment-resolved paths; these are the constructs it used.
+SHORTCUT_REPAIR_CONSTRUCTS = (
+    "CreateShortcut",
+    "SetShortcutTarget",
+    "SetLnkAppUserModelId",
+    "$SMPROGRAMS",
+    "$DESKTOP",
+    "ReadEnvStr",
+    "NSIS_HOOK_POSTINSTALL",
+    "NSIS_HOOK_PREINSTALL",
 )
 
 
@@ -45,9 +63,94 @@ def _read(path: Path) -> str:
 
 
 def test_no_custom_nsis_shortcut_repair_hook() -> None:
-    config = _read(ROOT / "desktop/src-tauri/tauri.conf.json")
-    assert "installerHooks" not in config
+    """Shortcut management stays Tauri's, whatever hooks exist.
+
+    This used to assert `"installerHooks" not in config`, which was a proxy
+    for the real rule: `b44536a` deleted a POSTINSTALL hook that re-created
+    Start Menu and Desktop shortcuts from environment-resolved paths, and
+    the blanket ban kept it from coming back. ADR-012 needs a POSTUNINSTALL
+    hook to delete user data, so the proxy is replaced by the rule itself —
+    no install-time hooks at all, and no shortcut construct in the one hook
+    that is allowed.
+    """
     assert not (ROOT / "desktop/src-tauri/nsis-hooks.nsh").exists()
+
+    hook = _read(INSTALLER_HOOKS) if INSTALLER_HOOKS.exists() else ""
+    offenders = [c for c in SHORTCUT_REPAIR_CONSTRUCTS if c in hook]
+    assert offenders == [], f"shortcut repair is Tauri's job: {offenders}"
+
+
+def test_the_only_installer_hook_is_the_user_data_deletion_hook() -> None:
+    config = _read(ROOT / "desktop/src-tauri/tauri.conf.json")
+    if "installerHooks" not in config:
+        assert not INSTALLER_HOOKS.exists()
+        return
+
+    assert '"installerHooks": "installer/hooks.nsh"' in config
+    assert INSTALLER_HOOKS.exists()
+    hook = _read(INSTALLER_HOOKS)
+    assert "NSIS_HOOK_POSTUNINSTALL" in hook
+
+
+def test_user_data_deletion_is_guarded_by_the_checkbox_and_skips_upgrades() -> None:
+    """Both guards, or the uninstaller could delete a mailbox unasked.
+
+    `$DeleteAppDataCheckboxState` is only set when the confirmation page was
+    shown and the box ticked, so requiring it also makes a silent uninstall
+    keep the data. `$UpdateMode` excludes the upgrade path, where the old
+    uninstaller runs to clear binaries.
+    """
+    hook = _read(INSTALLER_HOOKS)
+    assert "$DeleteAppDataCheckboxState = 1" in hook
+    assert "$UpdateMode <> 1" in hook
+
+    deletion = hook.split("!macro AlfredDeleteUserData", 1)[1].split("!macroend", 1)[0]
+    guard = hook.split("!macro NSIS_HOOK_POSTUNINSTALL", 1)[1].split("!macroend", 1)[0]
+    assert "!insertmacro AlfredDeleteUserData" in guard
+    # The destructive RMDir /r lives behind the guard, never in it.
+    assert "RMDir /r" in deletion
+    assert "RMDir /r" not in guard
+
+
+def test_user_data_deletion_targets_alfreds_data_and_never_ollama_models() -> None:
+    """Ollama's model store is shared and must survive an uninstall.
+
+    docs/Rules.md forbids deleting model files; they are not Alfred's data
+    and other Ollama clients depend on them.
+    """
+    hook = _read(INSTALLER_HOOKS)
+    assert "AlfredData" in hook
+    assert "alfred.sqlite3" in hook
+
+    deletion = hook.split("!macro AlfredDeleteUserData", 1)[1].split("!macroend", 1)[0]
+    for forbidden in ("Ollama", "models", ".ollama", "$APPDATA", "$PROGRAMFILES"):
+        assert forbidden not in deletion, f"out of scope for deletion: {forbidden}"
+
+    # A bare `RMDir /r "$INSTDIR"` would take the binaries' directory and
+    # anything a future layout puts there with it; the install directory is
+    # only ever removed non-recursively, once the user's files are gone.
+    assert 'RMDir /r "$INSTDIR"' not in deletion
+    assert 'RMDir "$INSTDIR"' in deletion
+
+
+def test_the_delete_app_data_checkbox_says_what_it_deletes() -> None:
+    """A standing rule: no data deletion without a communicated choice.
+
+    Tauri's default label is "Delete the application data", which does not
+    tell the user their mail goes with it.
+    """
+    language_file = ROOT / "desktop/src-tauri/installer/English.nsh"
+    config = _read(ROOT / "desktop/src-tauri/tauri.conf.json")
+    assert '"English": "installer/English.nsh"' in config
+    assert language_file.exists()
+
+    label = next(
+        line for line in _read(language_file).splitlines()
+        if line.startswith("LangString deleteAppData")
+    )
+    assert "Delete the application data" not in label
+    assert "mail" in label.lower()
+    assert "cannot be undone" in label.lower()
 
 
 def test_no_prebuilt_shortcuts_are_bundled() -> None:
@@ -77,7 +180,8 @@ def test_tauri_uses_standard_per_user_nsis_and_external_sidecar() -> None:
     assert '"targets": "nsis"' in config
     assert '"installMode": "currentUser"' in config
     assert '"externalBin": ["binaries/alfred-backend"]' in config
-    assert "installerHooks" not in config
+    # Hooks are covered by the three ADR-012 tests above, which allow exactly
+    # one and constrain what it may do.
 
 
 def test_frontend_packaged_tauri_does_not_fall_back_to_dev_port() -> None:

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_user_corrections
 qualified_name: backend.tests.test_task_user_corrections.test_priority_patch_persists
 source: backend/tests/test_task_user_corrections.py
-line: 107
+line: 112
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_priority_patch_persists` in `backend/tests/te
 
 ## Location
 
-`backend/tests/test_task_user_corrections.py:107`
+`backend/tests/test_task_user_corrections.py:112`
 
 ## Signature
 

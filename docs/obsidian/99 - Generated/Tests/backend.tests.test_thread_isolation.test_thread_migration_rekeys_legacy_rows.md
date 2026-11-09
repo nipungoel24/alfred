@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.test_thread_migration_rekeys_legacy_rows
 source: backend/tests/test_thread_isolation.py
-line: 147
+line: 152
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Legacy (raw thread id) rows migrate to scoped threads with tasks.
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:147`
+`backend/tests/test_thread_isolation.py:152`
 
 ## Signature
 

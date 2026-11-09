@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_shutdown_endpoint_is_token_protected
 source: backend/tests/test_desktop_auth.py
-line: 58
+line: 63
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_shutdown_endpoint_is_token_protected` in `bac
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:58`
+`backend/tests/test_desktop_auth.py:63`
 
 ## Signature
 

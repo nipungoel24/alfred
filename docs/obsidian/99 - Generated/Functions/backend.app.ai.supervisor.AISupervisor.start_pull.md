@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.start_pull
 source: backend/app/ai/supervisor.py
-line: 297
+line: 318
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Begin downloading the configured model. Idempotent.
 
 ## Location
 
-`backend/app/ai/supervisor.py:297`
+`backend/app/ai/supervisor.py:318`
 
 ## Signature
 

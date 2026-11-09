@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_windows_tauri_origin_gets_cors_headers
 source: backend/tests/test_desktop_auth.py
-line: 117
+line: 123
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Actual requests from the packaged Windows WebView must carry the
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:117`
+`backend/tests/test_desktop_auth.py:123`
 
 ## Signature
 

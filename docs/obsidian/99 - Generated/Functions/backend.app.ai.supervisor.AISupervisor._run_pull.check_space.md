@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor._run_pull
 qualified_name: backend.app.ai.supervisor.AISupervisor._run_pull.check_space
 source: backend/app/ai/supervisor.py
-line: 371
+line: 392
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `check_space` in `backend/app/ai/supervisor.py`.
 
 ## Location
 
-`backend/app/ai/supervisor.py:371`
+`backend/app/ai/supervisor.py:392`
 
 ## Signature
 

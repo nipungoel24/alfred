@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.test_task_fingerprint_dual_form_dedupe
 source: backend/tests/test_thread_isolation.py
-line: 196
+line: 201
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Post-migration derivation must not duplicate pre-migration tasks.
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:196`
+`backend/tests/test_thread_isolation.py:201`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_structured_search_by_sender
 source: backend/tests/test_structured_search.py
-line: 35
+line: 40
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Should filter emails by sender.
 
 ## Location
 
-`backend/tests/test_structured_search.py:35`
+`backend/tests/test_structured_search.py:40`
 
 ## Signature
 

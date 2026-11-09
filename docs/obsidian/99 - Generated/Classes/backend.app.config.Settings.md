@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.config
 qualified_name: backend.app.config.Settings
 source: backend/app/config.py
-line: 88
+line: 210
 status: active
 tags: [backend, class]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `Settings` in `backend/app/config.py`.
 
 ## Location
 
-`backend/app/config.py:88`
+`backend/app/config.py:210`
 
 ## Bases
 

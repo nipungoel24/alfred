@@ -12,6 +12,8 @@ import time
 import pytest
 from fastapi.testclient import TestClient
 
+from backend.tests import conftest
+
 
 @pytest.fixture
 def startup_app(tmp_path, monkeypatch):
@@ -24,7 +26,10 @@ def startup_app(tmp_path, monkeypatch):
     importlib.reload(main_mod)
     yield main_mod
     monkeypatch.delenv("ALFRED_RUNTIME_TOKEN")
-    monkeypatch.delenv("ALFRED_DATABASE_PATH")
+    # Restore the scratch default, never "unset": the reload below rebinds
+    # backend.app.main's module-level Repository, and with no override that
+    # is %LOCALAPPDATA% — the user's live mailbox. See conftest.
+    monkeypatch.setenv("ALFRED_DATABASE_PATH", str(conftest.SESSION_DATABASE))
     importlib.reload(config_mod)
     importlib.reload(main_mod)
 

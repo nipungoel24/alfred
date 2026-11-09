@@ -22,3 +22,7 @@ tags: [module, backend]
 - `Path` ← `pathlib.Path`
 - `os` ← `os`
 - `tempfile` ← `tempfile`
+
+## Constants
+
+- `SESSION_DATABASE`

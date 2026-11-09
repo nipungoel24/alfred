@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_unknown_origin_gets_no_cors_headers
 source: backend/tests/test_desktop_auth.py
-line: 141
+line: 147
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ CORS stays restrictive: unlisted origins must not receive ACAO.
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:141`
+`backend/tests/test_desktop_auth.py:147`
 
 ## Signature
 

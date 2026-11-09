@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_structured_search_combined_filters
 source: backend/tests/test_structured_search.py
-line: 98
+line: 103
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Should apply multiple filters correctly.
 
 ## Location
 
-`backend/tests/test_structured_search.py:98`
+`backend/tests/test_structured_search.py:103`
 
 ## Signature
 

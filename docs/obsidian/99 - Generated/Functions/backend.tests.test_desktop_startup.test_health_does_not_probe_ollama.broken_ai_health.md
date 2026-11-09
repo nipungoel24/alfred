@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_startup.test_health_does_not_probe_ollama
 qualified_name: backend.tests.test_desktop_startup.test_health_does_not_probe_ollama.broken_ai_health
 source: backend/tests/test_desktop_startup.py
-line: 68
+line: 73
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `broken_ai_health` in `backend/tests/test_desktop_s
 
 ## Location
 
-`backend/tests/test_desktop_startup.py:68`
+`backend/tests/test_desktop_startup.py:73`
 
 ## Signature
 

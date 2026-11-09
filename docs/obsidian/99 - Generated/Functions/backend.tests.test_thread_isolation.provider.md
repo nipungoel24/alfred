@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.provider
 source: backend/tests/test_thread_isolation.py
-line: 68
+line: 73
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `provider` in `backend/tests/test_thread_isolation.
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:68`
+`backend/tests/test_thread_isolation.py:73`
 
 ## Signature
 

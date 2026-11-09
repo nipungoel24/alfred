@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_user_corrections
 qualified_name: backend.tests.test_task_user_corrections.isolated_app
 source: backend/tests/test_task_user_corrections.py
-line: 16
+line: 18
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `isolated_app` in `backend/tests/test_task_user_cor
 
 ## Location
 
-`backend/tests/test_task_user_corrections.py:16`
+`backend/tests/test_task_user_corrections.py:18`
 
 ## Signature
 

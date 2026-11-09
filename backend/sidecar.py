@@ -43,12 +43,21 @@ def _setup_file_logging():
 
 
 import uvicorn
-from backend.app.config import get_settings
+from backend.app.config import get_settings, migrate_legacy_user_data
+
+# Logging first, so the migration's decision — including every refusal to
+# act — reaches backend.log.
+log_dir = _setup_file_logging()
+startup = logging.getLogger("alfred.startup")
+
+# The ONE call site. ADR-012: a legacy mailbox sits in the directory the
+# installer owns, so it is moved to %LOCALAPPDATA%\AlfredData before
+# anything opens it. It must happen here, in the packaged entry point, and
+# not anywhere reachable from `get_settings()` — `backend.app.main` binds a
+# Repository at import time, which `pytest` reloads against real paths.
+migrate_legacy_user_data()
 
 settings = get_settings()
-log_dir = _setup_file_logging()
-
-startup = logging.getLogger("alfred.startup")
 startup.info(
     "sidecar_start pid=%s exe=%s cwd=%s port=%s db_path=%s frozen=%s config_present=%s token_set=%s",
     os.getpid(), sys.executable, os.getcwd(),

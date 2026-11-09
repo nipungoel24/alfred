@@ -7,6 +7,8 @@ from pathlib import Path
 import pytest
 from fastapi.testclient import TestClient
 
+from backend.tests import conftest
+
 
 @pytest.fixture
 def authed_app(tmp_path, monkeypatch):
@@ -21,7 +23,10 @@ def authed_app(tmp_path, monkeypatch):
     yield main_mod.app, main_mod
     # Restore defaults for other tests
     monkeypatch.delenv("ALFRED_RUNTIME_TOKEN")
-    monkeypatch.delenv("ALFRED_DATABASE_PATH")
+    # Restore the scratch default, never "unset": the reload below rebinds
+    # backend.app.main's module-level Repository, and with no override that
+    # is %LOCALAPPDATA% — the user's live mailbox. See conftest.
+    monkeypatch.setenv("ALFRED_DATABASE_PATH", str(conftest.SESSION_DATABASE))
     importlib.reload(config_mod)
     importlib.reload(main_mod)
 
@@ -87,7 +92,8 @@ def test_no_token_means_no_auth(tmp_path, monkeypatch):
         assert client.get("/api/accounts").status_code == 200
         assert client.get("/health").status_code == 200
     finally:
-        monkeypatch.delenv("ALFRED_DATABASE_PATH")
+        # Scratch default, never "unset" — see conftest.
+        monkeypatch.setenv("ALFRED_DATABASE_PATH", str(conftest.SESSION_DATABASE))
         importlib.reload(config_mod)
         importlib.reload(main_mod)
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context
 qualified_name: backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context.legacy_email
 source: backend/tests/test_thread_isolation.py
-line: 295
+line: 300
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `legacy_email` in `backend/tests/test_thread_isolat
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:295`
+`backend/tests/test_thread_isolation.py:300`
 
 ## Signature
 

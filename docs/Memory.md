@@ -1,8 +1,9 @@
 # Alfred — Engineering Memory
 
 Status: active
-Last updated: 2026-11-09, startup defects closed and the fixed build installed
-(see §STARTUP DEFECTS 2026-11-06, and §Installed over the October build within it)
+Last updated: 2026-11-09, startup defects closed, the fixed build installed, and
+user data moved out of the install directory (see §STARTUP DEFECTS 2026-11-06 and
+§USER DATA AND THE INSTALLER 2026-11-09)
 
 ---
 
@@ -255,19 +256,121 @@ finding 1 predicts.
 5. **The single-instance race.** Five `desktop.start` lines were logged in three
    seconds on 2026-10-12 because the line is written before `Builder::build()`
    arbitrates. S3 removes the damage, not the race.
-6. **The uninstaller's "delete app data" checkbox deletes nothing.** It targets
-   `$LOCALAPPDATA\com.alfred.local` (the bundle identifier), but Alfred's data is
-   at `%LOCALAPPDATA%\AlfredData` and, on legacy installs, at
-   `%LOCALAPPDATA%\Alfred` beside the binaries. So a user who asks for their mail
-   to be removed keeps it, and one who wants it kept is protected only by the
-   non-recursive `RMDir`. Both halves of the choice are wrong, and the install
-   directory doubling as the data directory is why. Found 2026-11-09 while reading
-   the generated NSIS script before installing; **not** fixed — it touches the
-   uninstall path and deserves its own authorized change. Fixing it means moving
-   legacy data to `AlfredData` with a migration, then pointing the checkbox at the
-   real locations. Gate 7 material, and bound by the standing rule that an upgrade
-   or uninstall must not delete user data without an explicit, clearly
-   communicated choice.
+6. ~~**The uninstaller's "delete app data" checkbox deletes nothing.**~~
+   **FIXED 2026-11-09 — see ADR-012 and §USER DATA AND THE INSTALLER below.**
+7. **`backend.app.main` binds a module-level `Repository` at import time.**
+   `repo = Repository(settings.database_path)` runs on import, so any reload with
+   the `ALFRED_DATABASE_PATH` guard absent opens the user's live mailbox. This is
+   the root cause behind the fixture hole fixed under ADR-012, and it is why
+   migration may not live anywhere reachable from `get_settings()`. Contained by
+   `conftest.SESSION_DATABASE` plus
+   `test_no_fixture_unsets_the_live_mailbox_guard`; removing it means making the
+   binding lazy, a refactor across every route module. Not attempted.
+
+## USER DATA AND THE INSTALLER 2026-11-09 (ADR-012)
+
+Finding 6 above, fixed. The mailbox now lives at `%LOCALAPPDATA%\AlfredData`,
+the uninstaller's checkbox deletes the real locations, and its label says so.
+ADR-012 holds the reasoning; this is what the work turned up.
+
+### The installer was never the only problem
+
+The checkbox aimed at `$LOCALAPPDATA\com.alfred.local`, which has never existed,
+so ticking it deleted nothing. Leaving it unticked preserved the mailbox only
+because `RMDir "$INSTDIR"` lacks `/r`. Both answers were wrong because the
+install directory *was* the data directory on this install.
+
+### A migration in the wrong place moved the real mailbox
+
+The first version called `migrate_legacy_user_data()` from
+`resolve_database_path()`. `backend.app.main` binds a Repository to
+`settings.database_path` **at import time**, and six test fixtures unset
+`ALFRED_DATABASE_PATH` in teardown and then `importlib.reload(main_mod)`. So
+running `pytest` moved the live mailbox out of the install directory and bound a
+Repository to it.
+
+`backend/tests/conftest.py` existed precisely to stop this — "backend tests must
+never touch the user's live database" — and those teardowns were undoing it.
+**The suite had therefore been opening and writing to the live mailbox long
+before this change**; the migration only made the damage visible by also moving
+the file.
+
+What it cost, measured rather than assumed: `PRAGMA integrity_check` ok, and all
+15 tables identical in row count to the pre-install backup (1068 emails, 230
+tasks, FTS matching). Nothing was lost. The file's hash changed because
+`Repository.__init__` writes schema/pragmas.
+
+Three changes, not one:
+
+1. Migration has **one** call site, `backend/sidecar.py`, which only the
+   packaged app runs. `resolve_database_path()` reports and never moves.
+2. `migrate_legacy_user_data()` returns early when `ALFRED_DATABASE_PATH` is
+   set — independent of the call site.
+3. All six fixtures restore `conftest.SESSION_DATABASE` instead of unsetting the
+   variable, and `test_no_fixture_unsets_the_live_mailbox_guard` forbids the
+   pattern returning.
+
+Proof the third one works: the mailbox's SHA-256 was unchanged across three
+consecutive full `pytest backend/app backend/tests` runs.
+
+### Two traps worth remembering
+
+**`makensis` reads a BOM as part of the first token.** A vendored language file
+opening with a `;` comment became the invalid command `<BOM>;` and failed the
+bundle step. Tauri's own generated file carries a BOM but opens with a
+`LangString`, which is why nobody noticed. `installer/English.nsh` is now ASCII
+with no BOM.
+
+**A hook that is never included fails silently.** `!ifmacrodef
+NSIS_HOOK_POSTUNINSTALL` is simply false if `installerHooks` is misspelled, and
+the build succeeds with no hook — the same shape of no-op as the original
+defect. `test_tauri_wires_the_hook_into_the_script_it_compiles` reads the
+generated script and asserts the `!include`.
+
+### Tests
+
+| Suite | Command | Result |
+| --- | --- | --- |
+| Rust | `cargo test` from `desktop/src-tauri` | **53 passed** |
+| Backend | `py -3.12 -m pytest backend/app backend/tests -q` | **402 passed** (was 381) |
+| Tools | `py -3.12 -m pytest tools -q` | **24 passed** (was 18) |
+| Frontend | `npm --prefix frontend test` | **395 passed / 33 files** |
+| Lint | `npm --prefix frontend run lint` | exit 0 |
+| Format / lint | `cargo fmt --check`, `cargo clippy --all-targets` | exit 0, no warnings |
+
+**Total: 874 passed, 0 skipped, 0 failures**, measured after the release build.
+Before it, `tools` reported 22 passed and 1 skip at `test_release_integrity.py:74`
+— the sidecar was older than the Python just changed. Rebuilding regenerates the
+sidecar, which both clears that skip and gives
+`test_tauri_wires_the_hook_into_the_script_it_compiles` a generated script to
+read instead of skipping. Run the suite after a build, not before.
+
+The five NSIS tests compile `hooks.nsh` with real `makensis` and execute it.
+Five mutations of that file, the original defect included, were each caught.
+
+### Packaged verification
+
+| Check | Result |
+| --- | --- |
+| Rebuilt installer | exit 0, secret scan PASS, 27.1 MB |
+| Installed over a live install | mailbox hash **byte-identical** afterwards |
+| App reads the new location | `sidecar_start … db_path=…\AlfredData\alfred.sqlite3` |
+| Install directory | holds three binaries and no user data |
+| Launch / quit | one `Tauri Window`, `desktop=0 backend=0` after quit |
+| Build identity | `build=5d7159ae4917` — the real HEAD this time |
+
+**Not verified:** a real uninstall with the box ticked. It would delete this
+machine's actual mailbox, and NSIS resolves `$LOCALAPPDATA` from the shell
+folder, so it cannot be pointed at a scratch directory. That direction rests on
+the makensis-executed tests of the same file the build compiles; the safe
+direction is covered there and on the real install.
+
+### Still open
+
+`backend.app.main` binding a module-level `Repository` at import time is the
+root cause behind both the fixture hole and the migration misplacement. The
+guard and the contract test contain it; making the binding lazy would remove it,
+and that is a refactor across the whole app — not attempted here.
 
 ## Toolchain
 

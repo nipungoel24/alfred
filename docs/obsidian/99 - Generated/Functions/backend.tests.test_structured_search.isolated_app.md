@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.isolated_app
 source: backend/tests/test_structured_search.py
-line: 10
+line: 12
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `isolated_app` in `backend/tests/test_structured_se
 
 ## Location
 
-`backend/tests/test_structured_search.py:10`
+`backend/tests/test_structured_search.py:12`
 
 ## Signature
 

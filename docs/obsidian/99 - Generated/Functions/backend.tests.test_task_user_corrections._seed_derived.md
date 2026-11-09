@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_user_corrections
 qualified_name: backend.tests.test_task_user_corrections._seed_derived
 source: backend/tests/test_task_user_corrections.py
-line: 31
+line: 36
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ One analyzed email with one derived task; returns (email, task).
 
 ## Location
 
-`backend/tests/test_task_user_corrections.py:31`
+`backend/tests/test_task_user_corrections.py:36`
 
 ## Signature
 

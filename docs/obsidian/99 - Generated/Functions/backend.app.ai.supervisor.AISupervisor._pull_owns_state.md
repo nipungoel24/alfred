@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor._pull_owns_state
 source: backend/app/ai/supervisor.py
-line: 273
+line: 294
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ True when a download task is running and is not the caller.
 
 ## Location
 
-`backend/app/ai/supervisor.py:273`
+`backend/app/ai/supervisor.py:294`
 
 ## Signature
 

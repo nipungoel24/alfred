@@ -17,7 +17,7 @@ tags: [test, function]
 
 ## Purpose
 
-Purpose inferred from usage: `_live_db` in `backend/tests/test_task_reconcile_idempotency.py`.
+The user's mailbox, in either layout, or None.
 
 ## Location
 

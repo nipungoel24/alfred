@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor._run_pull
 qualified_name: backend.app.ai.supervisor.AISupervisor._run_pull.on_progress
 source: backend/app/ai/supervisor.py
-line: 363
+line: 384
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `on_progress` in `backend/app/ai/supervisor.py`.
 
 ## Location
 
-`backend/app/ai/supervisor.py:363`
+`backend/app/ai/supervisor.py:384`
 
 ## Signature
 

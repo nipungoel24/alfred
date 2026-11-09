@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup
 qualified_name: backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup.slow_preload
 source: backend/tests/test_desktop_startup.py
-line: 43
+line: 48
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `slow_preload` in `backend/tests/test_desktop_start
 
 ## Location
 
-`backend/tests/test_desktop_startup.py:43`
+`backend/tests/test_desktop_startup.py:48`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.make_supervisor
 source: backend/tests/test_ai_supervisor.py
-line: 42
+line: 44
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `make_supervisor` in `backend/tests/test_ai_supervi
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:42`
+`backend/tests/test_ai_supervisor.py:44`
 
 ## Signature
 

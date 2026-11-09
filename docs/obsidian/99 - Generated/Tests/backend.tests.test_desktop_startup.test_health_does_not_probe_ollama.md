@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_startup
 qualified_name: backend.tests.test_desktop_startup.test_health_does_not_probe_ollama
 source: backend/tests/test_desktop_startup.py
-line: 61
+line: 66
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Backend readiness is not AI readiness.
 
 ## Location
 
-`backend/tests/test_desktop_startup.py:61`
+`backend/tests/test_desktop_startup.py:66`
 
 ## Signature
 

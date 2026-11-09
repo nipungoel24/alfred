@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.config
 qualified_name: backend.app.config._reject_shipped_client_secret
 source: backend/app/config.py
-line: 61
+line: 183
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ A frozen Alfred must not be carrying a Google OAuth client secret.
 
 ## Location
 
-`backend/app/config.py:61`
+`backend/app/config.py:183`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_startup
 qualified_name: backend.tests.test_desktop_startup.test_health_serves_without_waiting_for_slow_startup
 source: backend/tests/test_desktop_startup.py
-line: 32
+line: 37
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ The desktop shell probes /health on a bounded timeout.
 
 ## Location
 
-`backend/tests/test_desktop_startup.py:32`
+`backend/tests/test_desktop_startup.py:37`
 
 ## Signature
 

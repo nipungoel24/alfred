@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_preflight_exemption_does_not_open_actual_requests
 source: backend/tests/test_desktop_auth.py
-line: 153
+line: 159
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Passing OPTIONS through must not weaken token enforcement on GET.
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:153`
+`backend/tests/test_desktop_auth.py:159`
 
 ## Signature
 

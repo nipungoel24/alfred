@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_structured_search_no_results
 source: backend/tests/test_structured_search.py
-line: 136
+line: 141
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Should return empty when no emails match.
 
 ## Location
 
-`backend/tests/test_structured_search.py:136`
+`backend/tests/test_structured_search.py:141`
 
 ## Signature
 

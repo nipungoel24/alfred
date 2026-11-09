@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.set_model
 source: backend/app/ai/supervisor.py
-line: 283
+line: 304
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Select the model to use. Refuses while a pull is in flight.
 
 ## Location
 
-`backend/app/ai/supervisor.py:283`
+`backend/app/ai/supervisor.py:304`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_account_scoped_structured_search
 source: backend/tests/test_structured_search.py
-line: 207
+line: 212
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Structured search must respect account_id filter.
 
 ## Location
 
-`backend/tests/test_structured_search.py:207`
+`backend/tests/test_structured_search.py:212`
 
 ## Signature
 

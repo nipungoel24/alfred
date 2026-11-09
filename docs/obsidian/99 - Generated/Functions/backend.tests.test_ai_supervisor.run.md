@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.run
 source: backend/tests/test_ai_supervisor.py
-line: 57
+line: 59
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `run` in `backend/tests/test_ai_supervisor.py`.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:57`
+`backend/tests/test_ai_supervisor.py:59`
 
 ## Signature
 

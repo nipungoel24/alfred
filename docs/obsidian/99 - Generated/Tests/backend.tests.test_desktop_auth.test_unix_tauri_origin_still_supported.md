@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_unix_tauri_origin_still_supported
 source: backend/tests/test_desktop_auth.py
-line: 130
+line: 136
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_unix_tauri_origin_still_supported` in `backen
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:130`
+`backend/tests/test_desktop_auth.py:136`
 
 ## Signature
 

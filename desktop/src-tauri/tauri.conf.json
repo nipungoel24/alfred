@@ -38,7 +38,11 @@
     ],
     "windows": {
       "nsis": {
-        "installMode": "currentUser"
+        "installMode": "currentUser",
+        "installerHooks": "installer/hooks.nsh",
+        "customLanguageFiles": {
+          "English": "installer/English.nsh"
+        }
       }
     },
     "externalBin": ["binaries/alfred-backend"]

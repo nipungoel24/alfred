@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_filter_before_limit
 source: backend/tests/test_structured_search.py
-line: 167
+line: 172
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Priority and needs_reply filters must be applied BEFORE LIMIT/OFFSET.
 
 ## Location
 
-`backend/tests/test_structured_search.py:167`
+`backend/tests/test_structured_search.py:172`
 
 ## Signature
 

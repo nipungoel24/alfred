@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.make_email
 source: backend/tests/test_structured_search.py
-line: 25
+line: 30
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `make_email` in `backend/tests/test_structured_sear
 
 ## Location
 
-`backend/tests/test_structured_search.py:25`
+`backend/tests/test_structured_search.py:30`
 
 ## Signature
 

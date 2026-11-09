@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor._smoke_test
 source: backend/app/ai/supervisor.py
-line: 502
+line: 518
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Synthetic inference using a fixed prompt â€” never user email.
 
 ## Location
 
-`backend/app/ai/supervisor.py:502`
+`backend/app/ai/supervisor.py:518`
 
 ## Signature
 

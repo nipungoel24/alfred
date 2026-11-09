@@ -24,6 +24,7 @@ tags: [module, backend]
 - `Repository` ← `backend.app.db.repositories.Repository`
 - `SearchFilters` ← `backend.app.schemas.SearchFilters`
 - `TestClient` ← `fastapi.testclient.TestClient`
+- `conftest` ← `backend.tests.conftest`
 - `pytest` ← `pytest`
 
 ## Functions

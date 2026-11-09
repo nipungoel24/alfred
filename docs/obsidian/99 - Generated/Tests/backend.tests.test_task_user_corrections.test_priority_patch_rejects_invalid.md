@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_user_corrections
 qualified_name: backend.tests.test_task_user_corrections.test_priority_patch_rejects_invalid
 source: backend/tests/test_task_user_corrections.py
-line: 124
+line: 129
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_priority_patch_rejects_invalid` in `backend/t
 
 ## Location
 
-`backend/tests/test_task_user_corrections.py:124`
+`backend/tests/test_task_user_corrections.py:129`
 
 ## Signature
 

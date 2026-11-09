@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search._seed_search_mail
 source: backend/tests/test_structured_search.py
-line: 234
+line: 239
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ One archived, one sent, one inbox mail; body-only marker word.
 
 ## Location
 
-`backend/tests/test_structured_search.py:234`
+`backend/tests/test_structured_search.py:239`
 
 ## Signature
 

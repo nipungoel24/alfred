@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_structured_search_with_free_text
 source: backend/tests/test_structured_search.py
-line: 117
+line: 122
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Should combine free text with filters.
 
 ## Location
 
-`backend/tests/test_structured_search.py:117`
+`backend/tests/test_structured_search.py:122`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.refresh
 source: backend/app/ai/supervisor.py
-line: 212
+line: 233
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Run a full health check and update the state machine.
 
 ## Location
 
-`backend/app/ai/supervisor.py:212`
+`backend/app/ai/supervisor.py:233`
 
 ## Signature
 

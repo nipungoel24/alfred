@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.test_ready_requires_smoke_test
 source: backend/tests/test_ai_supervisor.py
-line: 86
+line: 88
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ READY is only reached after a successful synthetic smoke test.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:86`
+`backend/tests/test_ai_supervisor.py:88`
 
 ## Signature
 

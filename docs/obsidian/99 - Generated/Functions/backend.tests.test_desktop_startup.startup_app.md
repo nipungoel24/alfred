@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_startup
 qualified_name: backend.tests.test_desktop_startup.startup_app
 source: backend/tests/test_desktop_startup.py
-line: 17
+line: 19
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `startup_app` in `backend/tests/test_desktop_startu
 
 ## Location
 
-`backend/tests/test_desktop_startup.py:17`
+`backend/tests/test_desktop_startup.py:19`
 
 ## Signature
 

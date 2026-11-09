@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.test_scoped_thread_identity
 source: backend/tests/test_thread_isolation.py
-line: 72
+line: 77
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_scoped_thread_identity` in `backend/tests/tes
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:72`
+`backend/tests/test_thread_isolation.py:77`
 
 ## Signature
 

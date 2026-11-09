@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_oauth_two_accounts
 qualified_name: backend.tests.test_oauth_two_accounts.test_reconnect_same_account_is_idempotent
 source: backend/tests/test_oauth_two_accounts.py
-line: 55
+line: 60
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_reconnect_same_account_is_idempotent` in `bac
 
 ## Location
 
-`backend/tests/test_oauth_two_accounts.py:55`
+`backend/tests/test_oauth_two_accounts.py:60`
 
 ## Signature
 

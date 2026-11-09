@@ -25,6 +25,7 @@ tags: [module, backend]
 - `Priority` ← `backend.app.schemas.Priority`
 - `Repository` ← `backend.app.db.repositories.Repository`
 - `TestClient` ← `fastapi.testclient.TestClient`
+- `conftest` ← `backend.tests.conftest`
 - `pytest` ← `pytest`
 - `rebuild_tasks_from_analyses` ← `backend.app.services.task_derivation.rebuild_tasks_from_analyses`
 

@@ -21,6 +21,7 @@ tags: [module, backend]
 
 - `AsyncMock` ← `unittest.mock.AsyncMock`
 - `TestClient` ← `fastapi.testclient.TestClient`
+- `conftest` ← `backend.tests.conftest`
 - `pytest` ← `pytest`
 
 ## Functions

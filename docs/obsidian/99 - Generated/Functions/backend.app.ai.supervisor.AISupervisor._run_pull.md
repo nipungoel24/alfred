@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor._run_pull
 source: backend/app/ai/supervisor.py
-line: 360
+line: 381
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Download `model`, publishing real progress as it arrives.
 
 ## Location
 
-`backend/app/ai/supervisor.py:360`
+`backend/app/ai/supervisor.py:381`
 
 ## Signature
 

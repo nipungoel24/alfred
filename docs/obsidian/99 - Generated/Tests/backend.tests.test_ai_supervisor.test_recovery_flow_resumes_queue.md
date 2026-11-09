@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.test_recovery_flow_resumes_queue
 source: backend/tests/test_ai_supervisor.py
-line: 127
+line: 129
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ unavailable → recovering → ready, and the queue unpauses.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:127`
+`backend/tests/test_ai_supervisor.py:129`
 
 ## Signature
 

@@ -15,7 +15,11 @@ sys.path.insert(0, str(ROOT))
 
 from backend.app.db.database import snapshot_database
 
-SRC = Path(os.environ.get("LOCALAPPDATA", "")) / "Alfred" / "alfred.sqlite3"
+# ADR-012 moved the mailbox out of the install directory, so resolve it
+# rather than assuming either layout.
+from backend.app.config import resolve_database_path
+
+SRC = resolve_database_path()
 
 
 def main() -> int:

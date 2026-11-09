@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_reconcile_idempotency
 qualified_name: backend.tests.test_task_reconcile_idempotency.test_reconcile_on_a_copy_of_the_live_database_is_idempotent
 source: backend/tests/test_task_reconcile_idempotency.py
-line: 361
+line: 379
 status: active
 tags: [test, function, test]
 ---
@@ -17,11 +17,11 @@ tags: [test, function, test]
 
 ## Purpose
 
-The real 291-row backlog, on a copy. The live file is never opened.
+The real backlog, on a copy. The live file is never opened.
 
 ## Location
 
-`backend/tests/test_task_reconcile_idempotency.py:361`
+`backend/tests/test_task_reconcile_idempotency.py:379`
 
 ## Signature
 

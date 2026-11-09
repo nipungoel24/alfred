@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor._noop_auto_start
 source: backend/tests/test_ai_supervisor.py
-line: 53
+line: 55
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `_noop_auto_start` in `backend/tests/test_ai_superv
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:53`
+`backend/tests/test_ai_supervisor.py:55`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_query_token_form_for_sse
 source: backend/tests/test_desktop_auth.py
-line: 51
+line: 56
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_query_token_form_for_sse` in `backend/tests/t
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:51`
+`backend/tests/test_desktop_auth.py:56`
 
 ## Signature
 

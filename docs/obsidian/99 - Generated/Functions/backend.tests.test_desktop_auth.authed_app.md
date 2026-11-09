@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.authed_app
 source: backend/tests/test_desktop_auth.py
-line: 12
+line: 14
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `authed_app` in `backend/tests/test_desktop_auth.py
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:12`
+`backend/tests/test_desktop_auth.py:14`
 
 ## Signature
 

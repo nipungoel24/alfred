@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_in_scope_mapping
 source: backend/tests/test_structured_search.py
-line: 268
+line: 273
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Every advertised in: value maps to storage semantics.
 
 ## Location
 
-`backend/tests/test_structured_search.py:268`
+`backend/tests/test_structured_search.py:273`
 
 ## Signature
 

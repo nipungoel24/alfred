@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.test_rebuild_after_thread_migration_keeps_single_task
 source: backend/tests/test_thread_isolation.py
-line: 220
+line: 225
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Legacy v2 task (raw-thread fp) -> migrate -> rebuild -> one task.
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:220`
+`backend/tests/test_thread_isolation.py:225`
 
 ## Signature
 

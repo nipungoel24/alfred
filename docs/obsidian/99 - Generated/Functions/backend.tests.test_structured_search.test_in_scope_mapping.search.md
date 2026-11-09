@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search.test_in_scope_mapping
 qualified_name: backend.tests.test_structured_search.test_in_scope_mapping.search
 source: backend/tests/test_structured_search.py
-line: 275
+line: 280
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `search` in `backend/tests/test_structured_search.p
 
 ## Location
 
-`backend/tests/test_structured_search.py:275`
+`backend/tests/test_structured_search.py:280`
 
 ## Signature
 

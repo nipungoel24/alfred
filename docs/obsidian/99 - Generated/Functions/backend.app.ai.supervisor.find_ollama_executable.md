@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor
 qualified_name: backend.app.ai.supervisor.find_ollama_executable
 source: backend/app/ai/supervisor.py
-line: 90
+line: 111
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Locate the Ollama executable on this machine, or None.
 
 ## Location
 
-`backend/app/ai/supervisor.py:90`
+`backend/app/ai/supervisor.py:111`
 
 ## Signature
 

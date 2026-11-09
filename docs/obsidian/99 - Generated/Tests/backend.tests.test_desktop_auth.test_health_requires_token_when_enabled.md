@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_health_requires_token_when_enabled
 source: backend/tests/test_desktop_auth.py
-line: 43
+line: 48
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_health_requires_token_when_enabled` in `backe
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:43`
+`backend/tests/test_desktop_auth.py:48`
 
 ## Signature
 

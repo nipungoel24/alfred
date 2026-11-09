@@ -152,7 +152,10 @@ def main():
     print("=" * 60)
     
     # Determine DB path
-    db_path = Path(os.getenv("ALFRED_DATABASE_PATH", Path(os.getenv("LOCALAPPDATA", ".")) / "Alfred" / "alfred.sqlite3"))
+    # ADR-012: resolve_database_path honours ALFRED_DATABASE_PATH and knows
+    # both the managed and the legacy layout.
+    from backend.app.config import resolve_database_path
+    db_path = resolve_database_path()
     print(f"\nDatabase path: {db_path}")
     print(f"Database exists: {db_path.exists()}")
     

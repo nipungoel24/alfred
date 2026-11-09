@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_in_scope_unknown_rejected
 source: backend/tests/test_structured_search.py
-line: 287
+line: 292
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Unknown in: values produce a controlled validation error.
 
 ## Location
 
-`backend/tests/test_structured_search.py:287`
+`backend/tests/test_structured_search.py:292`
 
 ## Signature
 

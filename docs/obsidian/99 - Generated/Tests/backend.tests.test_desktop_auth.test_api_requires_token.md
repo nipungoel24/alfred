@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_api_requires_token
 source: backend/tests/test_desktop_auth.py
-line: 29
+line: 34
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_api_requires_token` in `backend/tests/test_de
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:29`
+`backend/tests/test_desktop_auth.py:34`
 
 ## Signature
 

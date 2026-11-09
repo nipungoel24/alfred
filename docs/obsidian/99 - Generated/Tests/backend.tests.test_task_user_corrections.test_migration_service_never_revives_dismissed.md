@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_user_corrections
 qualified_name: backend.tests.test_task_user_corrections.test_migration_service_never_revives_dismissed
 source: backend/tests/test_task_user_corrections.py
-line: 200
+line: 205
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ derive -> dismiss -> TaskMigrationService -> no active task reappears,
 
 ## Location
 
-`backend/tests/test_task_user_corrections.py:200`
+`backend/tests/test_task_user_corrections.py:205`
 
 ## Signature
 

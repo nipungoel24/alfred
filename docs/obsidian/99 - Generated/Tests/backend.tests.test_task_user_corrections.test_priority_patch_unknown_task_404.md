@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_user_corrections
 qualified_name: backend.tests.test_task_user_corrections.test_priority_patch_unknown_task_404
 source: backend/tests/test_task_user_corrections.py
-line: 137
+line: 142
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_priority_patch_unknown_task_404` in `backend/
 
 ## Location
 
-`backend/tests/test_task_user_corrections.py:137`
+`backend/tests/test_task_user_corrections.py:142`
 
 ## Signature
 

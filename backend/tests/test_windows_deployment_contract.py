@@ -99,3 +99,51 @@ def test_session_token_is_never_logged():
 
 def test_credential_store_is_fail_closed():
     contract.test_credential_store_is_fail_closed()
+
+
+def test_the_only_installer_hook_is_the_user_data_deletion_hook():
+    contract.test_the_only_installer_hook_is_the_user_data_deletion_hook()
+
+
+def test_user_data_deletion_is_guarded_by_the_checkbox_and_skips_upgrades():
+    contract.test_user_data_deletion_is_guarded_by_the_checkbox_and_skips_upgrades()
+
+
+def test_user_data_deletion_targets_alfreds_data_and_never_ollama_models():
+    contract.test_user_data_deletion_targets_alfreds_data_and_never_ollama_models()
+
+
+def test_the_delete_app_data_checkbox_says_what_it_deletes():
+    contract.test_the_delete_app_data_checkbox_says_what_it_deletes()
+
+
+def test_no_fixture_unsets_the_live_mailbox_guard():
+    """A fixture must redirect ALFRED_DATABASE_PATH, never unset it.
+
+    `backend.app.main` binds a Repository at import time, so a fixture that
+    deletes the variable and then reloads that module opens — and writes
+    to — %LOCALAPPDATA%, the user's real mailbox. Two fixtures did, and the
+    2026-11-09 suite run moved and rewrote the live database as a result.
+    Restore `conftest.SESSION_DATABASE` instead.
+
+    Exempt: tests whose subject IS the unset state. They must redirect
+    LOCALAPPDATA to a tmp_path, which the review of this list enforces.
+    """
+    from pathlib import Path
+
+    # This file is exempt because it contains the pattern it looks for.
+    exempt = {"test_legacy_data_migration.py", Path(__file__).name}
+    offenders: list[str] = []
+    tests_dir = Path(__file__).resolve().parent
+    for path in sorted(tests_dir.glob("test_*.py")):
+        if path.name in exempt:
+            continue
+        for number, line in enumerate(
+            path.read_text(encoding="utf-8").splitlines(), start=1
+        ):
+            if "delenv" in line and "ALFRED_DATABASE_PATH" in line:
+                offenders.append(f"{path.name}:{number}")
+    assert offenders == [], (
+        "these unset the live-mailbox guard; redirect to "
+        f"conftest.SESSION_DATABASE instead: {offenders}"
+    )

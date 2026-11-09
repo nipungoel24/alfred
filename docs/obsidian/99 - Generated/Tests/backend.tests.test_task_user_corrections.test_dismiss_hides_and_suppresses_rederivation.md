@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_task_user_corrections
 qualified_name: backend.tests.test_task_user_corrections.test_dismiss_hides_and_suppresses_rederivation
 source: backend/tests/test_task_user_corrections.py
-line: 54
+line: 59
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Purpose inferred from usage: `test_dismiss_hides_and_suppresses_rederivation` in
 
 ## Location
 
-`backend/tests/test_task_user_corrections.py:54`
+`backend/tests/test_task_user_corrections.py:59`
 
 ## Signature
 

@@ -27,6 +27,7 @@ tags: [module, backend]
 - `_normalize_action` ← `backend.app.services.task_derivation._normalize_action`
 - `base64` ← `base64`
 - `candidate_fingerprints` ← `backend.app.services.task_derivation.candidate_fingerprints`
+- `conftest` ← `backend.tests.conftest`
 - `parse_thread_id` ← `backend.app.mail.identity.parse_thread_id`
 - `pytest` ← `pytest`
 - `scoped_email_id` ← `backend.app.mail.identity.scoped_email_id`

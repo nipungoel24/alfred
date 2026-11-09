@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.cancel_pull
 source: backend/app/ai/supervisor.py
-line: 341
+line: 362
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Cancel the in-flight download. Idempotent and safe.
 
 ## Location
 
-`backend/app/ai/supervisor.py:341`
+`backend/app/ai/supervisor.py:362`
 
 ## Signature
 

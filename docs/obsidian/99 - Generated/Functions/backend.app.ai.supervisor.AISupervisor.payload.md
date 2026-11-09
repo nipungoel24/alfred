@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.payload
 source: backend/app/ai/supervisor.py
-line: 158
+line: 179
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Observer-facing status payload (never secrets).
 
 ## Location
 
-`backend/app/ai/supervisor.py:158`
+`backend/app/ai/supervisor.py:179`
 
 ## Signature
 

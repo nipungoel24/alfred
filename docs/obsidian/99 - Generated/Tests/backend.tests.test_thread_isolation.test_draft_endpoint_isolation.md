@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.test_draft_endpoint_isolation
 source: backend/tests/test_thread_isolation.py
-line: 104
+line: 109
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ The AI draft prompt for A must contain ONLY A's thread messages.
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:104`
+`backend/tests/test_thread_isolation.py:109`
 
 ## Signature
 

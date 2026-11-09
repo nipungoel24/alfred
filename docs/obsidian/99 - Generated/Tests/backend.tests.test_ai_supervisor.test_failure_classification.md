@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.test_failure_classification
 source: backend/tests/test_ai_supervisor.py
-line: 104
+line: 106
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Mid-analysis failures map to the right states.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:104`
+`backend/tests/test_ai_supervisor.py:106`
 
 ## Signature
 

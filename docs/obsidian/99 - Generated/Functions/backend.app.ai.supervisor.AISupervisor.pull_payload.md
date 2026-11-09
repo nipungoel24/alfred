@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor.AISupervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor.pull_payload
 source: backend/app/ai/supervisor.py
-line: 173
+line: 194
 status: active
 tags: [ai, function]
 ---
@@ -21,7 +21,7 @@ Current download progress, or None when no pull has been started.
 
 ## Location
 
-`backend/app/ai/supervisor.py:173`
+`backend/app/ai/supervisor.py:194`
 
 ## Signature
 

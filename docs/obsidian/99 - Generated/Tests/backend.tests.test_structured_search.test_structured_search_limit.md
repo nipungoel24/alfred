@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_structured_search_limit
 source: backend/tests/test_structured_search.py
-line: 151
+line: 156
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Should respect limit parameter.
 
 ## Location
 
-`backend/tests/test_structured_search.py:151`
+`backend/tests/test_structured_search.py:156`
 
 ## Signature
 

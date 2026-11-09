@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_structured_search_by_subject
 source: backend/tests/test_structured_search.py
-line: 52
+line: 57
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Should filter emails by subject.
 
 ## Location
 
-`backend/tests/test_structured_search.py:52`
+`backend/tests/test_structured_search.py:57`
 
 ## Signature
 

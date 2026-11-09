@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.isolated_app
 source: backend/tests/test_thread_isolation.py
-line: 28
+line: 30
 status: active
 tags: [test, function]
 ---
@@ -21,7 +21,7 @@ Reload the FastAPI app against a scratch database (same pattern as
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:28`
+`backend/tests/test_thread_isolation.py:30`
 
 ## Signature
 

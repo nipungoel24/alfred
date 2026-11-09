@@ -21,6 +21,7 @@ tags: [module, backend]
 
 - `Path` ← `pathlib.Path`
 - `TestClient` ← `fastapi.testclient.TestClient`
+- `conftest` ← `backend.tests.conftest`
 - `json` ← `json`
 - `os` ← `os`
 - `pytest` ← `pytest`

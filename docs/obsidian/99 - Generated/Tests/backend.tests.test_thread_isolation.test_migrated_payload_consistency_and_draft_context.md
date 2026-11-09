@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_thread_isolation
 qualified_name: backend.tests.test_thread_isolation.test_migrated_payload_consistency_and_draft_context
 source: backend/tests/test_thread_isolation.py
-line: 282
+line: 287
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Legacy DB -> migrate -> payload/columns agree -> REAL draft endpoint
 
 ## Location
 
-`backend/tests/test_thread_isolation.py:282`
+`backend/tests/test_thread_isolation.py:287`
 
 ## Signature
 

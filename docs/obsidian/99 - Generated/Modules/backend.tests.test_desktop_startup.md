@@ -21,6 +21,7 @@ tags: [module, backend]
 
 - `TestClient` ← `fastapi.testclient.TestClient`
 - `asyncio` ← `asyncio`
+- `conftest` ← `backend.tests.conftest`
 - `os` ← `os`
 - `pytest` ← `pytest`
 - `time` ← `time`

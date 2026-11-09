@@ -6,7 +6,7 @@ layer: backend
 module: backend.app.config
 qualified_name: backend.app.config._load_environment
 source: backend/app/config.py
-line: 37
+line: 159
 status: active
 tags: [backend, function]
 ---
@@ -21,7 +21,7 @@ Loads configuration for dev or frozen production.
 
 ## Location
 
-`backend/app/config.py:37`
+`backend/app/config.py:159`
 
 ## Signature
 

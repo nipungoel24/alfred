@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_desktop_auth
 qualified_name: backend.tests.test_desktop_auth.test_oauth_callback_is_exempt_from_token
 source: backend/tests/test_desktop_auth.py
-line: 64
+line: 69
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ The system browser's OAuth redirect carries no session token — its
 
 ## Location
 
-`backend/tests/test_desktop_auth.py:64`
+`backend/tests/test_desktop_auth.py:69`
 
 ## Signature
 

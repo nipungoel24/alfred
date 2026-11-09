@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.test_smoke_prompt_never_contains_user_data
 source: backend/tests/test_ai_supervisor.py
-line: 172
+line: 174
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ The smoke prompt is fixed synthetic text.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:172`
+`backend/tests/test_ai_supervisor.py:174`
 
 ## Signature
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_structured_search
 qualified_name: backend.tests.test_structured_search.test_structured_search_by_date
 source: backend/tests/test_structured_search.py
-line: 69
+line: 74
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Should filter emails by date range.
 
 ## Location
 
-`backend/tests/test_structured_search.py:69`
+`backend/tests/test_structured_search.py:74`
 
 ## Signature
 

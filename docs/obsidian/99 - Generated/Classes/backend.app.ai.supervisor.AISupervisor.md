@@ -6,7 +6,7 @@ layer: ai
 module: backend.app.ai.supervisor
 qualified_name: backend.app.ai.supervisor.AISupervisor
 source: backend/app/ai/supervisor.py
-line: 106
+line: 127
 status: active
 tags: [ai, class]
 ---
@@ -21,7 +21,7 @@ State machine + recovery for the local AI backend.
 
 ## Location
 
-`backend/app/ai/supervisor.py:106`
+`backend/app/ai/supervisor.py:127`
 
 ## Called By
 

@@ -6,7 +6,7 @@ layer: test
 module: backend.tests.test_ai_supervisor
 qualified_name: backend.tests.test_ai_supervisor.test_model_missing_state
 source: backend/tests/test_ai_supervisor.py
-line: 73
+line: 75
 status: active
 tags: [test, function, test]
 ---
@@ -21,7 +21,7 @@ Reachable server without the configured model → model_missing.
 
 ## Location
 
-`backend/tests/test_ai_supervisor.py:73`
+`backend/tests/test_ai_supervisor.py:75`
 
 ## Signature
 

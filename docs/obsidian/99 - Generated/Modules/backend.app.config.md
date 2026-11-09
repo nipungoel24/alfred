@@ -22,6 +22,7 @@ tags: [module, backend]
 - `BaseModel` ← `pydantic.BaseModel`
 - `Field` ← `pydantic.Field`
 - `Path` ← `pathlib.Path`
+- `logging` ← `logging`
 - `lru_cache` ← `functools.lru_cache`
 - `os` ← `os`
 - `sys` ← `sys`
@@ -33,7 +34,16 @@ tags: [module, backend]
 ## Functions
 
 - [[backend.app.config._default_database_path|_default_database_path]]
+- [[backend.app.config._legacy_database_path|_legacy_database_path]]
 - [[backend.app.config._load_dotenv_file|_load_dotenv_file]]
 - [[backend.app.config._load_environment|_load_environment]]
+- [[backend.app.config._local_app_data|_local_app_data]]
+- [[backend.app.config._managed_database_path|_managed_database_path]]
 - [[backend.app.config._reject_shipped_client_secret|_reject_shipped_client_secret]]
 - [[backend.app.config.get_settings|get_settings]]
+- [[backend.app.config.migrate_legacy_user_data|migrate_legacy_user_data]]
+- [[backend.app.config.resolve_database_path|resolve_database_path]]
+
+## Constants
+
+- `_DATABASE_SIDECAR_SUFFIXES`
